@@ -156,3 +156,53 @@ verified Stage 04 state was captured as a checkpoint commit and tagged
 `portfolio-stage-04-verified` before any documentation was written.
 
 No product code, styling or visual behaviour was changed.
+
+---
+
+## Infrastructure - Domain, HTTPS and Production Deployment
+
+Status: **Complete**
+
+### Summary
+Published the verified Stage 04 portfolio at
+`https://intelligent-systems-lab.duckdns.org` behind the host's existing Caddy
+reverse proxy, with a Let's Encrypt certificate issued automatically. Deployment
+did not change any application code or advance the design stage.
+
+### What changed
+```
+repository:  package.json (start:portfolio script)
+             deploy/pm2.portfolio.config.js (new, no secrets)
+             qa/production-check.mjs (new)
+             docs/* updated to record production state
+external:    C:\ce-staging\Caddyfile - one site block appended
+             backup: C:\ce-staging\Caddyfile.backup-20260831-070207
+```
+
+### Architecture
+```
+Internet -> Caddy v2.11.4 (80/443, shared)
+              +-- appclubedaeconomia.com.br -> 127.0.0.1:3200  (unchanged)
+              +-- intelligent-systems-lab.duckdns.org -> 127.0.0.1:3100  (new)
+```
+
+The Next.js production process runs under PM2 as `portfolio`, bound to loopback
+only, with no public inbound firewall rule. The development preview on port 3000
+remains available and was verified to coexist with production.
+
+### Notable during implementation
+- PM2 was already the host's process-management standard - it manages both the
+  other application and Caddy itself - so the portfolio reuses it rather than
+  introducing a second mechanism.
+- Caddy was reloaded gracefully; its PID did not change and the other domain
+  never dropped a request.
+- A tooling environment variable leaked into the production process on first
+  launch (PM2 inherits the starting shell's environment). The process was
+  recreated with a clean environment and re-saved.
+- External inbound reachability on 443 is proven by Let's Encrypt's tls-alpn-01
+  validation, which connected from four public IPs.
+
+### QA
+Existing domain identical pre/post change. New domain: 200 over HTTPS, trusted
+certificate, 308 redirect from HTTP, zero console errors, zero failed requests,
+zero mixed content, zero third-party requests, all sensitive paths 404.

@@ -3,9 +3,14 @@
   "purpose": "Demonstrate engineering capability to freelance clients. Technical portfolio, not a personal site.",
   "currentStage": 4,
   "stage05Started": false,
-  "nextStage": "domain-deployment",
-  "nextStageTitle": "Domain + HTTPS + production deployment",
-  "frozenStages": [1, 2, 3, 4],
+  "nextStage": "stage-05",
+  "nextStageTitle": "Stage 05",
+  "frozenStages": [
+    1,
+    2,
+    3,
+    4
+  ],
   "stageNames": {
     "1": "Visual foundation - Milky Intelligence background",
     "2": "Typography - Geist Sans and Geist Mono",
@@ -28,7 +33,11 @@
     "technicalFont": "Geist Mono",
     "fontPackage": "geist",
     "fontDelivery": "self-hosted variable WOFF2 via next/font/local",
-    "surfaces": ["Milk", "Frost", "Prism"],
+    "surfaces": [
+      "Milk",
+      "Frost",
+      "Prism"
+    ],
     "auroraFields": 6,
     "prismBeams": 2
   },
@@ -41,23 +50,48 @@
     "npm": "11.17.0",
     "language": "TypeScript",
     "cssApproach": "plain CSS with design tokens",
-    "clientComponents": ["src/components/navigation/SiteNavigation.tsx"]
+    "clientComponents": [
+      "src/components/navigation/SiteNavigation.tsx"
+    ]
   },
-  "routes": ["/", "/specimen"],
-  "navigationDestinations": ["Systems", "Products", "AI Learning", "Lab", "Work"],
+  "routes": [
+    "/",
+    "/specimen"
+  ],
+  "navigationDestinations": [
+    "Systems",
+    "Products",
+    "AI Learning",
+    "Lab",
+    "Work"
+  ],
   "runtime": {
     "previewCommand": "npm run dev:remote",
     "bindAddress": "0.0.0.0",
     "port": 3000,
     "publicPreviewUrl": "http://108.186.112.75:3000",
-    "domainConfigured": false,
-    "httpsConfigured": false,
-    "reverseProxyConfigured": false,
-    "productionDeployed": false,
-    "providerFirewall": "UNVERIFIED"
+    "domainConfigured": true,
+    "httpsConfigured": true,
+    "reverseProxyConfigured": true,
+    "productionDeployed": true,
+    "providerFirewall": "reachable on 80/443 (proven by external ACME validation)",
+    "productionUrl": "https://intelligent-systems-lab.duckdns.org",
+    "productionHostname": "intelligent-systems-lab.duckdns.org",
+    "productionBind": "127.0.0.1",
+    "productionPort": 3100,
+    "productionCommand": "npm run start:portfolio",
+    "processManager": "PM2 (app name: portfolio)",
+    "reverseProxy": "Caddy v2.11.4",
+    "certificateManagement": "Caddy automatic HTTPS (Let\u2019s Encrypt ACME)",
+    "deploymentStatus": "live"
   },
   "qa": {
-    "stagesPassing": [1, 2, 3, 4],
+    "stagesPassing": [
+      1,
+      2,
+      3,
+      4
+    ],
     "cls": 0,
     "thirdPartyRequests": 0,
     "horizontalOverflow": 0,
@@ -72,7 +106,8 @@
       "390x844",
       "360x800"
     ],
-    "lcpTiming": "UNVERIFIED"
+    "lcpTiming": "UNVERIFIED",
+    "productionHttps": "PASS"
   },
   "canonicalDocs": [
     "docs/CLAUDE_HANDOFF.md",

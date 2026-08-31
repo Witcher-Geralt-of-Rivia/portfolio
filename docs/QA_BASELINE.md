@@ -145,6 +145,69 @@ with `--disable-backgrounding-occluded-windows`,
 `--disable-renderer-backgrounding`, `--disable-background-timer-throttling`.
 Several apparent bugs during Stages 03 and 04 were this artefact, not the app.
 
+## Production HTTPS Verification
+
+Verified against the live public URL `https://intelligent-systems-lab.duckdns.org`
+with a real Chromium browser and strict TLS.
+
+```
+HTTP status               200
+protocol / host           https: intelligent-systems-lab.duckdns.org
+HTTP -> HTTPS             308 Permanent Redirect
+TLS verify result         0 (trusted)
+certificate               CN=intelligent-systems-lab.duckdns.org
+issuer                    Let's Encrypt YE1
+chain                     ISRG Root X2 -> Root YE -> YE1 -> leaf, Verification OK
+console errors            0
+failed requests           0
+mixed content             0 (no http:// subresources)
+third-party requests      0
+horizontal overflow       none
+```
+
+Stage integrity confirmed through the public URL:
+
+```
+Stage 01   6 aurora fields, 2 prism beams, grain present, 25 animations running
+Stage 02   GeistSans + GeistMono loaded, body font resolves to GeistSans
+Stage 03   5 navigation links
+Stage 04   hero title correct, 8 constellation nodes, 21 links, 5 signals
+```
+
+Static resources over public HTTPS, all 200: `/marks/system-mark.svg`,
+`/textures/micro-grain.svg`, `/specimen`, the CSS chunk, the JS chunk and both
+WOFF2 fonts.
+
+Security, all returning 404 over the public URL: `/.env`, `/.env.local`,
+`/.git/config`, `/package.json`, `/next.config.ts`, `/src/app/page.tsx`,
+`/docs/CLAUDE_HANDOFF.md`, `/docs/project-state.json`,
+`/deploy/pm2.portfolio.config.js`, `/qa/report.json`. Directory paths
+(`/docs/`, `/src/`, `/qa/`, `/public/`, `/deploy/`) all resolve to 404 - Caddy is
+a reverse proxy only and no `file_server` is configured.
+
+Contact-information and AI-credential scans of the live markup: clean.
+
+Screenshot: `qa/shots/production-https-1440x900.png`.
+Script: `qa/production-check.mjs`.
+
+### Existing-domain regression (mandatory)
+
+The other production domain on this host was captured before the Caddy change
+and re-verified after. Identical in every respect:
+
+```
+                     pre-change          post-change
+HTTP                 308 -> HTTPS        308 -> HTTPS
+HTTPS status/size    200 / 8382 bytes    200 / 8382 bytes
+title                Clube da Economia   Clube da Economia
+certificate          LE YE2, Aug 26 -> Nov 24 2026   unchanged
+strict TLS           verify 0            verify 0
+backend 127.0.0.1:3200   200             200
+```
+
+Caddy PID was unchanged across the reload (graceful, no process interruption),
+and PM2 restart counters for all three processes remained 0.
+
 ## Reading Two QA Outputs Correctly
 
 Two results look like failures and are not. Both were re-verified after the

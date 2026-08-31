@@ -10,10 +10,12 @@ Everything below was read from the repository, not recalled from conversation.
 
 ```
 Stages 01-04   COMPLETE and FROZEN
+Deployment     LIVE at https://intelligent-systems-lab.duckdns.org
 Stage 05       NOT STARTED
 ```
 
-The task immediately before Stage 05 is domain + HTTPS + production deployment.
+Deployment did not advance the design stage: the current design stage is still
+4 and stages 1-4 remain frozen. The next task is Stage 05.
 See `docs/NEXT_STAGE.md`.
 
 ## Toolchain
@@ -306,9 +308,27 @@ public/textures/micro-grain.svg   locally generated feTurbulence tile
 
 No stock imagery, no downloaded icons, no external image dependency.
 
+## Deployment
+
+The site is live. Full detail in `docs/DEPLOYMENT.md`.
+
+```
+Public URL       https://intelligent-systems-lab.duckdns.org
+Reverse proxy    Caddy v2.11.4 (shared host infrastructure, another project's)
+Internal bind    127.0.0.1:3100, loopback only, no public inbound rule
+Process manager  PM2, app name "portfolio"
+Certificate      Caddy automatic HTTPS (Let's Encrypt)
+Dev preview      still available at http://108.186.112.75:3000
+```
+
+Update procedure: `npm run qa:memory` -> `npm run build` ->
+`pm2 restart portfolio`. Caddy is untouched by an application release.
+
 ## Known Gaps
 
-- Production deployment, domain, DNS and HTTPS: NOT CONFIGURED
-- Provider-level firewall reachability: UNVERIFIED
 - Stage 05 section content: NOT STARTED
 - LCP timing: UNVERIFIED in the headless QA environment (see QA_BASELINE.md)
+- Reboot survival relies on the host's existing PM2 logon-time resurrection,
+  which fires at Administrator logon rather than at system boot. This affects
+  every service on the host, not just the portfolio. Not reboot-tested, because
+  another production domain is served from the same machine.

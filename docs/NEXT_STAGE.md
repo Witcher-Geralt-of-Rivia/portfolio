@@ -7,44 +7,47 @@
 
 ```
 Stages 01-04            COMPLETE and FROZEN
-Persistent context      COMPLETE (this documentation set)
+Persistent context      COMPLETE
+Domain / HTTPS deploy   COMPLETE - live at https://intelligent-systems-lab.duckdns.org
 Stage 05                NOT STARTED
 ```
+
+Deployment did **not** advance the design stage. The current design stage
+remains 4 and stages 1-4 remain frozen.
 
 ## Ordered plan
 
 ```
 1. Persistent context system            DONE
-2. Domain / HTTPS / production deploy   NEXT
-3. Independent public-site inspection   after 2
-4. Stage 05 - section content           after 3
+2. Domain / HTTPS / production deploy   DONE
+3. Independent public-site inspection   optional - see note below
+4. Stage 05 - section content           NEXT
 ```
 
 ## NEXT TASK
 
-**Domain + HTTPS + production deployment.**
+**Stage 05.**
+
+Stage 05 replaces the five neutral anchor sections on `/` with real section
+content: Systems, Products, AI Learning, Lab and Work.
 
 The user will supply that specification separately. Do not begin it
-automatically, and do not improvise any part of it.
+automatically, and do not design those sections in advance.
 
-Nothing in that area is configured today:
+## Before starting Stage 05
 
-```
-Domain / DNS        NOT CONFIGURED
-HTTPS / TLS         NOT CONFIGURED
-Reverse proxy       NOT CONFIGURED for this project
-Production deploy   NOT COMPLETED
-Provider firewall   UNVERIFIED
-```
+The site is now public. Anything shipped from here is visible immediately at
+`https://intelligent-systems-lab.duckdns.org`, so:
 
-When that specification arrives, read the server-safety rules in
-`docs/DEPLOYMENT.md` first. The VPS already hosts other services and existing
-domains, ports and web-server configuration must be preserved.
+- Run the full regression suite before restarting the production process.
+- The production update procedure is in `docs/DEPLOYMENT.md`. It is:
+  `npm run qa:memory` -> `npm run build` -> `pm2 restart portfolio`.
+  Caddy is not touched by an application deployment.
+- The frozen-stage and privacy constraints apply unchanged.
 
-## Not yet
+## Independent public-site inspection
 
-Stage 05 will replace the five neutral anchor sections on `/` with real section
-content. It has not started and must not be started before the deployment task
-is complete.
-
-Do not design Systems, Products, AI Learning, Lab or Work content yet.
+Every verification so far originated on the VPS itself. External inbound
+reachability on port 443 is proven by Let's Encrypt's ACME validation, which
+connected from four public IPs. A visual check from the user's own browser is
+still worth doing once, but it is not a blocker for Stage 05.

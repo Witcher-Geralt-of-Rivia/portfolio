@@ -73,11 +73,17 @@ npm run dev:remote     # next dev --hostname 0.0.0.0 --port 3000
 http://108.186.112.75:3000
 ```
 
+Production, live:
+
+```
+https://intelligent-systems-lab.duckdns.org
+Caddy v2.11.4  ->  127.0.0.1:3100  (PM2 app "portfolio")
+```
+
 `next.config.ts` sets `allowedDevOrigins` to the VPS IP plus `localhost` and
 `127.0.0.1`. Without those entries Next 16 returns 403 for `/_next/*` dev assets
-from a non-localhost origin. Do not remove them. See `docs/DEPLOYMENT.md`.
-
-**Domain, HTTPS and production deployment are NOT configured.**
+from a non-localhost origin. Do not remove them. It is development-only and the
+production domain is deliberately not listed. See `docs/DEPLOYMENT.md`.
 
 ## Frozen Stages
 
@@ -168,14 +174,15 @@ measurements showing the original approach is better. Reasons in
 
 | Item | State |
 |---|---|
-| Git | Repository initialised. Branch `main`. Tag `portfolio-stage-04-verified` |
-| Dev preview | `npm run dev:remote` on `0.0.0.0:3000`, reachable at the VPS IP |
-| Host firewall | Inbound TCP 3000 allowed (pre-existing rule) |
-| Provider firewall | UNVERIFIED - cannot be tested from inside the VPS |
-| Domain / DNS | NOT CONFIGURED |
-| HTTPS / TLS | NOT CONFIGURED |
-| Reverse proxy | NOT CONFIGURED for this project |
-| Production deploy | NOT COMPLETED |
+| Git | Repository initialised. Branch `main`. Tags `portfolio-stage-04-verified`, `portfolio-production-v1` |
+| Production | LIVE at `https://intelligent-systems-lab.duckdns.org` |
+| Dev preview | `npm run dev:remote` on `0.0.0.0:3000`, still available |
+| Host firewall | 80/443 allowed; 3000 allowed; 3100 has no inbound rule |
+| Provider firewall | Reachable on 443 - proven by external ACME validation |
+| Domain / DNS | DuckDNS A record to 108.186.112.75 |
+| HTTPS / TLS | Caddy automatic HTTPS (Let's Encrypt) |
+| Reverse proxy | Caddy v2.11.4, shared with another project - append only |
+| Production deploy | COMPLETE (PM2 app `portfolio`, `127.0.0.1:3100`) |
 
 The VPS already hosts other services. Read the safety rules in
 `docs/DEPLOYMENT.md` before touching any server configuration.
@@ -201,15 +208,20 @@ truth for tokens. Documentation must not duplicate it.
 
 ## Current Task Status
 
-Stages 01-04 complete and frozen. The persistent context system (this
-documentation set) is complete. Stage 05 has **not** started.
+Stages 01-04 complete and frozen. The persistent context system is complete.
+The site is deployed and live over HTTPS. Deployment did not advance the design
+stage. Stage 05 has **not** started.
 
 ## Next Allowed Task
 
-**Domain + HTTPS + production deployment.** The user will supply that
-specification separately. See `docs/NEXT_STAGE.md`.
+**Stage 05** - replacing the five neutral anchor sections with real content.
+The user will supply that specification separately. See `docs/NEXT_STAGE.md`.
 
-Do not begin it automatically. Do not begin Stage 05.
+Do not begin it automatically.
+
+The site is public now: anything shipped is immediately visible. Follow the
+update procedure in `docs/DEPLOYMENT.md` and never point the domain at
+`next dev`.
 
 ## Forbidden Actions
 

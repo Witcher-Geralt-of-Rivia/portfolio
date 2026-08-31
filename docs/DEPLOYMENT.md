@@ -3,130 +3,193 @@
 
 # Deployment
 
-Only the **current, verified** environment is recorded here.
-
 ```
-DOMAIN/HTTPS PRODUCTION CONFIGURATION:
-NOT YET COMPLETED
+PRODUCTION STATUS: LIVE
+https://intelligent-systems-lab.duckdns.org
 ```
 
-## Current Environment
+Only verified state is recorded here. No secret, token, password or private key
+belongs in this file.
+
+## Production
+
+| Item | Value |
+|---|---|
+| Public URL | `https://intelligent-systems-lab.duckdns.org` |
+| Hostname | intelligent-systems-lab.duckdns.org (DuckDNS A record to 108.186.112.75) |
+| Reverse proxy | Caddy v2.11.4 |
+| Internal bind | `127.0.0.1:3100` (loopback only) |
+| Production command | `npm run start:portfolio` |
+| Process manager | PM2, app name `portfolio` |
+| PM2 config | `deploy/pm2.portfolio.config.js` (in this repo, contains no secrets) |
+| Certificate | Caddy automatic HTTPS via Let's Encrypt ACME |
+| HTTP behaviour | 308 redirect to HTTPS (Caddy automatic) |
+
+The Next.js production server binds loopback only and has **no** inbound
+firewall rule. All public traffic arrives through Caddy on 80/443.
+
+## Host Environment
 
 | Item | Value |
 |---|---|
 | Host OS | Windows Server 2022 |
 | Public IPv4 | 108.186.112.75 (bound directly to the NIC, no NAT) |
 | Runtime | Node v24.19.0 / npm 11.17.0 |
-| Server | Next.js development server |
-| Preview command | `npm run dev:remote` |
-| Bind address | `0.0.0.0:3000` |
-| Preview URL | `http://108.186.112.75:3000` |
 
-The public IP was confirmed by three independent lookups agreeing with the NIC
-address, so there is no NAT layer in front of the host.
+## Development Preview
+
+Unchanged and still available alongside production:
+
+```
+npm run dev:remote      next dev --hostname 0.0.0.0 --port 3000
+http://108.186.112.75:3000
+```
+
+```
+3000  development preview   public inbound allowed (pre-existing rule)
+3100  production            loopback only, no public inbound rule
+```
+
+Verified: the development server and the production server run concurrently
+without interfering, and Caddy routes the domain only to production. The public
+domain never points at `next dev`.
+
+`allowedDevOrigins` in `next.config.ts` remains development-only. The production
+domain is deliberately **not** added to it - production does not depend on it.
 
 ## Commands
 
 ```
-npm run dev          local development (localhost only)
-npm run dev:remote   remote preview  - next dev --hostname 0.0.0.0 --port 3000
-npm run build        production build
-npm start            production server (next start)
-npm run lint         eslint
-npm run qa:memory    canonical documentation consistency check
+npm run dev             local development (localhost only)
+npm run dev:remote      remote preview on 0.0.0.0:3000
+npm run build           production build
+npm run start:portfolio production server on 127.0.0.1:3100
+npm start               plain next start (default port)
+npm run lint            eslint
+npm run qa:memory       canonical documentation consistency check
 ```
 
-Do not remove or repurpose `dev`, `dev:remote` or `build`.
-
-## allowedDevOrigins
-
-`next.config.ts`:
-
-```ts
-allowedDevOrigins: ["108.186.112.75", "localhost", "127.0.0.1"]
-```
-
-Next 16 returns 403 for `/_next/*` dev resources requested from an origin it does
-not recognise. Without the VPS IP a real browser gets a blocked chunk and a dead
-HMR socket while `curl` still returns 200 - so a naive smoke test passes while
-the preview is actually broken. `127.0.0.1` is listed explicitly because Next's
-default allowance covers the hostname `localhost` but not the literal loopback
-address, which the QA harness uses.
-
-This setting is development-only and has no effect on `next build` or
-`next start`. If the public address ever changes, update this list.
-
-## Firewall
-
-Windows Defender Firewall is enabled on all three profiles. The active interface
-is on the Public profile.
-
-Inbound TCP 3000 is already permitted by a **pre-existing** rule named
-`MY50POINTS-frontend-3000` (Allow, profile Any, remote Any, program Any). No
-firewall rule was created for this project, and no rule was modified.
+## Production Update Procedure
 
 ```
-Provider firewall / security group:  UNVERIFIED
+1. make and test changes
+2. npm run qa:memory        canonical docs still consistent
+3. npx tsc --noEmit         types clean
+4. npm run build            production build
+5. pm2 restart portfolio    swap in the new build
+6. pm2 save                 only if the process definition changed
 ```
 
-That cannot be tested from inside the VPS. If an external browser cannot reach
-the preview while the host checks pass, the provider firewall is the remaining
-variable: inbound TCP for the chosen port must be allowed.
+Caddy is **not** touched by an application deployment. Certificates renew
+automatically and require no action during a normal release.
+
+Note: `npm run build` replaces `.next`, so the running production process serves
+stale chunks until it is restarted. Always follow a build with
+`pm2 restart portfolio`.
+
+## Caddy
+
+| Item | Value |
+|---|---|
+| Executable | `C:\ce-staging\caddy-bin\caddy.exe` |
+| Version | v2.11.4 |
+| Config | `C:\ce-staging\Caddyfile` (Caddyfile adapter) |
+| Managed by | PM2, app name `ce-staging-proxy` |
+| Access log (portfolio) | `C:\ce-staging\caddy-access-portfolio.log` |
+
+Caddy is **shared infrastructure owned by another project on this host.** The
+portfolio only appends its own site block.
+
+The portfolio site block routes explicitly by hostname, is never a default or
+catch-all site, and mirrors the existing house style (two security headers plus
+a rolling access log).
+
+### Changing Caddy safely
+
+```
+1. back up:  copy Caddyfile to Caddyfile.backup-YYYYMMDD-HHMMSS (never overwrite one)
+2. edit:     append only; do not reorder or reformat existing blocks
+3. validate: caddy.exe validate --config C:/ce-staging/Caddyfile --adapter caddyfile
+4. reload:   caddy.exe reload   --config C:/ce-staging/Caddyfile --adapter caddyfile
+5. verify:   re-test the OTHER domain before declaring success
+```
+
+Use `caddy reload`, never a PM2 restart of `ce-staging-proxy`: reload keeps the
+same process and does not interrupt the other site. The last reload left the
+Caddy PID unchanged.
 
 ## Other Services on This Host - Do Not Disturb
 
-The VPS is shared. Observed at the time of writing:
-
 | Port | Owner | Note |
 |---|---|---|
-| 80, 443 | Caddy | another project's reverse proxy - NOT ours |
-| 3000 | node (this project's dev server) | ours |
-| 5432 | PostgreSQL | listening on 0.0.0.0, no inbound firewall rule admits it |
+| 80, 443 | Caddy (`ce-staging-proxy`) | shared - serves both domains |
+| 3200 | another project's Next.js app (`ce-staging`) | loopback only - NOT ours |
+| 3100 | this portfolio (`portfolio`) | loopback only - ours |
+| 3000 | this portfolio's dev preview | ours |
+| 5432 | PostgreSQL | listening on 0.0.0.0, no inbound rule admits it |
 | 3389 | Remote Desktop | system |
 
-Nothing above except port 3000 belongs to this project, and nothing else was
-modified.
+The other project's PM2 process file lives outside its repository because it
+holds live secrets. **Never read from, copy, or write to it.** The portfolio's
+own PM2 file is separate and secret-free.
 
 ## Server Safety Rules
 
-Before any future deployment work:
+1. Inspect before changing - enumerate ports, sites, certificates, firewall rules.
+2. Preserve existing domains. Another production domain is served from this host.
+3. Preserve existing ports and services. Never stop or rebind what is not ours.
+4. Back up any configuration before editing, with a timestamped name.
+5. Use host-based routing. Never add a catch-all or default site.
+6. Avoid destructive firewall changes. No range opening, no disabling.
+7. Never force-renew or replace certificates belonging to other domains.
+8. Prefer graceful reload over process restart for shared infrastructure.
 
-1. **Inspect before changing.** Enumerate listening ports, existing sites,
-   existing certificates and existing firewall rules first.
-2. **Preserve existing domains.** Other sites are served from this host.
-3. **Preserve existing ports and services.** Do not stop, rebind or reconfigure
-   a service that is not ours.
-4. **Back up affected web-server configuration** before editing it, and record
-   where the backup went.
-5. **Use host-based routing.** Add a virtual host / site block for the new
-   domain rather than changing global configuration or default handlers.
-6. **Avoid destructive firewall changes.** Add the minimum specific rule needed.
-   Never disable a firewall, never open a range, never delete existing rules.
-7. **Do not force-renew or replace certificates** belonging to other domains.
+## Process Persistence
 
-A reverse proxy already occupies 80 and 443. Any production setup for this
-project must integrate with it as an additional site, not replace it.
-
-## Not Configured
+PM2 is the existing standard on this host: the other application and Caddy
+itself both run under it. The portfolio follows the same pattern.
 
 ```
-Domain name              NOT CONFIGURED
-DNS records              NOT CONFIGURED
-HTTPS / TLS certificate  NOT CONFIGURED
-Reverse proxy site       NOT CONFIGURED for this project
-Process manager          NOT CONFIGURED (no PM2, no Windows service)
-Production hosting       NOT COMPLETED
+reboot survival configured: YES (via the host's existing PM2 mechanism)
+actual reboot test:         NOT PERFORMED
 ```
 
-The preview runs as a foreground development process and will not survive a
-reboot. Restart it with `npm run dev:remote`.
+A reboot was deliberately not performed because another production domain is
+served from this host. Persistence was validated structurally instead:
+`pm2 save` wrote the process list to `%USERPROFILE%\.pm2\dump.pm2`, and
+`pm2-windows-startup` is registered in the `HKCU\...\Run` key to resurrect it.
 
-## External Reachability
+**Known limitation, inherited from the host's existing setup:** that Run key
+fires at *Administrator logon*, not at system boot. An unattended reboot with no
+logon would leave PM2 - and therefore both this portfolio and the pre-existing
+application - not running. This is the host's current behaviour for every
+service, not something introduced by the portfolio. Converting PM2 to a true
+boot-time service would affect the other project too and was not done
+unilaterally.
+
+## DNS
+
+`intelligent-systems-lab.duckdns.org` is a DuckDNS record resolving to
+108.186.112.75. It was already configured before this deployment and required no
+change.
+
+No DuckDNS token is stored in this repository, and none is required for normal
+operation. If dynamic IP updating is ever needed, the token must live outside
+the repository.
+
+## Verified Reachability
 
 ```
-LOCAL SERVER TEST:              PASS (127.0.0.1 and localhost return 200)
-LISTENING ON PUBLIC INTERFACE:  PASS (0.0.0.0:3000)
-HOST FIREWALL:                  PASS (pre-existing allow rule)
-PROVIDER FIREWALL:              UNVERIFIED
-EXTERNAL CLIENT TEST:           REQUIRES THE USER'S BROWSER
+LOCAL SERVER TEST:              PASS  (127.0.0.1:3100 returns 200)
+LISTENING ON PUBLIC INTERFACE:  PASS  (Caddy on 80/443)
+HOST FIREWALL:                  PASS  (80/443 allowed; 3100 has no inbound rule)
+PROVIDER FIREWALL:              PASS  (proven - see below)
+EXTERNAL CLIENT TEST:           INDIRECT (see below)
 ```
+
+Every request in QA originated on the VPS itself, so those tests do not by
+themselves prove reachability from the outside internet. However, Let's Encrypt
+completed a `tls-alpn-01` challenge for this hostname, which required inbound
+connections from four public validation IPs to port 443 on this host, and the
+certificate was issued. That is genuine external-reachability evidence for 443.
+A visual check from the user's own browser is still worthwhile.
