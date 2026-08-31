@@ -85,7 +85,14 @@
     "processManager": "PM2 (app name: portfolio)",
     "reverseProxy": "Caddy v2.11.4",
     "certificateManagement": "Caddy automatic HTTPS (Let\u2019s Encrypt ACME)",
-    "deploymentStatus": "live"
+    "deploymentStatus": "live",
+    "deploymentCommand": "npm run deploy:safe",
+    "releaseSlots": [
+      ".next-release-a",
+      ".next-release-b"
+    ],
+    "developmentDistDir": ".next",
+    "productionServesDefaultNext": false
   },
   "qa": {
     "stagesPassing": [

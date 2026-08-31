@@ -248,3 +248,52 @@ and complete, zero external requests, zero console errors.
 ### Deployment
 Shipped through the documented procedure: build then `pm2 restart portfolio`.
 Caddy was not touched and its process was never restarted.
+
+---
+
+## Infrastructure - Safe A/B Production Deployment
+
+Status: **Complete**
+
+### Summary
+Made the Stage 05 outage structurally impossible. Production now serves an
+alternating release directory and never the default `.next`, so a build cannot
+rewrite files the running process is reading.
+
+### Files
+`next.config.ts` (validated dynamic distDir), `deploy/safe-deploy.ps1`,
+`deploy/pm2-status.mjs`, `deploy/pm2.portfolio.config.js`, `package.json`
+(`deploy:safe`), `.gitignore`, `qa/deploy-continuity*.mjs`, docs
+
+### What changed
+```
+.next            development and local builds (never served in production)
+.next-release-a  production release slot
+.next-release-b  production release slot
+
+npm run deploy:safe   the only supported production deployment
+```
+
+`deploy:safe` runs 15 phases: preflight, slot selection with a hard
+target-must-not-equal-active assertion, clean the inactive slot only, validate
+(qa:memory + tsc + eslint), build, verify output, smoke-test on a loopback port,
+switch PM2, public health check, automatic rollback on failure, and `pm2 save`
+only after success. It is serialised by a named mutex and cleans up its smoke
+server in a `finally` block.
+
+### Notable during implementation
+- Migrated production from legacy `.next` to `.next-release-a`, then proved
+  alternation with a second deployment to `.next-release-b`.
+- The rollback path was exercised for real, not just written.
+- PowerShell 5.1 cannot parse `pm2 jlist` (duplicate `username`/`USERNAME`
+  keys), so PM2 introspection moved to a small Node helper.
+- The deployment strips `CLAUDE*` variables before invoking PM2; the production
+  process environment is now two variables instead of 69.
+- Next.js appends per-slot type paths to `tsconfig.json` on first build into
+  each slot; this settles once both slots exist.
+
+### QA
+Accidental plain build: 255/255 public requests 200. Inactive-slot build:
+327/327 200. Rollback drill: restored correctly, public healthy, exit 1.
+Caddy hash unchanged and its process never restarted. Stages 01-05 regression
+all PASS - no visual change.

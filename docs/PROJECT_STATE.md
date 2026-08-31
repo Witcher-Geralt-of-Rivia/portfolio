@@ -63,7 +63,12 @@ build        next build
 start        next start
 lint         eslint
 qa:memory    node qa/project-memory-check.mjs
+deploy:safe  powershell -NoProfile -ExecutionPolicy Bypass -File deploy/safe-deploy.ps1
 ```
+
+`deploy:safe` is the only supported production deployment path. Production
+serves an alternating release slot and never the default `.next`, so a plain
+`npm run build` cannot disturb the live site.
 
 ## Rendering Architecture
 
@@ -357,13 +362,14 @@ The site is live. Full detail in `docs/DEPLOYMENT.md`.
 Public URL       https://intelligent-systems-lab.duckdns.org
 Reverse proxy    Caddy v2.11.4 (shared host infrastructure, another project's)
 Internal bind    127.0.0.1:3100, loopback only, no public inbound rule
+Release slots    .next-release-a / .next-release-b (alternating; .next is dev only)
+Deploy command   npm run deploy:safe
 Process manager  PM2, app name "portfolio"
 Certificate      Caddy automatic HTTPS (Let's Encrypt)
 Dev preview      still available at http://108.186.112.75:3000
 ```
 
-Update procedure: `npm run qa:memory` -> `npm run build` ->
-`pm2 restart portfolio`. Caddy is untouched by an application release.
+Update procedure: `npm run deploy:safe`. Caddy is untouched by a release.
 
 ## Known Gaps
 

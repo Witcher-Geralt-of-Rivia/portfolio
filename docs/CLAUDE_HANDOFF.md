@@ -23,11 +23,8 @@ biography, no photograph, and no contact route of any kind.
 
 ## Mission
 
-Communicate three capability families:
-
-1. **AI Agents and Automation** — CRM, ERP, SaaS, APIs, backend systems
-2. **Web and Mobile + AI** — product engineering across interfaces
-3. **AI Education / AI Learning Systems** — adaptive learning
+Three capability families: **AI Agents and Automation** (CRM, ERP, SaaS, APIs,
+backend), **Web and Mobile + AI**, and **AI Education / Learning Systems**.
 
 Within 5-10 seconds a visiting client should understand that this is advanced
 systems engineering, not isolated screens.
@@ -51,14 +48,13 @@ Both rules hold until the user explicitly changes them. See
 
 | Item | Value |
 |---|---|
-| Framework | Next.js 16.3.3 (App Router, Turbopack) |
-| React | 19.2.8 |
-| Node / npm | v24.19.0 / 11.17.0 |
+| Framework | Next.js 16.3.3 (App Router, Turbopack), React 19.2.8 |
+| Runtime | Node v24.19.0 / npm 11.17.0 |
 | Language | TypeScript (strict), ESLint 9 |
 | Fonts | `geist` ^1.7.2, self-hosted variable WOFF2 via `next/font/local` |
 | Styling | Plain CSS with design tokens. No Tailwind, no CSS-in-JS |
 | Animation | CSS and SVG only. No GSAP/Motion/Three.js/D3/Lottie |
-| Backend | None. No database, no API route, no server action |
+| Backend | None. No database, API route or server action |
 | QA | Playwright + pngjs (devDependencies), scripts in `qa/` |
 
 Rendering is almost entirely server-side. The **only** client component in the
@@ -82,6 +78,11 @@ https://intelligent-systems-lab.duckdns.org
 Caddy v2.11.4  ->  127.0.0.1:3100  (PM2 app "portfolio")
 ```
 
+**Deploy with `npm run deploy:safe`. Nothing else.** Production serves an
+alternating release slot (`.next-release-a` / `.next-release-b`), never the
+default `.next`, so an ordinary `npm run build` cannot touch it. See
+`docs/DEPLOYMENT.md`.
+
 `next.config.ts` sets `allowedDevOrigins` to the VPS IP plus `localhost` and
 `127.0.0.1`. Without those entries Next 16 returns 403 for `/_next/*` dev assets
 from a non-localhost origin. Do not remove them. It is development-only and the
@@ -93,11 +94,11 @@ Stages 01-05 are complete, QA-verified and **frozen**. Do not redesign them.
 
 | Stage | Scope | Status |
 |---|---|---|
-| 01 | Background: 6 aurora fields, 2 prism beams, grain, 3 surfaces | FROZEN |
-| 02 | Typography: Geist Sans + Geist Mono, type scale, text colour roles | FROZEN |
-| 03 | Navigation + SiteShell: desktop bar, compact panel below 900px | FROZEN |
+| 01 | Background: aurora, prism, grain, 3 surfaces | FROZEN |
+| 02 | Typography: Geist Sans + Mono, scale, text roles | FROZEN |
+| 03 | Navigation + SiteShell | FROZEN |
 | 04 | Hero + Intelligence Constellation | FROZEN |
-| 05 | 01 / Intelligent Systems - the architecture lab | FROZEN |
+| 05 | Intelligent Systems architecture lab | FROZEN |
 
 Details in `docs/PROJECT_STATE.md`. History in `docs/CHANGELOG.md`.
 
@@ -166,19 +167,17 @@ These are deliberate and evidence-backed. **Do not "fix" them** without new
 measurements showing the original approach is better. Reasons in
 `docs/DECISIONS.md`.
 
-- Display measures use calibrated `em` (`8.62em` / `10.6em`), not `ch` - `ch`
-  caused font-swap CLS.
-- Constellation node chips are HTML over SVG, not SVG `<text>`.
-- Constellation chips carry no `backdrop-filter`.
-- Cross-link routing bows asymmetrically to avoid a wireframe-orb look.
+- Display measures use calibrated `em`, not `ch` (`ch` caused font-swap CLS).
+- Constellation chips are HTML over SVG, with no `backdrop-filter`.
+- Cross-link routing bows asymmetrically, avoiding a wireframe-orb look.
 - Mobile capability rail drops its vertical dividers.
 - `.site-main:has(.hero)` zeroes the shell's top padding.
-- No scroll cue, and no forced `<br>` in the hero heading.
+- No scroll cue; no forced `<br>` in the hero heading.
 - No navigation item is active while the hero owns the viewport.
-- Architecture connections use a userSpaceOnUse gradient; the default
-  objectBoundingBox degenerates on horizontal paths.
-- The architecture trace drops below the canvas at 1149px, not 999px, because
-  the side column squeezed the canvas into node overlap at 1024px.
+- Architecture gradients use `userSpaceOnUse` (the default degenerates on
+  horizontal paths); the trace drops below the canvas at 1149px, not 999px.
+
+Each is an entry in `docs/DECISIONS.md` with its measured reason.
 
 ## Infrastructure State
 
@@ -193,6 +192,7 @@ measurements showing the original approach is better. Reasons in
 | HTTPS / TLS | Caddy automatic HTTPS (Let's Encrypt) |
 | Reverse proxy | Caddy v2.11.4, shared with another project - append only |
 | Production deploy | COMPLETE (PM2 app `portfolio`, `127.0.0.1:3100`) |
+| Deployment | `npm run deploy:safe` - alternating release slots, smoke test, auto-rollback |
 
 The VPS already hosts other services. Read the safety rules in
 `docs/DEPLOYMENT.md` before touching any server configuration.
@@ -244,6 +244,9 @@ update procedure in `docs/DEPLOYMENT.md` and never point the domain at
 - Altering ports 80/443 or existing web-server configuration on the VPS
 - Removing the QA harness (`qa/`, `playwright`, `pngjs`)
 - Breaking `npm run dev`, `npm run dev:remote` or `npm run build`
+- Deploying by hand (`npm run build && pm2 restart portfolio`) instead of
+  `npm run deploy:safe`
+- Pointing production at `.next`
 
 ## Session Bootstrap Procedure
 
@@ -262,15 +265,11 @@ Run this before editing anything:
 
 ### Conflict rule
 
-If repository documents contradict **each other**: STOP. Identify the
-conflicting statements, report them, and do not edit product code until the user
-resolves it.
-
-If documents contradict **the code**: inspect `git log` to judge which is stale,
-report the discrepancy, and do not silently pick whichever is convenient.
-
-If a conversation statement contradicts canonical documentation: the repository
-wins. Report the conflict before acting.
+If repository documents contradict **each other**: STOP, report the conflicting
+statements, and do not edit product code until the user resolves it. If they
+contradict **the code**: inspect `git log` to judge which is stale and report the
+discrepancy. If a conversation statement contradicts canonical documentation,
+the repository wins. Never silently pick whichever is convenient.
 
 ### When the user supplies a new Stage specification
 

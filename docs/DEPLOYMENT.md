@@ -19,7 +19,8 @@ belongs in this file.
 | Hostname | intelligent-systems-lab.duckdns.org (DuckDNS A record to 108.186.112.75) |
 | Reverse proxy | Caddy v2.11.4 |
 | Internal bind | `127.0.0.1:3100` (loopback only) |
-| Production command | `npm run start:portfolio` |
+| Deployment command | `npm run deploy:safe` |
+| Active release slot | read from PM2 `PORTFOLIO_DIST_DIR` |
 | Process manager | PM2, app name `portfolio` |
 | PM2 config | `deploy/pm2.portfolio.config.js` (in this repo, contains no secrets) |
 | Certificate | Caddy automatic HTTPS via Let's Encrypt ACME |
@@ -63,7 +64,8 @@ domain is deliberately **not** added to it - production does not depend on it.
 npm run dev             local development (localhost only)
 npm run dev:remote      remote preview on 0.0.0.0:3000
 npm run build           production build
-npm run start:portfolio production server on 127.0.0.1:3100
+npm run start:portfolio production server on 127.0.0.1:3100 (manual; not a deploy)
+npm run deploy:safe     THE production deployment command
 npm start               plain next start (default port)
 npm run lint            eslint
 npm run qa:memory       canonical documentation consistency check
@@ -72,20 +74,81 @@ npm run qa:memory       canonical documentation consistency check
 ## Production Update Procedure
 
 ```
-1. make and test changes
-2. npm run qa:memory        canonical docs still consistent
-3. npx tsc --noEmit         types clean
-4. npm run build            production build
-5. pm2 restart portfolio    swap in the new build
-6. pm2 save                 only if the process definition changed
+npm run deploy:safe
 ```
 
-Caddy is **not** touched by an application deployment. Certificates renew
-automatically and require no action during a normal release.
+That is the whole procedure, and it is the ONLY supported way to update
+production.
 
-Note: `npm run build` replaces `.next`, so the running production process serves
-stale chunks until it is restarted. Always follow a build with
-`pm2 restart portfolio`.
+### Never do this
+
+```
+npm run build && pm2 restart portfolio      <-- NO
+```
+
+`npm run build` writes `.next`. Production does not serve `.next`, so a plain
+build is now harmless — but it also does not deploy anything. Restarting PM2 by
+hand skips validation, the smoke test and the rollback path.
+
+### Why production never serves `.next`
+
+During Stage 05 the live site broke twice because `next build` rewrote the same
+`.next` directory the running production process was reading. The process then
+served a page referencing chunks that had just been replaced, and returned 500s
+until PM2 was restarted.
+
+Production now alternates between two release directories:
+
+```
+.next            development and local builds  (never served in production)
+.next-release-a  production release slot
+.next-release-b  production release slot
+```
+
+A deployment always builds into the **inactive** slot. The running process reads
+a directory the build never touches, so the failure mode is structurally
+impossible rather than merely documented.
+
+Measured proof: with production serving `.next-release-a`, a plain
+`npm run build` ran to completion while the public site was polled continuously
+— 255 of 255 requests returned 200 (page, CSS chunk and JS chunk).
+
+### What deploy:safe does
+
+```
+ 1 preflight            node/npm/pm2, PM2 process, port 3100, public health,
+                        git tree (dirty aborts unless -AllowDirtyTree)
+ 2 determine slots      active read from PM2; target is the other one
+                        hard assert: target must never equal active
+ 3 clean target only    active slot and .next are never touched
+ 4 validate             qa:memory, tsc --noEmit, eslint  (any failure aborts)
+ 5 build target
+ 6 verify output        BUILD_ID, server/, static/ present and non-empty
+ 7 smoke test           new release on 127.0.0.1:3199, loopback only:
+                        page, CSS, JS, both fonts, both SVGs, #systems markup
+ 8 switch               PM2 re-pointed at the target slot
+ 9 public health        up to 10 attempts, page + CSS + JS must all be 200
+10 rollback on failure  previous slot restored automatically, then re-verified
+11 pm2 save             only after the new release is proven healthy
+```
+
+Exit code is 0 only on full success. A successful rollback still exits non-zero,
+because the intended deployment did not happen.
+
+Useful flags:
+
+```
+-AllowDirtyTree            deploy with uncommitted changes (states them first)
+-FailAfterSwitchForTest    rollback drill: forces the health check to fail
+```
+
+Deployment is serialised by a named mutex, so two runs cannot pick the same
+"inactive" slot. Logs are written to `deploy/logs/` (gitignored).
+
+### After a deployment
+
+The previous slot is kept intact for fast rollback. Only the inactive slot is
+cleaned, and only after the active slot has been confirmed.
 
 ## Caddy
 

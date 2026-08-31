@@ -202,6 +202,53 @@ Scripts: `qa/stage05-shots.mjs`, `stage05-interaction.mjs`, `stage05-a11y.mjs`,
 `stage05-responsive.mjs`, `stage05-contrast.mjs`, `stage05-public.mjs`.
 Screenshots in `qa/shots/stage05/`.
 
+## Deployment Safety (A/B release slots)
+
+Production serves `.next-release-a` or `.next-release-b`, never `.next`. These
+are the measurements that prove a build can no longer disturb the live site.
+
+**Accidental plain build** — production on `.next-release-a`, ran
+`npm run build` (writes `.next`) while polling the public site:
+
+```
+page       85 requests   85x 200   0 non-200   0 connection failures
+CSS chunk  85 requests   85x 200   0 non-200   0 connection failures
+JS chunk   85 requests   85x 200   0 non-200   0 connection failures
+.next BUILD_ID rewritten; .next-release-a BUILD_ID untouched
+```
+
+**Safe deployment, inactive-slot build window** — `deploy:safe` building
+`.next-release-b` while production served `.next-release-a`:
+
+```
+327 requests during the build window, 327x 200, 0 failures
+```
+
+**Switch window** is the only interruption: PM2 stops the old process and the
+new one boots. Measured 12.6s, 13.8s and 58.8s across three switches; the 58.8s
+run had the development server competing for RAM. The public monitor recorded
+502s for ~46s during that worst case. This is a real availability gap, not zero
+downtime, and it is the PM2 restart — not the build.
+
+**Rollback drill** — `deploy:safe -FailAfterSwitchForTest`, health check forced
+to fail after switching:
+
+```
+switched to .next-release-a, forced failure, rolled back to .next-release-b
+public site healthy after rollback (page + CSS + JS all 200)
+pm2 save persisted the RESTORED slot
+exit code 1 (a successful rollback is still a failed deployment)
+1083 requests during the drill's build and smoke phases: 1083x 200
+```
+
+**Production process environment** after migration: 2 variables
+(`NODE_ENV`, `PORTFOLIO_DIST_DIR`), down from 69. No tooling or credential
+variable names present.
+
+Scripts: `qa/deploy-continuity.mjs` (run with `MSYS_NO_PATHCONV=1` under Git
+Bash, or a leading-slash asset path is rewritten to a Windows path before Node
+sees it), `qa/deploy-continuity-report.mjs`.
+
 ## Production HTTPS Verification
 
 Verified against the live public URL `https://intelligent-systems-lab.duckdns.org`

@@ -628,3 +628,81 @@ these sizes removes the overlap; verified at 1024, 1100, 1200 and 768.
 ### Future modification condition
 If node widths or band membership change, re-run the overlap check across
 1024–1200 before narrowing this breakpoint again.
+
+---
+
+## D-030 — Production serves alternating release directories, never `.next`
+
+Status: Accepted
+Stage: infrastructure hardening (after Stage 05)
+
+### Decision
+Production runs from one of two release slots, `.next-release-a` or
+`.next-release-b`, selected by `PORTFOLIO_DIST_DIR`. The default `.next` stays
+the development and local-build output and is never served in production.
+Deployment is `npm run deploy:safe`, which always builds the *inactive* slot.
+
+### Reason
+During Stage 05 the live site broke twice: `next build` rewrote the same `.next`
+directory the running production process was reading, so the served page
+referenced chunks that had just been replaced and the site returned 500s until
+PM2 was restarted. Documentation had already warned about this and it happened
+anyway — the guarantee had to become structural.
+
+Measured after the change: with production on `.next-release-a`, a plain
+`npm run build` ran to completion while the public site was polled continuously.
+255 of 255 requests returned 200 across page, CSS chunk and JS chunk. During a
+real `deploy:safe` build of the inactive slot, 327 of 327 requests returned 200.
+
+### Alternatives rejected
+- Documentation alone — already tried, and it failed.
+- A pre-build guard that refuses to build — would break ordinary local builds,
+  which developers legitimately need.
+- Copying a built app to a separate production directory — more moving parts,
+  and the copy step becomes the new race.
+
+### Consequences
+`PORTFOLIO_DIST_DIR` is validated against an allow-list in both
+`next.config.ts` and the PM2 process file; an absolute path or a traversal is
+rejected. The PM2 file additionally refuses `.next`, so production cannot be
+started on the development output even by hand. Both slots are retained after a
+deployment so rollback is immediate.
+
+### Future modification condition
+Do not point production at `.next`. If a third slot is ever wanted, add it to
+both allow-lists and to the alternation logic together.
+
+---
+
+## D-031 — PM2 introspection goes through a Node helper
+
+Status: Accepted
+Stage: infrastructure hardening
+
+### Decision
+`deploy/safe-deploy.ps1` reads PM2 state via `deploy/pm2-status.mjs` rather than
+parsing `pm2 jlist` in PowerShell.
+
+### Reason
+PowerShell 5.1's `ConvertFrom-Json` treats object keys case-insensitively and
+throws `duplicated keys 'username' and 'USERNAME'` on any Windows process
+environment. The deployment script read this as "PM2 process not found" and
+aborted. Node's `JSON.parse` handles it, and the helper prints only the fields
+the script needs — never an environment value.
+
+---
+
+## D-032 — The deployment strips tooling variables before touching PM2
+
+Status: Accepted
+Stage: infrastructure hardening
+
+### Decision
+`safe-deploy.ps1` removes `CLAUDE*` variables from its own environment before
+any `pm2` invocation, and the PM2 process file declares an explicit `env` block.
+
+### Reason
+`pm2 --update-env` re-reads the invoking shell's environment into the managed
+process. The first production deployment leaked a tooling token into a
+long-lived process that way. The production environment is now two variables:
+`NODE_ENV` and `PORTFOLIO_DIST_DIR`.

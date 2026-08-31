@@ -61,6 +61,13 @@ public/
   textures/micro-grain.svg
   marks/system-mark.svg
 
+deploy/
+  safe-deploy.ps1           the production deployment (build inactive slot,
+                            smoke test, switch, auto-rollback)
+  pm2.portfolio.config.js   PM2 process definition; refuses to serve .next
+  pm2-status.mjs            PM2 introspection for the deploy script
+  logs/                     per-deployment logs (gitignored)
+
 qa/                         Playwright harness + screenshot baselines
 docs/                       canonical project memory
 ```
@@ -162,6 +169,13 @@ a fan-in reads as a routing bundle instead of one overdrawn line.
 - Keep one canonical source per data set. The five navigation destinations exist
   once, in `nav-items.ts`, and are consumed by the desktop bar, the compact panel
   and the page's anchor sections.
+
+## Release Layout
+
+`next.config.ts` resolves `distDir` from `PORTFOLIO_DIST_DIR`, validated against
+an allow-list. Production runs from `.next-release-a` or `.next-release-b` and
+never from `.next`, so building can never rewrite what the live process is
+reading. Deployment alternates slots and keeps the previous one for rollback.
 
 ## Performance Posture
 

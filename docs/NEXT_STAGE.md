@@ -42,13 +42,15 @@ Each is currently a neutral placeholder showing an eyebrow label and the words
 
 ## Before starting Stage 06
 
-The site is public, so anything shipped is immediately visible. Follow the
-production update procedure in `docs/DEPLOYMENT.md`:
+The site is public, so anything shipped is immediately visible. Deploy with:
 
 ```
-npm run qa:memory  ->  npx tsc --noEmit  ->  npm run build  ->  pm2 restart portfolio
+npm run deploy:safe
 ```
 
-**`npm run build` replaces `.next` while the production process is serving from
-it, so the live site breaks until the restart.** Treat build and restart as one
-step, and re-verify the public URL afterwards.
+That is the whole procedure. It validates, builds the inactive release slot,
+smoke-tests it on a loopback port, switches production, health-checks the public
+URL and rolls back automatically if anything fails.
+
+Do **not** deploy by hand. Production no longer serves `.next`, so a plain
+`npm run build` is harmless — but it also deploys nothing.
