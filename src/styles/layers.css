@@ -1,0 +1,365 @@
+/* =====================================================================
+   MILKY INTELLIGENCE — BACKGROUND ARCHITECTURE
+   Four independent, separately mounted layers:
+
+     A  base surface   z-index -4   stationary gradient foundation
+     B  aurora fields  z-index -3   six drifting pools of coloured light
+     C  prism light    z-index -2   broad diagonal illumination sweeps
+     D  micro grain    z-index -1   monochrome dither over the gradients
+
+   Every layer is fixed, non-interactive, and paints behind page content.
+   Blur is declared once and never animated; only transform and opacity move.
+   ===================================================================== */
+
+/* ---------------------------------------------------------------------
+   LAYER A — BASE SURFACE
+   Stationary. Establishes the warm/cool tilt the aurora sits on top of.
+   --------------------------------------------------------------------- */
+
+.backdrop-base {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-base-surface);
+  pointer-events: none;
+  background: var(--background-surface);
+  contain: layout paint style;
+}
+
+/* ---------------------------------------------------------------------
+   LAYER B — AURORA COLOUR FIELDS
+   Six diffused pools. Not circles: each carries its own irregular radius
+   and a radial falloff, then a large static blur dissolves the silhouette.
+   --------------------------------------------------------------------- */
+
+.aurora {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-aurora);
+  pointer-events: none;
+  overflow: hidden;
+  contain: layout paint style;
+}
+
+.aurora__field {
+  position: absolute;
+  left: var(--field-x);
+  top: var(--field-y);
+  width: var(--field-w);
+  height: var(--field-h);
+  border-radius: var(--field-radius);
+  opacity: var(--field-opacity);
+  filter: blur(var(--field-blur));
+
+  /* Fallback for engines without color-mix(): a flat pool of the same hue. */
+  background: var(--field-color);
+  background: radial-gradient(
+    ellipse closest-side at 50% 50%,
+    var(--field-color) 0%,
+    var(--field-color) 70%,
+    color-mix(in srgb, var(--field-color) 64%, transparent) 100%
+  );
+
+  will-change: transform;
+  animation-name: var(--field-animation);
+  animation-duration: var(--field-duration);
+  animation-delay: var(--field-delay);
+  animation-timing-function: var(--ease-aurora);
+  animation-direction: alternate;
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+}
+
+/* --- Field 1 — Lavender --------------------------------------------- */
+.aurora__field--1 {
+  --field-color: var(--aurora-lavender);
+  --field-w: clamp(520px, 84vw, 1400px);
+  --field-h: clamp(500px, 98vh, 1120px);
+  --field-x: clamp(-280px, -15.3vw, -110px);
+  --field-y: clamp(-240px, -18vh, -90px);
+  --field-blur: 140px;
+  --field-opacity: 0.55;
+  --field-radius: 42% 58% 67% 33% / 46% 38% 62% 54%;
+  --field-animation: aurora-drift-1;
+  --field-duration: var(--duration-field-1);
+  --field-delay: -4s;
+}
+
+/* --- Field 2 — Sky --------------------------------------------------- */
+.aurora__field--2 {
+  --field-color: var(--aurora-sky);
+  --field-w: clamp(440px, 58vw, 1080px);
+  --field-h: clamp(440px, 80vh, 980px);
+  --field-x: 65vw;
+  --field-y: clamp(-320px, -25vh, -120px);
+  --field-blur: 140px;
+  --field-opacity: 0.55;
+  --field-radius: 63% 37% 44% 56% / 38% 62% 39% 61%;
+  --field-animation: aurora-drift-2;
+  --field-duration: var(--duration-field-2);
+  --field-delay: -11s;
+}
+
+/* --- Field 3 — Mint -------------------------------------------------- */
+.aurora__field--3 {
+  --field-color: var(--aurora-mint);
+  --field-w: clamp(500px, 72vw, 1260px);
+  --field-h: clamp(440px, 75vh, 920px);
+  --field-x: 55vw;
+  --field-y: 45vh;
+  --field-blur: 150px;
+  --field-opacity: 0.45;
+  --field-radius: 35% 65% 58% 42% / 57% 43% 61% 39%;
+  --field-animation: aurora-drift-3;
+  --field-duration: var(--duration-field-3);
+  --field-delay: -19s;
+}
+
+/* --- Field 4 — Rose -------------------------------------------------- */
+.aurora__field--4 {
+  --field-color: var(--aurora-rose);
+  --field-w: clamp(500px, 104vw, 1560px);
+  --field-h: clamp(460px, 82vh, 1000px);
+  --field-x: clamp(-240px, -12.5vw, -90px);
+  --field-y: 55vh;
+  --field-blur: 140px;
+  --field-opacity: 0.42;
+  --field-radius: 56% 44% 33% 67% / 41% 59% 47% 53%;
+  --field-animation: aurora-drift-4;
+  --field-duration: var(--duration-field-4);
+  --field-delay: -7s;
+}
+
+/* --- Field 5 — Peach ------------------------------------------------- */
+.aurora__field--5 {
+  --field-color: var(--aurora-peach);
+  --field-w: clamp(440px, 76vw, 1180px);
+  --field-h: clamp(400px, 72vh, 880px);
+  --field-x: 32vw;
+  --field-y: 72vh;
+  --field-blur: 130px;
+  --field-opacity: 0.38;
+  --field-radius: 48% 52% 62% 38% / 63% 34% 66% 37%;
+  --field-animation: aurora-drift-5;
+  --field-duration: var(--duration-field-5);
+  --field-delay: -26s;
+}
+
+/* --- Field 6 — Lemon over Aqua --------------------------------------- */
+.aurora__field--6 {
+  --field-color: var(--aurora-lemon);
+  --field-w: clamp(420px, 58vw, 1020px);
+  --field-h: clamp(360px, 62vh, 780px);
+  --field-x: 68vw;
+  --field-y: 82vh;
+  --field-blur: 140px;
+  --field-opacity: 0.38;
+  --field-radius: 67% 33% 51% 49% / 36% 58% 42% 64%;
+  --field-animation: aurora-drift-6;
+  --field-duration: var(--duration-field-6);
+  --field-delay: -14s;
+
+  background: var(--aurora-aqua);
+  background:
+    radial-gradient(
+      ellipse closest-side at 34% 42%,
+      var(--aurora-lemon) 0%,
+      color-mix(in srgb, var(--aurora-lemon) 88%, transparent) 46%,
+      var(--aurora-lemon-0) 92%
+    ),
+    radial-gradient(
+      ellipse closest-side at 68% 62%,
+      var(--aurora-aqua) 0%,
+      var(--aurora-aqua) 58%,
+      color-mix(in srgb, var(--aurora-aqua) 55%, transparent) 100%
+    );
+}
+
+/* ---------------------------------------------------------------------
+   LAYER C — PRISM LIGHT
+   Two broad diagonal sweeps drifting across the composition. The intent
+   is that surfaces read as illuminated, not merely tinted. Look straight
+   at it and it should all but disappear.
+   --------------------------------------------------------------------- */
+
+.prism {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-prism);
+  pointer-events: none;
+  overflow: hidden;
+  contain: layout paint style;
+}
+
+.prism__beam {
+  position: absolute;
+  top: -25%;
+  left: -25%;
+  width: 150%;
+  height: 150%;
+  will-change: transform, opacity;
+  animation-timing-function: var(--ease-aurora);
+  animation-direction: alternate;
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+}
+
+.prism__beam--a {
+  background: var(--prism-beam-a);
+  opacity: var(--prism-opacity-a);
+  animation-name: prism-sweep-a;
+  animation-duration: var(--duration-prism-a);
+}
+
+.prism__beam--b {
+  background: var(--prism-beam-b);
+  opacity: var(--prism-opacity-b);
+  mix-blend-mode: soft-light;
+  animation-name: prism-sweep-b;
+  animation-duration: var(--duration-prism-b);
+  animation-delay: -22s;
+}
+
+/* ---------------------------------------------------------------------
+   LAYER D — MICRO GRAIN
+   A 256px monochrome tile, generated locally as SVG turbulence. It sits
+   above the gradients and below page content, so it dithers the colour
+   fields without ever touching the crispness of type.
+   --------------------------------------------------------------------- */
+
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-grain);
+  pointer-events: none;
+  background-image: url("/textures/micro-grain.svg");
+  background-repeat: repeat;
+  background-size: var(--grain-tile) var(--grain-tile);
+  opacity: var(--grain-opacity);
+  mix-blend-mode: var(--grain-blend);
+  contain: layout paint style;
+}
+
+/* =====================================================================
+   RESPONSIVE BEHAVIOUR
+   The page stays colourful at every width. What shrinks is blur cost,
+   travel distance, and the number of fields competing for attention —
+   never the palette itself.
+   ===================================================================== */
+
+/* Large desktop — a little more travel reads well at 1920 and above. */
+@media (min-width: 1600px) {
+  :root {
+    --aurora-amplitude: 1.08;
+  }
+}
+
+/* Laptop and small desktop. */
+@media (max-width: 1200px) {
+  :root {
+    --aurora-amplitude: 0.85;
+  }
+}
+
+/* Tablet — shorter travel, cheaper blur, gentler supporting fields. */
+@media (max-width: 900px) {
+  :root {
+    --aurora-amplitude: 0.62;
+  }
+
+  .aurora__field {
+    --field-blur: 96px;
+  }
+
+  .aurora__field--5 {
+    --field-opacity: 0.3;
+  }
+
+  .aurora__field--6 {
+    --field-opacity: 0.28;
+  }
+
+  .prism__beam {
+    left: -35%;
+    width: 170%;
+  }
+}
+
+/* Mobile — the six pools restack into a single vertical column. Their
+   order follows the hue wheel (lavender, sky, mint, aqua/lemon, peach,
+   rose) so neighbouring fields are neighbours in hue too. Stacking
+   complementary hues here would cancel them into grey, which is what a
+   narrow viewport does to the desktop arrangement.
+
+   Blur and opacity both come down, per the responsive brief; the tighter
+   blur is what buys back the colour the smaller fields would otherwise
+   lose. */
+@media (max-width: 600px) {
+  :root {
+    --aurora-amplitude: 0.45;
+    --prism-opacity-a: 0.18;
+    --prism-opacity-b: 0.12;
+  }
+
+  .aurora__field {
+    --field-blur: 48px;
+  }
+
+  .aurora__field--1 {
+    --field-x: -34vw;
+    --field-y: -16vh;
+    --field-w: clamp(360px, 140vw, 860px);
+    --field-h: clamp(300px, 46vh, 560px);
+    --field-opacity: 0.55;
+  }
+
+  .aurora__field--2 {
+    --field-x: -14vw;
+    --field-y: 8vh;
+    --field-w: clamp(340px, 130vw, 800px);
+    --field-h: clamp(290px, 44vh, 540px);
+    --field-opacity: 0.5;
+  }
+
+  .aurora__field--3 {
+    --field-x: -18vw;
+    --field-y: 30vh;
+    --field-w: clamp(340px, 130vw, 800px);
+    --field-h: clamp(280px, 42vh, 520px);
+    --field-opacity: 0.42;
+  }
+
+  .aurora__field--6 {
+    --field-x: -16vw;
+    --field-y: 48vh;
+    --field-w: clamp(340px, 130vw, 800px);
+    --field-h: clamp(280px, 42vh, 520px);
+    --field-opacity: 0.34;
+  }
+
+  .aurora__field--5 {
+    --field-x: -20vw;
+    --field-y: 64vh;
+    --field-w: clamp(340px, 130vw, 800px);
+    --field-h: clamp(280px, 42vh, 520px);
+    --field-opacity: 0.36;
+  }
+
+  .aurora__field--4 {
+    --field-x: -30vw;
+    --field-y: 78vh;
+    --field-w: clamp(360px, 140vw, 860px);
+    --field-h: clamp(300px, 46vh, 560px);
+    --field-opacity: 0.4;
+  }
+}
+
+/* Small mobile — a touch less travel again, everything else holds. */
+@media (max-width: 400px) {
+  :root {
+    --aurora-amplitude: 0.36;
+  }
+
+  .aurora__field {
+    --field-blur: 42px;
+  }
+}

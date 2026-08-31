@@ -1,0 +1,351 @@
+/* =====================================================================
+   MILKY INTELLIGENCE — DESIGN TOKENS
+   Single source of truth for every principal visual value.
+   Nothing in this system should hard-code a raw value that lives here.
+   ===================================================================== */
+
+:root {
+  /* -------------------------------------------------------------
+     1. BACKGROUND FOUNDATIONS
+     Pure white is never used as a page background.
+     ------------------------------------------------------------- */
+  --background-base: #f7f7fb;
+  --background-warm: #faf7f4;
+  --background-cool: #f5f8fb;
+
+  --background-surface: linear-gradient(
+    135deg,
+    var(--background-base) 0%,
+    var(--background-warm) 45%,
+    var(--background-cool) 100%
+  );
+
+  /* -------------------------------------------------------------
+     2. AURORA PALETTE
+     Low saturation, high lightness. Do not intensify.
+     Each hue also carries a zero-alpha twin so radial falloffs
+     fade to nothing instead of drifting through grey.
+     ------------------------------------------------------------- */
+  --aurora-lavender: #e9e0ff;
+  --aurora-sky: #dceeff;
+  --aurora-aqua: #d9f4f3;
+  --aurora-mint: #ddf5e8;
+  --aurora-rose: #f9dfeb;
+  --aurora-peach: #fbe4d7;
+  --aurora-lemon: #f8efc9;
+
+  --aurora-lavender-0: rgba(233, 224, 255, 0);
+  --aurora-sky-0: rgba(220, 238, 255, 0);
+  --aurora-aqua-0: rgba(217, 244, 243, 0);
+  --aurora-mint-0: rgba(221, 245, 232, 0);
+  --aurora-rose-0: rgba(249, 223, 235, 0);
+  --aurora-peach-0: rgba(251, 228, 215, 0);
+  --aurora-lemon-0: rgba(248, 239, 201, 0);
+
+  /* -------------------------------------------------------------
+     3. TEXT
+     Never solid black.
+     ------------------------------------------------------------- */
+  --text-primary: #191b24;
+  --text-secondary: #515666;
+  /* Annotation is the accessible small-technical role added in Stage 02.
+     It exists so that captions, technical labels and metadata that must
+     stay readable never have to reach for muted. */
+  --text-annotation: #595e6c;
+
+  /* Muted measures ~3.2:1 against the live background: below AA for any
+     meaningful text. Reserved for decorative indexes and ghosted, wholly
+     non-essential annotation. Never body copy, captions or control labels. */
+  --text-muted: #7c8190;
+
+  /* -------------------------------------------------------------
+     4. LINES AND BORDERS
+     ------------------------------------------------------------- */
+  --line-subtle: rgba(61, 68, 88, 0.1);
+
+  --border-subtle: 1px solid rgba(74, 80, 104, 0.08);
+  --border-glass: 1px solid rgba(255, 255, 255, 0.68);
+  --border-technical: 1px solid rgba(74, 80, 104, 0.1);
+
+  /* -------------------------------------------------------------
+     5. SURFACES
+     ------------------------------------------------------------- */
+  --surface-milk-bg: rgba(255, 255, 255, 0.68);
+  --surface-milk-border: rgba(255, 255, 255, 0.72);
+  --surface-milk-blur: 16px;
+
+  --surface-frost-bg: rgba(248, 249, 253, 0.46);
+  --surface-frost-border: rgba(255, 255, 255, 0.65);
+  --surface-frost-blur: 24px;
+
+  --surface-prism-bg: rgba(255, 255, 255, 0.6);
+  --surface-prism-border: rgba(255, 255, 255, 0.7);
+  --surface-prism-blur: 18px;
+
+  /* -------------------------------------------------------------
+     6. CORNER RADII
+     A single consistent family. Radii are never assigned at random.
+     ------------------------------------------------------------- */
+  --radius-control: 10px;
+  --radius-button: 13px;
+  --radius-card-sm: 16px;
+  --radius-card: 20px;
+  --radius-feature: 24px;
+  --radius-panel: 28px;
+  --radius-panel-lg: 32px;
+  --radius-pill: 999px;
+
+  /* -------------------------------------------------------------
+     7. SHADOWS
+     Diffused and cool. No dark halos.
+     ------------------------------------------------------------- */
+  --shadow-card-lg: 0 24px 70px rgba(41, 47, 70, 0.08);
+  --shadow-card: 0 12px 36px rgba(41, 47, 70, 0.055);
+  --shadow-float: 0 8px 24px rgba(41, 47, 70, 0.07);
+  --shadow-milk: 0 20px 60px rgba(42, 48, 74, 0.07);
+  --shadow-inner-light: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+
+  /* -------------------------------------------------------------
+     8. MOTION
+     Aurora cycles are mutually prime-ish so the composition never
+     returns to a recognisable arrangement.
+     ------------------------------------------------------------- */
+  --ease-aurora: ease-in-out;
+  --ease-standard: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-entrance: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-nav: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --duration-field-1: 31s;
+  --duration-field-2: 37s;
+  --duration-field-3: 43s;
+  --duration-field-4: 35s;
+  --duration-field-5: 47s;
+  --duration-field-6: 41s;
+
+  --duration-prism-a: 58s;
+  --duration-prism-b: 68s;
+  --duration-hue: 64s;
+
+  --duration-fast: 160ms;
+  --duration-medium: 280ms;
+  --duration-slow: 520ms;
+
+  /* Global amplitude multiplier for every aurora movement.
+     Lowered per breakpoint to shorten travel without losing colour. */
+  --aurora-amplitude: 1;
+
+  /* -------------------------------------------------------------
+     9. LAYER DEPTH
+     ------------------------------------------------------------- */
+  --z-base-surface: -4;
+  --z-aurora: -3;
+  --z-prism: -2;
+  --z-grain: -1;
+
+  /* -------------------------------------------------------------
+     10. PRISM LIGHT (Layer C)
+     Broad diagonal light sweeps. Opacity is capped well under 0.25 so
+     the effect reads as illumination rather than as an overlay.
+     ------------------------------------------------------------- */
+  --prism-opacity-a: 0.22;
+  --prism-opacity-b: 0.16;
+
+  --prism-beam-a: linear-gradient(
+    115deg,
+    transparent 10%,
+    rgba(255, 255, 255, 0.13) 38%,
+    rgba(220, 238, 255, 0.16) 52%,
+    rgba(233, 224, 255, 0.15) 65%,
+    transparent 85%
+  );
+
+  --prism-beam-b: linear-gradient(
+    72deg,
+    transparent 16%,
+    rgba(255, 255, 255, 0.12) 42%,
+    rgba(221, 245, 232, 0.1) 57%,
+    rgba(251, 228, 215, 0.09) 71%,
+    transparent 90%
+  );
+
+  /* -------------------------------------------------------------
+     11. GRAIN
+     ------------------------------------------------------------- */
+  --grain-opacity: 0.024;
+  --grain-blend: multiply;
+  --grain-tile: 256px;
+
+  /* -------------------------------------------------------------
+     12. LAYOUT
+     ------------------------------------------------------------- */
+  --content-max: 1200px;
+  --content-wide: 1440px;
+  --content-narrow: 780px;
+  --gutter: clamp(20px, 5vw, 72px);
+
+  /* -------------------------------------------------------------
+     13. SPACING SCALE
+     ------------------------------------------------------------- */
+  --space-3xs: 4px;
+  --space-2xs: 8px;
+  --space-xs: 12px;
+  --space-sm: 16px;
+  --space-md: 24px;
+  --space-lg: 32px;
+  --space-xl: 48px;
+  --space-2xl: 64px;
+  --space-3xl: 96px;
+  --space-4xl: 128px;
+
+  /* -------------------------------------------------------------
+     14. TYPOGRAPHY — FAMILIES
+     Geist resolves first. The fallbacks exist only for font failure,
+     never as a design intent. Both families are bundled locally.
+     ------------------------------------------------------------- */
+  --font-sans: var(--font-geist-sans), Inter, ui-sans-serif, system-ui,
+    -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: var(--font-geist-mono), "SFMono-Regular", Consolas,
+    "Liberation Mono", Menlo, monospace;
+
+  /* -------------------------------------------------------------
+     15. WEIGHTS
+     A deliberately narrow working range. 700+ is not part of the
+     system: hierarchy comes from scale, spacing and colour first.
+     ------------------------------------------------------------- */
+  --weight-body: 400;
+  --weight-lead: 450;
+  --weight-ui: 500;
+  --weight-subhead: 520;
+  --weight-heading: 560;
+  --weight-strong: 620;
+
+  /* -------------------------------------------------------------
+     16. TYPE SCALE
+     ------------------------------------------------------------- */
+  --type-display-1: clamp(3.75rem, 6.5vw, 7.25rem);
+  --type-display-2: clamp(2.875rem, 4.8vw, 5rem);
+
+  --type-h1: clamp(2.5rem, 4vw, 4rem);
+  --type-h2: clamp(2rem, 3vw, 3rem);
+  --type-h3: clamp(1.5rem, 2vw, 2rem);
+  --type-h4: 1.25rem;
+
+  --type-lead: clamp(1.1875rem, 1.4vw, 1.375rem);
+  --type-body-lg: 1.125rem;
+  --type-body: 1.0625rem;
+  --type-small: 0.875rem;
+  --type-caption: 0.8125rem;
+
+  /* Technical sizes never go below 12px, and 12px is metadata only. */
+  --type-technical: 0.8125rem;
+  --type-technical-micro: 0.75rem;
+  --type-eyebrow: 0.75rem;
+  --type-code: 0.875rem;
+  --type-code-compact: 0.8125rem;
+
+  /* -------------------------------------------------------------
+     17. LINE HEIGHTS
+     ------------------------------------------------------------- */
+  --leading-display-1: 0.94;
+  --leading-display-2: 0.98;
+  --leading-h1: 1.02;
+  --leading-h2: 1.06;
+  --leading-h3: 1.15;
+  --leading-h4: 1.3;
+  --leading-lead: 1.58;
+  --leading-body-lg: 1.65;
+  --leading-body: 1.68;
+  --leading-small: 1.55;
+  --leading-caption: 1.45;
+  --leading-technical: 1.4;
+  --leading-code: 1.65;
+
+  /* -------------------------------------------------------------
+     18. TRACKING
+     Negative on the large sizes, opening up as type gets smaller,
+     positive only where uppercase mono needs the room.
+     ------------------------------------------------------------- */
+  --tracking-display-1: -0.055em;
+  --tracking-display-2: -0.045em;
+  --tracking-h1: -0.04em;
+  --tracking-h2: -0.035em;
+  --tracking-h3: -0.025em;
+  --tracking-h4: -0.015em;
+  --tracking-lead: -0.012em;
+  --tracking-body-lg: -0.008em;
+  --tracking-body: -0.005em;
+  --tracking-small: 0em;
+  --tracking-caption: 0em;
+  --tracking-technical: 0.025em;
+  --tracking-technical-micro: 0.035em;
+  --tracking-eyebrow: 0.095em;
+  --tracking-code: 0em;
+
+  /* -------------------------------------------------------------
+     19. MEASURE
+     Line length is a first-class token: prose never widens just
+     because the viewport did.
+     ------------------------------------------------------------- */
+  /* The two display measures are expressed in em, not ch, and this is
+     deliberate. `ch` resolves against the loaded font's "0" advance:
+     0.662em in Geist against 0.555em in the metric-adjusted fallback, a
+     19% gap. That made 13ch mean 862px once Geist arrived but 723px
+     before it did, so the display line count changed on font swap and
+     cost ~0.016-0.021 CLS. These values are those same 13ch and 16ch
+     measured in Geist (13 x 0.662em, 16 x 0.662em), so the rendered line
+     length is unchanged while the measure no longer depends on which
+     font is currently resolved. Prose measures below stay in ch, where
+     the unit is the point and no shift was measurable. */
+  --measure-display-1: 8.62em; /* = 13ch in Geist Sans */
+  --measure-display-2: 10.6em; /* = 16ch in Geist Sans */
+  --measure-lead: 54ch;
+  --measure-body-lg: 60ch;
+  --measure-body: 64ch;
+  --measure-prose: 62ch;
+
+  /* -------------------------------------------------------------
+     20. SELECTION
+     ------------------------------------------------------------- */
+  --selection-bg: rgba(214, 204, 255, 0.58);
+  --selection-fg: #191b24;
+
+  /* -------------------------------------------------------------
+     21. NAVIGATION
+     Geometry and stacking only. The navigation's surface is the
+     existing Frost recipe, so no new glass tokens are introduced —
+     just the alpha the floating bar needs to hold text steady over
+     the moving aurora.
+     ------------------------------------------------------------- */
+  --nav-desktop-height: 64px;
+  --nav-desktop-max: 1060px;
+  --nav-desktop-top: 18px;
+  --nav-desktop-clearance: 24px;
+
+  --nav-mobile-height: 56px;
+  --nav-mobile-inset: 12px;
+
+  --nav-z: 100;
+  --nav-mobile-z: 110;
+  --nav-panel-z: 108;
+  --nav-veil-z: 106;
+
+  /* Frost, carried a little denser than the base surface so nav text
+     never depends on which aurora field is passing underneath. */
+  --nav-surface-bg: rgba(248, 249, 253, 0.53);
+  --nav-panel-bg: rgba(248, 249, 253, 0.62);
+  --nav-veil: rgba(247, 247, 251, 0.18);
+
+  --nav-link-hover-bg: rgba(255, 255, 255, 0.38);
+  --nav-link-active-bg: rgba(255, 255, 255, 0.68);
+  --nav-accent: linear-gradient(
+    90deg,
+    var(--aurora-lavender),
+    var(--aurora-sky),
+    var(--aurora-mint)
+  );
+
+  /* Clearance so fixed navigation never sits over an anchor target. */
+  --nav-scroll-margin: 110px;
+  --shell-top-desktop: 118px;
+  --shell-top-mobile: 92px;
+}

@@ -1,0 +1,782 @@
+/* =====================================================================
+   MILKY INTELLIGENCE — HERO
+   The first viewport: a text column and the Intelligence Constellation,
+   embedded in the Stage 01 atmosphere rather than sitting on a panel of
+   its own. Nothing here introduces a hero background.
+   ===================================================================== */
+
+.hero {
+  /* Tall enough to compose, never so tall that content clips. */
+  min-height: max(720px, 100svh);
+  padding-top: clamp(124px, 14vh, 172px);
+  padding-bottom: clamp(64px, 8vh, 104px);
+  display: flex;
+  align-items: center;
+}
+
+.hero__inner {
+  display: grid;
+  gap: clamp(40px, 5vw, 64px);
+  width: 100%;
+}
+
+.hero__text {
+  max-width: 560px;
+}
+
+/* --- Text rhythm: fixed to the Stage 02 scale, spacing to the spec ---- */
+
+.hero__eyebrow {
+  margin-bottom: 22px;
+  letter-spacing: 0.09em;
+}
+
+.hero__title {
+  /* Display 01, untouched from Stage 02. */
+  max-width: var(--measure-display-1);
+  margin-bottom: 30px;
+  font-size: var(--type-display-1);
+  font-weight: var(--weight-heading);
+  line-height: var(--leading-display-1);
+  letter-spacing: var(--tracking-display-1);
+  text-wrap: balance;
+}
+
+.hero__lead {
+  max-width: 52ch;
+  margin-bottom: 32px;
+  color: var(--text-secondary);
+  font-size: var(--type-lead);
+  font-weight: var(--weight-lead);
+  line-height: var(--leading-lead);
+  letter-spacing: var(--tracking-lead);
+  text-wrap: pretty;
+}
+
+/* --- Actions --------------------------------------------------------- */
+
+.hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 36px;
+}
+
+.hero__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 46px;
+  border-radius: 14px;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: var(--weight-ui);
+  line-height: 1;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color 180ms var(--ease-standard),
+    border-color 180ms var(--ease-standard),
+    color 180ms var(--ease-standard),
+    transform 180ms var(--ease-standard);
+}
+
+/* Primary: a Milk-derived control. The only filled surface in the hero. */
+.hero__action--primary {
+  padding-inline: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.76);
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow:
+    0 10px 30px rgba(41, 47, 70, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.78);
+  color: var(--text-primary);
+}
+
+.hero__action--primary:hover {
+  background: rgba(255, 255, 255, 0.84);
+  transform: translateY(-1px);
+}
+
+/* Secondary stays deliberately quieter so the two never compete. */
+.hero__action--secondary {
+  padding-inline: 16px;
+  border: 1px solid rgba(74, 80, 104, 0.08);
+  background: rgba(255, 255, 255, 0.2);
+  color: var(--text-secondary);
+}
+
+.hero__action--secondary:hover {
+  background: rgba(255, 255, 255, 0.34);
+  color: var(--text-primary);
+  transform: translateY(-1px);
+}
+
+.hero__action-icon {
+  flex: 0 0 auto;
+  transition: transform 180ms var(--ease-standard);
+}
+
+.hero__action--primary:hover .hero__action-icon {
+  transform: translateX(2px);
+}
+
+/* Stage 03 focus language, unchanged. */
+.hero__action:focus-visible {
+  outline: 2px solid rgba(81, 86, 102, 0.48);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 5px rgba(233, 224, 255, 0.42);
+}
+
+/* --- Capability rail: quiet metadata, not a card grid ---------------- */
+
+.hero__rail {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hero__rail-item {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding-inline: 16px;
+  border-left: 1px solid rgba(74, 80, 104, 0.09);
+}
+
+.hero__rail-item:first-child {
+  padding-left: 0;
+  border-left: 0;
+}
+
+.hero__rail-index {
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: var(--weight-ui);
+  letter-spacing: 0.05em;
+}
+
+.hero__rail-label {
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: var(--weight-ui);
+  white-space: nowrap;
+}
+
+/* =====================================================================
+   INTELLIGENCE CONSTELLATION
+   An SVG connection layer with an HTML chip layer registered on top of
+   it. The SVG scales with the artboard; the chips do not, which is what
+   keeps their labels readable on a phone.
+   ===================================================================== */
+
+.constellation {
+  position: relative;
+  width: clamp(500px, 44vw, 640px);
+  max-width: 100%;
+  /* Reserved before anything paints, so the artwork cannot shift layout. */
+  aspect-ratio: 1 / 1;
+  margin-inline: auto;
+}
+
+.constellation__svg,
+.constellation__overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.constellation__overlay {
+  pointer-events: none;
+}
+
+/* --- Connections ------------------------------------------------------ */
+
+.clink {
+  fill: none;
+  stroke: rgba(81, 86, 102, 0.15);
+  stroke-linecap: round;
+  transition: stroke-opacity 220ms var(--ease-standard);
+}
+
+.clink--primary {
+  stroke-width: 1.1;
+}
+
+.clink--secondary,
+.clink--cross {
+  stroke-width: 0.75;
+}
+
+.clink--cross {
+  stroke: rgba(81, 86, 102, 0.11);
+}
+
+/* Three links carry a gradient and a travelling dash. Everything else
+   stays neutral so the network never reads as glowing wiring. */
+.clink--flow-0 {
+  stroke: url(#ic-flow-a);
+  stroke-width: 1.1;
+}
+
+.clink--flow-1 {
+  stroke: url(#ic-flow-b);
+  stroke-width: 1;
+}
+
+.clink--flow-2 {
+  stroke: url(#ic-flow-c);
+  stroke-width: 1;
+}
+
+.constellation__halo {
+  fill: none;
+  stroke: rgba(81, 86, 102, 0.06);
+  stroke-width: 1;
+}
+
+.constellation__halo--outer {
+  stroke: rgba(220, 238, 255, 0.15);
+}
+
+.crelay {
+  fill: rgba(255, 255, 255, 0.6);
+  stroke: rgba(81, 86, 102, 0.14);
+  stroke-width: 0.7;
+}
+
+.csignal {
+  opacity: 0.78;
+}
+
+/* --- Capability chips ------------------------------------------------- */
+
+.cnode {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  box-sizing: border-box;
+  min-width: 88px;
+  height: 44px;
+  padding-inline: 11px;
+  border: 1px solid rgba(255, 255, 255, 0.68);
+  border-radius: var(--radius-button);
+  /* Frost language without the backdrop filter: these eight chips drift
+     continuously, and re-blurring a live backdrop every frame is the one
+     cost this composition cannot afford. Over the Stage 01 gradient the
+     difference is not visible. */
+  background: rgba(252, 252, 254, 0.72);
+  box-shadow:
+    0 8px 24px rgba(41, 47, 70, 0.045),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  /* Centring lives on `translate` so `transform` is free for the drift. */
+  translate: -50% -50%;
+  pointer-events: auto;
+  transition:
+    background-color 220ms var(--ease-standard),
+    opacity 220ms var(--ease-standard);
+}
+
+.cnode__dot {
+  flex: 0 0 auto;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  opacity: 0.9;
+  transition: opacity 220ms var(--ease-standard);
+}
+
+.cnode__label {
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  font-weight: var(--weight-ui);
+  line-height: 1;
+  letter-spacing: -0.004em;
+  white-space: nowrap;
+}
+
+/* --- Orchestrator core ------------------------------------------------ */
+
+.ccore {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 112px;
+  height: 112px;
+  border: 1px solid rgba(81, 86, 102, 0.15);
+  border-radius: 50%;
+  /* The frost/prism material of the spec, as a CSS radial gradient: the
+     chips are HTML, so the core is too, and this keeps it sized in real
+     pixels at every breakpoint. */
+  background: radial-gradient(
+    circle at 50% 46%,
+    rgba(255, 255, 255, 0.84) 0%,
+    rgba(239, 240, 250, 0.66) 52%,
+    rgba(220, 238, 255, 0.3) 100%
+  );
+  translate: -50% -50%;
+}
+
+.ccore__halo {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  border-radius: 50%;
+  translate: -50% -50%;
+  pointer-events: none;
+}
+
+.ccore__halo--inner {
+  width: 146px;
+  height: 146px;
+  border: 1px solid rgba(81, 86, 102, 0.06);
+}
+
+.ccore__halo--outer {
+  width: 192px;
+  height: 192px;
+  border: 1px solid rgba(220, 238, 255, 0.15);
+}
+
+.ccore__glyph {
+  width: 30px;
+  height: 30px;
+}
+
+.ccore__label {
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: var(--weight-ui);
+  line-height: 1;
+  letter-spacing: 0.08em;
+}
+
+/* --- Technical annotations -------------------------------------------- */
+
+.cnote {
+  position: absolute;
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: var(--weight-ui);
+  line-height: 1;
+  letter-spacing: 0.07em;
+  white-space: nowrap;
+  opacity: 0.75;
+  translate: -50% -50%;
+}
+
+/* =====================================================================
+   MOTION
+   Everything ambient runs on transform, opacity, offset-distance and
+   stroke-dashoffset. Nothing animates blur, shadow or layout.
+   ===================================================================== */
+
+/* --- Entrance: under a second end to end, 8px of travel at most ------- */
+
+@keyframes hero-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes hero-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.hero__eyebrow {
+  animation: hero-rise 520ms var(--ease-nav) 80ms both;
+}
+
+.hero__title {
+  animation: hero-rise 600ms var(--ease-nav) 150ms both;
+}
+
+.hero__lead {
+  animation: hero-rise 580ms var(--ease-nav) 240ms both;
+}
+
+.hero__actions {
+  animation: hero-rise 520ms var(--ease-nav) 320ms both;
+}
+
+.hero__rail {
+  animation: hero-rise 520ms var(--ease-nav) 400ms both;
+}
+
+.constellation__backplate,
+.constellation__grid {
+  animation: hero-fade 620ms var(--ease-nav) 250ms both;
+}
+
+.constellation__links,
+.constellation__relays {
+  animation: hero-fade 600ms var(--ease-nav) 360ms both;
+}
+
+.constellation__overlay {
+  animation: hero-fade 560ms var(--ease-nav) 460ms both;
+}
+
+.constellation__signals {
+  animation: hero-fade 500ms linear 650ms both;
+}
+
+/* --- Ambient node drift ----------------------------------------------- */
+
+@keyframes cnode-drift-a {
+  0% { transform: translate(0, 0); }
+  50% { transform: translate(3px, -2.5px); }
+  100% { transform: translate(-2.5px, 2px); }
+}
+
+@keyframes cnode-drift-b {
+  0% { transform: translate(0, 0); }
+  50% { transform: translate(-3.5px, 2px); }
+  100% { transform: translate(2px, 3px); }
+}
+
+@keyframes cnode-drift-c {
+  0% { transform: translate(0, 0); }
+  50% { transform: translate(2.5px, 3.5px); }
+  100% { transform: translate(-2px, -2.5px); }
+}
+
+@keyframes cnode-drift-d {
+  0% { transform: translate(0, 0); }
+  50% { transform: translate(-2px, -3px); }
+  100% { transform: translate(3.5px, 1.5px); }
+}
+
+.cnode {
+  animation-timing-function: ease-in-out;
+  animation-direction: alternate;
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+}
+
+/* Eight nodes, four paths, eight different durations and offsets — the
+   cycles share no common factor, so they never fall into step. */
+.cnode--agents { animation-name: cnode-drift-a; animation-duration: 11s; animation-delay: -2s; }
+.cnode--automation { animation-name: cnode-drift-b; animation-duration: 13s; animation-delay: -5s; }
+.cnode--crm { animation-name: cnode-drift-c; animation-duration: 9.5s; animation-delay: -1s; }
+.cnode--api { animation-name: cnode-drift-d; animation-duration: 15s; animation-delay: -7s; }
+.cnode--data { animation-name: cnode-drift-a; animation-duration: 12.5s; animation-delay: -4s; }
+.cnode--learning { animation-name: cnode-drift-b; animation-duration: 16s; animation-delay: -9s; }
+.cnode--mobile { animation-name: cnode-drift-c; animation-duration: 10.5s; animation-delay: -3s; }
+.cnode--web { animation-name: cnode-drift-d; animation-duration: 14s; animation-delay: -6s; }
+
+/* The core is anchored: 1.2px of travel, slow enough to read as breathing
+   rather than wobble. */
+@keyframes ccore-drift {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(1.2px, -1.2px); }
+}
+
+.ccore {
+  animation: ccore-drift 15s ease-in-out infinite alternate both;
+}
+
+/* --- Travelling signals ------------------------------------------------ */
+
+@keyframes signal-travel {
+  0% { offset-distance: 0%; opacity: 0; }
+  14% { opacity: 0.78; }
+  86% { opacity: 0.78; }
+  100% { offset-distance: 100%; opacity: 0; }
+}
+
+.csignal {
+  offset-path: var(--path);
+  offset-rotate: 0deg;
+  offset-distance: 0%;
+  animation: signal-travel var(--dur) linear var(--delay) infinite;
+}
+
+.csignal--reverse {
+  animation-direction: reverse;
+}
+
+/* --- Connection flow: three paths, a fine dash, nothing brighter ------- */
+
+@keyframes flow-dash {
+  to { stroke-dashoffset: -46; }
+}
+
+.clink--flow {
+  stroke-dasharray: 1.5 10;
+  animation: flow-dash 9s linear infinite;
+}
+
+.clink--flow-1 { animation-duration: 7s; }
+.clink--flow-2 { animation-duration: 11s; }
+
+/* =====================================================================
+   HOVER
+   Pointer devices only. Raising one node lifts its spoke to the core and
+   eases everything else back — never below 0.72, so nothing vanishes.
+   Implemented with :has(), which keeps the whole hero server-rendered.
+   ===================================================================== */
+
+@media (hover: hover) and (pointer: fine) {
+  .cnode:hover {
+    background: rgba(255, 255, 255, 0.86);
+  }
+
+  .cnode:hover .cnode__dot {
+    opacity: 1;
+  }
+
+  .constellation:has(.cnode:hover) .cnode:not(:hover) {
+    opacity: 0.72;
+  }
+
+  .constellation:has(.cnode--agents:hover) .clink--to-agents,
+  .constellation:has(.cnode--automation:hover) .clink--to-automation,
+  .constellation:has(.cnode--crm:hover) .clink--to-crm,
+  .constellation:has(.cnode--api:hover) .clink--to-api,
+  .constellation:has(.cnode--data:hover) .clink--to-data,
+  .constellation:has(.cnode--learning:hover) .clink--to-learning,
+  .constellation:has(.cnode--mobile:hover) .clink--to-mobile,
+  .constellation:has(.cnode--web:hover) .clink--to-web {
+    stroke: rgba(81, 86, 102, 0.42);
+    stroke-width: 1.4;
+  }
+}
+
+/* =====================================================================
+   RESPONSIVE
+   ===================================================================== */
+
+/* Two columns only once there is genuinely room for them. */
+@media (min-width: 1100px) {
+  .hero__inner {
+    grid-template-columns: minmax(0, 0.92fr) minmax(480px, 1.08fr);
+    align-items: center;
+  }
+}
+
+/* Tablet: stacked, text first, artwork centred beneath it. */
+@media (max-width: 1099px) {
+  .hero {
+    min-height: 0;
+    padding-bottom: clamp(56px, 7vh, 88px);
+  }
+
+  .hero__text {
+    max-width: 620px;
+  }
+
+  .constellation {
+    width: clamp(430px, 74vw, 560px);
+  }
+}
+
+@media (max-width: 899px) {
+  .hero {
+    padding-top: clamp(104px, 12vh, 140px);
+  }
+}
+
+/* Phone: one column, tighter chrome, artwork last. */
+@media (max-width: 699px) {
+  .hero {
+    padding-top: 100px;
+    padding-bottom: 48px;
+  }
+
+  .hero__title {
+    max-width: none;
+  }
+
+  .hero__lead {
+    max-width: none;
+    font-size: var(--type-body-lg);
+    line-height: var(--leading-body-lg);
+  }
+
+  .hero__inner {
+    gap: 44px;
+  }
+
+  .constellation {
+    width: min(100%, 380px);
+  }
+
+  /* Chips step down a size, staying inside the spec's mobile range. */
+  /* The chips grow relative to the artboard as it shrinks, so a spoke that
+     clears a chip on desktop can end just inside one here. A slightly denser
+     fill keeps the line fully occluded — measured bleed drops to the same
+     level as the grain dither, i.e. nothing a viewer can see. */
+  .cnode {
+    min-width: 72px;
+    height: 38px;
+    gap: 6px;
+    padding-inline: 9px;
+    border-radius: var(--radius-control);
+    background: rgba(252, 252, 254, 0.82);
+  }
+
+  .cnode__label {
+    font-size: 11.5px;
+  }
+
+  .cnode__dot {
+    width: 5px;
+    height: 5px;
+  }
+
+  /* Top of the spec's mobile range, so the label can stay near 10px. */
+  .ccore {
+    width: 88px;
+    height: 88px;
+    gap: 3px;
+  }
+
+  .ccore__glyph {
+    width: 24px;
+    height: 24px;
+  }
+
+  .ccore__label {
+    font-size: 9.5px;
+    letter-spacing: 0.05em;
+  }
+
+  .ccore__halo--inner {
+    width: 115px;
+    height: 115px;
+  }
+
+  .ccore__halo--outer {
+    width: 151px;
+    height: 151px;
+  }
+
+  .cnote {
+    font-size: 10px;
+  }
+}
+
+/* Below 500px the artboard is small enough that the grid, half the relays,
+   two annotations and two signals become noise rather than detail. */
+@media (max-width: 499px) {
+  .constellation__grid,
+  .crelay--optional,
+  .cnote--optional {
+    display: none;
+  }
+
+  .csignal:nth-of-type(4),
+  .csignal:nth-of-type(5) {
+    display: none;
+  }
+
+  .clink--flow-1,
+  .clink--flow-2 {
+    animation: none;
+    stroke-dasharray: none;
+  }
+}
+
+/* Narrow phones: the rail goes two-up, then one column — never scrolling,
+   never truncated. The vertical rules are dropped here: once items wrap, a
+   left border lands at the start of a row, where it reads as a stray mark
+   rather than a separator, and it pushes every item but the first out of
+   alignment. Spacing carries the separation instead. */
+@media (max-width: 699px) {
+  .hero__rail {
+    display: grid;
+    grid-template-columns: repeat(2, auto);
+    justify-content: start;
+    gap: 10px 24px;
+  }
+
+  .hero__rail-item {
+    padding-inline: 0;
+    border-left: 0;
+  }
+}
+
+/* Below ~380px the two-up rail no longer fits its labels without
+   truncating, so it becomes a single column rather than scrolling. */
+@media (max-width: 380px) {
+  .hero__rail {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 9px;
+  }
+
+  .hero__rail-label {
+    font-size: 12.5px;
+  }
+}
+
+/* =====================================================================
+   REDUCED MOTION
+   Every element stays present and fully composed. Only movement stops.
+   ===================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .hero__eyebrow,
+  .hero__title,
+  .hero__lead,
+  .hero__actions,
+  .hero__rail,
+  .constellation__backplate,
+  .constellation__grid,
+  .constellation__links,
+  .constellation__relays,
+  .constellation__overlay,
+  .constellation__signals {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .cnode,
+  .ccore {
+    animation: none;
+    transform: none;
+  }
+
+  .hero__action:hover,
+  .hero__action--primary:hover .hero__action-icon {
+    transform: none;
+  }
+
+  .clink--flow {
+    animation: none;
+    stroke-dasharray: none;
+  }
+
+  /* Packets rest mid-route: present and legible, simply not travelling. */
+  .csignal {
+    animation: none;
+    offset-distance: 45%;
+    opacity: 0.78;
+  }
+}

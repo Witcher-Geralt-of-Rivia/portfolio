@@ -1,0 +1,19 @@
+/* ---------------------------------------------------------------------
+   NAVIGATION SPECIMEN
+   Stage 03 ships navigation, not a homepage. These zones give the
+   navigation something to scroll through and observe. Deletable whole
+   once real sections arrive.
+   --------------------------------------------------------------------- */
+
+.nav-specimen {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-2xs);
+  min-height: 85vh;
+  border-top: 1px solid var(--line-subtle);
+}
+
+.nav-specimen:first-child {
+  border-top: 0;
+}

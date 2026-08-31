@@ -1,0 +1,243 @@
+/* =====================================================================
+   MILKY INTELLIGENCE — MOTION
+   Every aurora field owns an independent, asynchronous cycle.
+   All movement is expressed through `transform` and `opacity` only, so
+   the compositor can run it without repainting the blurred layers.
+
+   Amplitude is factored through --aurora-amplitude, which lets a single
+   token shorten travel on small screens without touching a keyframe.
+
+   Note on colour morphing: the palette shift is produced entirely by
+   translucent fields drifting through one another. Animated hue-rotate is
+   deliberately avoided — it is a filter, and re-filtering six 140px-blurred
+   layers every frame is exactly the cost this system is designed to skip.
+   ===================================================================== */
+
+/* --- Layer B — aurora field drift ---------------------------------- */
+
+@keyframes aurora-drift-1 {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg)
+      scale(calc(1 + var(--aurora-amplitude) * 0.02));
+  }
+  50% {
+    transform: translate3d(
+        calc(var(--aurora-amplitude) * 4.5vw),
+        calc(var(--aurora-amplitude) * -3.2vh),
+        0
+      )
+      rotate(calc(var(--aurora-amplitude) * 3.5deg))
+      scale(calc(1 + var(--aurora-amplitude) * 0.08));
+  }
+  100% {
+    transform: translate3d(
+        calc(var(--aurora-amplitude) * -6vw),
+        calc(var(--aurora-amplitude) * 2.8vh),
+        0
+      )
+      rotate(calc(var(--aurora-amplitude) * -4.5deg))
+      scale(calc(1 - var(--aurora-amplitude) * 0.06));
+  }
+}
+
+@keyframes aurora-drift-2 {
+  0% {
+    transform: translate3d(0, 0, 0)
+      rotate(calc(var(--aurora-amplitude) * -2deg))
+      scale(calc(1 - var(--aurora-amplitude) * 0.03));
+  }
+  50% {
+    transform: translate3d(
+        calc(var(--aurora-amplitude) * -5.5vw),
+        calc(var(--aurora-amplitude) * 3.4vh),
+        0
+      )
+      rotate(calc(var(--aurora-amplitude) * 2.5deg))
+      scale(calc(1 + var(--aurora-amplitude) * 0.05));
+  }
+  100% {
+    transform: translate3d(
+        calc(var(--aurora-amplitude) * 3.5vw),
+        calc(var(--aurora-amplitude) * 5vh),
+        0
+      )
+      rotate(calc(var(--aurora-amplitude) * 6deg))
+      scale(calc(1 + var(--aurora-amplitude) * 0.09));
+  }
+}
+
+@keyframes aurora-drift-3 {
+  0% {
+    transform: translate3d(0, 0, 0)
+      rotate(calc(var(--aurora-amplitude) * 1.5deg)) scale(1);
+  }
+  50% {
+    transform: translate3d(
+        calc(var(--aurora-amplitude) * -4vw),
+        calc(var(--aurora-amplitude) * -4.4vh),
+        0
+      )
+      rotate(calc(var(--aurora-amplitude) * -5deg))
+      scale(calc(1 + var(--aurora-amplitude) * 0.07));
+  }
+  100% {
+    transform: translate3d(
+        calc(var(--aurora-amplitude) * 5.5vw),
+        calc(var(--aurora-amplitude) * -2vh),
+        0
+      )
+      rotate(calc(var(--aurora-amplitude) * 4deg))
+      scale(calc(1 - var(--aurora-amplitude) * 0.05));
+  }
+}
+
+@keyframes aurora-drift-4 {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg)
+      scale(calc(1 + var(--aurora-amplitude) * 0.04));
+  }
+  50% {
+    transform: translate3d(
+        calc(var(--aurora-amplitude) * 6.5vw),
+        calc(var(--aurora-amplitude) * 2.2vh),
+        0
+      )
+      rotate(calc(var(--aurora-amplitude) * 5.5deg))
+      scale(calc(1 - var(--aurora-amplitude) * 0.04));
+  }
+  100% {
+    transform: translate3d(
+        calc(var(--aurora-amplitude) * 2.5vw),
+        calc(var(--aurora-amplitude) * -4.8vh),
+        0
+      )
+      rotate(calc(var(--aurora-amplitude) * -3deg))
+      scale(calc(1 + var(--aurora-amplitude) * 0.1));
+  }
+}
+
+@keyframes aurora-drift-5 {
+  0% {
+    transform: translate3d(0, 0, 0)
+      rotate(calc(var(--aurora-amplitude) * -3deg))
+      scale(calc(1 - var(--aurora-amplitude) * 0.02));
+  }
+  50% {
+    transform: translate3d(
+        calc(var(--aurora-amplitude) * -6vw),
+        calc(var(--aurora-amplitude) * -3vh),
+        0
+      )
+      rotate(calc(var(--aurora-amplitude) * 3deg))
+      scale(calc(1 + var(--aurora-amplitude) * 0.06));
+  }
+  100% {
+    transform: translate3d(
+        calc(var(--aurora-amplitude) * -2vw),
+        calc(var(--aurora-amplitude) * 4.2vh),
+        0
+      )
+      rotate(calc(var(--aurora-amplitude) * 7deg))
+      scale(calc(1 - var(--aurora-amplitude) * 0.08));
+  }
+}
+
+@keyframes aurora-drift-6 {
+  0% {
+    transform: translate3d(0, 0, 0)
+      rotate(calc(var(--aurora-amplitude) * 2deg))
+      scale(calc(1 + var(--aurora-amplitude) * 0.05));
+  }
+  50% {
+    transform: translate3d(
+        calc(var(--aurora-amplitude) * 4vw),
+        calc(var(--aurora-amplitude) * -2.6vh),
+        0
+      )
+      rotate(calc(var(--aurora-amplitude) * -4deg))
+      scale(calc(1 - var(--aurora-amplitude) * 0.07));
+  }
+  100% {
+    transform: translate3d(
+        calc(var(--aurora-amplitude) * -5vw),
+        calc(var(--aurora-amplitude) * -5.4vh),
+        0
+      )
+      rotate(calc(var(--aurora-amplitude) * 6.5deg))
+      scale(calc(1 + var(--aurora-amplitude) * 0.03));
+  }
+}
+
+/* --- Layer C — prism light sweep ------------------------------------ */
+
+@keyframes prism-sweep-a {
+  0% {
+    transform: translate3d(-7%, -1.5%, 0);
+    opacity: calc(var(--prism-opacity-a) * 0.72);
+  }
+  50% {
+    transform: translate3d(2%, 1%, 0);
+    opacity: var(--prism-opacity-a);
+  }
+  100% {
+    transform: translate3d(8%, -0.5%, 0);
+    opacity: calc(var(--prism-opacity-a) * 0.8);
+  }
+}
+
+@keyframes prism-sweep-b {
+  0% {
+    transform: translate3d(6%, 1%, 0);
+    opacity: calc(var(--prism-opacity-b) * 0.85);
+  }
+  50% {
+    transform: translate3d(-1%, -1.5%, 0);
+    opacity: calc(var(--prism-opacity-b) * 0.6);
+  }
+  100% {
+    transform: translate3d(-7%, 0.5%, 0);
+    opacity: var(--prism-opacity-b);
+  }
+}
+
+/* =====================================================================
+   REDUCED MOTION
+   Movement stops. Colour does not. Each field is parked at a composed
+   offset rather than at its raw origin, so the still frame is a
+   deliberate composition instead of an animation caught at 0%.
+   ===================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .aurora__field,
+  .prism__beam {
+    animation: none !important;
+  }
+
+  .aurora__field--1 {
+    transform: translate3d(2.5vw, -1.8vh, 0) rotate(2deg) scale(1.05);
+  }
+  .aurora__field--2 {
+    transform: translate3d(-3vw, 1.9vh, 0) rotate(1.5deg) scale(1.03);
+  }
+  .aurora__field--3 {
+    transform: translate3d(-2.2vw, -2.4vh, 0) rotate(-2.8deg) scale(1.04);
+  }
+  .aurora__field--4 {
+    transform: translate3d(3.5vw, 1.2vh, 0) rotate(3deg) scale(1.02);
+  }
+  .aurora__field--5 {
+    transform: translate3d(-3.2vw, -1.6vh, 0) rotate(1.8deg) scale(1.04);
+  }
+  .aurora__field--6 {
+    transform: translate3d(2.2vw, -1.4vh, 0) rotate(-2.2deg) scale(1.03);
+  }
+
+  .prism__beam--a {
+    transform: translate3d(1%, 0, 0);
+    opacity: var(--prism-opacity-a);
+  }
+  .prism__beam--b {
+    transform: translate3d(-1%, 0, 0);
+    opacity: calc(var(--prism-opacity-b) * 0.8);
+  }
+}

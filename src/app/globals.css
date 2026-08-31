@@ -1,0 +1,153 @@
+/* =====================================================================
+   MILKY INTELLIGENCE — GLOBAL STYLESHEET
+   Composition root only. Tokens, typography, motion, background layers
+   and surfaces each live in their own file; this one wires them together
+   and sets the base document rules.
+   ===================================================================== */
+
+@import "../styles/tokens.css";
+@import "../styles/typography.css";
+@import "../styles/motion.css";
+@import "../styles/layers.css";
+@import "../styles/surfaces.css";
+@import "../styles/navigation.css";
+@import "../styles/hero.css";
+
+/* ---------------------------------------------------------------------
+   RESET
+   --------------------------------------------------------------------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+html {
+  /* A flat foundation colour underneath every layer. Even before a single
+     stylesheet paints, the page is never white. */
+  background-color: var(--background-base);
+  color-scheme: light;
+  /* Anchor links glide for everyone except reduced-motion users. */
+  scroll-behavior: smooth;
+  /* The gutter is reserved permanently so locking body scroll for the
+     compact menu cannot change the layout width, and nothing jumps
+     sideways when the scrollbar goes away. */
+  scrollbar-gutter: stable;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  min-height: 100svh;
+  /* Transparent so the four fixed background layers stay visible. */
+  background: transparent;
+  color: var(--text-primary);
+  /* Resolves to Geist Sans; the stack behind it is failure insurance. */
+  font-family: var(--font-sans);
+  font-size: var(--type-body);
+  font-weight: var(--weight-body);
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
+  /* Smoothing only. text-rendering is left alone deliberately: its
+     browser behaviour is inconsistent and it buys nothing here. */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+/* Form controls inherit the family rather than falling back to the UA
+   font, so Geist holds across the whole interface. */
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+/* ---------------------------------------------------------------------
+   BASE DOCUMENT
+   Heading, paragraph, code and role typography all live in
+   styles/typography.css — this file does not restate them.
+   --------------------------------------------------------------------- */
+
+::selection {
+  background: var(--selection-bg);
+  color: var(--selection-fg);
+}
+
+:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--text-secondary) 55%, transparent);
+  outline-offset: 3px;
+  border-radius: var(--radius-control);
+}
+
+/* ---------------------------------------------------------------------
+   LAYOUT SHELL
+   --------------------------------------------------------------------- */
+
+/* The shell's own top padding is clearance for the fixed navigation.
+   It is a minimum, not hero spacing: pages add their rhythm on top. */
+.site-main {
+  position: relative;
+  width: 100%;
+  padding-top: var(--shell-top-desktop);
+  padding-inline: var(--gutter);
+}
+
+@media (max-width: 899px) {
+  .site-main {
+    padding-top: var(--shell-top-mobile);
+  }
+}
+
+/* Anchor targets clear the floating bar rather than hiding beneath it. */
+:where(section[id]) {
+  scroll-margin-top: var(--nav-scroll-margin);
+}
+
+/* The shell's top padding is a default for ordinary pages. A page that
+   opens with the hero sets its own, larger clearance, so the shell stands
+   down rather than adding a second gap on top of it. */
+.site-main:has(.hero) {
+  padding-top: 0;
+}
+
+.page-shell {
+  position: relative;
+  width: 100%;
+  min-height: 100svh;
+  padding-inline: var(--gutter);
+}
+
+.content-frame {
+  width: 100%;
+  max-width: var(--content-max);
+  margin-inline: auto;
+}
+
+/* ---------------------------------------------------------------------
+   REDUCED MOTION
+   Layer-level behaviour is defined in motion.css. This only covers the
+   document itself.
+   --------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  /* Anchor changes jump instead of gliding. */
+  html {
+    scroll-behavior: auto;
+  }
+}

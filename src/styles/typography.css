@@ -1,0 +1,378 @@
+/* =====================================================================
+   MILKY INTELLIGENCE — TYPOGRAPHY
+   Two families, one narrow weight range, and a scale that carries the
+   hierarchy so weight does not have to.
+
+     Geist Sans   display, headings, body, UI, major metrics
+     Geist Mono   code, identifiers, statuses, technical annotation
+
+   Every size, leading, tracking and measure below resolves to a token in
+   tokens.css. Nothing here hard-codes a value that belongs in the scale.
+   ===================================================================== */
+
+/* ---------------------------------------------------------------------
+   BASE ELEMENTS
+   Semantic tags get the right role by default, so authored markup does
+   not have to reach for a class to look correct.
+   --------------------------------------------------------------------- */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  /* Headings wrap by balancing, never by hand-placed line breaks. */
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: var(--type-h1);
+  font-weight: var(--weight-heading);
+  line-height: var(--leading-h1);
+  letter-spacing: var(--tracking-h1);
+}
+
+h2 {
+  font-size: var(--type-h2);
+  font-weight: var(--weight-heading);
+  line-height: var(--leading-h2);
+  letter-spacing: var(--tracking-h2);
+}
+
+h3 {
+  font-size: var(--type-h3);
+  font-weight: var(--weight-subhead);
+  line-height: var(--leading-h3);
+  letter-spacing: var(--tracking-h3);
+}
+
+h4 {
+  font-size: var(--type-h4);
+  font-weight: var(--weight-subhead);
+  line-height: var(--leading-h4);
+  letter-spacing: var(--tracking-h4);
+}
+
+p {
+  font-size: var(--type-body);
+  font-weight: var(--weight-body);
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
+  text-wrap: pretty;
+}
+
+/* Prose rhythm: successive paragraphs breathe by one line of their own
+   size, so the gap scales with the type rather than being fixed. */
+p + p {
+  margin-top: 1em;
+}
+
+/* Emphasis sits at 620. The system deliberately has no 700+ tier. */
+strong,
+b {
+  font-weight: var(--weight-strong);
+}
+
+/* Italics are available for genuine semantic emphasis, and are never a
+   structural device in this system. */
+em,
+i {
+  font-style: italic;
+}
+
+small {
+  font-size: var(--type-small);
+  line-height: var(--leading-small);
+}
+
+/* ---------------------------------------------------------------------
+   DISPLAY
+   Reserved for a single statement per view. Both display roles carry
+   their own measure, which is what keeps a short line from stretching
+   across a 1920px viewport.
+   --------------------------------------------------------------------- */
+
+.type-display-1 {
+  max-width: var(--measure-display-1);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: var(--type-display-1);
+  font-weight: var(--weight-heading);
+  line-height: var(--leading-display-1);
+  letter-spacing: var(--tracking-display-1);
+  text-wrap: balance;
+}
+
+.type-display-2 {
+  max-width: var(--measure-display-2);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: var(--type-display-2);
+  font-weight: var(--weight-heading);
+  line-height: var(--leading-display-2);
+  letter-spacing: var(--tracking-display-2);
+  text-wrap: balance;
+}
+
+/* ---------------------------------------------------------------------
+   HEADINGS AS ROLES
+   The same treatment as the tags, available where the correct heading
+   level is not the correct visual size.
+   --------------------------------------------------------------------- */
+
+.type-h1 {
+  font-size: var(--type-h1);
+  font-weight: var(--weight-heading);
+  line-height: var(--leading-h1);
+  letter-spacing: var(--tracking-h1);
+  text-wrap: balance;
+}
+
+.type-h2 {
+  font-size: var(--type-h2);
+  font-weight: var(--weight-heading);
+  line-height: var(--leading-h2);
+  letter-spacing: var(--tracking-h2);
+  text-wrap: balance;
+}
+
+.type-h3 {
+  font-size: var(--type-h3);
+  font-weight: var(--weight-subhead);
+  line-height: var(--leading-h3);
+  letter-spacing: var(--tracking-h3);
+  text-wrap: balance;
+}
+
+.type-h4 {
+  font-size: var(--type-h4);
+  font-weight: var(--weight-subhead);
+  line-height: var(--leading-h4);
+  letter-spacing: var(--tracking-h4);
+  text-wrap: balance;
+}
+
+/* ---------------------------------------------------------------------
+   BODY
+   Each body role carries its own measure. Prose is capped by characters,
+   not by pixels, so the line length holds at every viewport.
+   --------------------------------------------------------------------- */
+
+.type-lead {
+  max-width: var(--measure-lead);
+  color: var(--text-secondary);
+  font-size: var(--type-lead);
+  font-weight: var(--weight-lead);
+  line-height: var(--leading-lead);
+  letter-spacing: var(--tracking-lead);
+  text-wrap: pretty;
+}
+
+.type-body-lg {
+  max-width: var(--measure-body-lg);
+  font-size: var(--type-body-lg);
+  font-weight: var(--weight-body);
+  line-height: var(--leading-body-lg);
+  letter-spacing: var(--tracking-body-lg);
+  text-wrap: pretty;
+}
+
+.type-body {
+  max-width: var(--measure-body);
+  font-size: var(--type-body);
+  font-weight: var(--weight-body);
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
+  text-wrap: pretty;
+}
+
+.type-small {
+  font-size: var(--type-small);
+  font-weight: var(--weight-body);
+  line-height: var(--leading-small);
+  letter-spacing: var(--tracking-small);
+}
+
+/* Captions are meaningful text, so they default to the annotation
+   colour rather than to muted. */
+.type-caption {
+  color: var(--text-annotation);
+  font-size: var(--type-caption);
+  font-weight: var(--weight-lead);
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-caption);
+}
+
+/* ---------------------------------------------------------------------
+   TECHNICAL — GEIST MONO
+   Mono is a signal, not a texture. It marks machine-facing text:
+   identifiers, statuses, routes, measurements and code. It is never used
+   for a paragraph.
+   --------------------------------------------------------------------- */
+
+/* Section marker. Short, uppercase, and open enough to read at 12px. */
+.eyebrow {
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: var(--type-eyebrow);
+  font-weight: var(--weight-ui);
+  line-height: var(--leading-technical);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+}
+
+/* Primary technical label — 13px, the floor for meaningful interface text. */
+.type-technical {
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: var(--type-technical);
+  font-weight: var(--weight-ui);
+  line-height: var(--leading-technical);
+  letter-spacing: var(--tracking-technical);
+}
+
+/* Uppercase is for short identifiers only, where the extra tracking of
+   the label role keeps the capitals from tightening up. */
+.type-technical--upper {
+  text-transform: uppercase;
+}
+
+/* Micro label — 12px, non-primary metadata only. Never a control label,
+   never a caption that carries meaning on its own. */
+.type-technical-micro {
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: var(--type-technical-micro);
+  font-weight: var(--weight-ui);
+  line-height: var(--leading-technical);
+  letter-spacing: var(--tracking-technical-micro);
+}
+
+/* ---------------------------------------------------------------------
+   CODE
+   Legibility over decoration: ligatures are off so that ->, =>, != and
+   === read as the characters they actually are.
+   --------------------------------------------------------------------- */
+
+code,
+kbd,
+samp,
+pre,
+.type-code {
+  font-family: var(--font-mono);
+  font-size: var(--type-code);
+  font-weight: var(--weight-body);
+  line-height: var(--leading-code);
+  letter-spacing: var(--tracking-code);
+  font-variant-ligatures: none;
+}
+
+pre {
+  overflow-x: auto;
+  color: var(--text-secondary);
+  /* A code block is preformatted: it must not inherit prose balancing. */
+  text-wrap: nowrap;
+}
+
+pre code {
+  font-size: inherit;
+}
+
+/* ---------------------------------------------------------------------
+   NUMERALS
+   Metrics and engineering measurements align in columns and hold their
+   width as values change. Prose numbers are left alone.
+   --------------------------------------------------------------------- */
+
+.type-numeric {
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: "tnum" 1, "lnum" 1;
+}
+
+/* A headline figure: sans, tabular, and allowed one step of extra weight. */
+.type-metric {
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: var(--type-h2);
+  font-weight: var(--weight-strong);
+  line-height: var(--leading-h2);
+  letter-spacing: var(--tracking-h2);
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: "tnum" 1, "lnum" 1;
+}
+
+/* ---------------------------------------------------------------------
+   COLOUR ROLES
+   Named so components never reach for a raw hex.
+   --------------------------------------------------------------------- */
+
+.text-primary {
+  color: var(--text-primary);
+}
+
+.text-secondary {
+  color: var(--text-secondary);
+}
+
+/* The accessible small-technical role. Use this for captions, technical
+   annotation and metadata that has to stay readable. */
+.text-annotation {
+  color: var(--text-annotation);
+}
+
+/* Decorative only. Never body copy, captions, or control labels — it does
+   not reach AA at meaningful text sizes over this background. */
+.text-muted {
+  color: var(--text-muted);
+}
+
+/* ---------------------------------------------------------------------
+   MEASURE UTILITIES
+   For cases where a role's default measure is not the right one.
+   --------------------------------------------------------------------- */
+
+.measure-prose {
+  max-width: var(--measure-prose);
+}
+
+.measure-lead {
+  max-width: var(--measure-lead);
+}
+
+.measure-none {
+  max-width: none;
+}
+
+/* ---------------------------------------------------------------------
+   RESPONSIVE ADJUSTMENTS
+   The scale is fluid through clamp(), so the only things that change by
+   breakpoint are the two values clamp cannot express: the compact code
+   size, and display measures that would otherwise strand a single word.
+   --------------------------------------------------------------------- */
+
+@media (max-width: 600px) {
+  code,
+  kbd,
+  samp,
+  pre,
+  .type-code {
+    font-size: var(--type-code-compact);
+  }
+
+  /* At 390px the display sizes are already at their clamp floor; letting
+     them use the full column stops a 13ch cap from orphaning a word. */
+  .type-display-1,
+  .type-display-2 {
+    max-width: none;
+  }
+
+  /* A headline figure at h2 scale is enough on a narrow column. */
+  .type-metric {
+    font-size: var(--type-h3);
+    line-height: var(--leading-h3);
+    letter-spacing: var(--tracking-h3);
+  }
+}

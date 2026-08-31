@@ -1,0 +1,161 @@
+/* =====================================================================
+   MILKY INTELLIGENCE — SURFACES
+   Exactly three reusable surface treatments. Everything that sits on the
+   aurora uses one of them; nothing invents its own glass recipe.
+
+     .surface-milk    major content            most of the page
+     .surface-frost   floating UI              navigation, controls
+     .surface-prism   showcase only            used sparingly
+
+   Each exposes --surface-radius so a consumer can pick a radius from the
+   established family without redefining the surface.
+   ===================================================================== */
+
+/* ---------------------------------------------------------------------
+   SURFACE 1 — MILK
+   The workhorse. Reads as poured milk over colour: it lets the aurora
+   through without ever letting text lose contrast.
+   --------------------------------------------------------------------- */
+
+.surface-milk {
+  --surface-radius: var(--radius-card);
+
+  position: relative;
+  border: 1px solid var(--surface-milk-border);
+  border-radius: var(--surface-radius);
+  background: var(--surface-milk-bg);
+  box-shadow: var(--shadow-milk), var(--shadow-inner-light);
+  -webkit-backdrop-filter: blur(var(--surface-milk-blur)) saturate(1.04);
+  backdrop-filter: blur(var(--surface-milk-blur)) saturate(1.04);
+  color: var(--text-secondary);
+}
+
+/* ---------------------------------------------------------------------
+   SURFACE 2 — FROST
+   Thinner and colder than milk, with a heavier backdrop blur so it can
+   float over anything without competing with it.
+   --------------------------------------------------------------------- */
+
+.surface-frost {
+  --surface-radius: var(--radius-card-sm);
+
+  position: relative;
+  border: 1px solid var(--surface-frost-border);
+  border-radius: var(--surface-radius);
+  background: var(--surface-frost-bg);
+  box-shadow: var(--shadow-float), var(--shadow-inner-light);
+  -webkit-backdrop-filter: blur(var(--surface-frost-blur)) saturate(1.08);
+  backdrop-filter: blur(var(--surface-frost-blur)) saturate(1.08);
+  color: var(--text-secondary);
+}
+
+/* ---------------------------------------------------------------------
+   SURFACE 3 — PRISM
+   Reserved for showcase moments. The edge is a refraction, not a rainbow:
+   two pastel hues at opposing corners with plain light in between, drawn
+   as a masked 1px ring so it never thickens into a coloured outline.
+   --------------------------------------------------------------------- */
+
+.surface-prism {
+  --surface-radius: var(--radius-panel);
+
+  position: relative;
+  isolation: isolate;
+  border-radius: var(--surface-radius);
+  background: var(--surface-prism-bg);
+  box-shadow: var(--shadow-card-lg), var(--shadow-inner-light);
+  -webkit-backdrop-filter: blur(var(--surface-prism-blur)) saturate(1.06);
+  backdrop-filter: blur(var(--surface-prism-blur)) saturate(1.06);
+  color: var(--text-secondary);
+}
+
+/* The refracted edge. */
+.surface-prism::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  padding: 1px;
+  border-radius: inherit;
+  background: linear-gradient(
+    138deg,
+    rgba(233, 224, 255, 0.85) 0%,
+    rgba(255, 255, 255, 0.5) 26%,
+    rgba(255, 255, 255, 0.34) 52%,
+    rgba(220, 238, 255, 0.7) 76%,
+    rgba(249, 223, 235, 0.6) 100%
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* A single soft highlight across the upper edge, so the panel catches the
+   prism layer rather than sitting flat on it. */
+.surface-prism::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    152deg,
+    rgba(255, 255, 255, 0.42) 0%,
+    rgba(255, 255, 255, 0.12) 34%,
+    rgba(221, 245, 232, 0.08) 62%,
+    rgba(255, 255, 255, 0) 88%
+  );
+  pointer-events: none;
+}
+
+.surface-prism > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* Engines without mask-composite fall back to a plain bright glass edge
+   rather than a filled pastel rectangle. */
+@supports not (mask-composite: exclude) {
+  .surface-prism::before {
+    background: none;
+    border: var(--border-glass);
+  }
+}
+
+/* ---------------------------------------------------------------------
+   SHARED DETAILS
+   --------------------------------------------------------------------- */
+
+/* A hairline divider that matches the technical line token. */
+.surface-divider {
+  height: 1px;
+  border: 0;
+  margin: 0;
+  background: var(--line-subtle);
+}
+
+/* Backdrop blur is a real cost on low-end mobile GPUs. Below the tablet
+   breakpoint the surfaces trade some blur for opacity, which keeps text
+   contrast identical while dropping the per-frame work. */
+@media (max-width: 600px) {
+  .surface-milk {
+    --surface-milk-blur: 12px;
+    background: rgba(255, 255, 255, 0.74);
+  }
+
+  .surface-frost {
+    --surface-frost-blur: 18px;
+    background: rgba(248, 249, 253, 0.56);
+  }
+
+  .surface-prism {
+    --surface-prism-blur: 14px;
+    background: rgba(255, 255, 255, 0.68);
+  }
+}

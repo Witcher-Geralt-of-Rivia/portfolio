@@ -1,0 +1,126 @@
+
+================ 1920x1080 ================
+  overflow=none (scroll 1920 vs client 1920)  CLS=0
+  widest element: content-frame specimen @ 1200px
+  console errors: none   failed requests: none
+    Display 01        116px / w560 / lh 109.04px / ls -6.38px
+    Display 02        80px / w560 / lh 78.4px / ls -3.6px
+    H1                64px / w560 / lh 65.28px / ls -2.56px
+    H2                48px / w560 / lh 50.88px / ls -1.68px
+    H3                32px / w520 / lh 36.8px / ls -0.8px
+    H4                20px / w520 / lh 26px / ls -0.3px
+    Lead              22px / w450 / lh 34.76px / ls -0.264px
+    Body Large        18px / w400 / lh 29.7px / ls -0.144px
+    Body              17px / w400 / lh 28.56px / ls -0.085px
+    Small             14px / w400 / lh 21.7px / ls normal
+    Caption           13px / w450 / lh 18.85px / ls normal
+    Eyebrow           12px / w500 / lh 16.8px / ls 1.14px
+    Technical label   13px / w500 / lh 18.2px / ls 0.325px
+    Technical micro   12px / w500 / lh 16.8px / ls 0.42px
+    Code              14px / w400 / lh 23.1px / ls normal
+    Metric            48px / w620 / lh 50.88px / ls -1.68px
+
+================ 1440x900 ================
+  overflow=none (scroll 1440 vs client 1440)  CLS=0
+  widest element: content-frame specimen @ 1200px
+  console errors: none   failed requests: none
+    Display 01        93.6px / w560 / lh 87.984px / ls -5.148px
+    Display 02        69.12px / w560 / lh 67.7376px / ls -3.1104px
+    H1                57.6px / w560 / lh 58.752px / ls -2.304px
+    H2                43.2px / w560 / lh 45.792px / ls -1.512px
+    H3                28.8px / w520 / lh 33.12px / ls -0.72px
+    H4                20px / w520 / lh 26px / ls -0.3px
+    Lead              20.16px / w450 / lh 31.8528px / ls -0.24192px
+    Body Large        18px / w400 / lh 29.7px / ls -0.144px
+    Body              17px / w400 / lh 28.56px / ls -0.085px
+    Small             14px / w400 / lh 21.7px / ls normal
+    Caption           13px / w450 / lh 18.85px / ls normal
+    Eyebrow           12px / w500 / lh 16.8px / ls 1.14px
+    Technical label   13px / w500 / lh 18.2px / ls 0.325px
+    Technical micro   12px / w500 / lh 16.8px / ls 0.42px
+    Code              14px / w400 / lh 23.1px / ls normal
+    Metric            43.2px / w620 / lh 45.792px / ls -1.512px
+
+================ 1366x768 ================
+  overflow=none (scroll 1366 vs client 1366)  CLS=0
+  widest element: content-frame specimen @ 1200px
+  console errors: none   failed requests: none
+    Display 01        88.79px / w560 / lh 83.4626px / ls -4.88345px
+    Display 02        65.568px / w560 / lh 64.2566px / ls -2.95056px
+    H1                54.64px / w560 / lh 55.7328px / ls -2.1856px
+    H2                40.98px / w560 / lh 43.4388px / ls -1.4343px
+    H3                27.32px / w520 / lh 31.418px / ls -0.683px
+    H4                20px / w520 / lh 26px / ls -0.3px
+    Lead              19.124px / w450 / lh 30.2159px / ls -0.229488px
+    Body Large        18px / w400 / lh 29.7px / ls -0.144px
+    Body              17px / w400 / lh 28.56px / ls -0.085px
+    Small             14px / w400 / lh 21.7px / ls normal
+    Caption           13px / w450 / lh 18.85px / ls normal
+    Eyebrow           12px / w500 / lh 16.8px / ls 1.14px
+    Technical label   13px / w500 / lh 18.2px / ls 0.325px
+    Technical micro   12px / w500 / lh 16.8px / ls 0.42px
+    Code              14px / w400 / lh 23.1px / ls normal
+    Metric            40.98px / w620 / lh 43.4388px / ls -1.4343px
+
+================ 768x1024 ================
+  overflow=none (scroll 768 vs client 768)  CLS=0
+  widest element: content-frame specimen @ 691px
+  console errors: none   failed requests: none
+    Display 01        60px / w560 / lh 56.4px / ls -3.3px
+    Display 02        46px / w560 / lh 45.08px / ls -2.07px
+    H1                40px / w560 / lh 40.8px / ls -1.6px
+    H2                32px / w560 / lh 33.92px / ls -1.12px
+    H3                24px / w520 / lh 27.6px / ls -0.6px
+    H4                20px / w520 / lh 26px / ls -0.3px
+    Lead              19px / w450 / lh 30.02px / ls -0.228px
+    Body Large        18px / w400 / lh 29.7px / ls -0.144px
+    Body              17px / w400 / lh 28.56px / ls -0.085px
+    Small             14px / w400 / lh 21.7px / ls normal
+    Caption           13px / w450 / lh 18.85px / ls normal
+    Eyebrow           12px / w500 / lh 16.8px / ls 1.14px
+    Technical label   13px / w500 / lh 18.2px / ls 0.325px
+    Technical micro   12px / w500 / lh 16.8px / ls 0.42px
+    Code              14px / w400 / lh 23.1px / ls normal
+    Metric            32px / w620 / lh 33.92px / ls -1.12px
+
+================ 390x844 ================
+  overflow=none (scroll 390 vs client 390)  CLS=0
+  widest element: content-frame specimen @ 350px
+  console errors: none   failed requests: none
+    Display 01        60px / w560 / lh 56.4px / ls -3.3px
+    Display 02        46px / w560 / lh 45.08px / ls -2.07px
+    H1                40px / w560 / lh 40.8px / ls -1.6px
+    H2                32px / w560 / lh 33.92px / ls -1.12px
+    H3                24px / w520 / lh 27.6px / ls -0.6px
+    H4                20px / w520 / lh 26px / ls -0.3px
+    Lead              19px / w450 / lh 30.02px / ls -0.228px
+    Body Large        18px / w400 / lh 29.7px / ls -0.144px
+    Body              17px / w400 / lh 28.56px / ls -0.085px
+    Small             14px / w400 / lh 21.7px / ls normal
+    Caption           13px / w450 / lh 18.85px / ls normal
+    Eyebrow           12px / w500 / lh 16.8px / ls 1.14px
+    Technical label   13px / w500 / lh 18.2px / ls 0.325px
+    Technical micro   12px / w500 / lh 16.8px / ls 0.42px
+    Code              13px / w400 / lh 21.45px / ls normal
+    Metric            24px / w620 / lh 27.6px / ls -0.6px
+
+================ 360x800 ================
+  overflow=none (scroll 360 vs client 360)  CLS=0
+  widest element: content-frame specimen @ 320px
+  console errors: none   failed requests: none
+    Display 01        60px / w560 / lh 56.4px / ls -3.3px
+    Display 02        46px / w560 / lh 45.08px / ls -2.07px
+    H1                40px / w560 / lh 40.8px / ls -1.6px
+    H2                32px / w560 / lh 33.92px / ls -1.12px
+    H3                24px / w520 / lh 27.6px / ls -0.6px
+    H4                20px / w520 / lh 26px / ls -0.3px
+    Lead              19px / w450 / lh 30.02px / ls -0.228px
+    Body Large        18px / w400 / lh 29.7px / ls -0.144px
+    Body              17px / w400 / lh 28.56px / ls -0.085px
+    Small             14px / w400 / lh 21.7px / ls normal
+    Caption           13px / w450 / lh 18.85px / ls normal
+    Eyebrow           12px / w500 / lh 16.8px / ls 1.14px
+    Technical label   13px / w500 / lh 18.2px / ls 0.325px
+    Technical micro   12px / w500 / lh 16.8px / ls 0.42px
+    Code              13px / w400 / lh 21.45px / ls normal
+    Metric            24px / w620 / lh 27.6px / ls -0.6px

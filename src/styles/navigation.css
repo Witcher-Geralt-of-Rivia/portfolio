@@ -1,0 +1,461 @@
+/* =====================================================================
+   MILKY INTELLIGENCE — NAVIGATION
+   A precision instrument floating over the aurora, not a panel sitting
+   on top of it.
+
+   The surface is the Stage 01 Frost recipe — same border, same blur,
+   same floating shadow — carried at a slightly higher alpha so link
+   text stays stable while colour fields drift underneath. No fourth
+   glass system is introduced.
+
+   Desktop (>= 900px) and compact (< 900px) navigations are both
+   rendered and swapped by media query alone, so nothing depends on
+   measuring the viewport in JavaScript.
+   ===================================================================== */
+
+/* ---------------------------------------------------------------------
+   SHARED FROST SURFACE
+   --------------------------------------------------------------------- */
+
+.nav-surface {
+  border: 1px solid var(--surface-frost-border);
+  background: var(--nav-surface-bg);
+  box-shadow: var(--shadow-float), var(--shadow-inner-light);
+  -webkit-backdrop-filter: blur(var(--surface-frost-blur)) saturate(1.08);
+  backdrop-filter: blur(var(--surface-frost-blur)) saturate(1.08);
+}
+
+/* A single focus treatment for every navigation control: a quiet ring
+   plus a barely-there lavender halo. Never the default blue. */
+.site-nav :focus-visible {
+  outline: 2px solid rgba(81, 86, 102, 0.48);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 5px rgba(233, 224, 255, 0.42);
+}
+
+/* ---------------------------------------------------------------------
+   DESKTOP BAR
+   --------------------------------------------------------------------- */
+
+.site-nav__desktop {
+  position: fixed;
+  top: var(--nav-desktop-top);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: var(--nav-z);
+  display: flex;
+  align-items: center;
+  width: min(
+    calc(100vw - (var(--nav-desktop-clearance) * 2)),
+    var(--nav-desktop-max)
+  );
+  height: var(--nav-desktop-height);
+  padding-left: 14px;
+  padding-right: 10px;
+  /* Architectural, not a pill. */
+  border-radius: 20px;
+}
+
+/* Identity cluster: mark plus wordmark, held to a reserved width so the
+   link group lands in the same place regardless of label metrics. */
+.site-nav__identity {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 210px;
+}
+
+/* The identity doubles as the anchor home. It keeps the same metrics as
+   the static cluster; only affordance is added. */
+.site-nav__identity--link {
+  border-radius: var(--radius-control);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.site-nav__mark {
+  display: block;
+  width: 28px;
+  height: 28px;
+  /* Explicit box: the mark is an <img>, and this keeps it from ever
+     contributing layout shift while it decodes. */
+  flex: 0 0 28px;
+}
+
+.site-nav__wordmark {
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.065em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.site-nav__links {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: auto;
+  padding: 0;
+  list-style: none;
+}
+
+.site-nav__link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  padding-inline: 14px;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.006em;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  /* Only compositor-friendly properties. Blur is never animated. */
+  transition:
+    background-color 180ms var(--ease-standard),
+    color 180ms var(--ease-standard),
+    transform 180ms var(--ease-standard);
+}
+
+.site-nav__link:hover {
+  background-color: var(--nav-link-hover-bg);
+  color: var(--text-primary);
+  transform: translateY(-1px);
+}
+
+.site-nav__link[aria-current="location"] {
+  background-color: var(--nav-link-active-bg);
+  color: var(--text-primary);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
+/* The one place the navigation openly quotes the aurora palette. */
+.site-nav__link[aria-current="location"]::after {
+  content: "";
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  width: 20px;
+  height: 1.5px;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: var(--nav-accent);
+  opacity: 0.9;
+}
+
+/* ---------------------------------------------------------------------
+   COMPACT TOP BAR
+   --------------------------------------------------------------------- */
+
+.site-nav__bar {
+  position: fixed;
+  top: var(--nav-mobile-inset);
+  right: var(--nav-mobile-inset);
+  left: var(--nav-mobile-inset);
+  z-index: var(--nav-mobile-z);
+  display: flex;
+  align-items: center;
+  height: var(--nav-mobile-height);
+  padding-inline: 10px;
+  border-radius: 18px;
+}
+
+.site-nav__bar .site-nav__identity {
+  gap: 8px;
+  min-width: 0;
+}
+
+.site-nav__bar .site-nav__wordmark {
+  font-size: 11.5px;
+}
+
+.site-nav__toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin-left: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.34);
+  cursor: pointer;
+  transition: background-color 180ms var(--ease-standard);
+}
+
+/* Only pointers that can actually hover get the hover state, so a tap
+   on a phone does not leave the button stuck lit. */
+@media (hover: hover) {
+  .site-nav__toggle:hover {
+    background: rgba(255, 255, 255, 0.56);
+  }
+}
+
+/* --- Menu icon: two rules that become a clean X. No rotation tricks. -- */
+
+.site-nav__icon {
+  position: relative;
+  display: block;
+  width: 17px;
+  height: 12px;
+}
+
+.site-nav__icon span {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 17px;
+  height: 1.5px;
+  margin-top: -0.75px;
+  border-radius: 999px;
+  background: #191b24;
+  transition:
+    transform 200ms var(--ease-standard),
+    opacity 200ms var(--ease-standard);
+}
+
+/* Gap of 5px between the two rules => centres 3.25px either side. */
+.site-nav__icon span:first-child {
+  transform: translateY(-3.25px);
+}
+
+.site-nav__icon span:last-child {
+  transform: translateY(3.25px);
+}
+
+.site-nav__toggle[aria-expanded="true"] .site-nav__icon span:first-child {
+  transform: translateY(0) rotate(45deg);
+}
+
+.site-nav__toggle[aria-expanded="true"] .site-nav__icon span:last-child {
+  transform: translateY(0) rotate(-45deg);
+}
+
+/* ---------------------------------------------------------------------
+   COMPACT PANEL
+   --------------------------------------------------------------------- */
+
+/* A whisper of milk over the page, never a dark modal scrim. */
+.site-nav__veil {
+  position: fixed;
+  inset: 0;
+  z-index: var(--nav-veil-z);
+  background: var(--nav-veil);
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 240ms var(--ease-nav),
+    visibility 0s linear 240ms;
+}
+
+.site-nav__veil[data-open="true"] {
+  opacity: 1;
+  visibility: visible;
+  transition:
+    opacity 240ms var(--ease-nav),
+    visibility 0s;
+}
+
+.site-nav__panel {
+  position: fixed;
+  top: 78px;
+  right: var(--nav-mobile-inset);
+  bottom: var(--nav-mobile-inset);
+  left: var(--nav-mobile-inset);
+  z-index: var(--nav-panel-z);
+  display: flex;
+  flex-direction: column;
+  /* The panel is full height by design, but five 74px rows leave most of
+     a tablet panel empty. Centring the list makes that space read as
+     deliberate rather than unfinished; auto overflow keeps short
+     landscape viewports from clipping instead of scrolling. */
+  justify-content: center;
+  overflow-y: auto;
+  padding: 26px 24px 22px;
+  border-radius: 28px;
+  background: var(--nav-panel-bg);
+  opacity: 0;
+  transform: translateY(-8px) scale(0.985);
+  visibility: hidden;
+  /* backdrop-filter is declared once and never animated. */
+  transition:
+    opacity 240ms var(--ease-nav),
+    transform 240ms var(--ease-nav),
+    visibility 0s linear 240ms;
+}
+
+.site-nav__panel[data-open="true"] {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  visibility: visible;
+  transition:
+    opacity 240ms var(--ease-nav),
+    transform 240ms var(--ease-nav),
+    visibility 0s;
+}
+
+.site-nav__panel-list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Items are flexible rather than fixed-height blocks: at 360x800 five
+   hardcoded rows would overflow the panel. */
+.site-nav__panel-item {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 74px;
+  max-height: 84px;
+  border-top: 1px solid rgba(74, 80, 104, 0.08);
+}
+
+.site-nav__panel-item:first-child {
+  border-top: 0;
+}
+
+.site-nav__panel-link {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  padding-block: 8px;
+  border-radius: var(--radius-card-sm);
+  text-decoration: none;
+  /* The panel is the surface; items are not cards. */
+  background: transparent;
+}
+
+.site-nav__panel-index {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.05em;
+}
+
+.site-nav__panel-label {
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: clamp(28px, 8vw, 36px);
+  font-weight: 500;
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+
+/* Active is a dash beside the number, never a filled row. */
+.site-nav__panel-dash {
+  width: 18px;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--nav-accent);
+  opacity: 0;
+}
+
+.site-nav__panel-link[aria-current="location"] .site-nav__panel-dash {
+  opacity: 0.9;
+}
+
+/* Entrance stagger, capped at 25ms a step and 100ms overall. */
+.site-nav__panel-item {
+  opacity: 0;
+  transform: translateY(5px);
+  transition:
+    opacity 240ms var(--ease-nav),
+    transform 240ms var(--ease-nav);
+}
+
+.site-nav__panel[data-open="true"] .site-nav__panel-item {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: calc(var(--item-index, 0) * 25ms);
+}
+
+/* While the compact panel is open the page beneath must not scroll.
+   html reserves the scrollbar gutter, so this cannot shift layout. */
+body.nav-locked {
+  overflow: hidden;
+}
+
+/* ---------------------------------------------------------------------
+   BREAKPOINT SWAP
+   Exactly one navigation exists in the accessibility tree at a time:
+   the other is display:none, not merely hidden.
+   --------------------------------------------------------------------- */
+
+@media (max-width: 899px) {
+  .site-nav__desktop {
+    display: none;
+  }
+}
+
+@media (min-width: 900px) {
+  .site-nav__bar,
+  .site-nav__panel,
+  .site-nav__veil {
+    display: none;
+  }
+}
+
+/* ---------------------------------------------------------------------
+   REDUCED MOTION
+   The navigation stays fully usable; it simply stops moving.
+   --------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .site-nav__link {
+    transition: background-color 1ms linear, color 1ms linear;
+  }
+
+  .site-nav__link:hover {
+    transform: none;
+  }
+
+  .site-nav__icon span {
+    transition: none;
+  }
+
+  .site-nav__panel,
+  .site-nav__veil {
+    transition: opacity 1ms linear, visibility 0s;
+  }
+
+  /* No slide, no scale — the panel simply is there. */
+  .site-nav__panel {
+    transform: none;
+  }
+
+  .site-nav__panel[data-open="true"] {
+    transform: none;
+  }
+
+  .site-nav__panel-item {
+    transform: none;
+    transition: opacity 1ms linear;
+  }
+
+  .site-nav__panel[data-open="true"] .site-nav__panel-item {
+    transform: none;
+    /* Stagger is a motion effect: it goes too. */
+    transition-delay: 0ms;
+  }
+}

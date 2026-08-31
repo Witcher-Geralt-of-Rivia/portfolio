@@ -1,0 +1,137 @@
+/* ---------------------------------------------------------------------
+   TYPE SPECIMEN
+   Stage 02 ships a typography system, not a page. This file exists only
+   so every type role can be seen against the live background and on each
+   of the three surfaces, at every breakpoint. Scoped to this route and
+   deletable whole once real content arrives.
+   --------------------------------------------------------------------- */
+
+.specimen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3xl);
+  padding-block: var(--space-3xl) var(--space-4xl);
+}
+
+.specimen__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.specimen__section-head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+}
+
+/* A specimen row: the role name in mono, the sample beneath it. */
+.specimen__row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--line-subtle);
+}
+
+.specimen__row:first-of-type {
+  border-top: 0;
+  padding-top: 0;
+}
+
+/* The role name sits at micro scale: it is metadata about the specimen,
+   never part of the specimen itself. It still carries meaning, so it uses
+   the annotation colour — muted would drop it to ~3.2:1, below AA. */
+.specimen__role {
+  color: var(--text-annotation);
+}
+
+/* ---------------------------------------------------------------------
+   SURFACES
+   --------------------------------------------------------------------- */
+
+.specimen__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-md);
+  align-items: start;
+}
+
+.specimen__panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding: var(--space-lg);
+}
+
+.specimen__panel-divider {
+  height: 1px;
+  border: 0;
+  margin: 0;
+  background: var(--line-subtle);
+}
+
+/* ---------------------------------------------------------------------
+   METRICS
+   --------------------------------------------------------------------- */
+
+.specimen__metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-lg) var(--space-2xl);
+}
+
+.specimen__metric {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3xs);
+}
+
+/* ---------------------------------------------------------------------
+   CODE BLOCK
+   --------------------------------------------------------------------- */
+
+.specimen__code {
+  margin: 0;
+  padding: var(--space-md);
+  border: var(--border-technical);
+  border-radius: var(--radius-card-sm);
+  background: rgba(255, 255, 255, 0.42);
+}
+
+/* Letterform proofing strip — mixed caps, punctuation and numerals. */
+.specimen__letterforms {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2xs) var(--space-sm);
+  max-width: var(--measure-body);
+}
+
+/* ---------------------------------------------------------------------
+   RESPONSIVE
+   --------------------------------------------------------------------- */
+
+@media (max-width: 900px) {
+  .specimen__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .specimen {
+    gap: var(--space-2xl);
+    padding-block: var(--space-2xl) var(--space-3xl);
+  }
+
+  .specimen__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .specimen__panel {
+    padding: var(--space-md);
+  }
+
+  .specimen__metrics {
+    gap: var(--space-md) var(--space-xl);
+  }
+}
