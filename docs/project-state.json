@@ -1,0 +1,94 @@
+{
+  "project": "Milky Intelligence Technical Portfolio",
+  "purpose": "Demonstrate engineering capability to freelance clients. Technical portfolio, not a personal site.",
+  "currentStage": 4,
+  "stage05Started": false,
+  "nextStage": "domain-deployment",
+  "nextStageTitle": "Domain + HTTPS + production deployment",
+  "frozenStages": [1, 2, 3, 4],
+  "stageNames": {
+    "1": "Visual foundation - Milky Intelligence background",
+    "2": "Typography - Geist Sans and Geist Mono",
+    "3": "Navigation and site shell",
+    "4": "Hero and Intelligence Constellation"
+  },
+  "constraints": {
+    "contactInformation": false,
+    "paidAiApis": false,
+    "backendRequiredForAiDemos": false,
+    "backend": false,
+    "externalFontRequests": false,
+    "externalImageAssets": false,
+    "animationLibrary": false,
+    "webgl": false
+  },
+  "design": {
+    "identity": "Milky Intelligence",
+    "primaryFont": "Geist Sans",
+    "technicalFont": "Geist Mono",
+    "fontPackage": "geist",
+    "fontDelivery": "self-hosted variable WOFF2 via next/font/local",
+    "surfaces": ["Milk", "Frost", "Prism"],
+    "auroraFields": 6,
+    "prismBeams": 2
+  },
+  "technology": {
+    "framework": "Next.js",
+    "frameworkVersion": "16.3.3",
+    "router": "app",
+    "react": "19.2.8",
+    "node": "v24.19.0",
+    "npm": "11.17.0",
+    "language": "TypeScript",
+    "cssApproach": "plain CSS with design tokens",
+    "clientComponents": ["src/components/navigation/SiteNavigation.tsx"]
+  },
+  "routes": ["/", "/specimen"],
+  "navigationDestinations": ["Systems", "Products", "AI Learning", "Lab", "Work"],
+  "runtime": {
+    "previewCommand": "npm run dev:remote",
+    "bindAddress": "0.0.0.0",
+    "port": 3000,
+    "publicPreviewUrl": "http://108.186.112.75:3000",
+    "domainConfigured": false,
+    "httpsConfigured": false,
+    "reverseProxyConfigured": false,
+    "productionDeployed": false,
+    "providerFirewall": "UNVERIFIED"
+  },
+  "qa": {
+    "stagesPassing": [1, 2, 3, 4],
+    "cls": 0,
+    "thirdPartyRequests": 0,
+    "horizontalOverflow": 0,
+    "consoleErrors": 0,
+    "validatedViewports": [
+      "1920x1080",
+      "1440x900",
+      "1366x768",
+      "1024x768",
+      "768x1024",
+      "430x932",
+      "390x844",
+      "360x800"
+    ],
+    "lcpTiming": "UNVERIFIED"
+  },
+  "canonicalDocs": [
+    "docs/CLAUDE_HANDOFF.md",
+    "docs/PROJECT_STATE.md",
+    "docs/DESIGN_SYSTEM.md",
+    "docs/ARCHITECTURE.md",
+    "docs/DECISIONS.md",
+    "docs/QA_BASELINE.md",
+    "docs/PRIVACY_AND_SECURITY.md",
+    "docs/DEPLOYMENT.md",
+    "docs/CHANGELOG.md",
+    "docs/NEXT_STAGE.md"
+  ],
+  "git": {
+    "underVersionControl": true,
+    "branch": "main",
+    "stage04Tag": "portfolio-stage-04-verified"
+  }
+}

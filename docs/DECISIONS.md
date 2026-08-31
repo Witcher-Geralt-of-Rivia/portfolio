@@ -1,0 +1,531 @@
+<!-- PROJECT_STAGE: 4 -->
+<!-- DOCUMENT_STATUS: CURRENT -->
+
+# Decisions
+
+An ADR-lite log. Each entry records what was decided and, more importantly, the
+evidence behind it — so a later session does not "fix" something that was
+deliberate.
+
+Status values: `Accepted`, `Superseded`, `Reversed`.
+
+---
+
+## D-001 — Milky Intelligence visual identity
+
+Status: Accepted
+Stage: 01
+
+### Decision
+The site uses a bright, soft, multi-hue "milky" atmosphere generated entirely in
+CSS and SVG: a stationary base gradient, six drifting aurora fields, two prism
+sweeps and a micro-grain dither.
+
+### Reason
+The portfolio must read as premium engineering rather than as a template. A
+continuously transitioning pastel atmosphere is distinctive, cheap to render and
+impossible to mistake for a stock theme.
+
+### Alternatives rejected
+Dark developer theme, plain white with accent gradients, generic glassmorphism,
+photographic or stock backgrounds.
+
+### Future modification condition
+Only on explicit user instruction. The anti-pattern list in
+`docs/DESIGN_SYSTEM.md` exists to prevent gradual drift.
+
+---
+
+## D-002 — Persistent aurora rather than a static background
+
+Status: Accepted
+Stage: 01
+
+### Decision
+The background is never still. Six fields drift on cycles of 31/37/43/35/47/41s
+with negative delays, `ease-in-out`, `alternate`, `infinite`.
+
+### Reason
+Cycle lengths share no common factor, so the composition never visibly repeats or
+resets. Movement is slow enough to be felt rather than watched.
+
+### Alternatives rejected
+A static gradient (reads as a template); a single animated blob (reads as a
+generic SaaS orb).
+
+### Future modification condition
+Movement may be reduced for measured performance reasons, but the page must never
+become a static white surface.
+
+---
+
+## D-003 — Grain opacity is 0.024, not the lower figure first sketched
+
+Status: Accepted
+Stage: 01
+
+### Decision
+`--grain-opacity: 0.024` with `mix-blend-mode: multiply`.
+
+### Reason
+Measured. Below roughly 0.021 the dither rounds away entirely at 8-bit precision:
+the longest flat run on a scanline stayed at 61px. At 0.021+ it collapses to
+about 9px, which is what removes gradient banding. `soft-light` barely registers
+on a near-white ground; `multiply` cut the flat run from 61px to 9px.
+
+### Alternatives rejected
+0.018 (ineffective), `soft-light` (ineffective at this lightness), `overlay`.
+
+### Future modification condition
+Only if measured banding behaviour changes. Re-run `qa/texture.mjs`.
+
+---
+
+## D-004 — Three surfaces only: Milk, Frost, Prism
+
+Status: Accepted
+Stage: 01
+
+### Decision
+Exactly three reusable surface treatments. Navigation reuses Frost at a slightly
+higher alpha rather than defining its own material.
+
+### Reason
+A fourth glass system is how a design language becomes incoherent. Constraining
+to three keeps every panel recognisably part of the same set.
+
+### Future modification condition
+Adding a surface requires an explicit user instruction and an update here.
+
+---
+
+## D-005 — Geist Sans + Geist Mono, self-hosted
+
+Status: Accepted
+Stage: 02
+
+### Decision
+`geist` npm package, both variable WOFF2 files served from the app via
+`next/font/local`. Mono is reserved for machine-facing text.
+
+### Reason
+Self-hosting guarantees zero third-party font requests, which is both a privacy
+property and a performance one. Verified: the only font resources are
+`/_next/static/media/Geist_Variable-*.woff2` (69,652 B) and
+`GeistMono_Variable-*.woff2` (71,368 B), with no request to Google Fonts, Adobe
+or any CDN.
+
+### Alternatives rejected
+Google Fonts CDN, Fontshare, self-converted static weights.
+
+### Future modification condition
+Never load a font from a third-party origin.
+
+---
+
+## D-006 — Display measures in calibrated `em`, not `ch`
+
+Status: Accepted
+Stage: 02
+
+### Decision
+`--measure-display-1: 8.62em` and `--measure-display-2: 10.6em`. Prose measures
+stay in `ch`.
+
+### Reason
+This is the single most counter-intuitive decision in the project. `ch` resolves
+against the *currently rendered* font's "0" advance. Measured: Geist Sans "0" is
+0.662em, the next/font metric-adjusted fallback is 0.555em — a 19% gap. So `13ch`
+meant 723px before the font arrived and 862px after, which changed the display
+heading's line count and cost 0.016–0.021 CLS. Preload and `font-display` tuning
+cannot fix it, because it is a unit-resolution problem, not a timing one. The em
+values were measured to reproduce exactly 13 and 16 characters per line in Geist;
+CLS went to 0.0000 at all six viewports.
+
+### Alternatives rejected
+Keeping `ch` (measurable CLS); `font-display: block` (hides text, and the spec
+forbids hiding the page while fonts load).
+
+### Future modification condition
+Do not revert to `ch` on large type. If node sizes change, re-derive the em value
+with `qa/ch-measure.mjs`.
+
+---
+
+## D-007 — `--text-annotation` added; `--text-muted` restricted
+
+Status: Accepted
+Stage: 02
+
+### Decision
+`--text-annotation: #595e6c` is the accessible small-technical role.
+`--text-muted: #7c8190` is decorative only.
+
+### Reason
+Measured against the live moving background, muted lands near 3.2:1 — below AA
+for any meaningful text. Annotation measures 5.2–6.4:1 everywhere it is used.
+The Stage 01 muted token was left unchanged rather than altered, so the original
+palette is intact and the accessible role is additive.
+
+### Future modification condition
+Never use muted for body copy, captions, control labels or technical labels.
+
+---
+
+## D-008 — Five navigation destinations, nothing else
+
+Status: Accepted
+Stage: 03
+
+### Decision
+Systems, Products, AI Learning, Lab, Work. Defined once in
+`src/components/navigation/nav-items.ts`.
+
+### Reason
+The portfolio sells capability families, not a personal story. Contact, Hire Me,
+About, Blog, Resume, Testimonials and Services are all deliberately absent.
+
+### Future modification condition
+Adding a destination requires an explicit user instruction. Adding any contact
+destination is forbidden outright — see `docs/PRIVACY_AND_SECURITY.md`.
+
+---
+
+## D-009 — Compact navigation below 900px
+
+Status: Accepted
+Stage: 03
+
+### Decision
+A 56px top bar plus a floating Frost panel replaces the desktop bar under 900px.
+Both presentations are rendered; CSS media queries swap them, so exactly one is
+in the accessibility tree.
+
+### Reason
+Squeezing five links into a phone-width bar produces unreadable targets. Swapping
+by media query rather than JavaScript avoids measuring the viewport in React and
+keeps both presentations server-rendered.
+
+### Future modification condition
+Keep the accessibility-tree guarantee: the hidden presentation must be
+`display: none`, not merely visually hidden.
+
+---
+
+## D-010 — Custom SVG system mark, one canonical source
+
+Status: Accepted
+Stage: 03
+
+### Decision
+`public/marks/system-mark.svg` — 890 bytes, viewBox `0 0 28 28`, four connected
+nodes plus a central hub. Referenced through a thin `SystemMarkImage` component
+using a plain `<img>`.
+
+### Reason
+No logo may be downloaded, and no third-party company mark may appear. Keeping
+the SVG in one file rather than duplicating it into JSX avoids two sources of
+truth. `next/image` would add a wrapper and a loader path for an 890-byte vector
+without shrinking anything, so a plain `<img>` with explicit width and height is
+correct here — and it keeps the mark shift-free.
+
+### Future modification condition
+If the mark becomes interactive or needs per-instance theming, inlining it may be
+reconsidered — but then the public file should be removed, not kept alongside.
+
+---
+
+## D-011 — Intelligence Constellation in CSS and SVG, not WebGL
+
+Status: Accepted
+Stage: 04
+
+### Decision
+The hero artwork is an SVG connection layer plus HTML chips, animated with CSS.
+No Canvas, no WebGL, no Three.js.
+
+### Reason
+The composition needs about 38 SVG shapes and eight labels. WebGL would add a
+large dependency, a canvas that cannot be styled by the design system, text that
+does not inherit the font stack, and no accessibility story — to draw something
+CSS renders on the compositor for free.
+
+### Alternatives rejected
+Three.js / React Three Fiber, Canvas 2D, an animated raster or video.
+
+### Future modification condition
+Only if a future stage genuinely needs real-time 3D, and then only for that
+component.
+
+---
+
+## D-012 — Constellation node chips are HTML over SVG, not SVG text
+
+Status: Accepted
+Stage: 04
+
+### Decision
+The eight capability chips and the orchestrator core are HTML positioned in
+percentages over the SVG. Only connections, backplate, grid, relays and signals
+are SVG.
+
+### Reason
+SVG `<text>` scales with the artboard. At the mobile artboard width (335px) a
+13px label would render near 7px — unreadable. As HTML the labels stay at real
+CSS pixels and can be tuned per breakpoint, which is what the responsive
+requirements demand. Consequence: the core uses a CSS radial-gradient rather than
+an SVG one, which is the only way to satisfy both the 112px desktop size and the
+78–88px mobile size.
+
+### Alternatives rejected
+All-SVG (unreadable mobile labels); per-breakpoint SVG font-size hacks (fragile).
+
+### Future modification condition
+If node positions or chip sizes change, re-run `qa/stage04-geometry.mjs` and
+`qa/stage04-occlusion.mjs`.
+
+---
+
+## D-013 — No `backdrop-filter` on the drifting chips
+
+Status: Accepted
+Stage: 04
+
+### Decision
+Constellation chips use a translucent fill, border and shadow — the Frost
+language minus the blur.
+
+### Reason
+Eight chips drift continuously. A live backdrop filter would be re-computed every
+frame for each of them. Over the smooth Stage 01 gradient the visual difference
+is not perceptible, so the cost buys nothing.
+
+### Future modification condition
+Only if the chips stop moving.
+
+---
+
+## D-014 — Cross-link routing bows asymmetrically
+
+Status: Accepted
+Stage: 04
+
+### Decision
+`crossCurve()` picks whichever side keeps each arc inside the composition while
+still clearing the orchestrator by 82 units, with per-link bend values so no two
+arcs run parallel. Ring links use flat alternating chords.
+
+### Reason
+The first implementation bowed every ring and cross link outward with a uniform
+curvature. Visual inspection showed the result read as a wireframe **sphere** —
+meridian lines around an orb, which is an explicit design failure condition.
+Asymmetric interior routing restores the network reading.
+
+### Alternatives rejected
+Uniform outward bows (the orb); straight chords (cut through the core).
+
+### Future modification condition
+After any routing change, inspect a zoomed capture of the constellation for the
+orb failure mode. Numbers alone will not catch it.
+
+---
+
+## D-015 — Connections terminate at node edges, never centres
+
+Status: Accepted
+Stage: 04
+
+### Decision
+Every connection endpoint is computed on the chip's edge (plus a small gap) or
+the orchestrator's rim.
+
+### Reason
+A line drawn to a node centre passes under its label. Terminating at edges means
+a line is always either outside a chip or hidden behind it. Verified: maximum
+pixel bleed over label text is 1/255 at 390px and 360px — below the grain
+dither's own amplitude. Mobile chip fill is 0.82 alpha rather than 0.72
+specifically to keep it there.
+
+### Future modification condition
+Re-verify with `qa/stage04-occlusion.mjs` after any geometry change.
+
+---
+
+## D-016 — Mobile capability rail drops its vertical dividers
+
+Status: Accepted
+Stage: 04
+
+### Decision
+Below 700px the hero capability rail becomes a grid (two-up, then one column
+below 380px) with no left borders.
+
+### Reason
+Once items wrap, a left border lands at the *start* of a row, where it reads as a
+stray mark rather than a separator. It also left the first item un-indented while
+the rest were indented — visible as a bug in the first 360px capture. Spacing
+carries the separation instead.
+
+### Future modification condition
+If the rail returns to a single row on small screens, the dividers can return
+with it.
+
+---
+
+## D-017 — `.site-main:has(.hero)` zeroes the shell's top padding
+
+Status: Accepted
+Stage: 04
+
+### Decision
+The shell provides default top clearance for the fixed navigation; a page that
+opens with the hero sets its own larger clearance and the shell stands down.
+
+### Reason
+Without it the hero's `clamp(124px, 14vh, 172px)` stacks on top of the shell's
+118px, producing roughly 242px of dead space. `:has()` expresses the rule
+declaratively where it belongs, rather than pushing page knowledge into
+`SiteShell`.
+
+### Future modification condition
+If a second hero-like page type appears, generalise the selector rather than
+duplicating the padding logic.
+
+---
+
+## D-018 — No scroll cue, and no forced line break in the hero heading
+
+Status: Accepted
+Stage: 04
+
+### Decision
+No "SCROLL" indicator. The heading uses `text-wrap: balance` with no `<br>`.
+
+### Reason
+Both were evaluated visually. The lower band already carries the capability rail
+and the constellation's annotations; a scroll marker added clutter without
+improving the composition. Balanced wrapping produces "Engineering / intelligent
+systems." on desktop and the intended three lines on mobile without help.
+
+### Future modification condition
+Only if a tested width produces genuinely inferior wrapping — and then record the
+width here.
+
+---
+
+## D-019 — No navigation item is active while the hero owns the viewport
+
+Status: Accepted
+Stage: 04
+
+### Decision
+`activeId` starts empty and clears whenever no section intersects the detection
+band. Systems becomes current only on entering `#systems`.
+
+### Reason
+Highlighting Systems while the visitor is still reading the hero misrepresents
+where they are. Sections are contiguous, so "nothing intersecting" can only
+happen above the first one. Verified: no active item at y=0 and y=400, Systems
+active on entry, no flicker at boundaries.
+
+### Note
+This intentionally differs from Stage 03's original behaviour. The Stage 03 QA
+assertion was updated to match.
+
+---
+
+## D-020 — `allowedDevOrigins` must list the VPS IP, localhost and 127.0.0.1
+
+Status: Accepted
+Stage: remote preview
+
+### Decision
+`next.config.ts` sets
+`allowedDevOrigins: ["108.186.112.75", "localhost", "127.0.0.1"]`.
+
+### Reason
+Next 16 blocks `/_next/*` dev resources from origins it does not recognise. A
+real browser on the public IP got a 403 on a chunk and a dead HMR socket while
+`curl` still returned 200 — so a naive smoke test passes while the preview is
+broken. `127.0.0.1` is listed explicitly because Next's default allowance covers
+the hostname `localhost` but not the literal loopback address, which the QA
+harness uses.
+
+### Note
+Dev-only. It has no effect on `next build` or `next start`.
+
+---
+
+## D-021 — `scrollbar-gutter: stable` on `html`
+
+Status: Accepted
+Stage: 03
+
+### Decision
+The scrollbar gutter is reserved permanently.
+
+### Reason
+The compact menu locks body scroll. Without a reserved gutter, removing the
+scrollbar widens the layout and everything jumps sideways. Verified: layout width
+unchanged at 768, 390 and 360 when the panel opens.
+
+### Note
+It costs 15px of layout width in desktop-style browsers, which is why the
+constellation measures 335px at a 390px viewport rather than 350px. Real touch
+devices use overlay scrollbars and are unaffected.
+
+---
+
+## D-022 — QA tooling is retained in the repository
+
+Status: Accepted
+Stage: 01 onward
+
+### Decision
+`playwright` and `pngjs` stay as devDependencies, and `qa/` keeps its scripts and
+screenshot baselines.
+
+### Reason
+Every visual claim in this project is measured rather than asserted. The harness
+is how a future session verifies that a frozen stage has not regressed, without
+rebuilding the measurement apparatus from scratch.
+
+### Future modification condition
+Do not remove. Screenshot baselines may be regenerated, but keep the scripts.
+
+---
+
+## D-023 — Typography specimen moved to `/specimen`
+
+Status: Accepted
+Stage: 03
+
+### Decision
+The Stage 02 specimen lives at `/specimen`; `/` became the navigation and hero
+page.
+
+### Reason
+Deleting the specimen would have removed the only place the full type scale is
+rendered, breaking the Stage 02 regression tests. Moving it keeps the scale
+verifiable. It is not linked from the site.
+
+---
+
+## D-024 — No paid AI runtime, no backend, no contact information
+
+Status: Accepted
+Stage: project-wide
+
+### Decision
+The portfolio ships with no AI provider, no API key, no backend, no database and
+no contact route of any kind.
+
+### Reason
+Standing product constraints set by the user. AI demonstrations must be
+deterministic local simulations, static JSON, scripted sequences or client-side
+interaction. The site must function fully with no AI account.
+
+### Future modification condition
+Only an explicit user instruction can change these. Until then, treat any request
+that implies them as a conflict and report it. See
+`docs/PRIVACY_AND_SECURITY.md`.
