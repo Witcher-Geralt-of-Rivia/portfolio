@@ -355,6 +355,14 @@ headless behaviour already recorded in `QA_BASELINE.md`:
   `currentTime: 0` as "animating at rest". Only infinite keyframe animations
   scoped to `#products` are counted now.
 
+### Also in this stage
+Every `qa/` script now honours `QA_BASE`, so the whole suite can run against the
+production build rather than only `next dev`. Stage 06 and the Stages 01-05
+regression were both measured that way. Correcting `stage03-desktop.mjs` to
+measure the desktop bar against the content frame - the criterion already
+recorded in `QA_BASELINE.md` - cleared a false `centred=FAIL` caused by overlay
+scrollbars. The navigation itself was not changed.
+
 ### QA
 50 text roles measured for contrast across all three scenarios with the flow
 complete: all pass, worst case 5.01:1. CLS 0.00000 at load and after three

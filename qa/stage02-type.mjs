@@ -1,7 +1,8 @@
 import { chromium } from "playwright";
+const BASE = process.env.QA_BASE || "http://127.0.0.1:3000";
 import { PNG } from "pngjs";
 
-const URL = "http://127.0.0.1:3000/specimen";
+const URL = BASE + "/specimen";
 const lum = ([r, g, b]) => { const f = v => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }; return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b); };
 const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
 

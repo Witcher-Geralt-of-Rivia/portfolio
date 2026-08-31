@@ -171,6 +171,26 @@ Stage 06 added four more, all harness faults rather than application faults:
   `currentTime: 0`. To ask "does this section animate at rest", filter to
   `animationName` set, `iterations === Infinity`, and target within the
   section.
+- **`elementHandle.screenshot()` waits for the element to be stable.** On a
+  section that animates it can time out outright, and it can never capture a
+  transient state: the wait guarantees the state is gone. Use
+  `page.screenshot({ clip })` with the clip resolved from
+  `getBoundingClientRect()` plus scroll offsets.
+- **Overlay scrollbars defeat the usual scrollbar correction.** Headless
+  Chromium reports `documentElement.clientWidth === window.innerWidth` while
+  `scrollbar-gutter: stable` still reserves 15px, so anything centred on the
+  content frame measures 7.5px off against either width. Measure against the
+  content frame itself. This produced a false `centred=FAIL` in
+  `stage03-desktop.mjs` for a bar that is centred to 0.00px, exactly as this
+  document already recorded.
+
+**No mid-flow screenshot exists for Stage 06, deliberately.** A clip large
+enough to show the event rail composites slowly enough that the 2.2s flow
+settles during the capture, yielding a frame with a lit stage beside a
+"Run again" button - a state the application never renders. Publishing that
+would misrepresent the product. The running state is verified by assertion in
+`stage06-interaction.mjs` instead: label `Running...`, button disabled, exactly
+one rail node lit, on 15 of 15 runs.
 
 ## Stage 05 - Intelligent Systems
 
@@ -398,7 +418,7 @@ qa/shots/               Stage 01 baselines (10 PNG)
 qa/shots/stage02/       Stage 02 baselines (12 PNG)
 qa/shots/stage03/       Stage 03 baselines (15 PNG)
 qa/shots/stage04/       Stage 04 baselines (14 PNG)
-qa/shots/stage06/       Stage 06 baselines (6 PNG)
+qa/shots/stage06/       Stage 06 baselines (6 PNG, captured from production)
 qa/report.json          Stage 01 machine-readable results
 qa/stage02-report.json  Stage 02 machine-readable results
 qa/stage02-measurements.txt
@@ -432,8 +452,11 @@ qa/stage06-shots.mjs        Stage 06 screenshot set
 qa/project-memory-check.mjs canonical documentation consistency
 ```
 
-Most scripts target `http://127.0.0.1:3000`. Stage 01 and Stage 02 scripts
-target `/specimen`, where the surfaces and type roles live.
+Every script now honours `QA_BASE`, defaulting to `http://127.0.0.1:3000`. Set
+`QA_BASE=http://127.0.0.1:3100` to run the same checks against the running
+production build - which is how the Stage 06 results above and the Stage 01-05
+regression were measured. Stage 01 and Stage 02 scripts target `/specimen`,
+where the surfaces and type roles live.
 
 ## Regression Rule
 

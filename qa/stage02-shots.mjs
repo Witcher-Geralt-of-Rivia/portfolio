@@ -1,7 +1,8 @@
 import { chromium } from "playwright";
+const BASE = process.env.QA_BASE || "http://127.0.0.1:3000";
 import fs from "node:fs";
 
-const URL = "http://127.0.0.1:3000/";
+const URL = BASE + "/";
 const VIEWPORTS = [
   [1920, 1080], [1440, 900], [1366, 768], [768, 1024], [390, 844], [360, 800],
 ];

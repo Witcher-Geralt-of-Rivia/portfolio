@@ -1,4 +1,5 @@
 import { chromium } from "playwright";
+const BASE = process.env.QA_BASE || "http://127.0.0.1:3000";
 const pass = (b) => (b ? "PASS" : "FAIL");
 const browser = await chromium.launch({ args: [
   "--disable-backgrounding-occluded-windows",
@@ -13,7 +14,7 @@ for (const [w, h] of [[768, 1024], [390, 844], [360, 800]]) {
   const errors = [], failed = [];
   page.on("console", m => { if (m.type() === "error") errors.push(m.text().slice(0, 140)); });
   page.on("requestfailed", r => failed.push(r.url().split("/").pop()));
-  await page.goto("http://127.0.0.1:3000/", { waitUntil: "networkidle" });
+  await page.goto(BASE + "/", { waitUntil: "networkidle" });
   await page.evaluate(() => document.fonts.ready);
   await page.waitForTimeout(500);
 

@@ -1,5 +1,6 @@
 import { chromium } from "playwright";
-const origins = ["http://127.0.0.1:3000/", "http://localhost:3000/", "http://108.186.112.75:3000/"];
+const BASE = process.env.QA_BASE || "http://127.0.0.1:3000";
+const origins = [BASE + "/", "http://localhost:3000/", "http://108.186.112.75:3000/"];
 const browser = await chromium.launch();
 for (const o of origins) {
   const ctx = await browser.newContext({ viewport: { width: 1200, height: 800 } });

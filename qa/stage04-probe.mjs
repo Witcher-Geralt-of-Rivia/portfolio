@@ -1,4 +1,5 @@
 import { chromium } from "playwright";
+const BASE = process.env.QA_BASE || "http://127.0.0.1:3000";
 const frame = async (p) => { await p.screenshot({ type: "jpeg", quality: 20 }); };
 const browser = await chromium.launch({ args: ["--disable-renderer-backgrounding","--disable-backgrounding-occluded-windows","--disable-background-timer-throttling"] });
 const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
@@ -6,7 +7,7 @@ const p = await ctx.newPage();
 const errs = [];
 p.on("console", m => { if (m.type() === "error") errs.push(m.text().slice(0,140)); });
 p.on("pageerror", e => errs.push("pageerror: " + e.message.slice(0,140)));
-await p.goto("http://127.0.0.1:3000/", { waitUntil: "networkidle" });
+await p.goto(BASE + "/", { waitUntil: "networkidle" });
 await p.evaluate(() => document.fonts.ready);
 await frame(p); await p.waitForTimeout(1500); await frame(p);
 

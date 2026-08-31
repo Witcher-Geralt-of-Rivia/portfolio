@@ -1,6 +1,7 @@
 import { chromium } from "playwright";
+const BASE = process.env.QA_BASE || "http://127.0.0.1:3000";
 
-const URL = process.argv[2] || "http://127.0.0.1:3000/specimen";
+const URL = process.argv[2] || BASE + "/specimen";
 const browser = await chromium.launch();
 const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
 const page = await ctx.newPage();

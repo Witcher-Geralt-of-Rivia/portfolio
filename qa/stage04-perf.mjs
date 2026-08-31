@@ -1,4 +1,5 @@
 import { chromium } from "playwright";
+const BASE = process.env.QA_BASE || "http://127.0.0.1:3000";
 import { PNG } from "pngjs";
 const pass = (b) => (b ? "PASS" : "FAIL");
 const frame = async (p) => { await p.screenshot({ type: "jpeg", quality: 20 }); };
@@ -21,12 +22,12 @@ for (const [w, h] of [[1920,1080],[1440,900],[1366,768],[1024,768],[768,1024],[4
   p.on("pageerror", e => errs.push("pageerror: " + e.message.slice(0,110)));
   p.on("requestfailed", r => failed.push(r.url().split("/").pop()));
   p.on("request", r => reqs.push(r.url()));
-  await p.goto("http://127.0.0.1:3000/", { waitUntil: "networkidle" });
+  await p.goto(BASE + "/", { waitUntil: "networkidle" });
   await p.evaluate(() => document.fonts.ready);
   await frame(p); await p.waitForTimeout(3000); await frame(p);
   const cls = await p.evaluate(() => +window.__cls.toFixed(4));
   const overflow = await p.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1);
-  const external = reqs.filter(u => !u.startsWith("http://127.0.0.1:3000"));
+  const external = reqs.filter(u => !u.startsWith(BASE));
   console.log(`  ${String(w+"x"+h).padEnd(10)} CLS=${cls}  overflow=${pass(!overflow)}  external=${external.length ? external.join(",") : "0"}  failed=${failed.length ? failed.join(",") : "none"}  console=${errs.length ? errs.join("|") : "clean"}`);
   await ctx.close();
 }
@@ -36,7 +37,7 @@ console.log("\n=== IDLE COST (1440x900, 6s after entrance) ===");
 {
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
   const p = await ctx.newPage();
-  await p.goto("http://127.0.0.1:3000/", { waitUntil: "networkidle" });
+  await p.goto(BASE + "/", { waitUntil: "networkidle" });
   await p.waitForTimeout(2000);
   const client = await p.context().newCDPSession(p);
   await client.send("Performance.enable");
@@ -55,7 +56,7 @@ console.log("\n=== MOTION OVER 30s (1440x900) ===");
 {
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
   const p = await ctx.newPage();
-  await p.goto("http://127.0.0.1:3000/", { waitUntil: "networkidle" });
+  await p.goto(BASE + "/", { waitUntil: "networkidle" });
   await frame(p); await p.waitForTimeout(1500);
   const samples = [], shots = [];
   for (let i = 0; i < 11; i++) {

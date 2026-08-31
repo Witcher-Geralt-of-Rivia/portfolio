@@ -1,5 +1,7 @@
 import { chromium } from "playwright";
 
+const BASE = process.env.QA_BASE || "http://127.0.0.1:3000";
+
 /* Stage 06 behaviour audit: scenario switching, the flow state machine, timer
    cleanup, keyboard semantics, and the hard requirement that running the flow
    makes no network request of any kind.
@@ -26,7 +28,7 @@ p.on("pageerror", (e) => consoleErrors.push(`pageerror: ${e.message}`));
 const requests = [];
 p.on("request", (r) => requests.push(r.url()));
 
-await p.goto("http://127.0.0.1:3000/#products", { waitUntil: "networkidle" });
+await p.goto(BASE + "/#products", { waitUntil: "networkidle" });
 await p.evaluate(() => document.fonts.ready);
 await frame(p); await p.waitForTimeout(800); await frame(p);
 

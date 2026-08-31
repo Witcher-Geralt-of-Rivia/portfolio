@@ -1,4 +1,5 @@
 import { chromium } from "playwright";
+const BASE = process.env.QA_BASE || "http://127.0.0.1:3000";
 import { PNG } from "pngjs";
 const lum = ([r,g,b]) => { const f=v=>{v/=255;return v<=0.03928?v/12.92:((v+0.055)/1.055)**2.4;}; return 0.2126*f(r)+0.7152*f(g)+0.0722*f(b); };
 const ratio = (a,b) => { const [x,y]=[lum(a),lum(b)].sort((p,q)=>q-p); return (x+0.05)/(y+0.05); };
@@ -9,7 +10,7 @@ const browser = await chromium.launch({ args: ["--disable-renderer-backgrounding
 async function audit(w, h, openMenu, targets) {
   const ctx = await browser.newContext({ viewport: { width: w, height: h }, deviceScaleFactor: 1 });
   const p = await ctx.newPage();
-  await p.goto("http://127.0.0.1:3000/", { waitUntil: "networkidle" });
+  await p.goto(BASE + "/", { waitUntil: "networkidle" });
   await p.evaluate(() => document.fonts.ready);
   await p.waitForTimeout(800);
   if (openMenu) { await p.click(".site-nav__toggle"); await frame(p); await p.waitForTimeout(450); await frame(p); }

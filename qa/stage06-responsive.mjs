@@ -1,5 +1,7 @@
 import { chromium } from "playwright";
 
+const BASE = process.env.QA_BASE || "http://127.0.0.1:3000";
+
 /* Stage 06 layout audit across the eight required viewports. Every surface has
    to survive at every width: nothing dropped, nothing overflowing, nothing
    overlapping into unreadability. */
@@ -17,7 +19,7 @@ let failures = 0;
 for (const [w, h] of VIEWPORTS) {
   const ctx = await browser.newContext({ viewport: { width: w, height: h }, deviceScaleFactor: 1 });
   const p = await ctx.newPage();
-  await p.goto("http://127.0.0.1:3000/#products", { waitUntil: "networkidle" });
+  await p.goto(BASE + "/#products", { waitUntil: "networkidle" });
   await p.evaluate(() => document.fonts.ready);
   await frame(p); await p.waitForTimeout(700); await frame(p);
 

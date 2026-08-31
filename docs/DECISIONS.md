@@ -806,3 +806,31 @@ output, but the ignore list inherited from `eslint-config-next` only covers
 `.next`. Linting them reported 174 errors in code we did not write, and
 `safe-deploy.ps1` runs ESLint in its validate phase — so this would have
 blocked every deployment from Stage 06 onward.
+
+---
+
+## D-038 — QA harnesses take a base URL, and frozen stages are re-verified against production
+
+Status: Accepted
+Stage: 6
+
+### Decision
+Every script in `qa/` reads `QA_BASE`, defaulting to `http://127.0.0.1:3000`.
+Stage 06 and the Stages 01-05 regression were both measured against the running
+production build on `http://127.0.0.1:3100`, not only against `next dev`.
+
+### Reason
+Development and production builds differ in ways that matter to what these
+harnesses measure: React's development double-render dominates long-task
+totals, and dev-only DOM such as `<nextjs-portal>` paints over the page. A
+regression suite that can only run against `next dev` cannot answer whether the
+thing actually serving the public is correct.
+
+### Consequence
+`stage03-desktop.mjs` compared the desktop bar's centre against
+`documentElement.clientWidth`. That is right for a classic scrollbar but not for
+the overlay scrollbars headless Chromium uses, where `clientWidth` equals
+`innerWidth` while `scrollbar-gutter: stable` still reserves 15px. It reported
+`centred=FAIL` for a bar centred to 0.00px. The reference is now the content
+frame, which is the criterion `QA_BASELINE.md` already documented. The
+navigation itself was not touched.

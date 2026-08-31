@@ -1,4 +1,5 @@
 import { chromium } from "playwright";
+const BASE = process.env.QA_BASE || "http://127.0.0.1:3000";
 const EXPS = {
   "A baseline": "",
   "B display measure off": ".type-display-1,.type-display-2{max-width:none}",
@@ -21,7 +22,7 @@ for (const [name, css] of Object.entries(EXPS)) {
         (document.head || document.documentElement).appendChild(s);
       }
     }, css);
-    await page.goto("http://127.0.0.1:3000/", { waitUntil: "networkidle" });
+    await page.goto(BASE + "/", { waitUntil: "networkidle" });
     await page.evaluate(() => document.fonts.ready);
     await page.waitForTimeout(3000);
     out.push(`${w}x${h}=${(await page.evaluate(() => +window.__cls.toFixed(4)))}`);

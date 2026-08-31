@@ -1,9 +1,10 @@
 import { chromium } from "playwright";
+const BASE = process.env.QA_BASE || "http://127.0.0.1:3000";
 const browser = await chromium.launch();
 for (const [dsf, zoom, tag] of [[2, 1, "dsf2-100pct"], [2, 1.25, "dsf2-125pct"]]) {
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: dsf });
   const page = await ctx.newPage();
-  await page.goto("http://127.0.0.1:3000/", { waitUntil: "networkidle" });
+  await page.goto(BASE + "/", { waitUntil: "networkidle" });
   if (zoom !== 1) await page.evaluate((z) => { document.documentElement.style.zoom = String(z); }, zoom);
   await page.evaluate(() => document.fonts.ready);
   await page.waitForTimeout(900);

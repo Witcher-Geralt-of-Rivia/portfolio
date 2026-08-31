@@ -1,7 +1,8 @@
 import { chromium } from "playwright";
+const BASE = process.env.QA_BASE || "http://127.0.0.1:3000";
 const browser = await chromium.launch();
 const page = await (await browser.newContext({ viewport: { width: 1920, height: 1080 } })).newPage();
-await page.goto("http://127.0.0.1:3000/", { waitUntil: "networkidle" });
+await page.goto(BASE + "/", { waitUntil: "networkidle" });
 await page.evaluate(() => document.fonts.ready);
 const r = await page.evaluate(() => {
   const mk = (fam) => {

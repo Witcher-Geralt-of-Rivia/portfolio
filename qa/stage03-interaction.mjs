@@ -1,4 +1,5 @@
 import { chromium } from "playwright";
+const BASE = process.env.QA_BASE || "http://127.0.0.1:3000";
 const pass = (b) => (b ? "PASS" : "FAIL");
 const frame = async (p) => { await p.screenshot({ type: "jpeg", quality: 20 }); };
 const browser = await chromium.launch({ args: [
@@ -14,7 +15,7 @@ for (const [w, h] of [[390, 844], [360, 800]]) {
   const errors = [];
   page.on("console", m => { if (m.type() === "error") errors.push(m.text().slice(0, 120)); });
   page.on("pageerror", e => errors.push("pageerror: " + e.message.slice(0, 120)));
-  await page.goto("http://127.0.0.1:3000/", { waitUntil: "networkidle" });
+  await page.goto(BASE + "/", { waitUntil: "networkidle" });
   await page.waitForTimeout(400);
 
   // underlying page must not scroll while open

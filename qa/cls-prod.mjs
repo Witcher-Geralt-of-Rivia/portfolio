@@ -1,4 +1,5 @@
 import { chromium } from "playwright";
+const BASE = process.env.QA_BASE || "http://127.0.0.1:3000";
 const browser = await chromium.launch();
 const rows = [];
 for (const [w, h] of [[1920,1080],[1440,900],[1366,768],[768,1024],[390,844],[360,800]]) {
@@ -12,7 +13,7 @@ for (const [w, h] of [[1920,1080],[1440,900],[1366,768],[768,1024],[390,844],[36
   const errs = [], failed = [];
   page.on("console", m => { if (m.type() === "error") errs.push(m.text().slice(0,120)); });
   page.on("requestfailed", r => failed.push(r.url().split("/").pop()));
-  await page.goto("http://127.0.0.1:3000/", { waitUntil: "networkidle" });
+  await page.goto(BASE + "/", { waitUntil: "networkidle" });
   await page.evaluate(() => document.fonts.ready);
   await page.waitForTimeout(4000);
   const r = await page.evaluate(() => ({ cls: +window.__cls.toFixed(4), n: window.__n,

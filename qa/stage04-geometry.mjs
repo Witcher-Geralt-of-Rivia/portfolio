@@ -1,4 +1,5 @@
 import { chromium } from "playwright";
+const BASE = process.env.QA_BASE || "http://127.0.0.1:3000";
 const pass = (b) => (b ? "PASS" : "FAIL");
 const frame = async (p) => { await p.screenshot({ type: "jpeg", quality: 20 }); };
 const browser = await chromium.launch({ args: ["--disable-renderer-backgrounding","--disable-backgrounding-occluded-windows"] });
@@ -6,7 +7,7 @@ const browser = await chromium.launch({ args: ["--disable-renderer-backgrounding
 for (const [w, h] of [[1920,1080],[1440,900],[390,844]]) {
   const ctx = await browser.newContext({ viewport: { width: w, height: h }, deviceScaleFactor: 1 });
   const p = await ctx.newPage();
-  await p.goto("http://127.0.0.1:3000/", { waitUntil: "networkidle" });
+  await p.goto(BASE + "/", { waitUntil: "networkidle" });
   await p.evaluate(() => document.fonts.ready);
   await frame(p); await p.waitForTimeout(1600); await frame(p);
 

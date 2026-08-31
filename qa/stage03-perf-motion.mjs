@@ -1,4 +1,5 @@
 import { chromium } from "playwright";
+const BASE = process.env.QA_BASE || "http://127.0.0.1:3000";
 const pass = (b) => (b ? "PASS" : "FAIL");
 const frame = async (p) => { await p.screenshot({ type: "jpeg", quality: 20 }); };
 const browser = await chromium.launch({ args: [
@@ -12,7 +13,7 @@ console.log("=== REDUCED MOTION (390x844) ===");
 {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1, reducedMotion: "reduce" });
   const p = await ctx.newPage();
-  await p.goto("http://127.0.0.1:3000/", { waitUntil: "networkidle" });
+  await p.goto(BASE + "/", { waitUntil: "networkidle" });
   await p.waitForTimeout(700);
   const base = await p.evaluate(() => ({
     scrollBehavior: getComputedStyle(document.documentElement).scrollBehavior,
@@ -58,7 +59,7 @@ for (const [w, h] of [[1920, 1080], [1440, 900], [1366, 768], [768, 1024], [390,
   p.on("pageerror", e => errors.push("pageerror: " + e.message.slice(0, 120)));
   p.on("requestfailed", r => failed.push(r.url().split("/").pop()));
   p.on("request", r => reqs.push(r.url()));
-  await p.goto("http://127.0.0.1:3000/", { waitUntil: "networkidle" });
+  await p.goto(BASE + "/", { waitUntil: "networkidle" });
   await p.evaluate(() => document.fonts.ready);
   await p.waitForTimeout(2500);
   const clsA = await p.evaluate(() => +window.__cls.toFixed(4));
@@ -72,7 +73,7 @@ for (const [w, h] of [[1920, 1080], [1440, 900], [1366, 768], [768, 1024], [390,
     await p.keyboard.press("Escape");
     await frame(p); await p.waitForTimeout(300);
   }
-  const external = reqs.filter(u => !u.startsWith("http://127.0.0.1:3000"));
+  const external = reqs.filter(u => !u.startsWith(BASE));
   const overflow = await p.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1);
   console.log(`  ${String(w + "x" + h).padEnd(10)} CLS=${clsA}${w < 900 ? ` (after menu open: ${clsB})` : ""}  overflow=${pass(!overflow)}  errors=${errors.length ? errors.join("|") : "none"}  failed=${failed.length ? failed.join(",") : "none"}  thirdParty=${external.length ? external.join(",") : "none"}`);
   await ctx.close();
@@ -83,7 +84,7 @@ console.log("\n=== IDLE JS ACTIVITY (1440x900, 6s idle) ===");
 {
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
   const p = await ctx.newPage();
-  await p.goto("http://127.0.0.1:3000/", { waitUntil: "networkidle" });
+  await p.goto(BASE + "/", { waitUntil: "networkidle" });
   await p.waitForTimeout(1500);
   const client = await p.context().newCDPSession(p);
   await client.send("Performance.enable");

@@ -1,4 +1,5 @@
 import { chromium } from "playwright";
+const BASE = process.env.QA_BASE || "http://127.0.0.1:3000";
 const ids = ["systems", "products", "ai-learning", "lab", "work"];
 const expected = ["Systems", "Products", "AI Learning", "Lab", "Work"];
 
@@ -9,7 +10,7 @@ const browser = await chromium.launch({ args: [
 ] });
 const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
 const page = await ctx.newPage();
-await page.goto("http://127.0.0.1:3000/", { waitUntil: "networkidle" });
+await page.goto(BASE + "/", { waitUntil: "networkidle" });
 await page.waitForTimeout(600);
 
 const seq = [];

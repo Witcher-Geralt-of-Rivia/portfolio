@@ -1,4 +1,5 @@
 import { chromium } from "playwright";
+const BASE = process.env.QA_BASE || "http://127.0.0.1:3000";
 const pass = (b) => (b ? "PASS" : "FAIL");
 const browser = await chromium.launch({ args: ["--disable-renderer-backgrounding","--disable-backgrounding-occluded-windows"] });
 
@@ -6,7 +7,7 @@ console.log("=== DESKTOP GEOMETRY ===");
 for (const [w, h] of [[1920, 1080], [1440, 900], [1366, 768]]) {
   const ctx = await browser.newContext({ viewport: { width: w, height: h }, deviceScaleFactor: 1 });
   const p = await ctx.newPage();
-  await p.goto("http://127.0.0.1:3000/", { waitUntil: "networkidle" });
+  await p.goto(BASE + "/", { waitUntil: "networkidle" });
   await p.evaluate(() => document.fonts.ready);
   await p.waitForTimeout(700);
   const g = await p.evaluate(() => {
@@ -14,12 +15,20 @@ for (const [w, h] of [[1920, 1080], [1440, 900], [1366, 768]]) {
     const idc = document.querySelector(".site-nav__desktop .site-nav__identity");
     const links = [...document.querySelectorAll(".site-nav__link")];
     const cs = getComputedStyle(nav), r = nav.getBoundingClientRect();
-    // The layout viewport excludes the scrollbar; innerWidth does not.
+    /* The bar is centred on the CONTENT FRAME, not on the raw viewport --
+       `scrollbar-gutter: stable` reserves 15px that the frame excludes. This
+       used to compare against documentElement.clientWidth, which is correct
+       for a classic scrollbar but not for the overlay scrollbars headless
+       Chromium uses: there clientWidth === innerWidth while the gutter is
+       still reserved, so a correctly centred bar read as 7.5px off. */
+    const main = document.querySelector("main");
+    const mr = main.getBoundingClientRect();
     const vw = document.documentElement.clientWidth;
     return {
       w: Math.round(r.width), h: Math.round(r.height), top: Math.round(r.top),
       left: Math.round(r.left), right: Math.round(vw - r.right),
-      centred: Math.abs((r.left + r.width / 2) - vw / 2) < 1.5,
+      centred: Math.abs((r.left + r.width / 2) - (mr.left + mr.width / 2)) < 1.5,
+      centreOffset: +((r.left + r.width / 2) - (mr.left + mr.width / 2)).toFixed(2),
       radius: cs.borderRadius, z: cs.zIndex, pos: cs.position,
       identity: Math.round(idc.getBoundingClientRect().width),
       linkH: Math.round(links[0].getBoundingClientRect().height),
@@ -29,7 +38,7 @@ for (const [w, h] of [[1920, 1080], [1440, 900], [1366, 768]]) {
     };
   });
   console.log(`  ${w}x${h} (layout ${g.viewport}px): ${g.w}x${g.h} top=${g.top} radius=${g.radius} z=${g.z} ${g.pos}`);
-  console.log(`     centred=${pass(g.centred)}  side clearance L/R=${g.left}/${g.right}px (min 24) ${pass(Math.min(g.left,g.right) >= 24)}  maxWidth<=1060 ${pass(g.w <= 1060)}`);
+  console.log(`     centred on content frame=${pass(g.centred)} (${g.centreOffset}px)  side clearance L/R=${g.left}/${g.right}px (min 24) ${pass(Math.min(g.left,g.right) >= 24)}  maxWidth<=1060 ${pass(g.w <= 1060)}`);
   console.log(`     identity=${g.identity}px (190-215) ${pass(g.identity >= 190 && g.identity <= 215)}  linkH=${g.linkH}  wrapping=${pass(!g.wrapped)}  compact bar hidden=${pass(g.barHidden)}`);
   await ctx.close();
 }
@@ -38,7 +47,7 @@ console.log("\n=== KEYBOARD ORDER + ARIA (1440x900) ===");
 {
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
   const p = await ctx.newPage();
-  await p.goto("http://127.0.0.1:3000/", { waitUntil: "networkidle" });
+  await p.goto(BASE + "/", { waitUntil: "networkidle" });
   await p.waitForTimeout(600);
   const order = [];
   for (let i = 0; i < 7; i++) {

@@ -1,4 +1,5 @@
 import { chromium } from "playwright";
+const BASE = process.env.QA_BASE || "http://127.0.0.1:3000";
 const browser = await chromium.launch();
 for (const [w, h] of [[1920, 1080], [1440, 900]]) {
   const ctx = await browser.newContext({ viewport: { width: w, height: h }, deviceScaleFactor: 1 });
@@ -20,7 +21,7 @@ for (const [w, h] of [[1920, 1080], [1440, 900]]) {
       }
     }).observe({ type: "layout-shift", buffered: true });
   });
-  await page.goto("http://127.0.0.1:3000/", { waitUntil: "networkidle" });
+  await page.goto(BASE + "/", { waitUntil: "networkidle" });
   await page.evaluate(() => document.fonts.ready);
   await page.waitForTimeout(3500);
   const shifts = await page.evaluate(() => window.__shifts);

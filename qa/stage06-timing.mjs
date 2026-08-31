@@ -1,5 +1,7 @@
 import { chromium } from "playwright";
 
+const BASE = process.env.QA_BASE || "http://127.0.0.1:3000";
+
 /* Measures the flow state machine from INSIDE the page. No screenshots are
    taken during the run: forcing frames from the harness perturbs headless
    timer scheduling, which is what made the flow look instantaneous. */
@@ -9,7 +11,7 @@ const browser = await chromium.launch({
 });
 const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
 const p = await ctx.newPage();
-await p.goto("http://127.0.0.1:3000/#products", { waitUntil: "networkidle" });
+await p.goto(BASE + "/#products", { waitUntil: "networkidle" });
 await p.evaluate(() => document.fonts.ready);
 await p.screenshot({ type: "jpeg", quality: 20 });
 await p.waitForTimeout(800);

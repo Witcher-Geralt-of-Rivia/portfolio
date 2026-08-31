@@ -1,6 +1,7 @@
 import { chromium } from "playwright";
+const BASE = process.env.QA_BASE || "http://127.0.0.1:3000";
 const OUT = "qa/shots/stage04";
-const URL = "http://127.0.0.1:3000/";
+const URL = BASE + "/";
 const frame = async (p) => { await p.screenshot({ type: "jpeg", quality: 20 }); };
 const browser = await chromium.launch({ args: [
   "--disable-backgrounding-occluded-windows",
