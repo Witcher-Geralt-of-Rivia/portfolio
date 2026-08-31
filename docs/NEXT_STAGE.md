@@ -1,4 +1,4 @@
-<!-- PROJECT_STAGE: 4 -->
+<!-- PROJECT_STAGE: 5 -->
 <!-- DOCUMENT_STATUS: CURRENT -->
 
 # Next Stage
@@ -6,48 +6,49 @@
 ## Current position
 
 ```
-Stages 01-04            COMPLETE and FROZEN
-Persistent context      COMPLETE
+Stages 01-05            COMPLETE and FROZEN
 Domain / HTTPS deploy   COMPLETE - live at https://intelligent-systems-lab.duckdns.org
-Stage 05                NOT STARTED
+Stage 06                NOT STARTED
 ```
-
-Deployment did **not** advance the design stage. The current design stage
-remains 4 and stages 1-4 remain frozen.
 
 ## Ordered plan
 
 ```
 1. Persistent context system            DONE
 2. Domain / HTTPS / production deploy   DONE
-3. Independent public-site inspection   optional - see note below
-4. Stage 05 - section content           NEXT
+3. Stage 05 - Intelligent Systems       DONE
+4. Stage 06 - Product Engineering       NEXT
 ```
 
 ## NEXT TASK
 
-**Stage 05.**
+**Stage 06 - Product Engineering / Web + Mobile + AI.**
 
-Stage 05 replaces the five neutral anchor sections on `/` with real section
-content: Systems, Products, AI Learning, Lab and Work.
+It fills the `#products` section, which is still a Stage 03 navigation
+placeholder. The user will supply that specification separately. Do not begin
+it automatically and do not design it in advance.
 
-The user will supply that specification separately. Do not begin it
-automatically, and do not design those sections in advance.
+## Sections still to build
 
-## Before starting Stage 05
+```
+#products      Stage 06 - Product Engineering / Web + Mobile + AI
+#ai-learning   later stage
+#lab           later stage
+#work          later stage
+```
 
-The site is now public. Anything shipped from here is visible immediately at
-`https://intelligent-systems-lab.duckdns.org`, so:
+Each is currently a neutral placeholder showing an eyebrow label and the words
+"Navigation specimen section". Replace one per stage; leave the rest alone.
 
-- Run the full regression suite before restarting the production process.
-- The production update procedure is in `docs/DEPLOYMENT.md`. It is:
-  `npm run qa:memory` -> `npm run build` -> `pm2 restart portfolio`.
-  Caddy is not touched by an application deployment.
-- The frozen-stage and privacy constraints apply unchanged.
+## Before starting Stage 06
 
-## Independent public-site inspection
+The site is public, so anything shipped is immediately visible. Follow the
+production update procedure in `docs/DEPLOYMENT.md`:
 
-Every verification so far originated on the VPS itself. External inbound
-reachability on port 443 is proven by Let's Encrypt's ACME validation, which
-connected from four public IPs. A visual check from the user's own browser is
-still worth doing once, but it is not a blocker for Stage 05.
+```
+npm run qa:memory  ->  npx tsc --noEmit  ->  npm run build  ->  pm2 restart portfolio
+```
+
+**`npm run build` replaces `.next` while the production process is serving from
+it, so the live site breaks until the restart.** Treat build and restart as one
+step, and re-verify the public URL afterwards.

@@ -1,4 +1,4 @@
-<!-- PROJECT_STAGE: 4 -->
+<!-- PROJECT_STAGE: 5 -->
 <!-- DOCUMENT_STATUS: CURRENT -->
 
 # QA Baseline
@@ -14,6 +14,7 @@ Stage 01   PASS
 Stage 02   PASS
 Stage 03   PASS
 Stage 04   PASS
+Stage 05   PASS
 ```
 
 ## Validated Viewports
@@ -144,6 +145,62 @@ frame lifecycle is deferred and reads stale:
 with `--disable-backgrounding-occluded-windows`,
 `--disable-renderer-backgrounding`, `--disable-background-timer-throttling`.
 Several apparent bugs during Stages 03 and 04 were this artefact, not the app.
+
+## Stage 05 - Intelligent Systems
+
+Measured against a production build.
+
+```
+mode content       agent 10 nodes / 11 links   automation 10 / 12
+                   crm 9 / 10                  saas 10 / 12    (8 trace rows each)
+panel height       621px, spread 0px across all four modes
+20 mode switches   no node residue, no stale trace, exactly one tab selected,
+                   CLS 0, zero console warnings
+idle 6s in view    script +0.010s, layouts +2, style recalcs +2, no continuous JS
+section DOM        222 elements
+external requests  0
+```
+
+Responsive, all PASS - no overflow, no clipped labels, CLS 0 at every size:
+
+```
+1920x1080  topology       panel 1200x621
+1440x900   topology       panel 1200x621
+1366x768   topology       panel 1200x621
+1024x768   topology       trace below, canvas 864px
+768x1024   topology       trace below, canvas 642px
+430x932    vertical flow  panel 372x1170
+390x844    vertical flow  panel 335x1170
+360x800    vertical flow  panel 305x1196
+```
+
+Node overlap checked across all four modes at 1920, 1440, 1366, 1200, 1100,
+1024 and 768: none.
+
+Accessibility:
+
+```
+tablist        ArrowLeft/Right wrap, Home, End, roving tabindex 1 of 4
+node focus     <button>, aria-describedby the detail strip, 2px focus ring
+tab order      Request -> Intent Router -> Planner -> Context -> Retrieval
+diagram        one visually hidden aria-live summary per mode
+reduced motion 0 running animations, packets parked at 50%, everything visible,
+               mode switching still works
+```
+
+Contrast, all 18 roles PASS over live surfaces at 1440x900:
+
+```
+eyebrow 6.06   heading 16.06   supporting copy 6.84   capability line 6.06
+lab title 16.37   lab subtitle 6.97   mode active 14.05   mode inactive 7.07
+node label 17.03   node technical 6.42   trace title 6.20   trace badge 5.34
+trace time 6.20   trace row 6.95   detail strip 6.32
+principle index 6.06   principle title 16.06   micro label 5.60
+```
+
+Scripts: `qa/stage05-shots.mjs`, `stage05-interaction.mjs`, `stage05-a11y.mjs`,
+`stage05-responsive.mjs`, `stage05-contrast.mjs`, `stage05-public.mjs`.
+Screenshots in `qa/shots/stage05/`.
 
 ## Production HTTPS Verification
 

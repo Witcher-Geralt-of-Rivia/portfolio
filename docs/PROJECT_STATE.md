@@ -1,4 +1,4 @@
-<!-- PROJECT_STAGE: 4 -->
+<!-- PROJECT_STAGE: 5 -->
 <!-- DOCUMENT_STATUS: CURRENT -->
 
 # Project State
@@ -9,13 +9,12 @@ Everything below was read from the repository, not recalled from conversation.
 ## Stage Status
 
 ```
-Stages 01-04   COMPLETE and FROZEN
+Stages 01-05   COMPLETE and FROZEN
 Deployment     LIVE at https://intelligent-systems-lab.duckdns.org
-Stage 05       NOT STARTED
+Stage 06       NOT STARTED
 ```
 
-Deployment did not advance the design stage: the current design stage is still
-4 and stages 1-4 remain frozen. The next task is Stage 05.
+The next task is Stage 06 - Product Engineering, filling `#products`.
 See `docs/NEXT_STAGE.md`.
 
 ## Toolchain
@@ -71,10 +70,13 @@ qa:memory    node qa/project-memory-check.mjs
 Server-first. The entire hero, the whole background system and both navigation
 presentations are server components.
 
-The only `"use client"` file is
-`src/components/navigation/SiteNavigation.tsx`. It owns exactly five behaviours:
-compact menu open state, focus management, active-section tracking via
-IntersectionObserver, Escape handling, and the body scroll lock.
+Two `"use client"` entry points exist:
+
+- `src/components/navigation/SiteNavigation.tsx` - compact menu state, focus
+  management, active-section tracking via IntersectionObserver, Escape
+  handling, body scroll lock.
+- `src/components/systems/ArchitectureLab.tsx` - the architecture mode and the
+  hovered/focused node. Everything visual below it is CSS.
 
 No `requestAnimationFrame` loop, no `setInterval` animation and no pointer
 tracking runs anywhere in the project.
@@ -87,7 +89,8 @@ tracking runs anywhere in the project.
 | `/specimen` | Stage 02 typography specimen, unlinked | Static (prerendered) |
 
 Section ids on `/`: `hero`, `systems`, `products`, `ai-learning`, `lab`, `work`.
-The five non-hero sections are QA placeholders with no real content.
+`#systems` is the real Stage 05 section. The remaining four are still Stage 03
+QA placeholders with no real content.
 
 ## Source Tree
 
@@ -114,6 +117,14 @@ src/
     hero/IntelligenceConstellation.tsx
     hero/CapabilityRail.tsx
     hero/constellation-geometry.ts
+    systems/IntelligentSystemsSection.tsx    section shell (server)
+    systems/ArchitectureLab.tsx              "use client"
+    systems/ArchitectureCanvas.tsx
+    systems/ArchitectureModeSelector.tsx     full ARIA tablist
+    systems/ExecutionTrace.tsx
+    systems/EngineeringPrinciples.tsx
+    systems/architecture-data.ts             four modes
+    systems/architecture-geometry.ts         orthogonal routing
   styles/
     tokens.css            all design tokens - the source of truth for values
     typography.css        type roles and base elements
@@ -122,6 +133,7 @@ src/
     surfaces.css          Milk / Frost / Prism
     navigation.css        navigation geometry and states
     hero.css              hero layout, constellation, hero motion
+    systems.css           Intelligent Systems section and architecture lab
 
 public/
   textures/micro-grain.svg    locally generated SVG turbulence tile
@@ -132,7 +144,7 @@ docs/                          canonical project memory (this directory)
 ```
 
 Stylesheet import order in `globals.css`: tokens, typography, motion, layers,
-surfaces, navigation, hero.
+surfaces, navigation, hero, systems.
 
 ## Stage 01 - Background (FROZEN)
 
@@ -298,6 +310,35 @@ AI API, and no client JavaScript in the hero at all.
 
 Geometry is computed once in `constellation-geometry.ts` at module scope, so the
 browser receives finished path strings.
+
+## Stage 05 - Intelligent Systems (FROZEN)
+
+Section `#systems`, heading "From event to decision to execution."
+
+The System Architecture Lab holds four modes, switched by a real ARIA tablist
+with arrow-key navigation. Every mode is declared in `architecture-data.ts`;
+there is no hand-built JSX per mode.
+
+| Mode | Nodes | Connections | Trace rows |
+|---|---|---|---|
+| Agent Workflow (default) | 10 | 11 | 8 |
+| Automation | 10 | 12 | 8 |
+| CRM / ERP | 9 | 10 | 8 |
+| SaaS Backend | 10 | 12 | 8 |
+
+Implementation: SVG connections beneath HTML node surfaces, the Stage 04
+pattern. Routing is soft-orthogonal with rounded turns and separated corridors
+where links converge. Packets move on CSS `offset-path`; the mode transition,
+node highlighting and trace stagger are all CSS.
+
+Below 700px the positioned topology is replaced by a vertical execution flow
+built from the same data, with the parallel band as a three-column row.
+
+Nothing in this section reaches the network. Switching mode is local state over
+static TypeScript. The trace timings are labelled LOCAL SIMULATION and are not
+performance claims.
+
+Desktop panel measures 1200x621 and is height-stable across all four modes.
 
 ## Assets
 

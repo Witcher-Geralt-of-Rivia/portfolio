@@ -1,21 +1,23 @@
 {
   "project": "Milky Intelligence Technical Portfolio",
   "purpose": "Demonstrate engineering capability to freelance clients. Technical portfolio, not a personal site.",
-  "currentStage": 4,
-  "stage05Started": false,
-  "nextStage": "stage-05",
-  "nextStageTitle": "Stage 05",
+  "currentStage": 5,
+  "stage05Started": true,
+  "nextStage": "stage-06",
+  "nextStageTitle": "Stage 06",
   "frozenStages": [
     1,
     2,
     3,
-    4
+    4,
+    5
   ],
   "stageNames": {
     "1": "Visual foundation - Milky Intelligence background",
     "2": "Typography - Geist Sans and Geist Mono",
     "3": "Navigation and site shell",
-    "4": "Hero and Intelligence Constellation"
+    "4": "Hero and Intelligence Constellation",
+    "5": "Intelligent Systems - architecture lab"
   },
   "constraints": {
     "contactInformation": false,
@@ -90,7 +92,8 @@
       1,
       2,
       3,
-      4
+      4,
+      5
     ],
     "cls": 0,
     "thirdPartyRequests": 0,

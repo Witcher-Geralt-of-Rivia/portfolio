@@ -1,4 +1,4 @@
-<!-- PROJECT_STAGE: 4 -->
+<!-- PROJECT_STAGE: 5 -->
 <!-- DOCUMENT_STATUS: CURRENT -->
 
 # Architecture
@@ -38,6 +38,15 @@ src/
       IntelligenceConstellation.tsx
       CapabilityRail.tsx
       constellation-geometry.ts   node/link maths, module scope
+    systems/
+      IntelligentSystemsSection.tsx   section shell (server)
+      ArchitectureLab.tsx             "use client" - mode + hovered node
+      ArchitectureCanvas.tsx          SVG links + HTML nodes, both layouts
+      ArchitectureModeSelector.tsx    full ARIA tablist
+      ExecutionTrace.tsx
+      EngineeringPrinciples.tsx
+      architecture-data.ts            four modes, declarative
+      architecture-geometry.ts        orthogonal routing
   styles/
     tokens.css              every design token
     typography.css
@@ -46,6 +55,7 @@ src/
     surfaces.css
     navigation.css
     hero.css
+    systems.css
 
 public/
   textures/micro-grain.svg
@@ -90,8 +100,10 @@ hero rules do not live in `navigation.css`.
 
 ## Client/Server Boundary
 
-`SiteNavigation.tsx` is the only `"use client"` module. Its responsibilities are
-deliberately bounded:
+There are two `"use client"` modules, each with deliberately bounded
+responsibilities.
+
+`SiteNavigation.tsx`:
 
 - compact menu open/close state
 - focus management (move into panel, return to trigger, Tab containment)
@@ -99,8 +111,13 @@ deliberately bounded:
 - Escape handling
 - body scroll lock
 
-Everything else - the aurora, the prism, the grain, the hero, the constellation,
-its hover states and all of its motion - is server-rendered markup plus CSS.
+`ArchitectureLab.tsx` holds two pieces of state: the selected architecture mode
+and the node currently hovered or focused. The mode transition, packet motion,
+connection highlighting and trace stagger are all CSS.
+
+Everything else - the aurora, the prism, the grain, the hero, the
+constellation, the systems section shell and the principles strip - is
+server-rendered markup plus CSS.
 
 The constellation's hover uses CSS `:has()` specifically so the hero does not
 need to become a client component.
@@ -119,6 +136,11 @@ Two rules are encoded there and should not be casually changed:
 2. Cross-links bow asymmetrically, choosing whichever side keeps the arc inside
    the composition while still clearing the orchestrator. Uniform outward bows
    produce meridian lines and the artwork reads as a wireframe orb.
+
+`architecture-geometry.ts` does the equivalent for the systems section, but
+soft-orthogonal rather than organic: straight runs with small rounded turns,
+and separated horizontal corridors where several links converge on one node so
+a fan-in reads as a routing bundle instead of one overdrawn line.
 
 ## Architectural Principles
 

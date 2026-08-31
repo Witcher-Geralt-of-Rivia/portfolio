@@ -1,4 +1,4 @@
-<!-- PROJECT_STAGE: 4 -->
+<!-- PROJECT_STAGE: 5 -->
 <!-- DOCUMENT_STATUS: CURRENT -->
 
 # Project Changelog
@@ -206,3 +206,45 @@ remains available and was verified to coexist with production.
 Existing domain identical pre/post change. New domain: 200 over HTTPS, trusted
 certificate, 308 redirect from HTTP, zero console errors, zero failed requests,
 zero mixed content, zero third-party requests, all sensitive paths 404.
+
+---
+
+## Stage 05 - Intelligent Systems
+
+Status: **Frozen**
+
+### Summary
+Replaced the `#systems` placeholder with the first real capability section: an
+interactive System Architecture Lab holding four switchable topologies (Agent
+Workflow, Automation, CRM / ERP, SaaS Backend), a deterministic execution
+trace, and a four-item engineering principles strip.
+
+### Files
+`src/components/systems/*` (8 modules), `src/styles/systems.css`,
+`src/app/page.tsx`, `src/app/globals.css` (import plus a visually-hidden
+utility)
+
+### Notable during implementation
+- Modes are declarative data, not four JSX trees; positions are fixed and
+  nothing uses randomness.
+- Connections render as SVG beneath HTML node surfaces, the Stage 04 pattern,
+  so labels keep real pixel sizes. Below 700px the topology becomes a vertical
+  execution flow built from the same data.
+- The flow gradient had to move to `userSpaceOnUse`: with the default units a
+  horizontal path has a zero-height bounding box and the connection all but
+  disappeared.
+- Connection opacity was raised above the brief's range after visual review;
+  at the suggested value the routing was invisible and the panel read as
+  scattered cards.
+- The trace column now collapses below the canvas at 1149px, because at 1024px
+  the side column squeezed the canvas until Automation's four-node band
+  overlapped.
+
+### QA
+Eight viewports PASS, CLS 0 everywhere, 20 mode transitions with no residue,
+18 contrast roles PASS, full tablist keyboard behaviour, reduced motion static
+and complete, zero external requests, zero console errors.
+
+### Deployment
+Shipped through the documented procedure: build then `pm2 restart portfolio`.
+Caddy was not touched and its process was never restarted.

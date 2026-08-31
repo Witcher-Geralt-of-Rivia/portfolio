@@ -1,4 +1,4 @@
-<!-- PROJECT_STAGE: 4 -->
+<!-- PROJECT_STAGE: 5 -->
 <!-- DOCUMENT_STATUS: CURRENT -->
 
 # Decisions
@@ -529,3 +529,102 @@ interaction. The site must function fully with no AI account.
 Only an explicit user instruction can change these. Until then, treat any request
 that implies them as a conflict and report it. See
 `docs/PRIVACY_AND_SECURITY.md`.
+
+---
+
+## D-025 — The systems section is one architecture lab, not a feature grid
+
+Status: Accepted
+Stage: 05
+
+### Decision
+`#systems` is a single interactive System Architecture Lab with four switchable
+topologies, plus an execution trace and a four-item principles strip.
+
+### Reason
+A capability list or six feature cards proves familiarity with words. A working
+topology — input, orchestration, capabilities, validation, human control,
+output — shows that the whole system is understood. The brief for this section
+was explicitly that a technical client should conclude the developer
+understands how complete intelligent systems operate.
+
+### Alternatives rejected
+Skill checklist, technology-logo wall, six feature cards, an embedded code
+editor.
+
+---
+
+## D-026 — Architecture modes are data, not four JSX trees
+
+Status: Accepted
+Stage: 05
+
+### Decision
+`architecture-data.ts` declares each mode's nodes, connections, trace and
+accessible summary. Components are presentational.
+
+### Reason
+Four near-identical hand-built trees would drift apart the first time anything
+changed. Positions are fixed percentages and there is no `Math.random()`
+anywhere, so screenshots and client experiences are identical every time.
+
+### Future modification condition
+Adding a mode means adding a data entry, not a component.
+
+---
+
+## D-027 — Connection gradients use userSpaceOnUse
+
+Status: Accepted
+Stage: 05
+
+### Decision
+The flow gradient is declared with `gradientUnits="userSpaceOnUse"` spanning
+the viewBox.
+
+### Reason
+Measured bug. With the default `objectBoundingBox`, a purely horizontal path
+has a zero-height bounding box, the gradient degenerates and the connection
+renders all but invisible. It showed up as missing links in CRM / ERP
+(`Lead / Order -> Normalize`, `Validation -> Notification`) and in Agent
+Workflow (`Request -> Intent Router`).
+
+### Future modification condition
+Never revert to the default units on a diagram containing axis-aligned paths.
+
+---
+
+## D-028 — Connections are drawn above the spec's opacity range
+
+Status: Accepted
+Stage: 05
+
+### Decision
+Base connections are `rgba(81,86,102,0.28)` at 1.25px, above the 0.13–0.20
+range the Stage 05 brief suggested.
+
+### Reason
+Visual inspection. At 0.16 and 1px the routing was effectively invisible, and
+the routing is the entire point of the diagram — without it the panel reads as
+scattered cards, which is the stated failure condition for this section. The
+lines remain far quieter than the node surfaces.
+
+---
+
+## D-029 — The trace drops below the canvas at 1149px, not 999px
+
+Status: Accepted
+Stage: 05
+
+### Decision
+The side trace column collapses beneath the architecture at 1149px.
+
+### Reason
+Measured. With the 280px trace still beside it, a 1024px viewport left the
+canvas about 563px wide and Automation's four-node band overlapped
+(Queue/Transform and Transform/Condition). Giving the canvas full width at
+these sizes removes the overlap; verified at 1024, 1100, 1200 and 768.
+
+### Future modification condition
+If node widths or band membership change, re-run the overlap check across
+1024–1200 before narrowing this breakpoint again.

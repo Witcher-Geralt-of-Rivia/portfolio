@@ -1,0 +1,808 @@
+/* =====================================================================
+   MILKY INTELLIGENCE — 01 / INTELLIGENT SYSTEMS
+   A system architecture laboratory, not a card grid. The panel reuses the
+   Milk surface with a faint Prism edge; nothing here introduces a new
+   material, a dark console, or a colour outside the Stage 01 palette.
+   ===================================================================== */
+
+.systems {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(44px, 4.5vw, 68px);
+  padding-block: clamp(120px, 12vw, 168px);
+}
+
+/* --- Introduction ---------------------------------------------------- */
+
+.systems__intro {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(24px, 3vw, 40px);
+}
+
+.systems__intro-lead {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.systems__title {
+  max-width: var(--measure-display-2);
+  color: var(--text-primary);
+  font-size: var(--type-display-2);
+  font-weight: var(--weight-heading);
+  line-height: var(--leading-display-2);
+  letter-spacing: var(--tracking-display-2);
+  text-wrap: balance;
+}
+
+.systems__intro-support {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.systems__lead {
+  max-width: 54ch;
+  color: var(--text-secondary);
+  font-size: var(--type-lead);
+  font-weight: var(--weight-lead);
+  line-height: var(--leading-lead);
+  letter-spacing: var(--tracking-lead);
+  text-wrap: pretty;
+}
+
+.systems__capabilities {
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: var(--weight-ui);
+  line-height: 1.5;
+  letter-spacing: 0.075em;
+}
+
+/* The heading dominates; the support column sits beside and below it. */
+@media (min-width: 1000px) {
+  .systems__intro {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+    gap: clamp(32px, 4vw, 72px);
+    align-items: end;
+  }
+}
+
+/* --- Lab panel -------------------------------------------------------- */
+
+.systems__lab {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.arch-lab {
+  --surface-radius: var(--radius-panel-lg);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 620px;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+/* A faint local atmosphere — never a visible gradient blob, and entirely
+   inside the panel. The Stage 01 aurora is untouched. */
+.arch-lab::before {
+  content: "";
+  position: absolute;
+  inset: -10%;
+  z-index: 0;
+  background:
+    radial-gradient(46% 42% at 24% 16%, rgba(233, 224, 255, 0.12), transparent 70%),
+    radial-gradient(44% 40% at 78% 30%, rgba(220, 238, 255, 0.11), transparent 72%),
+    radial-gradient(48% 44% at 60% 88%, rgba(217, 244, 243, 0.1), transparent 74%);
+  pointer-events: none;
+}
+
+/* Barely-there refracted edge, in the Prism language. */
+.arch-lab::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  padding: 1px;
+  border-radius: inherit;
+  background: linear-gradient(
+    140deg,
+    rgba(233, 224, 255, 0.6) 0%,
+    rgba(255, 255, 255, 0.3) 32%,
+    rgba(255, 255, 255, 0.18) 58%,
+    rgba(220, 238, 255, 0.5) 82%,
+    rgba(217, 244, 243, 0.4) 100%
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.arch-lab > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* --- Panel header ----------------------------------------------------- */
+
+.arch-lab__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  min-height: 66px;
+  padding: 12px clamp(16px, 2vw, 24px);
+  border-bottom: 1px solid var(--line-subtle);
+}
+
+.arch-lab__identity {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.arch-lab__title {
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: var(--weight-ui);
+  line-height: 1.3;
+  letter-spacing: 0.08em;
+}
+
+.arch-lab__subtitle {
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  line-height: 1.3;
+}
+
+/* --- Mode selector: one compact segmented control --------------------- */
+
+.arch-modes {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.52);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.26);
+}
+
+.arch-mode {
+  position: relative;
+  height: 34px;
+  padding-inline: 14px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  font-weight: var(--weight-ui);
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color 180ms var(--ease-standard),
+    color 180ms var(--ease-standard);
+}
+
+.arch-mode:hover {
+  color: var(--text-primary);
+}
+
+.arch-mode.is-active {
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--text-primary);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
+/* The same quiet aurora marker the navigation uses for its active item. */
+.arch-mode.is-active::after {
+  content: "";
+  position: absolute;
+  bottom: 5px;
+  left: 50%;
+  width: 18px;
+  height: 1.5px;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: var(--nav-accent);
+  opacity: 0.9;
+}
+
+.arch-lab :focus-visible {
+  outline: 2px solid rgba(81, 86, 102, 0.48);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 5px rgba(233, 224, 255, 0.42);
+}
+
+/* --- Panel body: canvas beside the trace ------------------------------ */
+
+.arch-lab__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: clamp(16px, 2vw, 24px);
+  flex: 1;
+  padding: clamp(16px, 2vw, 24px);
+}
+
+.arch-lab__body:focus-visible {
+  outline-offset: -3px;
+}
+
+.arch-canvas-wrap {
+  position: relative;
+  min-width: 0;
+}
+
+.arch-canvas {
+  position: relative;
+  width: 100%;
+  /* Fixed aspect so the SVG never distorts and the panel height is stable
+     across mode changes. */
+  aspect-ratio: 1000 / 520;
+}
+
+.arch-canvas__svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* A faint technical grid, fading out well before the panel edge. */
+.arch-canvas::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, rgba(81, 86, 102, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(81, 86, 102, 0.035) 1px, transparent 1px);
+  background-size: 30px 30px;
+  -webkit-mask-image: radial-gradient(52% 54% at 50% 48%, #000 18%, transparent 92%);
+  mask-image: radial-gradient(52% 54% at 50% 48%, #000 18%, transparent 92%);
+  pointer-events: none;
+}
+
+/* --- Connections ------------------------------------------------------ */
+
+.arch-link {
+  fill: none;
+  stroke: rgba(81, 86, 102, 0.28);
+  stroke-width: 1.25;
+  stroke-linecap: round;
+  transition: stroke 220ms var(--ease-standard);
+}
+
+.arch-link--flow {
+  stroke: url(#arch-flow-a);
+  stroke-width: 1.5;
+}
+
+.arch-link.is-active {
+  stroke: rgba(81, 86, 102, 0.52);
+  stroke-width: 1.6;
+}
+
+.arch-packet {
+  fill: #dceeff;
+  opacity: 0.8;
+  offset-path: var(--path);
+  offset-rotate: 0deg;
+  offset-distance: 0%;
+  animation: arch-packet-travel var(--dur) linear var(--delay) infinite;
+}
+
+.arch-packet:nth-of-type(2) { fill: #e9e0ff; }
+.arch-packet:nth-of-type(3) { fill: #d9f4f3; }
+.arch-packet:nth-of-type(4) { fill: #ddf5e8; }
+
+@keyframes arch-packet-travel {
+  0% { offset-distance: 0%; opacity: 0; }
+  16% { opacity: 0.8; }
+  84% { opacity: 0.8; }
+  100% { offset-distance: 100%; opacity: 0; }
+}
+
+/* --- Nodes ------------------------------------------------------------ */
+
+.arch-node {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  box-sizing: border-box;
+  height: 56px;
+  padding-inline: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.66);
+  box-shadow:
+    0 6px 18px rgba(41, 47, 70, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color 200ms var(--ease-standard),
+    border-color 200ms var(--ease-standard),
+    opacity 200ms var(--ease-standard),
+    transform 200ms var(--ease-standard);
+}
+
+.arch-canvas .arch-node {
+  position: absolute;
+  translate: -50% -50%;
+}
+
+.arch-node__marker {
+  flex: 0 0 auto;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--marker, #dceeff);
+}
+
+/* Category is a small marker, never a coloured node. */
+.arch-node--input { --marker: #dceeff; }
+.arch-node--orchestration { --marker: #e9e0ff; }
+.arch-node--systems { --marker: #d9f4f3; }
+.arch-node--control { --marker: #f8efc9; }
+.arch-node--output { --marker: #fbe4d7; }
+
+.arch-node__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.arch-node__label {
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  font-weight: var(--weight-ui);
+  line-height: 1.2;
+  letter-spacing: -0.004em;
+  white-space: nowrap;
+}
+
+.arch-node__technical {
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: var(--weight-ui);
+  line-height: 1.2;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .arch-node:hover {
+    background: rgba(255, 255, 255, 0.84);
+    border-color: rgba(255, 255, 255, 0.9);
+  }
+}
+
+.arch-node.is-active {
+  background: rgba(255, 255, 255, 0.86);
+  border-color: rgba(255, 255, 255, 0.92);
+  transform: translateY(-1px);
+}
+
+.arch-canvas .arch-node.is-active {
+  transform: translateY(-1px);
+}
+
+/* Unrelated nodes ease back but never disappear. */
+.arch-node.is-dimmed {
+  opacity: 0.76;
+}
+
+/* --- Execution trace --------------------------------------------------- */
+
+.arch-trace {
+  display: flex;
+  flex-direction: column;
+  align-self: start;
+  gap: 14px;
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: var(--radius-card);
+  background: rgba(248, 249, 253, 0.5);
+}
+
+.arch-trace__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.arch-trace__title {
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: var(--weight-ui);
+  letter-spacing: 0.09em;
+}
+
+/* States plainly that the timings are simulated, not measured. */
+.arch-trace__badge {
+  padding: 2px 7px;
+  border: 1px solid rgba(74, 80, 104, 0.1);
+  border-radius: 999px;
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: var(--weight-ui);
+  letter-spacing: 0.07em;
+}
+
+.arch-trace__list {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.arch-trace__row {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  align-items: baseline;
+  gap: 8px;
+}
+
+.arch-trace__dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #ddf5e8;
+  border: 1px solid rgba(81, 86, 102, 0.16);
+  transform: translateY(-1px);
+}
+
+.arch-trace__time {
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.arch-trace__text {
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+/* --- Detail strip: a fixed band, not a pointer tooltip ---------------- */
+
+.arch-lab__detail {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  min-height: 64px;
+  padding: 14px clamp(16px, 2vw, 24px);
+  border-top: 1px solid var(--line-subtle);
+}
+
+.arch-lab__detail-title {
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: var(--weight-ui);
+}
+
+.arch-lab__detail-text,
+.arch-lab__detail-hint {
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.arch-lab__detail-hint {
+  color: var(--text-annotation);
+}
+
+.systems__micro {
+  align-self: flex-end;
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  opacity: 0.8;
+}
+
+/* --- Mode and trace entrance ------------------------------------------ */
+
+@keyframes arch-enter {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes arch-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.arch-links,
+.arch-packets {
+  animation: arch-fade 400ms var(--ease-nav) both;
+}
+
+.arch-canvas .arch-node,
+.arch-flow .arch-node {
+  animation: arch-enter 380ms var(--ease-nav) both;
+}
+
+.arch-trace__row {
+  animation: arch-enter 300ms var(--ease-nav) both;
+  animation-delay: calc(var(--i, 0) * 45ms);
+}
+
+/* --- Principles strip -------------------------------------------------- */
+
+.systems__principles {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.systems__principle {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding-inline: clamp(14px, 2vw, 24px);
+  border-left: 1px solid var(--line-subtle);
+}
+
+.systems__principle:first-child {
+  padding-left: 0;
+  border-left: 0;
+}
+
+.systems__principle-index {
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: var(--weight-ui);
+  letter-spacing: 0.05em;
+}
+
+.systems__principle-title {
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: var(--weight-ui);
+  line-height: 1.4;
+}
+
+/* =====================================================================
+   MOBILE FLOW
+   Below 700px the positioned topology is replaced by a vertical execution
+   flow. Squeezing a ten-node diagram into a 350px column would make every
+   label unreadable, so the same data is re-laid rather than scaled.
+   ===================================================================== */
+
+.arch-flow {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.arch-flow__band {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+/* The connector between stacked rows. */
+.arch-flow__link {
+  width: 1px;
+  height: 22px;
+  background: linear-gradient(
+    to bottom,
+    rgba(81, 86, 102, 0.05),
+    rgba(81, 86, 102, 0.22),
+    rgba(81, 86, 102, 0.05)
+  );
+}
+
+.arch-flow__row {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.arch-flow__row .arch-node {
+  width: min(100%, 300px);
+}
+
+/* The genuinely parallel band stays a compact three-column row. */
+.arch-flow__row--parallel {
+  gap: 8px;
+}
+
+.arch-flow__row--parallel .arch-node {
+  flex: 1 1 0;
+  min-width: 84px;
+  width: auto;
+  height: 60px;
+  padding-inline: 9px;
+  gap: 7px;
+}
+
+.arch-flow__row--parallel .arch-node__label {
+  white-space: normal;
+  font-size: 12px;
+}
+
+.arch-flow__row--parallel .arch-node__technical {
+  font-size: 9px;
+}
+
+/* =====================================================================
+   RESPONSIVE
+   ===================================================================== */
+
+/* The trace moves below the architecture as soon as the side column would
+   squeeze the canvas. Measured: with the 280px trace still beside it, a
+   1024px viewport leaves the canvas about 563px, and Automation's four-node
+   band overlaps. Full canvas width at these sizes fixes it. */
+@media (max-width: 1149px) {
+  .arch-lab__body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .arch-lab {
+    min-height: 0;
+  }
+}
+
+/* Compact selector before it can overflow the header. */
+@media (max-width: 860px) {
+  .arch-lab__head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .arch-modes {
+    width: 100%;
+  }
+
+  .arch-mode {
+    flex: 1 1 0;
+    padding-inline: 8px;
+  }
+}
+
+@media (max-width: 640px) {
+  .arch-modes {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 3px;
+  }
+
+  .arch-mode {
+    height: 40px;
+    padding-inline: 10px;
+  }
+}
+
+/* Phone: swap the topology for the vertical flow. */
+@media (max-width: 699px) {
+  .systems {
+    padding-block: clamp(88px, 14vw, 112px);
+  }
+
+  .arch-canvas {
+    display: none;
+  }
+
+  .arch-flow {
+    display: flex;
+  }
+
+  .arch-lab__body {
+    padding: 20px 16px;
+  }
+
+  .systems__principles {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px 0;
+  }
+
+  .systems__principle:nth-child(odd) {
+    padding-left: 0;
+    border-left: 0;
+  }
+}
+
+/* Tablet principles: two by two. */
+@media (min-width: 700px) and (max-width: 999px) {
+  .systems {
+    padding-block: clamp(96px, 11vw, 128px);
+  }
+
+  .systems__principles {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px 0;
+  }
+
+  .systems__principle:nth-child(odd) {
+    padding-left: 0;
+    border-left: 0;
+  }
+}
+
+@media (max-width: 420px) {
+  .arch-flow__row--parallel .arch-node {
+    padding-inline: 7px;
+    gap: 5px;
+  }
+
+  .arch-flow__row--parallel .arch-node__label {
+    font-size: 11.5px;
+  }
+}
+
+/* =====================================================================
+   REDUCED MOTION
+   Everything stays visible and switchable; only movement stops.
+   ===================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .arch-links,
+  .arch-packets,
+  .arch-canvas .arch-node,
+  .arch-flow .arch-node,
+  .arch-trace__row {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .arch-canvas .arch-node {
+    translate: -50% -50%;
+  }
+
+  .arch-packet {
+    animation: none;
+    offset-distance: 50%;
+    opacity: 0.8;
+  }
+
+  .arch-node,
+  .arch-mode {
+    transition: none;
+  }
+
+  .arch-node.is-active,
+  .arch-canvas .arch-node.is-active {
+    transform: none;
+  }
+}

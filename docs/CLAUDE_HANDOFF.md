@@ -1,4 +1,4 @@
-<!-- PROJECT_STAGE: 4 -->
+<!-- PROJECT_STAGE: 5 -->
 <!-- DOCUMENT_STATUS: CURRENT -->
 
 # Claude Handoff
@@ -62,7 +62,9 @@ Both rules hold until the user explicitly changes them. See
 | QA | Playwright + pngjs (devDependencies), scripts in `qa/` |
 
 Rendering is almost entirely server-side. The **only** client component in the
-project is `src/components/navigation/SiteNavigation.tsx`.
+project are `src/components/navigation/SiteNavigation.tsx` and
+`src/components/systems/ArchitectureLab.tsx` (plus the two presentational
+modules the lab imports).
 
 ## Current Runtime
 
@@ -87,14 +89,15 @@ production domain is deliberately not listed. See `docs/DEPLOYMENT.md`.
 
 ## Frozen Stages
 
-Stages 01-04 are complete, QA-verified and **frozen**. Do not redesign them.
+Stages 01-05 are complete, QA-verified and **frozen**. Do not redesign them.
 
 | Stage | Scope | Status |
 |---|---|---|
-| 01 | Milky Intelligence background: 6 aurora fields, 2 prism beams, micro-grain, Milk/Frost/Prism surfaces | FROZEN |
+| 01 | Background: 6 aurora fields, 2 prism beams, grain, 3 surfaces | FROZEN |
 | 02 | Typography: Geist Sans + Geist Mono, type scale, text colour roles | FROZEN |
-| 03 | Navigation + SiteShell: fixed desktop bar, compact panel below 900px, system mark | FROZEN |
+| 03 | Navigation + SiteShell: desktop bar, compact panel below 900px | FROZEN |
 | 04 | Hero + Intelligence Constellation | FROZEN |
+| 05 | 01 / Intelligent Systems - the architecture lab | FROZEN |
 
 Details in `docs/PROJECT_STATE.md`. History in `docs/CHANGELOG.md`.
 
@@ -114,11 +117,12 @@ generic glassmorphism, gaming UI, crypto UI. Full anti-pattern list in
 
 Two routes:
 
-- **`/`** — hero (`#hero`) followed by five neutral navigation anchor sections:
-  `#systems`, `#products`, `#ai-learning`, `#lab`, `#work`.
-  Those five are **QA placeholders only**. Each contains an eyebrow label and the
-  words "Navigation specimen section". They are not designed sections and hold no
-  real content. Stage 05 will replace them.
+- **`/`** — hero (`#hero`), then the Stage 05 Intelligent Systems section
+  (`#systems`), then four remaining anchor sections: `#products`,
+  `#ai-learning`, `#lab`, `#work`.
+  Those four are **QA placeholders only** — an eyebrow label and the words
+  "Navigation specimen section". One stage replaces one placeholder; leave the
+  others alone.
 - **`/specimen`** — the Stage 02 typography specimen, kept so the type scale
   stays verifiable. Not linked from the site.
 
@@ -130,18 +134,20 @@ There is deliberately no Contact, Hire Me, About, Blog or social link.
 ```
 src/components/
   layout/SiteShell.tsx            background + navigation + <main> content frame
-  visual/AuroraBackground.tsx     Layer A base + Layer B six aurora fields
-  visual/PrismLight.tsx           Layer C two light sweeps
-  visual/GrainOverlay.tsx         Layer D micro-grain
-  navigation/SiteNavigation.tsx   CLIENT - the only client component
-  navigation/DesktopNavigation.tsx
-  navigation/MobileNavigation.tsx
-  navigation/SystemMarkImage.tsx
+  visual/{AuroraBackground,PrismLight,GrainOverlay}.tsx   background layers A-D
+  navigation/SiteNavigation.tsx   CLIENT - navigation state and observers
+  navigation/{DesktopNavigation,MobileNavigation,SystemMarkImage}.tsx
   navigation/nav-items.ts         single source for the five destinations
   hero/Hero.tsx
   hero/IntelligenceConstellation.tsx
   hero/CapabilityRail.tsx
   hero/constellation-geometry.ts  node/link maths, evaluated at build time
+  systems/IntelligentSystemsSection.tsx   section shell (server)
+  systems/ArchitectureLab.tsx     CLIENT - the section's only client component
+  systems/{ArchitectureCanvas,ArchitectureModeSelector,ExecutionTrace,
+           EngineeringPrinciples}.tsx
+  systems/architecture-data.ts    four modes: nodes, links, traces
+  systems/architecture-geometry.ts  orthogonal connection routing
 ```
 
 Full tree and architectural principles in `docs/ARCHITECTURE.md`.
@@ -169,12 +175,16 @@ measurements showing the original approach is better. Reasons in
 - `.site-main:has(.hero)` zeroes the shell's top padding.
 - No scroll cue, and no forced `<br>` in the hero heading.
 - No navigation item is active while the hero owns the viewport.
+- Architecture connections use a userSpaceOnUse gradient; the default
+  objectBoundingBox degenerates on horizontal paths.
+- The architecture trace drops below the canvas at 1149px, not 999px, because
+  the side column squeezed the canvas into node overlap at 1024px.
 
 ## Infrastructure State
 
 | Item | State |
 |---|---|
-| Git | Repository initialised. Branch `main`. Tags `portfolio-stage-04-verified`, `portfolio-production-v1` |
+| Git | Repository initialised. Branch `main`. Tags `portfolio-stage-04-verified`, `portfolio-production-v1`, `portfolio-stage-05-verified` |
 | Production | LIVE at `https://intelligent-systems-lab.duckdns.org` |
 | Dev preview | `npm run dev:remote` on `0.0.0.0:3000`, still available |
 | Host firewall | 80/443 allowed; 3000 allowed; 3100 has no inbound rule |
@@ -208,13 +218,12 @@ truth for tokens. Documentation must not duplicate it.
 
 ## Current Task Status
 
-Stages 01-04 complete and frozen. The persistent context system is complete.
-The site is deployed and live over HTTPS. Deployment did not advance the design
-stage. Stage 05 has **not** started.
+Stages 01-05 complete and frozen. The persistent context system is complete and
+the site is live over HTTPS. Stage 06 has **not** started.
 
 ## Next Allowed Task
 
-**Stage 05** - replacing the five neutral anchor sections with real content.
+**Stage 06 - Product Engineering / Web + Mobile + AI**, filling `#products`.
 The user will supply that specification separately. See `docs/NEXT_STAGE.md`.
 
 Do not begin it automatically.
