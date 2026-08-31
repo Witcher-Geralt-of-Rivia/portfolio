@@ -145,6 +145,27 @@ with `--disable-backgrounding-occluded-windows`,
 `--disable-renderer-backgrounding`, `--disable-background-timer-throttling`.
 Several apparent bugs during Stages 03 and 04 were this artefact, not the app.
 
+## Reading Two QA Outputs Correctly
+
+Two results look like failures and are not. Both were re-verified after the
+documentation work.
+
+**`stage04-geometry.mjs` reports geometric overlap below 700px.** At mobile
+widths the chips grow relative to the artboard, so a spoke computed against
+desktop chip sizes legitimately ends *behind* a chip. Chips paint above the SVG,
+so nothing is visible. The authoritative check is `stage04-occlusion.mjs`, which
+measures actual visible bleed over label text: **1/255** at both 390 and 360,
+below the grain dither's own amplitude. The geometry script now labels this
+explicitly. Do not change constellation geometry on the strength of that line.
+
+**CLS at 390x844 can read a small non-zero when the full suite runs.** One
+observation of 0.0057 was recorded while eight viewports plus a 30-second motion
+sampler ran back to back. Three isolated re-runs at that viewport all read
+**0**. Product code was byte-identical to the tagged Stage 04 checkpoint at the
+time, so this is measurement contention in the headless environment rather than
+a layout shift. Re-measure in isolation before treating a small mobile CLS
+reading as real.
+
 ## Artefact Locations
 
 ```
