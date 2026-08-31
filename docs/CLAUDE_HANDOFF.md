@@ -1,4 +1,4 @@
-<!-- PROJECT_STAGE: 5 -->
+<!-- PROJECT_STAGE: 6 -->
 <!-- DOCUMENT_STATUS: CURRENT -->
 
 # Claude Handoff
@@ -118,14 +118,13 @@ generic glassmorphism, gaming UI, crypto UI. Full anti-pattern list in
 
 Two routes:
 
-- **`/`** — hero (`#hero`), then the Stage 05 Intelligent Systems section
-  (`#systems`), then four remaining anchor sections: `#products`,
-  `#ai-learning`, `#lab`, `#work`.
-  Those four are **QA placeholders only** — an eyebrow label and the words
-  "Navigation specimen section". One stage replaces one placeholder; leave the
-  others alone.
-- **`/specimen`** — the Stage 02 typography specimen, kept so the type scale
-  stays verifiable. Not linked from the site.
+- **`/`** — hero (`#hero`), the Stage 05 Intelligent Systems section
+  (`#systems`), the Stage 06 Product Engineering section (`#products`), then
+  three remaining anchor sections: `#ai-learning`, `#lab`, `#work`.
+  Those three are **QA placeholders only** — an eyebrow label and the words
+  "Navigation specimen section". One stage replaces one; leave the rest alone.
+- **`/specimen`** — Stage 02 typography specimen, kept so the type scale stays
+  verifiable. Not linked from the site.
 
 Navigation destinations are exactly: Systems, Products, AI Learning, Lab, Work.
 There is deliberately no Contact, Hire Me, About, Blog or social link.
@@ -139,16 +138,19 @@ src/components/
   navigation/SiteNavigation.tsx   CLIENT - navigation state and observers
   navigation/{DesktopNavigation,MobileNavigation,SystemMarkImage}.tsx
   navigation/nav-items.ts         single source for the five destinations
-  hero/Hero.tsx
-  hero/IntelligenceConstellation.tsx
-  hero/CapabilityRail.tsx
+  hero/{Hero,IntelligenceConstellation,CapabilityRail}.tsx
   hero/constellation-geometry.ts  node/link maths, evaluated at build time
   systems/IntelligentSystemsSection.tsx   section shell (server)
-  systems/ArchitectureLab.tsx     CLIENT - the section's only client component
+  systems/ArchitectureLab.tsx     CLIENT - that section's only client component
   systems/{ArchitectureCanvas,ArchitectureModeSelector,ExecutionTrace,
            EngineeringPrinciples}.tsx
-  systems/architecture-data.ts    four modes: nodes, links, traces
-  systems/architecture-geometry.ts  orthogonal connection routing
+  systems/architecture-{data,geometry}.ts  four modes; orthogonal routing
+  products/ProductEngineeringSection.tsx  section shell (server)
+  products/ProductStudio.tsx      CLIENT - scenario state + flow state machine
+  products/ProductScenarioSelector.tsx    CLIENT - ARIA tablist
+  products/{WebProductSurface,MobileProductSurface,AiAssistSurface,
+            ProductEventFlow,ProductCapabilityRail}.tsx
+  products/product-scenarios.ts   three scenarios, event rail, capabilities
 ```
 
 Full tree and architectural principles in `docs/ARCHITECTURE.md`.
@@ -183,7 +185,7 @@ Each is an entry in `docs/DECISIONS.md` with its measured reason.
 
 | Item | State |
 |---|---|
-| Git | Repository initialised. Branch `main`. Tags `portfolio-stage-04-verified`, `portfolio-production-v1`, `portfolio-stage-05-verified` |
+| Git | Repository initialised. Branch `main`. Tags `portfolio-stage-04-verified`, `portfolio-production-v1`, `portfolio-stage-05-verified`, `portfolio-stage-06-verified` |
 | Production | LIVE at `https://intelligent-systems-lab.duckdns.org` |
 | Dev preview | `npm run dev:remote` on `0.0.0.0:3000`, still available |
 | Host firewall | 80/443 allowed; 3000 allowed; 3100 has no inbound rule |
@@ -213,24 +215,23 @@ The VPS already hosts other services. Read the safety rules in
 | What to do next | `docs/NEXT_STAGE.md` |
 | Machine-readable state | `docs/project-state.json` |
 
-Raw design values live in `src/styles/tokens.css` - that file is the source of
-truth for tokens. Documentation must not duplicate it.
+Raw design values live in `src/styles/tokens.css`, the source of truth for
+tokens. Documentation must not duplicate it.
 
 ## Current Task Status
 
-Stages 01-05 complete and frozen. The persistent context system is complete and
-the site is live over HTTPS. Stage 06 has **not** started.
+Stages 01-06 complete and frozen. The persistent context system is complete and
+the site is live over HTTPS. Stage 07 has **not** started.
 
 ## Next Allowed Task
 
-**Stage 06 - Product Engineering / Web + Mobile + AI**, filling `#products`.
-The user will supply that specification separately. See `docs/NEXT_STAGE.md`.
+**Stage 07**, filling the next placeholder (`#ai-learning`). The user will
+supply that specification separately. See `docs/NEXT_STAGE.md`.
 
 Do not begin it automatically.
 
-The site is public now: anything shipped is immediately visible. Follow the
-update procedure in `docs/DEPLOYMENT.md` and never point the domain at
-`next dev`.
+The site is public: anything shipped is immediately visible. Follow the update
+procedure in `docs/DEPLOYMENT.md` and never point the domain at `next dev`.
 
 ## Forbidden Actions
 

@@ -1,4 +1,4 @@
-<!-- PROJECT_STAGE: 5 -->
+<!-- PROJECT_STAGE: 6 -->
 <!-- DOCUMENT_STATUS: CURRENT -->
 
 # Milky Intelligence Design System
@@ -157,6 +157,27 @@ The Intelligence Constellation is the identity artwork: a system topology of
 eight capability nodes around an orchestrator. It must read as a network, not as
 a sphere, an orb, a brain or an atom. Signals travel slowly and sparsely; at most
 five packets exist at once.
+
+## Product Surface Language
+
+Product surfaces are authored, never borrowed. The web frame is our own
+application window: three pastel dots, a route field and a `DEMO DATA` label —
+no address bar, no back/forward, no vendor chrome, no facsimile of any real
+browser. The phone is a neutral container with a sensor capsule: no camera, no
+notch clone, no manufacturer detail, no hardware branding.
+
+Screens are rendered products, not decoration, so they use the same tokens as
+the rest of the site. Status carries on pastel pills, never on saturated
+semantic red/green. Data reads as demonstration data because it is labelled
+that way, not because it is obviously fake.
+
+The AI surface is a panel, not a chat window. Context, a one-line brief and a
+next action. No input field, no transcript, no provider name, no model. It is
+badged `LOCAL SIMULATION` on the surface itself, not only in a caption.
+
+When a scenario changes, frames stay where they are and only their contents
+transform. A surface that jumped position or resized on every switch would read
+as a page reload rather than one product with several faces.
 
 ## Responsive Principles
 

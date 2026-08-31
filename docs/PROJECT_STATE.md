@@ -1,4 +1,4 @@
-<!-- PROJECT_STAGE: 5 -->
+<!-- PROJECT_STAGE: 6 -->
 <!-- DOCUMENT_STATUS: CURRENT -->
 
 # Project State
@@ -9,13 +9,12 @@ Everything below was read from the repository, not recalled from conversation.
 ## Stage Status
 
 ```
-Stages 01-05   COMPLETE and FROZEN
+Stages 01-06   COMPLETE and FROZEN
 Deployment     LIVE at https://intelligent-systems-lab.duckdns.org
-Stage 06       NOT STARTED
+Stage 07       NOT STARTED
 ```
 
-The next task is Stage 06 - Product Engineering, filling `#products`.
-See `docs/NEXT_STAGE.md`.
+The next task is Stage 07, filling `#ai-learning`. See `docs/NEXT_STAGE.md`.
 
 ## Toolchain
 
@@ -33,22 +32,11 @@ See `docs/NEXT_STAGE.md`.
 
 ## Dependencies
 
-Runtime:
-
 ```
-geist        ^1.7.2
-next         16.3.3
-react        19.2.8
-react-dom    19.2.8
-```
-
-Development:
-
-```
-@types/node ^20, @types/react ^19, @types/react-dom ^19
-eslint ^9, eslint-config-next 16.3.3, typescript ^5
-playwright ^1.62.1        QA harness - do not remove
-pngjs ^7.0.0              QA pixel analysis - do not remove
+runtime  geist ^1.7.2, next 16.3.3, react 19.2.8, react-dom 19.2.8
+dev      typescript ^5, eslint ^9, eslint-config-next 16.3.3,
+         @types/{node ^20,react ^19,react-dom ^19}
+         playwright ^1.62.1 + pngjs ^7.0.0   QA harness - do not remove
 ```
 
 There is no animation library, no UI kit, no icon package, no CSS framework and
@@ -94,8 +82,8 @@ tracking runs anywhere in the project.
 | `/specimen` | Stage 02 typography specimen, unlinked | Static (prerendered) |
 
 Section ids on `/`: `hero`, `systems`, `products`, `ai-learning`, `lab`, `work`.
-`#systems` is the real Stage 05 section. The remaining four are still Stage 03
-QA placeholders with no real content.
+`#systems` (Stage 05) and `#products` (Stage 06) are real sections. The
+remaining three are still Stage 03 QA placeholders with no real content.
 
 ## Source Tree
 
@@ -104,41 +92,36 @@ src/
   app/
     layout.tsx            root layout, loads Geist, renders SiteShell
     globals.css           composition root; imports every stylesheet
-    page.tsx              hero + anchor sections
-    page.css              anchor section styling
+    page.tsx, page.css    hero + anchor sections
     specimen/page.tsx     typography specimen
     specimen/page.css
   components/
     layout/SiteShell.tsx
-    visual/AuroraBackground.tsx
-    visual/PrismLight.tsx
-    visual/GrainOverlay.tsx
+    visual/{AuroraBackground,PrismLight,GrainOverlay}.tsx
     navigation/SiteNavigation.tsx      "use client"
-    navigation/DesktopNavigation.tsx
-    navigation/MobileNavigation.tsx
-    navigation/SystemMarkImage.tsx
+    navigation/{DesktopNavigation,MobileNavigation,SystemMarkImage}.tsx
     navigation/nav-items.ts
-    hero/Hero.tsx
-    hero/IntelligenceConstellation.tsx
-    hero/CapabilityRail.tsx
+    hero/{Hero,IntelligenceConstellation,CapabilityRail}.tsx
     hero/constellation-geometry.ts
     systems/IntelligentSystemsSection.tsx    section shell (server)
     systems/ArchitectureLab.tsx              "use client"
-    systems/ArchitectureCanvas.tsx
     systems/ArchitectureModeSelector.tsx     full ARIA tablist
-    systems/ExecutionTrace.tsx
-    systems/EngineeringPrinciples.tsx
+    systems/{ArchitectureCanvas,ExecutionTrace,EngineeringPrinciples}.tsx
     systems/architecture-data.ts             four modes
     systems/architecture-geometry.ts         orthogonal routing
+    products/ProductEngineeringSection.tsx   section shell (server)
+    products/ProductStudio.tsx               "use client" - flow state machine
+    products/ProductScenarioSelector.tsx     full ARIA tablist
+    products/{WebProductSurface,MobileProductSurface,AiAssistSurface}.tsx
+    products/{ProductEventFlow,ProductCapabilityRail}.tsx
+    products/product-scenarios.ts            three scenarios + event rail
   styles/
     tokens.css            all design tokens - the source of truth for values
     typography.css        type roles and base elements
     motion.css            aurora/prism keyframes + reduced motion
     layers.css            four background layers + responsive behaviour
     surfaces.css          Milk / Frost / Prism
-    navigation.css        navigation geometry and states
-    hero.css              hero layout, constellation, hero motion
-    systems.css           Intelligent Systems section and architecture lab
+    navigation.css, hero.css, systems.css, products.css   per-section styles
 
 public/
   textures/micro-grain.svg    locally generated SVG turbulence tile
@@ -149,7 +132,7 @@ docs/                          canonical project memory (this directory)
 ```
 
 Stylesheet import order in `globals.css`: tokens, typography, motion, layers,
-surfaces, navigation, hero, systems.
+surfaces, navigation, hero, systems, products.
 
 ## Stage 01 - Background (FROZEN)
 
@@ -345,6 +328,40 @@ performance claims.
 
 Desktop panel measures 1200x621 and is height-stable across all four modes.
 
+## Stage 06 - Product Engineering (FROZEN)
+
+Section `#products`, heading "One product. Every surface."
+
+The Product Engineering Studio shows one product across four surfaces at once:
+a web application frame, a phone, an AI-assist panel and the backend event
+pipeline beneath them. Three scenarios are switched by a real ARIA tablist with
+arrow-key navigation. Each is declared in `product-scenarios.ts`; the surfaces
+are block renderers over that data, not hand-built JSX per scenario.
+
+| Scenario | Route | Web blocks | Phone blocks |
+|---|---|---|---|
+| Operations SaaS (default) | `/app/overview` | tiles, chart, rows, rows | cards |
+| Commerce Platform | `/app/commerce` | tiles, cards, timeline, rows | card, progress, suggestion |
+| Field Workflow | `/app/dispatch` | tiles, map, rows, rows | card, checklist |
+
+`Run product flow` walks a seven-step local state machine across the six-stage
+event rail (UI Event, API, Service, Data, Background Job, Sync), lighting each
+stage and propagating into the phone and the assist panel. Measured at 300ms
+per step, 2.18-2.21s end to end. The interval is torn down when the scenario
+changes, the flow restarts or the component unmounts, so an abandoned run
+leaves no stale state.
+
+Every frame is authored in HTML and CSS: no screenshot, no device mockup, no
+browser facsimile, no vendor chrome. The phone is a neutral container with a
+sensor capsule - no camera, no notch clone, no manufacturer detail.
+
+Nothing here reaches the network: 0 requests across 15 flow runs and 30
+scenario changes. The AI panel is provider-neutral with no input and no model,
+labelled AI ASSIST / LOCAL SIMULATION; web frames are labelled DEMO DATA. These
+are engineering simulations, not client work. Surfaces stay anchored when the
+scenario changes - the phone holds one height (367px) across all three - so
+only the contents transform.
+
 ## Assets
 
 ```
@@ -373,7 +390,6 @@ Update procedure: `npm run deploy:safe`. Caddy is untouched by a release.
 
 ## Known Gaps
 
-- Stage 05 section content: NOT STARTED
 - LCP timing: UNVERIFIED in the headless QA environment (see QA_BASELINE.md)
 - Reboot survival relies on the host's existing PM2 logon-time resurrection,
   which fires at Administrator logon rather than at system boot. This affects

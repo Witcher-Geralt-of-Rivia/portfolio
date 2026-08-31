@@ -1,4 +1,4 @@
-<!-- PROJECT_STAGE: 5 -->
+<!-- PROJECT_STAGE: 6 -->
 <!-- DOCUMENT_STATUS: CURRENT -->
 
 # Project Changelog
@@ -297,3 +297,69 @@ Accidental plain build: 255/255 public requests 200. Inactive-slot build:
 327/327 200. Rollback drill: restored correctly, public healthy, exit 1.
 Caddy hash unchanged and its process never restarted. Stages 01-05 regression
 all PASS - no visual change.
+
+---
+
+## Stage 06 - Product Engineering
+
+Status: **Frozen**
+
+### Summary
+Built `#products`, heading "One product. Every surface." A Product Engineering
+Studio shows one product across four surfaces simultaneously: a web application
+frame, a phone, an AI-assist panel and the backend event pipeline beneath them.
+Three scenarios — Operations SaaS, Commerce Platform, Field Workflow — switch
+through a real ARIA tablist. `Run product flow` walks a seven-step local state
+machine along the six-stage event rail and propagates into every surface.
+
+### Files
+`src/components/products/{ProductEngineeringSection,ProductStudio,
+WebProductSurface,MobileProductSurface,AiAssistSurface,ProductEventFlow,
+ProductScenarioSelector,ProductCapabilityRail}.tsx`,
+`src/components/products/product-scenarios.ts`, `src/styles/products.css`,
+`src/app/page.tsx`, `src/app/globals.css`, `qa/stage06-*.mjs`
+
+### Notable during implementation
+- ESLint was linting `.next-release-a/b`. The A/B hardening added those
+  directories but the ignore list still only covered `.next`, so 174 errors in
+  generated output would have failed the deployment's own validate phase.
+- `products.css` shipped no list reset. The global reset zeroes margins only,
+  and each stylesheet clears its own list defaults, so the browser's 40px marker
+  inset silently indented the rows, timeline, step list and capability rail.
+- The capability rail used `auto-fit`, which chose four columns at tablet width
+  and left two empty cells showing the divider colour. Explicit counts that
+  divide six (1/2/3/6) replaced it.
+- The desktop composition stretched its aside track and right-aligned the
+  children, leaving 100–185px of dead space beside the web frame. The frame is
+  now held at its 730px design width with the pair centred.
+- The field scenario's service-area SVG was a 2.4:1 box rendering 227px tall,
+  making that scenario's frame far taller than the others. Same drawing,
+  shallower viewBox.
+- At phone widths the mono row meta would not wrap and starved the row name
+  down to an ellipsis; name and meta now take separate lines.
+
+### QA harness corrections
+Four apparent application bugs were measurement artifacts, consistent with the
+headless behaviour already recorded in `QA_BASELINE.md`:
+- Frame-forcing screenshots cost over a second each, which swallowed the whole
+  2.2s flow and made it look instantaneous. Interaction assertions now read DOM
+  state directly and take no screenshots mid-run.
+- `waitForFunction` defaults to rAF polling; a headless page that is not
+  painting starves rAF, delaying detection and letting throttled interval
+  callbacks fire in a burst afterwards. Switched to interval polling.
+- The fixed site navigation and the `<nextjs-portal>` dev-tools indicator both
+  painted over the section in full-page captures — the nav's dark text was
+  being sampled as the assist panel's background, reading 1.00:1. Both are
+  removed for capture only; neither exists in the production build.
+- Counting `document.getAnimations()` counted 180–260ms colour transitions at
+  `currentTime: 0` as "animating at rest". Only infinite keyframe animations
+  scoped to `#products` are counted now.
+
+### QA
+50 text roles measured for contrast across all three scenarios with the flow
+complete: all pass, worst case 5.01:1. CLS 0.00000 at load and after three
+scenario changes plus three flows. 30 scenario changes and 15 flow runs clean,
+with 0 network requests. Eight viewports pass with no overflow and no surface
+collision. Flow measured at 2.18–2.21s over seven steps. Stage 06 contributes
+zero infinite animations at rest; under reduced motion it runs no keyframe
+animation at all while content still changes. Stages 01–05 regression all PASS.

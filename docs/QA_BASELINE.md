@@ -1,4 +1,4 @@
-<!-- PROJECT_STAGE: 5 -->
+<!-- PROJECT_STAGE: 6 -->
 <!-- DOCUMENT_STATUS: CURRENT -->
 
 # QA Baseline
@@ -139,12 +139,38 @@ frame lifecycle is deferred and reads stale:
 - CSS transitions do not advance (an element mid-transition reports its start
   geometry - a panel measured 0.985x scaled)
 - `getComputedStyle` returns pre-recalc values after `addStyleTag`
+- a compositing layer of its own (anything with `backdrop-filter`) can still
+  hold pre-override pixels after `addStyleTag`, long after the rest repaints
 
 **Mitigation:** force a frame with a throwaway
 `page.screenshot({ type: "jpeg", quality: 20 })` before measuring, and launch
 with `--disable-backgrounding-occluded-windows`,
 `--disable-renderer-backgrounding`, `--disable-background-timer-throttling`.
 Several apparent bugs during Stages 03 and 04 were this artefact, not the app.
+
+Stage 06 added four more, all harness faults rather than application faults:
+
+- **Screenshots are slow enough to swallow what they measure.** A full-page or
+  large-element capture costs over a second. A 2.2s flow measured with frame
+  forcing between the click and the read appeared to complete instantly. Assert
+  DOM state directly during interaction and take no screenshots mid-run; React
+  updates the DOM whether or not the page paints.
+- **`waitForFunction` polls on rAF by default.** A page that is not painting
+  starves rAF, which both delays detection and lets throttled `setInterval`
+  callbacks fire in a burst afterwards, collapsing a timed sequence. Pass
+  `{ polling: 120 }` for anything timing-sensitive.
+- **Fixed and injected overlays land in full-page captures.** The site
+  navigation is `position: fixed`, so scrolling a section into view parks its
+  dark text over that section in a full-page screenshot — sampled as if it were
+  the section's background, which read 1.00:1. `<nextjs-portal>`, the dev-tools
+  indicator, does the same and exists only under `next dev`. Remove both for
+  capture with `display: none` — `visibility: hidden` is not enough, because
+  nav children re-assert `visibility: visible`.
+- **`document.getAnimations()` counts transitions.** A snapshot taken just
+  after an interaction is full of 180-260ms colour transitions at
+  `currentTime: 0`. To ask "does this section animate at rest", filter to
+  `animationName` set, `iterations === Infinity`, and target within the
+  section.
 
 ## Stage 05 - Intelligent Systems
 
@@ -201,6 +227,38 @@ principle index 6.06   principle title 16.06   micro label 5.60
 Scripts: `qa/stage05-shots.mjs`, `stage05-interaction.mjs`, `stage05-a11y.mjs`,
 `stage05-responsive.mjs`, `stage05-contrast.mjs`, `stage05-public.mjs`.
 Screenshots in `qa/shots/stage05/`.
+
+## Stage 06 - Product Engineering
+
+Dev server, 1440x900 unless stated. Harness: `qa/stage06-*.mjs`.
+
+| Check | Result |
+|---|---|
+| Contrast, 50 text roles, 3 scenarios, flow complete | all PASS, worst 5.01:1 |
+| CLS at load | 0.00000 |
+| CLS after 3 scenario changes + 3 flows | 0.00000 |
+| Scenario changes | 30/30 clean |
+| Flow runs | 15/15 clean |
+| Network requests during those 45 interactions | 0 |
+| Console errors and warnings | 0 |
+| Viewports without overflow or surface collision | 8/8 |
+| Flow duration, 7 steps, measured in-page | 2183-2210ms |
+| Infinite animations at rest, scoped to `#products` | 0 |
+| Reduced motion: keyframe animations during a flow | 0 |
+| Reduced motion: content still changes | PASS |
+| DOM nodes in `#products` | 205 |
+
+Worst contrast is the `LOCAL / DETERMINISTIC` micro label at 5.01:1 against the
+capability rail; every other role clears 5.3:1. No role uses `--text-muted`.
+
+Keyboard: ArrowRight/ArrowLeft/Home/End all move selection and focus together
+across the scenario tablist. Abandoning a run mid-flight by switching scenario
+leaves no active stage, no passed stages, an empty live region and the button
+back to `Run product flow`.
+
+Surface stability across scenarios: the phone holds 367px at every viewport and
+every frame keeps its position; only the web frame's height follows its content
+(566-682px at desktop).
 
 ## Deployment Safety (A/B release slots)
 
@@ -340,6 +398,7 @@ qa/shots/               Stage 01 baselines (10 PNG)
 qa/shots/stage02/       Stage 02 baselines (12 PNG)
 qa/shots/stage03/       Stage 03 baselines (15 PNG)
 qa/shots/stage04/       Stage 04 baselines (14 PNG)
+qa/shots/stage06/       Stage 06 baselines (6 PNG)
 qa/report.json          Stage 01 machine-readable results
 qa/stage02-report.json  Stage 02 machine-readable results
 qa/stage02-measurements.txt
@@ -364,6 +423,12 @@ qa/stage04-occlusion.mjs    measured line bleed over label text
 qa/stage04-contrast.mjs     hero contrast over worst-case backdrop
 qa/stage04-perf.mjs         CLS, network, console, idle, 30s motion stability
 qa/stage04-shots.mjs        Stage 04 screenshot set
+qa/stage06-responsive.mjs   8 viewports: surfaces present, overflow, collision
+qa/stage06-interaction.mjs  30 scenario changes, 15 flow runs, keyboard, network
+qa/stage06-contrast.mjs     50 text roles across all three scenarios
+qa/stage06-perf.mjs         CLS, animation cost at rest, reduced-motion contract
+qa/stage06-timing.mjs       in-page flow timing (no screenshots during the run)
+qa/stage06-shots.mjs        Stage 06 screenshot set
 qa/project-memory-check.mjs canonical documentation consistency
 ```
 

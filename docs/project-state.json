@@ -1,23 +1,25 @@
 {
   "project": "Milky Intelligence Technical Portfolio",
   "purpose": "Demonstrate engineering capability to freelance clients. Technical portfolio, not a personal site.",
-  "currentStage": 5,
+  "currentStage": 6,
   "stage05Started": true,
-  "nextStage": "stage-06",
-  "nextStageTitle": "Stage 06",
+  "nextStage": "stage-07",
+  "nextStageTitle": "Stage 07",
   "frozenStages": [
     1,
     2,
     3,
     4,
-    5
+    5,
+    6
   ],
   "stageNames": {
     "1": "Visual foundation - Milky Intelligence background",
     "2": "Typography - Geist Sans and Geist Mono",
     "3": "Navigation and site shell",
     "4": "Hero and Intelligence Constellation",
-    "5": "Intelligent Systems - architecture lab"
+    "5": "Intelligent Systems - architecture lab",
+    "6": "Product Engineering - cross-surface product studio"
   },
   "constraints": {
     "contactInformation": false,
@@ -53,7 +55,11 @@
     "language": "TypeScript",
     "cssApproach": "plain CSS with design tokens",
     "clientComponents": [
-      "src/components/navigation/SiteNavigation.tsx"
+      "src/components/navigation/SiteNavigation.tsx",
+      "src/components/systems/ArchitectureLab.tsx",
+      "src/components/systems/ArchitectureModeSelector.tsx",
+      "src/components/products/ProductStudio.tsx",
+      "src/components/products/ProductScenarioSelector.tsx"
     ]
   },
   "routes": [
@@ -100,7 +106,8 @@
       2,
       3,
       4,
-      5
+      5,
+      6
     ],
     "cls": 0,
     "thirdPartyRequests": 0,
@@ -134,6 +141,8 @@
   "git": {
     "underVersionControl": true,
     "branch": "main",
-    "stage04Tag": "portfolio-stage-04-verified"
-  }
+    "stage04Tag": "portfolio-stage-04-verified",
+    "stage05Tag": "portfolio-stage-05-verified"
+  },
+  "stage06Started": true
 }

@@ -1,14 +1,16 @@
 import Hero from "@/components/hero/Hero";
 import IntelligentSystemsSection from "@/components/systems/IntelligentSystemsSection";
+import ProductEngineeringSection from "@/components/products/ProductEngineeringSection";
 import { NAV_ITEMS } from "@/components/navigation/nav-items";
 
 import "./page.css";
 
-/* The homepage: the Stage 04 hero, the Stage 05 Intelligent Systems section,
-   then the remaining navigation anchor zones. Those remaining four are still
-   Stage 03 QA placeholders and are replaced by their own stages. */
+/* The homepage: the Stage 04 hero, then the built capability sections, then
+   the remaining navigation anchor zones. Those remaining zones are still
+   Stage 03 QA placeholders and are replaced one per stage. */
 
-const PLACEHOLDERS = NAV_ITEMS.filter((item) => item.id !== "systems");
+const BUILT = new Set(["systems", "products"]);
+const PLACEHOLDERS = NAV_ITEMS.filter((item) => !BUILT.has(item.id));
 
 export default function Home() {
   return (
@@ -16,6 +18,8 @@ export default function Home() {
       <Hero />
 
       <IntelligentSystemsSection />
+
+      <ProductEngineeringSection />
 
       {PLACEHOLDERS.map((item) => (
         <section key={item.id} id={item.id} className="nav-specimen">

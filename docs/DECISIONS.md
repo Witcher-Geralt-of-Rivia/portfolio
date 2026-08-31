@@ -1,4 +1,4 @@
-<!-- PROJECT_STAGE: 5 -->
+<!-- PROJECT_STAGE: 6 -->
 <!-- DOCUMENT_STATUS: CURRENT -->
 
 # Decisions
@@ -706,3 +706,103 @@ any `pm2` invocation, and the PM2 process file declares an explicit `env` block.
 process. The first production deployment leaked a tooling token into a
 long-lived process that way. The production environment is now two variables:
 `NODE_ENV` and `PORTFOLIO_DIST_DIR`.
+
+---
+
+## D-033 — Product surfaces are authored, never screenshotted
+
+Status: Accepted
+Stage: 6
+
+### Decision
+Every frame in the Product Engineering Studio — the web application window, the
+phone, the assist panel — is built from HTML and CSS in this repository. No
+screenshot, no device-mockup package, no vendor browser chrome, no notch clone.
+The phone carries a neutral sensor capsule and nothing else.
+
+### Reason
+The section's claim is that this is our product design. A screenshot of someone
+else's interface, or a stock device frame, would demonstrate the opposite. It
+also keeps the section at zero external image requests and lets all three
+scenarios share one renderer driven by `product-scenarios.ts`.
+
+---
+
+## D-034 — One block renderer per surface, driven by scenario data
+
+Status: Accepted
+Stage: 6
+
+### Decision
+`WebProductSurface` and `MobileProductSurface` switch over a typed block union
+(`tiles`, `chart`, `rows`, `cards`, `timeline`, `map`; `cards`, `progress`,
+`checklist`, `suggestion`). Scenarios declare block lists; there is no
+hand-built JSX per scenario.
+
+### Reason
+The same rule as `architecture-data.ts` in Stage 05. Three near-duplicate
+screen implementations would drift, and adding a scenario would mean writing
+markup rather than data. The union keeps every scenario type-checked against
+the renderers it actually uses.
+
+---
+
+## D-035 — The product flow is a local interval, torn down on every exit
+
+Status: Accepted
+Stage: 6
+
+### Decision
+`ProductStudio` holds `flowState` and `stepIndex` in React state and advances
+them with a single `setInterval`, keyed on the flow state and the scenario. The
+effect's cleanup clears the interval, so changing scenario, restarting the flow
+or unmounting all abandon the run. No state-management library was introduced.
+
+### Reason
+Seven ordered steps do not justify a reducer library. The real risk is a
+timer outliving its scenario and writing into the wrong one, so the teardown is
+the load-bearing part: measured at zero stale state after abandoning a run
+mid-flight. The flow performs no network request of any kind — 0 requests
+across 15 runs and 30 scenario changes.
+
+### Consequence
+`setStepIndex(0)` happens in the click handler, not the effect body: calling
+setState synchronously inside an effect triggers cascading renders and is a
+lint error under `react-hooks/set-state-in-effect`.
+
+---
+
+## D-036 — The AI surface is provider-neutral and has no input
+
+Status: Accepted
+Stage: 6
+
+### Decision
+`AiAssistSurface` renders a heading, a one-line brief and a next action, badged
+`AI ASSIST` / `LOCAL SIMULATION`. It has no text input, no transcript, no model
+and no network call. The flow's completion swaps the brief for its resolved
+form; that is the whole behaviour.
+
+### Reason
+The project forbids any paid AI runtime, and a chat box would imply one. What a
+product actually needs from an assistive surface is context, a summary and a
+next action — which is demonstrable deterministically. Naming a provider would
+also date the work and imply a dependency that does not exist.
+
+---
+
+## D-037 — Release slots are ignored by ESLint for the same reason `.next` is
+
+Status: Accepted
+Stage: 6
+
+### Decision
+`eslint.config.mjs` ignores `.next-release-a/**` and `.next-release-b/**`
+alongside `.next/**`.
+
+### Reason
+The A/B hardening introduced two more directories holding generated build
+output, but the ignore list inherited from `eslint-config-next` only covers
+`.next`. Linting them reported 174 errors in code we did not write, and
+`safe-deploy.ps1` runs ESLint in its validate phase — so this would have
+blocked every deployment from Stage 06 onward.

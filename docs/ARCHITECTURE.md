@@ -1,4 +1,4 @@
-<!-- PROJECT_STAGE: 5 -->
+<!-- PROJECT_STAGE: 6 -->
 <!-- DOCUMENT_STATUS: CURRENT -->
 
 # Architecture
@@ -107,7 +107,7 @@ hero rules do not live in `navigation.css`.
 
 ## Client/Server Boundary
 
-There are two `"use client"` modules, each with deliberately bounded
+There are four `"use client"` modules, each with deliberately bounded
 responsibilities.
 
 `SiteNavigation.tsx`:
@@ -122,9 +122,20 @@ responsibilities.
 and the node currently hovered or focused. The mode transition, packet motion,
 connection highlighting and trace stagger are all CSS.
 
+`ProductStudio.tsx` holds the selected scenario and the position of the product
+flow. The flow is a single `setInterval` advancing a step index; its effect
+cleanup clears the timer, so changing scenario, restarting or unmounting all
+abandon the run rather than letting it write into a stale scenario. The lit
+stage, the phone's sync marker and the assist panel's resolved brief are all
+derived from that one index.
+
+`ArchitectureModeSelector.tsx` and `ProductScenarioSelector.tsx` are client
+only because a tablist needs key handling and roving tabindex. They own no
+state; the selection lives in their parent.
+
 Everything else - the aurora, the prism, the grain, the hero, the
-constellation, the systems section shell and the principles strip - is
-server-rendered markup plus CSS.
+constellation, both section shells, the four product surfaces, the event rail
+and the principles and capability strips - is server-rendered markup plus CSS.
 
 The constellation's hover uses CSS `:has()` specifically so the hero does not
 need to become a client component.
