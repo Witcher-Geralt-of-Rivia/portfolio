@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "next start",
     "start:portfolio": "next start --hostname 127.0.0.1 --port 3100",
+    "deploy:safe": "powershell -NoProfile -ExecutionPolicy Bypass -File deploy/safe-deploy.ps1",
     "lint": "eslint",
     "qa:memory": "node qa/project-memory-check.mjs"
   },

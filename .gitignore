@@ -42,3 +42,10 @@ next-env.d.ts
 
 # typescript build cache
 tsconfig.tsbuildinfo
+
+# production release slots (alternating; never committed)
+/.next-release-a/
+/.next-release-b/
+
+# safe-deploy logs
+/deploy/logs/
