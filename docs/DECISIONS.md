@@ -1400,3 +1400,217 @@ a due date, a customer name — rather than a category that repeats. Raw entity
 ids stay in the model for the later stages that will link these rows to their
 records, and are not displayed: they are internal plumbing, not product
 content.
+
+---
+
+## D-056 — The Overview's composition is one table derived from the permission matrix
+
+Status: Accepted
+Stage: 9C2.1
+
+### Decision
+`src/demos/operations/ui/overview-policy.ts` maps every Overview surface — each
+KPI, each panel, each action-queue category, each notification category — to
+the module whose data it summarises, and asks `permissions.ts` whether the role
+can open that module. The screen renders what the policy returns and decides
+nothing itself.
+
+### Reason
+09C2 filtered the KPI cards by role and left everything else alone, so the rule
+was half applied. A panel is a module's data in summary form: leaving the Lead
+funnel on screen for a role that cannot open Leads makes the Overview a hole in
+the policy it is supposed to demonstrate. The same was true one level down —
+the action queue and the notification list are built from records belonging to
+modules, and both leaked.
+
+The leak was not theoretical. As Finance Analyst the notification badge read
+**8** while the panel it labelled held **3**, because the badge counted the
+unfiltered set. A visitor comparing the two would have caught it.
+
+Deriving the table from `permissions.ts` rather than restating the matrix is
+what stops the two drifting: there is no second place to update when a role
+changes.
+
+### Consequence
+Panel and KPI composition per role is now:
+
+```
+Admin              4 KPIs   Lead funnel · Fleet status · Upcoming · Queue
+Sales Agent        2 KPIs   Lead funnel · Upcoming · Queue
+Fleet Coordinator  2 KPIs   Fleet status · Upcoming · Queue
+Finance Analyst    1 KPI    Payment status · Contract status · Queue
+```
+
+Payment Status and Contract Status appear only where a role has no richer
+operational panel, so Finance is not left with a single card and a list.
+`qa/stage09c21-operations-hardening.mjs` asserts the matrix, asserts that no
+role sees a surface from a module it cannot open, and asserts containment: no
+role sees anything Admin cannot, and each sees strictly less.
+
+This is still an interaction simulation, not a security boundary — every record
+remains readable in browser storage whatever role is selected. What it
+demonstrates is that one table governs the whole screen.
+
+---
+
+## D-057 — A KPI states its breakdown, not a progress bar
+
+Status: Accepted
+Stage: 9C2.1
+
+### Decision
+KPI cards carry either a derived breakdown that sums to the headline, or a
+derived note giving the headline its denominator. They carry no progress bars.
+
+### Reason
+The bars had no denominator. "38 open leads" is not 38% of anything, so the
+fill was chosen to look plausible — a decoration drawn in the visual language
+of a measurement, which is the same failure as a fabricated metric even though
+no number was invented.
+
+A breakdown does the job the bar was pretending to do. It is checkable on
+sight: the parts are counts from the same collections the panels below render,
+and they add up to the number above them.
+
+```
+OPEN LEADS      38    12 New · 10 Contacted · 9 Qualified · 7 Proposal
+PAYMENTS         8    5 pending · 3 overdue
+RESERVATIONS     4    4 vehicles currently held
+VEHICLES        10    of 24 fleet assets
+```
+
+### Consequence
+Every KPI is falsifiable from the rest of the screen. The harness asserts the
+sums rather than the pixels, and asserts that no comparison language ("vs last
+month", "+12%", "trending") appears anywhere — there is no previous period in
+this demo, so any comparison would be invented.
+
+---
+
+## D-058 — A revalidating query keeps its previous answer
+
+Status: Accepted
+Stage: 9C2.1
+
+### Decision
+`useDemoQuery` distinguishes a query's **identity** (status plus declared deps)
+from its **trigger** (identity plus revision and nonce). A new revision re-asks
+the same question, so the previous answer is kept while the re-read runs and
+`loading` reports the refresh. Changed deps ask a different question, so the
+previous answer is dropped. A failed read also drops it.
+
+### Reason
+Discarding the data on every revalidation made the interface state things that
+were not true. Marking eight notifications read issues eight writes; each one
+bumped the revision and blanked the query, and `NotificationCenter` renders
+`data ?? []`. The result was a badge that vanished and a list that read "No
+notifications" while six of the eight writes were still outstanding — and
+because a reload then restored the six, the demo appeared to lose data it had
+in fact never saved.
+
+The QA harness caught it as an intermittent failure. Measuring the store
+directly showed the truth: at the moment the badge cleared, IndexedDB still
+held six or seven unread. The persistence layer was correct throughout — the
+adapter awaits `tx.oncomplete`, so a resolved commit is durable. What was wrong
+was a screen that reported completion before the work was done.
+
+Identity is what decides this, not the trigger. Keeping stale data across a
+**dep** change would have been a different bug of the same family: switching
+role would show the previous role's records for a frame, which is exactly the
+leak D-056 closes.
+
+### Consequence
+`OperationsOverview` no longer falls back to its skeleton on every mutation —
+the skeleton is for having nothing to show, not for refreshing what is already
+on screen — so a change updates the figures in place. Callers that branch on
+`loading` behave exactly as before. The shared runtime keeps its rule that
+nothing polls and no timer runs at rest.
+
+---
+
+## D-059 — The mark is derived tight, not square
+
+Status: Accepted
+Stage: 9C2.1
+
+### Decision
+`public/brand/mark-120.png` is trimmed to the artwork's own bounds plus a 5%
+margin, keeping its 1077×1231 aspect, and is rendered 30px tall in the site
+navigation and 22px tall in the demo bar. The square derivatives remain for the
+favicon and app icons, where a square frame is required.
+
+### Reason
+The master centres a 965×1119 mark inside a 1254 square, so roughly 11% of each
+side is transparent padding. Rendered at 28px square that left about 25px of
+visible mark, reading small beside 12px type. The padding was measured, not
+assumed: alpha bounds at both `>1` and `>128` give the same figure, which is
+what proves the horizontal margin is genuinely empty rather than faint glow.
+
+Trimming to a square would have recovered only about 2% — the artwork is taller
+than it is wide, so a square trim is bounded by its height. Preserving the
+aspect is what recovers the rest.
+
+### Consequence
+The master `logo.png` is untouched, and the harness asserts its byte count and
+dimensions on every run. The derived mark keeps a safety margin so the soft
+outer glow is not shaved, and its corners stay fully transparent so no plate is
+drawn behind it on any surface.
+
+---
+
+## D-060 — The shared bar stands down where the product names itself
+
+Status: Accepted
+Stage: 9C2.1
+
+### Decision
+`DemoShell`'s `title` is optional and the Operations demo passes none. A demo
+that names itself inside its own interface is not named again by the shared
+chrome. The filler that holds the bar's row open is hidden once the bar wraps.
+
+### Reason
+The bar read "Operations Console" directly above a product whose sidebar and
+route heading already said so — the same words three times in the top 120px.
+Naming is the product's job; the shared bar's job is the disclosure, the way
+back, and the reset.
+
+The filler had to stand down with it. It carries no `order`, so in the wrapped
+layout it sorted ahead of the back link and claimed a whole row, pushing "←
+Portfolio" to the right-hand edge of a phone screen. `margin-left: auto` on the
+controls does the same work without occupying a row.
+
+### Consequence
+On a phone the bar is three honest rows — back, then role and reset, then the
+disclosure — with every item on screen and no empty row. The disclosure text is
+unchanged and remains mandatory on every demo route.
+
+---
+
+## D-061 — Demo 01 is deployed for external review before its remaining modules are built
+
+Status: Accepted
+Stage: 9C2.1
+
+### Decision
+`/demos/operations` ships to production carrying the shell and the Overview,
+with its other ten modules rendering as non-interactive labels. The registry
+keeps `operations = building`, `#work` is untouched and still renders its Stage
+03 placeholder, and Stage 09C3 does not begin until the deployed build has been
+reviewed live.
+
+### Reason
+The four defects this stage fixed — a decorative progress bar, a half-applied
+role rule, a notification panel that overflowed a phone, a mark too small to
+read — were all found by looking at rendered pixels, and three of them survived
+a QA suite that passed. A local production build answers whether the code
+works; it does not answer whether the product reads well on a real screen at
+arm's length. Deferring that judgement until all eleven modules exist would
+mean discovering shell-level problems eleven times over.
+
+Shipping it does not advertise it: the demo routes are `noindex, nofollow`,
+nothing links to them from the site, and `currentStage` stays at 8.
+
+### Consequence
+The next task is blocked, deliberately, on a human looking at the live URL.
+Deployment used `npm run deploy:safe` and the shared host's other application
+was verified healthy afterwards.

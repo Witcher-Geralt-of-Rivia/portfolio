@@ -11,16 +11,19 @@ Everything below was read from the repository, not recalled from conversation.
 ```
 Stages 01-08   COMPLETE and FROZEN
 Deployment     LIVE at https://intelligent-systems-lab.duckdns.org
-Stage 09       IN PROGRESS - 09A/09B/09C1/09C2 done, 0 of 3 demos built
+Stage 09       IN PROGRESS - through 09C2.1, 0 of 3 demos built
+Demo 01        /demos/operations DEPLOYED; 09C3 blocked on live review
 ```
 
 Stage 09 changed direction: `#work` becomes a launcher into three interactive
 frontend-only product demos, not case studies. 09A froze the shared runtime;
 09B froze Demo 01's contract; 09C1 built its domain; 09C2 built the shell and
-Overview at `/demos/operations`. The other ten modules are unbuilt, nothing is
-wired into `#work`, and `currentStage` stays 8. See
-`docs/DEMO_OPERATIONS_IMPLEMENTATION.md` and `docs/NEXT_STAGE.md`. The case-study framework and its one verified internal
-case are preserved, unpublished; see `docs/CASE_STUDY_SOURCE_AUDIT.md`.
+Overview at `/demos/operations`; 09C2.1 hardened it and deployed it to be
+judged on a real screen before ten more modules are built on it. Those ten are
+unbuilt, `#work` still renders its Stage 03 placeholder, and `currentStage`
+stays 8. See `docs/DEMO_OPERATIONS_IMPLEMENTATION.md` and `docs/NEXT_STAGE.md`.
+The case-study framework and its one verified internal case are preserved,
+unpublished; see `docs/CASE_STUDY_SOURCE_AUDIT.md`.
 
 ## Toolchain
 
@@ -45,32 +48,28 @@ dev      typescript ^5, eslint ^9, eslint-config-next 16.3.3,
          playwright ^1.62.1 + pngjs ^7.0.0   QA harness - do not remove
 ```
 
-There is no animation library, no UI kit, no icon package, no CSS framework and
-no AI SDK. That is intentional.
+No animation library, UI kit, icon package, CSS framework or AI SDK, by
+intent.
 
 ## Scripts
 
 `dev`, `dev:remote` (0.0.0.0:3000), `build`, `start`, `start:portfolio`,
-`lint`, `qa:memory`, `deploy:safe`. See `package.json`.
-
-`deploy:safe` is the only supported production deployment path. Production
-serves an alternating release slot and never the default `.next`, so a plain
-`npm run build` cannot disturb the live site.
+`lint`, `qa:memory`, `deploy:safe`. See `package.json`. `deploy:safe` is the
+only supported production path: production serves an alternating release slot
+and never the default `.next`, so `npm run build` cannot disturb the live site.
 
 ## Rendering Architecture
 
-Server-first. The hero, the background system and both navigation
-presentations are server components. Twenty `"use client"` modules exist: nine
-on the site (`SiteNavigation.tsx`, plus a lab and a tablist per capability
-section), four in the demo platform, and seven in the Operations demo's own
-interface. `project-state.json` holds the authoritative list.
+Server-first. The hero, the background system and both navigation presentations
+are server components. Twenty `"use client"` modules exist: nine on the site,
+four in the demo platform and seven in the Operations demo's own interface.
+`project-state.json` holds the authoritative list.
 
 No `requestAnimationFrame` loop and no pointer tracking runs anywhere. Timers
 exist only inside the three user-triggered sequences - the Stage 06 flow, the
-Stage 07 adaptation (an interval plus a settle timeout) and the Stage 08
-experiments - and every one is torn down by effect cleanup on scenario change,
-restart and unmount. See D-035, D-042 and D-044. Nothing runs on a timer at
-rest.
+Stage 07 adaptation and the Stage 08 experiments - each torn down by effect
+cleanup on scenario change, restart and unmount (D-035, D-042, D-044). Nothing
+runs on a timer at rest.
 
 ## Routes
 
@@ -78,11 +77,12 @@ rest.
 |---|---|---|
 | `/` | Hero + five navigation anchor sections | Static (prerendered) |
 | `/specimen` | Stage 02 typography specimen, unlinked | Static (prerendered) |
+| `/demos/operations` | Demo 01 shell + Overview, `noindex`, unlinked | Static page, client subtree |
 
 Section ids on `/`: `hero`, `systems`, `products`, `ai-learning`, `lab`, `work`.
 `#systems` (05), `#products` (06), `#ai-learning` (07) and `#lab` (08) are real
-sections. `#work` is the last Stage 03 QA placeholder. `src/app/demos/` holds a
-layout with no page beneath it, so it adds no route: `/demos` is a 404.
+sections. `#work` is the last Stage 03 QA placeholder. `/demos` is itself a
+404 - the layout there has no page of its own.
 
 ## Source Tree
 
@@ -380,20 +380,20 @@ delay", "simulated step 6 of 6") are sequence positions, not latency.
 
 ## Assets
 
-`public/brand/logo-*.png`, derived from the approved `logo.png` (never served),
-plus `public/textures/micro-grain.svg`. No stock imagery or icon package.
+`public/brand/*.png`, derived from the approved `logo.png` (never served), plus
+`public/textures/micro-grain.svg`. No stock imagery or icon package.
 
 ## Deployment
 
 Live at `https://intelligent-systems-lab.duckdns.org`. PM2 app "portfolio" on
-127.0.0.1:3100, behind a Caddy instance shared with another project, which also
-runs its own app on 3200. Production serves `.next-release-a` / `-b`; `.next`
-is development only. Update with `npm run deploy:safe` and nothing else. Host
+127.0.0.1:3100, behind a Caddy instance shared with another project that runs
+its own app on 3200. Production serves `.next-release-a` / `-b`; `.next` is
+development only. Update with `npm run deploy:safe` and nothing else; host
 safety rules in `docs/DEPLOYMENT.md`.
 
 ## Known Gaps
 
 - LCP timing: UNVERIFIED in the headless QA environment (see QA_BASELINE.md)
 - Reboot survival relies on the host's PM2 logon-time resurrection, which fires
-  at Administrator logon rather than at system boot. This affects every service
-  on the host. Not reboot-tested: another production domain shares the machine.
+  at Administrator logon rather than at boot. Not reboot-tested: another
+  production domain shares the machine.

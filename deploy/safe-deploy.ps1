@@ -49,7 +49,7 @@ $SmokePorts    = @(3199, 3198, 3197, 3196)
 $PublicUrl     = "https://intelligent-systems-lab.duckdns.org"
 $Pm2Config     = Join-Path $PSScriptRoot "pm2.portfolio.config.js"
 $LogDir        = Join-Path $PSScriptRoot "logs"
-$MutexName     = "Global\MilkyIntelligencePortfolioSafeDeploy"
+$MutexName     = "Global\IntelligentSystemsLabPortfolioSafeDeploy"
 
 $script:Phase = 0
 $script:Log = [System.Collections.ArrayList]::new()

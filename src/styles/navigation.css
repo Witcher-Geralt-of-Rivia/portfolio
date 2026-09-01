@@ -75,11 +75,13 @@
 
 .site-nav__mark {
   display: block;
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 30px;
   /* Explicit box: the mark is an <img>, and this keeps it from ever
-     contributing layout shift while it decodes. */
-  flex: 0 0 28px;
+     contributing layout shift while it decodes. 26x30 rather than 28 square
+     because the tight derivative keeps the artwork's own aspect; the visible
+     mark is larger than the old square asset gave in the same bar. */
+  flex: 0 0 26px;
 }
 
 .site-nav__wordmark {

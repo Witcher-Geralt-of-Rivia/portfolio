@@ -125,6 +125,20 @@ export type QueryState<T> = {
  * effect would be a synchronous write inside an effect, which cascades a
  * render. Two different objects would stringify alike and quietly never
  * refetch, hence the restriction.
+ *
+ * **A revalidation keeps the previous data.** Discarding it meant every
+ * mutation blanked every live query until the re-read settled, and a caller
+ * writing `data ?? []` rendered that blank as fact: marking eight
+ * notifications read cleared the badge and emptied the list after the first
+ * write, while seven were still unwritten. `loading` still says a read is in
+ * flight; a caller that shows a skeleton on `loading` behaves exactly as
+ * before.
+ *
+ * The identity of the query is what decides this, not the trigger. A new
+ * revision re-reads the *same* question, so the old answer is stale but still
+ * this query's. Changed `deps` ask a *different* question — switching role,
+ * page or filter — and the previous answer is then someone else's data, so it
+ * is dropped rather than shown for a frame.
  */
 export function useDemoQuery<T>(
   read: () => Promise<T>,
@@ -134,14 +148,20 @@ export function useDemoQuery<T>(
   const revision = useDemoRevision();
   const [nonce, setNonce] = useState(0);
 
-  const token = `${status}|${revision}|${nonce}|${deps.map(String).join("~::~")}`;
+  const identity = `${status}|${deps.map(String).join("~::~")}`;
+  const token = `${identity}|${revision}|${nonce}`;
   const [settled, setSettled] = useState<{
     token: string;
+    identity: string;
     data: T | null;
     error: DemoError | null;
   } | null>(null);
 
-  const current = settled && settled.token === token ? settled : null;
+  /* Settled for this exact trigger: the read is done. */
+  const fresh = settled && settled.token === token ? settled : null;
+  /* Settled for this question but an older revision: stale, still ours. */
+  const stale = settled && settled.identity === identity ? settled : null;
+  const shown = fresh ?? stale;
 
   useEffect(() => {
     if (status !== "ready" || !runtime) return;
@@ -149,12 +169,15 @@ export function useDemoQuery<T>(
 
     read()
       .then((data) => {
-        if (live) setSettled({ token, data, error: null });
+        if (live) setSettled({ token, identity, data, error: null });
       })
       .catch((cause: unknown) => {
         if (!live) return;
+        /* A failed read drops the data it failed to refresh: showing stale
+           rows beside an error would state the failure and contradict it. */
         setSettled({
           token,
+          identity,
           data: null,
           error:
             cause instanceof DemoError
@@ -173,9 +196,9 @@ export function useDemoQuery<T>(
   }, [runtime, token]);
 
   return {
-    data: current?.data ?? null,
-    loading: current === null,
-    error: current?.error ?? null,
+    data: shown?.data ?? null,
+    loading: fresh === null,
+    error: fresh?.error ?? null,
     refetch: () => setNonce((n) => n + 1),
   };
 }

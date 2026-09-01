@@ -960,3 +960,127 @@ stage09b-spec      96/96
 stage09c1-domain   211/211
 qa:memory          18/18
 ```
+
+---
+
+## Stage 09C2.1 - Operations Shell Hardening
+
+PASS. Harness: `qa/stage09c21-operations-hardening.mjs` (107 checks), plus the
+full regression below.
+
+Run against a **local production build**, never the dev server:
+
+```
+npm run build
+npx next start --hostname 127.0.0.1 --port 3001
+node qa/stage09c21-operations-hardening.mjs
+```
+
+Port 3001. Port 3200 belongs to the other application on this host and is not
+touched; 3100 is this portfolio's live production.
+
+### What this stage asked
+
+09C2 asked whether the shell rendered. This asked whether what it renders is
+honest.
+
+```
+KPI semantics       no progress bars; every breakdown sums to its headline;
+                    no comparison language anywhere
+role composition    KPI, panel, action-queue and notification sets per role,
+                    each derived from permissions.ts
+role containment    no role sees a surface from a module it cannot open;
+                    no role sees anything Admin cannot; each sees less
+mobile sheet        390px and 360px: inside the viewport, below its bar,
+                    scrim, close control, page scroll locked, last row
+                    reachable, focus returned
+logo                master byte-identical; derived mark tighter than the
+                    master, same aspect, margin intact, corners transparent
+identity            the product names itself exactly once at every width
+reset               returns to Admin, 38/4/10/8, 8 unread
+```
+
+### Defects found and fixed
+
+```
+KPI progress bars     a bar with no denominator, drawn in the visual language
+                      of a measurement            -> derived breakdowns (D-057)
+role rule half done   panels, queue and notifications ignored the matrix; the
+                      Finance badge read 8 over a list of 3   -> D-056
+notification popover  anchored to a 24px bell, overflowed a phone
+                      -> full-width sheet with scrim and close control
+mark too small        11% transparent padding on each side of the master
+                      -> tight derivative, 25px visible becomes 30px (D-059)
+bar duplicated name   "Operations Console" three times in the top 120px
+                      -> the shared bar's title stands down (D-060)
+query blanked on      the badge cleared and the list emptied while six of
+  every revalidation   eight writes were still outstanding      -> D-058
+```
+
+The last one was found by the harness as an intermittent failure and confirmed
+by reading IndexedDB directly at the moment the badge cleared: the store still
+held six or seven unread. The persistence layer was correct throughout. Three
+consecutive clean runs of each UI harness confirm the fix.
+
+### Role composition, as rendered
+
+```
+                   KPIs  panels                                    badge  queue
+Admin                 4  Lead funnel · Fleet · Upcoming · Queue        8      6
+Sales Agent           2  Lead funnel · Upcoming · Queue                8      6
+Fleet Coordinator     2  Fleet · Upcoming · Queue                      2      2
+Finance Analyst       1  Payment status · Contract status · Queue      0      3
+```
+
+Finance's badge is 0 because its own notifications are all read in the seed —
+which is the point: the badge now counts the list it labels. Every badge equals
+the unread rows in that role's own panel.
+
+### Mobile notification sheet
+
+```
+                         390px            360px
+panel width              92% of viewport  91% of viewport
+top                      189 (bar ends 181)
+bottom                   836 of 844
+horizontal overflow      none             none
+scrim / close control    present          present
+page scroll locked       yes              yes
+last row reachable       yes (22 rows)    yes (22 rows)
+focus returned on close  yes              yes
+shared bar               3 rows, every item on screen, no empty filler
+```
+
+### Logo
+
+```
+master        logo.png 1254x1254, 844406 bytes - read, never written
+artwork       965x1119 at x144 y67, so 68.7% of the master frame
+derived mark  public/brand/mark-120.png, 105x120, 17.3 KB
+              fills 88% of its frame, aspect within 2% of the master,
+              margin intact, all four corners fully transparent
+rendered      30px tall in site navigation, 22px in the demo bar
+```
+
+### Regression
+
+All run against the same local production build.
+
+```
+stage09a-runtime                76/76
+stage09a-shell                  85/85
+stage09b-operations-spec        96/96
+stage09c1-operations          211/211
+stage09c2-operations-ui       140/140
+stage09c21-hardening          107/107
+qa:memory                       18/18
+tsc --noEmit                    clean
+eslint                          0 errors (1 pre-existing warning in qa/texture.mjs)
+                              ------
+                              715 checks
+```
+
+Two assertions in the 09C2 harness were updated rather than removed: the demo
+bar mark is no longer square, and the queue's re-render is now waited for as a
+condition instead of a fixed 150ms sleep. A wait that never resolves still
+fails its check.

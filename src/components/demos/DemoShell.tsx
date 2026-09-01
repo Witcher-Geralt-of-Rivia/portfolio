@@ -27,8 +27,16 @@ import DemoDisclosure from "./DemoDisclosure";
 import DemoResetControl from "./DemoResetControl";
 
 export type DemoShellProps = {
-  /** The fictional product's name, or the demo's working title. */
-  title: string;
+  /**
+   * Optional working title.
+   *
+   * Deliberately optional and deliberately unused by a finished demo. This bar
+   * is the provenance layer — whose frame this is, that the data is synthetic,
+   * how to leave and how to reset. The product names itself inside its own
+   * shell, and printing that name here too made the bar read as part of the
+   * fictional company rather than as the portfolio's frame around it.
+   */
+  title?: string;
   /** Role switcher, supplied by the demo. A slot, so the demo owns its roles. */
   roleControl?: React.ReactNode;
   children: React.ReactNode;
@@ -49,10 +57,10 @@ export default function DemoShell({ title, roleControl, children }: DemoShellPro
           <Link className="demo-chrome__back" href="/#work">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/brand/logo-96.png"
+              src="/brand/mark-120.png"
               alt=""
-              width={20}
-              height={20}
+              width={19}
+              height={22}
               className="demo-chrome__mark"
               draggable={false}
             />
@@ -61,7 +69,7 @@ export default function DemoShell({ title, roleControl, children }: DemoShellPro
 
           <DemoDisclosure />
 
-          <p className="demo-chrome__title">{title}</p>
+          {title ? <p className="demo-chrome__title">{title}</p> : <span className="demo-chrome__gap" />}
 
           <div className="demo-chrome__controls">
             {sessionOnly && (

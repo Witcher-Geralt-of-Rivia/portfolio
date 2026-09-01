@@ -164,13 +164,17 @@ section("DISCLOSURE AND LOGO");
   check("the disclosure keeps both halves", bar.disclosure.includes("SYNTHETIC DATA"));
   /* The site navigation is hidden on demo routes, so its two copies of the
      mark measure 0x0. The one that matters is the rendered one in the bar. */
-  const rendered = bar.marks.filter((m) => (m.src ?? "").includes("logo-96") && m.cw > 0);
+  /* 09C2.1 replaced the square 96px derivative with a tight one that carries
+     the mark's own 1077x1231 aspect: the square asset spent 11% of each side
+     on transparent padding, which cost the mark visible height in the bar. */
+  const rendered = bar.marks.filter((m) => (m.src ?? "").includes("mark-120") && m.cw > 0);
   check("the portfolio mark is in the demo bar", rendered.length === 1, JSON.stringify(bar.marks));
   if (rendered.length) {
     const mark = rendered[0];
-    check("the mark loaded at its natural size", mark.w === 96 && mark.h === 96, `${mark.w}x${mark.h}`);
-    check("the mark is square, not distorted", mark.cw === mark.ch, `${mark.cw}x${mark.ch}`);
-    check("the mark is subtle in the bar", mark.cw >= 18 && mark.cw <= 22, `${mark.cw}px`);
+    check("the mark loaded at its natural size", mark.w === 105 && mark.h === 120, `${mark.w}x${mark.h}`);
+    check("the mark keeps the artwork's aspect, not a square",
+      Math.abs(mark.cw / mark.ch - 105 / 120) < 0.05, `${mark.cw}x${mark.ch}`);
+    check("the mark is subtle in the bar", mark.ch >= 18 && mark.ch <= 24, `${mark.ch}px tall`);
   }
 }
 
@@ -317,7 +321,20 @@ section("NOTIFICATIONS");
   check("mark all read clears the badge", true, "0 unread");
 
   await page.keyboard.press("Escape");
-  await page.waitForTimeout(150);
+  /* The badge and the action queue are two independent queries revalidated by
+     the same revision bump, and the queue settles a beat after the badge. Wait
+     for the condition rather than for a fixed interval: a wait that never
+     resolves still fails the check below. */
+  await page
+    .waitForFunction(
+      () =>
+        ![...document.querySelectorAll(".ops-queue__row")].some((r) =>
+          /assigned for follow-up/.test(r.textContent ?? "")
+        ),
+      null,
+      { timeout: 10_000, polling: 100 }
+    )
+    .catch(() => {});
   const queueAfter = await page.evaluate(() =>
     [...document.querySelectorAll(".ops-queue__row")].map((r) => r.textContent ?? "")
   );
@@ -326,8 +343,19 @@ section("NOTIFICATIONS");
 
   await page.reload({ waitUntil: "networkidle" });
   await ready();
-  const persisted = await page.evaluate(() => document.querySelector(".ops-notify__badge") === null);
-  check("the read state survives a reload", persisted === true);
+  /* The notification query resolves from IndexedDB after first paint, so the
+     badge's absence is only meaningful once that query has settled. */
+  await page
+    .waitForFunction(() => !document.querySelector("[aria-busy='true']"), null,
+      { timeout: 10_000, polling: 100 })
+    .catch(() => {});
+  await page.waitForTimeout(300);
+  const persisted = await page.evaluate(() => ({
+    badge: document.querySelector(".ops-notify__badge")?.textContent ?? null,
+    role: document.querySelector(".ops-actor__role")?.textContent ?? "?",
+  }));
+  check("the read state survives a reload", persisted.badge === null,
+    `badge ${persisted.badge} as ${persisted.role}`);
 }
 
 /* =====================================================================
@@ -662,7 +690,7 @@ section("NETWORK AND CONTENT");
   const api = app.filter((u) => u.includes("/api/"));
   check("no external request", external.length === 0, external.slice(0, 3).join(" "));
   check("no API route call", api.length === 0, api.slice(0, 3).join(" "));
-  check("the logo is served locally", app.some((u) => u.includes("/brand/logo-96.png")));
+  check("the logo is served locally", app.some((u) => u.includes("/brand/mark-120.png")));
   /* Scoped to what §126 actually names: errors, hydration warnings and failed
      resources. Next emits a preload hint for a route stylesheet the document
      does not claim within its window; it is a framework asset hint, not an

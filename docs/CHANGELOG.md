@@ -951,3 +951,80 @@ memory fallback, CLS, idle cost and network.
 Ten module screens. `#work` is untouched, the registry still reads
 `operations = building`, `currentStage` stays 8, and nothing was deployed —
 production remains on the previous release with no Operations route.
+
+---
+
+## Stage 09C2.1 - Operations Shell Hardening and Review Deployment
+
+Status: **Complete**
+
+### Summary
+Fixed what looking at the rendered product showed, then deployed
+`/demos/operations` so it can be judged live before ten more module screens are
+built on the same shell. Stage 09C3 is deliberately blocked until that review
+comes back.
+
+### Fixed
+
+- **KPI progress bars had no denominator.** "38 open leads" is not 38% of
+  anything, so the fill was chosen to look plausible — a decoration in the
+  visual language of a measurement. Replaced by breakdowns that sum to the
+  headline and can be checked against the panels below (D-057).
+- **The role rule was half applied.** 09C2 filtered KPI cards and left panels,
+  the action queue and notifications alone. `ui/overview-policy.ts` now derives
+  every surface's visibility from `permissions.ts`. The visible symptom was a
+  Finance notification badge reading 8 over a list of 3 (D-056).
+- **The notification popover overflowed a phone.** Below 768px it is a
+  full-width sheet under the top bar, with a scrim, an explicit close control,
+  the page behind locked and its own internal scroll.
+- **The mark carried the master's transparent padding**, about 11% of each
+  side, leaving 25px of visible mark in a 28px box. A tight derivative keeping
+  the artwork's aspect renders 30px (D-059).
+- **The product named itself three times in the top 120px.** `DemoShell`'s
+  title is now optional and Operations passes none; the filler that held the
+  bar's row open stands down when the bar wraps, where it had been pushing the
+  back link to the right-hand edge of a phone screen (D-060).
+
+### The bug underneath
+
+Fixing the badge exposed a shared-runtime defect worth more than the rest.
+`useDemoQuery` discarded its data on every revalidation, so marking eight
+notifications read — eight writes, eight revision bumps — cleared the badge and
+emptied the list after the first write while seven were still outstanding. A
+reload restored them, so the demo appeared to lose data it had never saved.
+
+The QA harness caught it as an intermittent failure and reading IndexedDB at
+the moment the badge cleared confirmed it: six or seven still unread. The
+persistence layer was never at fault — the adapter awaits `tx.oncomplete`, so a
+resolved commit is durable. The screen was reporting completion before the work
+was done.
+
+The hook now keeps the previous answer while re-reading the same question, and
+drops it when the question changes. That distinction is the whole fix: keeping
+stale data across a role change would have leaked the previous role's records
+for a frame, which is the failure D-056 closes (D-058).
+
+### QA
+
+`qa/stage09c21-operations-hardening.mjs`, 107 checks: KPI semantics and sums,
+the role composition matrix, role containment, the mobile sheet at 390 and 360,
+the master logo's bytes and the derived mark's geometry, and reset. Full
+regression is 715 checks across seven suites, all against a local production
+build on port 3001 — never 3200, which belongs to the other application here.
+
+Two 09C2 assertions were updated rather than removed: the demo bar mark is no
+longer square, and the queue's re-render is waited for as a condition instead
+of a fixed 150ms sleep.
+
+### Deployed
+
+`npm run deploy:safe`, the only supported path. The route is `noindex,
+nofollow`, nothing links to it, `#work` is untouched and still renders its
+Stage 03 placeholder, the registry still reads `operations = building`, and
+`currentStage` stays 8. The last concatenated occurrence of the retired
+design-language name, a mutex name in the deploy script, was renamed with it.
+
+### Not done
+
+Ten module screens. Stage 09C3 is blocked until the deployed build has been
+reviewed on a real screen (D-061).

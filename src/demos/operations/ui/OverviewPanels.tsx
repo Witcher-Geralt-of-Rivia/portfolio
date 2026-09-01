@@ -28,67 +28,144 @@ export type KpiKey =
   | "vehiclesAvailable"
   | "paymentsRequiringAttention";
 
-const KPI_META: Record<KpiKey, { label: string; support: string }> = {
-  openLeads: { label: "OPEN LEADS", support: "Across active pipeline stages" },
-  confirmedReservations: {
-    label: "CONFIRMED RESERVATIONS",
-    support: "Vehicles held for collection",
-  },
-  vehiclesAvailable: { label: "VEHICLES AVAILABLE", support: "Ready to rent today" },
-  paymentsRequiringAttention: {
-    label: "PAYMENTS REQUIRING ATTENTION",
-    support: "Pending or past due",
-  },
+/**
+ * What each KPI is, and the breakdown printed beneath it.
+ *
+ * The breakdown replaced a progress bar. That bar drew each value as a share
+ * of a denominator the card never named — open leads against all leads,
+ * available vehicles against the fleet — so it implied a ratio the reader
+ * could not check and that nothing in the product had defined. A count that
+ * sums to the headline is checkable on sight, and it is more useful: knowing
+ * the 38 open leads are 12 New and 10 Contacted says something a bar cannot.
+ *
+ * Every figure here is derived. Nothing is a trend: there is no previous
+ * period in the dataset to compare against, so a "+12%" would be invented.
+ */
+const KPI_META: Record<KpiKey, { label: string }> = {
+  openLeads: { label: "OPEN LEADS" },
+  confirmedReservations: { label: "CONFIRMED RESERVATIONS" },
+  vehiclesAvailable: { label: "VEHICLES AVAILABLE" },
+  paymentsRequiringAttention: { label: "PAYMENTS REQUIRING ATTENTION" },
 };
 
-/**
- * A small proportional cue, drawn from the value's own share of its whole.
- *
- * Not a trend: there is no previous period to compare against, and inventing
- * a "+12%" would be exactly the fabricated metric the project forbids.
- */
-function KpiCue({ share }: { share: number }) {
-  const pct = Math.max(0, Math.min(1, share));
+export type KpiBreakdownPart = { label: string; count: number };
+
+export type KpiValue = {
+  value: number;
+  /** Parts that sum to the value, or a single denominator note. */
+  parts?: KpiBreakdownPart[];
+  note?: string;
+};
+
+export function KpiGrid({ keys, values }: { keys: KpiKey[]; values: Record<KpiKey, KpiValue> }) {
   return (
-    <span className="ops-kpi__cue" aria-hidden="true">
-      <span className="ops-kpi__cue-fill" style={{ transform: `scaleX(${pct.toFixed(3)})` }} />
-    </span>
+    <div className={`ops-kpis ops-kpis--${keys.length}`}>
+      {keys.map((key) => {
+        const v = values[key];
+        return (
+          <article className="ops-kpi" key={key}>
+            <h3 className="ops-kpi__label">{KPI_META[key].label}</h3>
+            <p className="ops-kpi__value">{v.value}</p>
+            {v.parts ? (
+              <p className="ops-kpi__parts">
+                {v.parts.map((part, i) => (
+                  <span className="ops-kpi__part" key={part.label}>
+                    {i > 0 && <span className="ops-kpi__sep" aria-hidden="true"> · </span>}
+                    <span className="ops-kpi__part-count">{part.count}</span>{" "}
+                    <span className="ops-kpi__part-label">{part.label}</span>
+                  </span>
+                ))}
+              </p>
+            ) : (
+              <p className="ops-kpi__note">{v.note}</p>
+            )}
+          </article>
+        );
+      })}
+    </div>
   );
 }
 
-export function KpiGrid({
-  data,
-  keys,
-  totals,
-}: {
-  data: OverviewData;
-  keys: KpiKey[];
-  totals: { leads: number; reservations: number; vehicles: number; payments: number };
-}) {
-  const value: Record<KpiKey, number> = {
-    openLeads: data.openLeads,
-    confirmedReservations: data.confirmedReservations,
-    vehiclesAvailable: data.vehiclesAvailable,
-    paymentsRequiringAttention: data.paymentsRequiringAttention,
-  };
-  const whole: Record<KpiKey, number> = {
-    openLeads: totals.leads,
-    confirmedReservations: totals.reservations,
-    vehiclesAvailable: totals.vehicles,
-    paymentsRequiringAttention: totals.payments,
-  };
+/* =====================================================================
+   FINANCE PANELS
 
+   Payment Status and Contract Status, drawn from the same report selector the
+   Reports module will use. Proportional rails rather than a second ring: two
+   rings side by side would read as decoration, and a rail compares lengths
+   more honestly than arc segments.
+   ===================================================================== */
+
+function StatusBars({
+  title,
+  note,
+  rows,
+  titleId,
+}: {
+  title: string;
+  note: string;
+  titleId: string;
+  rows: { label: string; count: number; tone: string }[];
+}) {
+  const peak = Math.max(1, ...rows.map((r) => r.count));
   return (
-    <div className={`ops-kpis ops-kpis--${keys.length}`}>
-      {keys.map((key) => (
-        <article className="ops-kpi" key={key}>
-          <h3 className="ops-kpi__label">{KPI_META[key].label}</h3>
-          <p className="ops-kpi__value">{value[key]}</p>
-          <p className="ops-kpi__support">{KPI_META[key].support}</p>
-          <KpiCue share={whole[key] > 0 ? value[key] / whole[key] : 0} />
-        </article>
-      ))}
-    </div>
+    <section className="ops-panel" aria-labelledby={titleId}>
+      <div className="ops-panel__head">
+        <h2 className="ops-panel__title" id={titleId}>
+          {title}
+        </h2>
+        <p className="ops-panel__note">{note}</p>
+      </div>
+      <ul className="ops-statusbars">
+        {rows.map((r) => (
+          <li className="ops-statusbars__row" key={r.label}>
+            <span className="ops-statusbars__label">{r.label}</span>
+            <span className="ops-statusbars__rail" aria-hidden="true">
+              <span
+                className={`ops-statusbars__fill ops-statusbars__fill--${r.tone}`}
+                style={{ transform: `scaleX(${(r.count / peak).toFixed(3)})` }}
+              />
+            </span>
+            <span className="ops-statusbars__count">{r.count}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+export function PaymentStatus({
+  rows,
+  outstandingCents,
+}: {
+  rows: { status: string; count: number }[];
+  outstandingCents: number;
+}) {
+  const tone: Record<string, string> = { Paid: "mint", Pending: "sky", Overdue: "peach" };
+  return (
+    <StatusBars
+      title="Payment status"
+      titleId="ops-paystatus-title"
+      note={`USD ${formatCents(outstandingCents)} outstanding`}
+      rows={rows.map((r) => ({ label: r.status, count: r.count, tone: tone[r.status] ?? "sky" }))}
+    />
+  );
+}
+
+export function ContractStatus({ rows }: { rows: { status: string; count: number }[] }) {
+  const tone: Record<string, string> = {
+    Pending: "lavender",
+    Active: "sky",
+    Completed: "mint",
+    Cancelled: "peach",
+  };
+  const total = rows.reduce((sum, r) => sum + r.count, 0);
+  return (
+    <StatusBars
+      title="Contract status"
+      titleId="ops-contractstatus-title"
+      note={`${total} contracts`}
+      rows={rows.map((r) => ({ label: r.status, count: r.count, tone: tone[r.status] ?? "sky" }))}
+    />
   );
 }
 

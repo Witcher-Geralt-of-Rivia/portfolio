@@ -125,11 +125,9 @@ Two routes:
   then `#work`, the last anchor section.
   `#work` is a **QA placeholder only** — an eyebrow label and the words
   "Navigation specimen section". Stage 09 replaces it.
-- **`/specimen`** — Stage 02 typography specimen, kept so the type scale stays
-  verifiable. Not linked from the site.
+- **`/specimen`** — Stage 02 typography specimen, unlinked, kept verifiable.
 
-`/demos/operations` is the Operations demo, added in 09C2 and not deployed.
-`/demos` itself is a 404 — the layout has no page of its own.
+`/demos/operations` is the Operations demo, deployed in 09C2.1 for review; `noindex, nofollow`, linked from nowhere. `/demos` is a 404.
 
 Navigation destinations are exactly: Systems, Products, AI Learning, Lab, Work.
 There is deliberately no Contact, Hire Me, About, Blog or social link.
@@ -226,15 +224,17 @@ Raw design values live in `src/styles/tokens.css`. Docs must not duplicate it.
 
 Stages 01-08 complete and frozen; the site is live over HTTPS. Stage 09 is **in
 progress**: 09A froze the shared runtime, 09B froze Demo 01's contract, 09C1
-built its domain, 09C2 built the shell and Overview at `/demos/operations`. Ten
-module screens remain, `#work` still renders its placeholder, and nothing is
-deployed.
+built its domain, 09C2 built the shell and Overview at `/demos/operations`, and
+09C2.1 hardened and deployed it. Ten module screens remain; `#work` still
+renders its placeholder.
 
 ## Next Allowed Task
 
-**Stage 09C3 - Operations CRM: Leads + Customers + Inbox.** The first three
-module screens; the shell and every service they need are built. See
-`docs/NEXT_STAGE.md`.
+**Stage 09C3 - Operations CRM: Leads + Customers + Inbox.** The shell and every
+service the three screens need are built. See `docs/NEXT_STAGE.md`. **BLOCKED
+UNTIL EXTERNAL LIVE REVIEW OF 09C2.1** — the deployed demo has to be looked at
+on a real screen first: every defect 09C2.1 fixed was found that way, three of
+four while the QA suite passed (D-061).
 
 Do not begin it automatically.
 

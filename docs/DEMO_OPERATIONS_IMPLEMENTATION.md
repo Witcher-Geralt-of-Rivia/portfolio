@@ -9,9 +9,9 @@ the code beneath it.
 
 ```
 STATUS      domain complete / shell + Overview complete / ten modules unbuilt
-STAGE       09C1 and 09C2 complete
+STAGE       09C1, 09C2 and 09C2.1 complete
 REGISTRY    operations = building
-ROUTE       /demos/operations exists in the source build; not deployed
+ROUTE       /demos/operations DEPLOYED, noindex, for external live review
 ```
 
 ## Stage 09C programme
@@ -19,7 +19,8 @@ ROUTE       /demos/operations exists in the source build; not deployed
 ```
 09C1  domain + seed + runtime audit extension        COMPLETE
 09C2  shell + routes + Overview                      COMPLETE
-09C3  Leads + Customers + Inbox                      NEXT
+09C2.1 shell hardening + review deployment           COMPLETE
+09C3  Leads + Customers + Inbox                      BLOCKED on live review
 09C4  Reservations + Contracts + Fleet + Maintenance + Payments
 09C5  Automations + Reports + notifications + integrated workflows
 09C6  full QA + Work integration eligibility + deployment
@@ -55,7 +56,9 @@ src/demos/operations/
     OperationsSidebar   role-filtered navigation
     OperationsOverview  reads collections, calls the selector, renders
     OverviewPanels      KPI grid, lead funnel, fleet ring, tables, queue
-    NotificationCenter  disclosure popover
+    NotificationCenter  disclosure popover; a sheet on a phone
+    overview-policy.ts  Stage 09C2.1 - what each role sees, derived from
+                        permissions.ts rather than restated
 ```
 
 Twenty-one domain modules plus nine interface modules. Validation lives with
@@ -256,9 +259,69 @@ Visuals are CSS and authored SVG — no chart library, no icon package. Where an
 SVG carries data it is `aria-hidden` and the same values appear in text beside
 it, so nothing depends on distinguishing four soft hues.
 
+## Hardening (09C2.1)
+
+Four defects, all found by looking at the rendered product rather than at the
+code, and three of them present while the 09C2 suite was passing.
+
+**The role rule was half applied.** 09C2 filtered KPI cards and nothing else.
+`ui/overview-policy.ts` now maps every surface — KPI, panel, action-queue
+category, notification category — to the module whose data it summarises, and
+asks `permissions.ts` whether the role can open it. Derived, not restated, so
+the two cannot drift. The visible symptom was a Finance notification badge
+reading 8 over a list of 3 (D-056).
+
+**KPI progress bars had no denominator.** They were replaced by breakdowns that
+sum to the headline and can be checked against the panels below (D-057).
+
+**The notification popover overflowed a phone.** Below 768px it presents as a
+full-width sheet under the top bar, with a scrim, an explicit close control,
+the page behind locked, and its own internal scroll (D-060 covers the shared
+bar that sits above it).
+
+**The mark carried the master's padding.** `public/brand/mark-120.png` is
+trimmed to the artwork's bounds plus a 5% margin, keeping its aspect (D-059).
+
+### The query bug underneath
+
+Fixing the badge exposed a shared-runtime defect that mattered more than any of
+the above. `useDemoQuery` discarded its data on every revalidation, so marking
+eight notifications read — eight writes, eight revision bumps — cleared the
+badge and emptied the list after the first write, while seven were still
+outstanding. A reload then restored them, so the demo looked like it was losing
+data it had never saved.
+
+The persistence layer was never at fault: the IndexedDB adapter awaits
+`tx.oncomplete`, so a resolved commit is durable. Reading the store directly at
+the moment the badge cleared showed six or seven still unread. The hook now
+keeps the previous answer while re-reading the same question, and drops it when
+the question changes — the distinction matters, because keeping stale data
+across a role change would leak the previous role's records for a frame
+(D-058).
+
+`OperationsOverview` stopped falling back to its skeleton on every mutation as
+a consequence: the skeleton is for having nothing to show, not for refreshing
+what is on screen.
+
+### QA
+
+`qa/stage09c21-operations-hardening.mjs`, 107 checks against a local production
+build: KPI semantics and sums, the role matrix, role containment, the mobile
+sheet at 390 and 360, the master logo's bytes and the derived mark's geometry,
+and reset. Full regression is 715 checks across seven suites; see
+`docs/QA_BASELINE.md`.
+
+### Deployment
+
+Deployed with `npm run deploy:safe` so it can be judged live. The registry
+keeps `operations = building`, the route stays `noindex, nofollow`, nothing
+links to it, and `#work` is untouched. Stage 09C3 is blocked until the review
+comes back (D-061).
+
 ## Remaining UI work
 
 Ten module screens: Leads, Customers, Reservations, Contracts, Fleet,
 Maintenance, Payments, Automations, Inbox and Reports. Every service and
 selector they need already exists. `#work` still renders its placeholder, and
-nothing is deployed.
+the demo is deployed but unadvertised — `noindex, nofollow`, linked from
+nowhere.

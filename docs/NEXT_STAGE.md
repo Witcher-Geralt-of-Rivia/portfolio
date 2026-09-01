@@ -14,8 +14,25 @@ Stage 09                IN PROGRESS
   09C Operations build  IN PROGRESS
     09C1 domain + seed  COMPLETE
     09C2 shell + Overview  COMPLETE
-    09C3 Leads/Customers/Inbox  NEXT
+    09C2.1 shell hardening + review deployment  COMPLETE
+    09C3 Leads/Customers/Inbox  BLOCKED - awaiting external live review
 ```
+
+## The block
+
+Next task: Stage 09C3 - Operations CRM: Leads + Customers + Inbox (BLOCKED UNTIL EXTERNAL LIVE REVIEW OF 09C2.1)
+
+Stage 09C3 does not start until a human has looked at
+`https://intelligent-systems-lab.duckdns.org/demos/operations` on a real
+screen and said what they think of it.
+
+This is deliberate. Every defect 09C2.1 fixed was found by looking at rendered
+pixels, and three of the four survived a QA suite that passed. Ten more module
+screens will be built on this shell; discovering a shell-level problem after
+they exist means fixing it eleven times.
+
+Nothing about the block is technical. The build is deployed, the regression is
+green, and the work is ready to continue the moment the review comes back.
 
 `currentStage` stays at **8**. Neither 09A nor 09B completes Stage 09: the
 shared foundation exists and Demo 01's contract is frozen, but no demo has been
@@ -36,8 +53,9 @@ placeholder.
 9.  Stage 09B - Operations product spec         DONE
 10. Stage 09C1 - Operations domain + seed       DONE
 11. Stage 09C2 - Shell + routes + Overview      DONE
-12. Stage 09C3 - Leads + Customers + Inbox      NEXT
-13. Stage 09C4-C6 - modules, then QA/deploy     LATER
+12. Stage 09C2.1 - Hardening + review deploy    DONE
+13. Stage 09C3 - Leads + Customers + Inbox      BLOCKED on live review
+14. Stage 09C4-C6 - modules, then QA/deploy     LATER
 13. Field and Learning specs, then builds       LATER
 14. Stage 09 - #work launcher integration       LATER
 ```

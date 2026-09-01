@@ -221,6 +221,17 @@
   flex: 1 1 auto;
 }
 
+/* Shown only on phones: the sidebar carries the product name on desktop, and
+   the provenance bar deliberately does not carry it anywhere. */
+.ops-topbar__product {
+  display: none;
+  color: var(--ops-ink-3);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
 .ops-topbar__title {
   color: var(--ops-ink);
   font-size: 27px;
@@ -291,8 +302,12 @@
   font-size: 11px;
 }
 
+/* Wide enough for "Fleet Coordinator", the longest role, plus the native
+   select's own chevron. Clipping a role name to "Finance Analys" would be
+   exactly the unclear abbreviation the specification rules out. */
 .ops-role__select {
-  max-width: 150px;
+  min-width: 168px;
+  max-width: 200px;
 }
 
 /* ---------------------------------------------------------------------
@@ -324,6 +339,12 @@
 
 .ops-overview__row--wide {
   grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+}
+
+/* A role with an odd number of panels ends on a single, which takes the full
+   width rather than leaving a hole beside it. */
+.ops-overview__row--single {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 /* ---------------------------------------------------------------------
@@ -366,28 +387,29 @@
   line-height: 1;
 }
 
-.ops-kpi__support {
-  margin-top: 6px;
+/* The breakdown that replaced the progress bar. It sums to the headline
+   above it, so a reader can check it; the bar implied a ratio against a
+   denominator the card never named. */
+.ops-kpi__parts,
+.ops-kpi__note {
+  margin-top: 10px;
   color: var(--ops-ink-3);
-  font-size: 12.5px;
+  font-size: 12px;
+  line-height: 1.55;
 }
 
-/* A share of its own whole, not a trend. There is no previous period to
-   compare against and inventing one would be a fabricated metric. */
-.ops-kpi__cue {
-  display: block;
-  height: 3px;
-  margin-top: 14px;
-  border-radius: 2px;
-  background: var(--ops-line-soft);
+.ops-kpi__part {
+  white-space: nowrap;
 }
 
-.ops-kpi__cue-fill {
-  display: block;
-  height: 100%;
-  border-radius: 2px;
-  background: linear-gradient(90deg, var(--ops-sky), #8aa8e8);
-  transform-origin: left center;
+.ops-kpi__part-count {
+  color: var(--ops-ink-2);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+}
+
+.ops-kpi__sep {
+  color: var(--ops-line);
 }
 
 /* ---------------------------------------------------------------------
@@ -604,6 +626,53 @@
 }
 
 /* ---------------------------------------------------------------------
+   Status bars (Payment status, Contract status)
+   --------------------------------------------------------------------- */
+
+.ops-statusbars {
+  display: grid;
+  gap: 10px;
+}
+
+.ops-statusbars__row {
+  display: grid;
+  align-items: center;
+  gap: 10px;
+  grid-template-columns: 84px minmax(0, 1fr) 32px;
+}
+
+.ops-statusbars__label {
+  color: var(--ops-ink-2);
+  font-size: 12.5px;
+}
+
+.ops-statusbars__rail {
+  height: 9px;
+  border-radius: 5px;
+  background: var(--ops-surface-quiet);
+  box-shadow: inset 0 0 0 1px var(--ops-line-soft);
+}
+
+.ops-statusbars__fill {
+  display: block;
+  height: 100%;
+  border-radius: 5px;
+  transform-origin: left center;
+}
+
+.ops-statusbars__fill--mint { background: #7fc8a4; }
+.ops-statusbars__fill--sky { background: #6f9ee0; }
+.ops-statusbars__fill--lavender { background: #b2a4eb; }
+.ops-statusbars__fill--peach { background: #e8a578; }
+
+.ops-statusbars__count {
+  color: var(--ops-ink);
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  text-align: right;
+}
+
+/* ---------------------------------------------------------------------
    Tables, pills, queue
    --------------------------------------------------------------------- */
 
@@ -674,8 +743,8 @@
 
 .ops-queue__row {
   display: grid;
-  align-items: center;
-  gap: 10px;
+  align-items: baseline;
+  gap: 4px 10px;
   padding: 9px 0;
   border-bottom: 1px solid var(--ops-line-soft);
   grid-template-columns: auto minmax(0, 1fr);
@@ -685,13 +754,14 @@
   border-bottom: 0;
 }
 
+/* Wraps to a second line rather than truncating. An action row whose text is
+   cut at "USD 102.66 rental payment, due 2..." has lost the part that made it
+   actionable. */
 .ops-queue__label {
   min-width: 0;
-  overflow: hidden;
   color: var(--ops-ink-2);
   font-size: 13px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  line-height: 1.45;
 }
 
 .ops-queue__id {
@@ -738,13 +808,17 @@
   text-align: center;
 }
 
+/* Desktop and tablet: a popover anchored to its trigger. The mobile sheet
+   below is a different model, not this one repositioned. */
 .ops-notify__panel {
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
-  z-index: 30;
+  z-index: 60;
+  display: flex;
   width: 380px;
   max-height: min(520px, 70vh);
+  flex-direction: column;
   border: 1px solid var(--ops-line);
   border-radius: 13px;
   background: #fff;
@@ -752,13 +826,23 @@
   overflow: hidden;
 }
 
+/* Sticky so the count and the actions stay reachable while the list scrolls —
+   on a phone the list is taller than the sheet. */
 .ops-notify__head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-sm);
   padding: 13px 15px;
   border-bottom: 1px solid var(--ops-line-soft);
+  background: #fff;
+}
+
+.ops-notify__close {
+  display: none;
 }
 
 .ops-notify__title {
@@ -788,9 +872,12 @@
   cursor: default;
 }
 
+/* The list is the only thing that scrolls; the header stays put. */
 .ops-notify__list {
-  max-height: min(430px, 56vh);
+  min-height: 0;
+  flex: 1 1 auto;
   overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .ops-notify__item {
@@ -1061,5 +1148,93 @@
 
   .ops-kpis--1 {
     grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ---------------------------------------------------------------------
+   Mobile notification sheet
+
+   Below 768px the popover becomes a sheet. A 380px popover anchored to a
+   trigger near the right edge of a 360px screen is the wrong model: it has
+   nowhere to go, and its list is longer than the space beneath it.
+
+   The sheet is fixed beneath the header stack, spans the width, and bounds
+   its own height in dynamic viewport units so a phone's collapsing address
+   bar cannot cut the last row off. Only the list scrolls, and the scroll is
+   contained so the page behind it does not move with it.
+   --------------------------------------------------------------------- */
+
+@media (max-width: 767px) {
+  .ops-notify__panel {
+    position: fixed;
+    top: auto;
+    right: 8px;
+    bottom: 8px;
+    left: 8px;
+    width: auto;
+    /* Measured from the top of the viewport down to the sheet, rather than
+       against a hard-coded phone height. */
+    max-height: calc(100dvh - var(--ops-sheet-top, 150px) - 8px);
+    border-radius: 14px;
+    box-shadow: 0 -8px 40px rgba(40, 50, 80, 0.2);
+  }
+
+  .ops-notify__close {
+    display: inline-flex;
+    padding: 4px 9px;
+    border: 1px solid var(--ops-line);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--ops-ink-2);
+    font-family: var(--font-sans);
+    font-size: 12px;
+    cursor: pointer;
+  }
+
+  .ops-notify__actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Modestly denser rows: the previous height fitted three notifications on a
+     390px screen, which made a list of twenty-two feel endless. Nothing was
+     removed to achieve it. */
+  .ops-notify__item {
+    padding: 9px 14px;
+    gap: 8px;
+  }
+
+  .ops-notify__item-text {
+    font-size: 11.5px;
+  }
+
+  .ops-notify__mark {
+    align-self: flex-start;
+    padding: 3px 7px;
+    font-size: 10.5px;
+    white-space: nowrap;
+  }
+
+  /* The last row must clear the home indicator on a device that has one. */
+  .ops-notify__list {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+}
+
+/* A scrim behind the sheet, so a tap outside dismisses it and the page beneath
+   reads as inert. Desktop keeps the lighter dismiss-on-outside-click. */
+.ops-notify__scrim {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .ops-notify__scrim {
+    position: fixed;
+    z-index: 55;
+    display: block;
+    border: 0;
+    background: rgba(30, 38, 60, 0.28);
+    inset: 0;
   }
 }

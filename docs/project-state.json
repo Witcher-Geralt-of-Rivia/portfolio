@@ -4,7 +4,7 @@
   "currentStage": 8,
   "stage05Started": true,
   "nextStage": "stage-09c3",
-  "nextStageTitle": "Stage 09C3 - Operations CRM: Leads + Customers + Inbox",
+  "nextStageTitle": "Stage 09C3 - Operations CRM: Leads + Customers + Inbox (BLOCKED UNTIL EXTERNAL LIVE REVIEW OF 09C2.1)",
   "frozenStages": [
     1,
     2,
@@ -55,7 +55,8 @@
       "src/app/icon.png",
       "src/app/apple-icon.png",
       "public/brand/logo-96.png",
-      "public/brand/logo-192.png"
+      "public/brand/logo-192.png",
+      "public/brand/mark-120.png"
     ]
   },
   "technology": {
@@ -187,13 +188,13 @@
   "stage08Started": true,
   "stage09aComplete": true,
   "demoPlatform": {
-    "status": "09A foundation + Operations domain, shell and Overview; ten modules unbuilt",
+    "status": "09A foundation + Operations domain, shell and Overview, hardened and deployed for external review; ten modules unbuilt",
     "routes": [
       "/demos/operations",
       "/demos/field",
       "/demos/learning"
     ],
-    "routesLive": false,
+    "routesLive": true,
     "database": "portfolio-demo-runtime",
     "runtimeSchemaVersion": 1,
     "stores": [
@@ -214,9 +215,11 @@
     "requiredVerifiedDemos": 3,
     "disclosure": "INTERACTIVE ENGINEERING DEMO / SYNTHETIC DATA - FRONTEND ONLY",
     "operationsSpec": "frozen; docs/DEMO_OPERATIONS_SPEC.md",
-    "operationsDomain": "built; docs/DEMO_OPERATIONS_IMPLEMENTATION.md"
+    "operationsDomain": "built; docs/DEMO_OPERATIONS_IMPLEMENTATION.md",
+    "operationsReview": "deployed for external live review; 09C3 blocked until reviewed"
   },
   "stage09bComplete": true,
   "stage09c1Complete": true,
-  "stage09c2Complete": true
+  "stage09c2Complete": true,
+  "stage09c21Complete": true
 }

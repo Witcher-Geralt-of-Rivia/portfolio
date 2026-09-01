@@ -88,14 +88,20 @@ body:has(.demo-shell) .site-nav {
    frosted bar. */
 .demo-chrome__mark {
   display: block;
-  width: 20px;
-  height: 20px;
+  width: 19px;
+  height: 22px;
   flex: none;
 }
 
 .demo-chrome__back:hover {
   background: var(--nav-link-hover-bg);
   color: var(--text-primary);
+}
+
+/* Holds the row open where a demo supplies no title, so the controls stay
+   right-aligned without the disclosure stretching to meet them. */
+.demo-chrome__gap {
+  flex: 1 1 auto;
 }
 
 .demo-chrome__title {
@@ -363,6 +369,13 @@ body:has(.demo-shell) .site-nav {
     flex-wrap: wrap;
     gap: 6px var(--space-2xs);
     padding: 6px var(--space-xs);
+  }
+
+  /* The filler holds a single-line row open. Once the bar wraps it has no
+     order of its own, so it would claim row one and push the back link across
+     the screen; `margin-left: auto` on the controls does the job instead. */
+  .demo-chrome__gap {
+    display: none;
   }
 
   /* Row one: the two controls that must never become unreachable.

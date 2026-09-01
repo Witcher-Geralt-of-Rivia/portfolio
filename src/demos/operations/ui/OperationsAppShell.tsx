@@ -99,7 +99,7 @@ export default function OperationsAppShell({
 
   if (status === "error") {
     return (
-      <DemoShell title="Operations Console" roleControl={<RoleControl onAnnounce={setAnnouncement} />}>
+      <DemoShell roleControl={<RoleControl onAnnounce={setAnnouncement} />}>
         <div className="ops-fatal">
           <h1 className="ops-fatal__title">The demo could not start</h1>
           <p className="ops-fatal__text">
@@ -114,7 +114,7 @@ export default function OperationsAppShell({
   }
 
   return (
-    <DemoShell title="Operations Console" roleControl={<RoleControl onAnnounce={setAnnouncement} />}>
+    <DemoShell roleControl={<RoleControl onAnnounce={setAnnouncement} />}>
       <div className="ops-app">
         {/* Desktop and tablet: a persistent column above 1180px, a drawer
             below it. One element, two presentations, so the two navigations
@@ -161,6 +161,10 @@ export default function OperationsAppShell({
             </button>
 
             <div className="ops-topbar__context">
+              {/* The product names itself here now, on phones, because the
+                  provenance bar above no longer does. On desktop the sidebar
+                  carries it and this stays the page title alone. */}
+              <p className="ops-topbar__product">Operations Console</p>
               <h1 className="ops-topbar__title">{title}</h1>
               <p className="ops-topbar__sub">{context}</p>
             </div>
