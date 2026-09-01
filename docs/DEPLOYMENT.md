@@ -1,4 +1,4 @@
-<!-- PROJECT_STAGE: 7 -->
+<!-- PROJECT_STAGE: 8 -->
 <!-- DOCUMENT_STATUS: CURRENT -->
 
 # Deployment
@@ -124,11 +124,12 @@ Measured proof: with production serving `.next-release-a`, a plain
  4 validate             qa:memory, tsc --noEmit, eslint  (any failure aborts)
  5 build target
  6 verify output        BUILD_ID, server/, static/ present and non-empty
- 7 smoke test           new release on 127.0.0.1:3199, loopback only:
-                        page, CSS, JS, both fonts, both SVGs, and the markup
-                        of every built section: #systems, #products, and the
-                        Stage 06 heading that distinguishes the real products
-                        section from a navigation placeholder
+ 7 smoke test           new release on the first free loopback port of
+                        3199/3198/3197/3196: page, CSS, JS, both fonts, both
+                        SVGs, and the markup of every built section - the ids
+                        #systems, #products, #ai-learning and #lab, plus the
+                        Stage 06, 07 and 08 headings. The heading is the
+                        load-bearing half: a placeholder emits the id too
  8 switch               PM2 re-pointed at the target slot
  9 public health        up to 10 attempts, page + CSS + JS must all be 200
 10 rollback on failure  previous slot restored automatically, then re-verified

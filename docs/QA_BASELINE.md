@@ -1,4 +1,4 @@
-<!-- PROJECT_STAGE: 7 -->
+<!-- PROJECT_STAGE: 8 -->
 <!-- DOCUMENT_STATUS: CURRENT -->
 
 # QA Baseline
@@ -17,6 +17,7 @@ Stage 04   PASS
 Stage 05   PASS
 Stage 06   PASS
 Stage 07   PASS
+Stage 08   PASS
 ```
 
 ## Validated Viewports
@@ -356,6 +357,45 @@ shows the state the adapt action produces. The running state is verified by
 assertion instead - label "Adapting...", button disabled, journey tagged
 STATE / ADAPTING, on 20 of 20 runs.
 
+## Stage 08 - Engineering Lab
+
+Harness: `qa/stage08-*.mjs`. 1440x900 unless stated.
+
+| Check | Result |
+|---|---|
+| Contrast, 67 text roles, 5 experiments, after a run | all PASS, worst 6.13:1 |
+| CLS at load | 0.00000 |
+| CLS after 5 experiments + 5 runs | 0.00053 |
+| Experiment switches, 17 of them mid-execution | 50/50 clean |
+| Executions (20 per experiment) | 100/100 clean |
+| Run/reset cycles (20 per experiment) | 100/100 restored exactly |
+| Network requests during 100 runs + 50 switches | 0 |
+| Console errors, warnings, failed resources | 0 |
+| Viewports x experiments without overflow or overlap | 8 x 5 |
+| Idle long-task time over 6s | 0ms |
+| Execution long-task time across 5 runs | 759ms |
+| Standing animations owned by Stage 08 | 0 |
+| Reduced motion: keyframe animations during a run | 0 |
+| DOM nodes in `#lab` | 160 |
+
+Determinism is asserted, not assumed: twenty runs of each experiment must end
+in exactly one state, and the harness fails if an experiment produces two.
+The five end states are 200 OK; five admitted and two refused with a 429;
+delivery acknowledged; JOB-108 in the dead-letter queue; and two requests
+producing one action.
+
+Reset is checked against the recorded initial state rather than against
+"looks idle": label, observation state, observation event, live region, lit
+stages and the disabled state of Reset itself must all match what the
+experiment showed before its first run.
+
+**Measure the measurement.** The first execution-cost run reported 16.4s of
+long tasks. The cost was the instrument: an in-page sampler polling
+`document.getAnimations()` every 30ms to record which animations ran. Cost and
+animation sampling are now separate passes, and the figure fell to 759ms. If a
+performance number moves by an order of magnitude after adding a probe, suspect
+the probe.
+
 ## Deployment Safety (A/B release slots)
 
 Production serves `.next-release-a` or `.next-release-b`, never `.next`. These
@@ -401,10 +441,10 @@ variable names present.
 
 **Smoke gate coverage.** Before the switch, the loopback smoke server must
 serve the page, the CSS and JS chunks, both WOFF2 fonts and both SVG assets,
-and its HTML must contain `id="systems"`, `id="products"`, `id="ai-learning"`,
-the Stage 06 heading `One product. Every surface.` and the Stage 07 heading
-`Learning paths that adapt.` A release that compiles but renders a section-less
-page cannot reach production.
+and its HTML must contain the id of every built section - `id="systems"`,
+`id="products"`, `id="ai-learning"`, `id="lab"` - plus the Stage 06, 07 and 08
+headings. A release that compiles but renders a section-less page cannot reach
+production.
 
 The heading assertion is the load-bearing one and must not be dropped as
 redundant: before Stage 06 the navigation placeholder emitted `id="products"`
@@ -522,6 +562,7 @@ qa/shots/stage03/       Stage 03 baselines (15 PNG)
 qa/shots/stage04/       Stage 04 baselines (14 PNG)
 qa/shots/stage06/       Stage 06 baselines (6 PNG, captured from production)
 qa/shots/stage07/       Stage 07 baselines (5 PNG, captured from production)
+qa/shots/stage08/       Stage 08 baselines (5 PNG, captured from production)
 qa/report.json          Stage 01 machine-readable results
 qa/stage02-report.json  Stage 02 machine-readable results
 qa/stage02-measurements.txt
@@ -560,6 +601,12 @@ qa/stage07-contrast.mjs     40 text roles across all three scenarios
 qa/stage07-perf.mjs         CLS, idle cost, animation cost, reduced motion
 qa/stage07-maptype.mjs      rendered map type size and label collisions
 qa/stage07-shots.mjs        Stage 07 screenshot set
+qa/stage08-responsive.mjs   8 viewports x 5 experiments: overflow, overlap,
+                            tiny text, touch targets, phone order
+qa/stage08-interaction.mjs  50 switches, 100 runs, 100 run/reset cycles
+qa/stage08-contrast.mjs     67 text roles across all five experiments
+qa/stage08-perf.mjs         CLS, idle and execution cost, reduced motion
+qa/stage08-shots.mjs        Stage 08 screenshot set
 qa/stage06-shots.mjs        Stage 06 screenshot set
 qa/project-memory-check.mjs canonical documentation consistency
 ```

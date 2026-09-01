@@ -1,0 +1,1632 @@
+/* =====================================================================
+   MILKY INTELLIGENCE — 04 / ENGINEERING LAB
+   The most technical surface in the project: precise grids, small
+   diagnostic labels, controlled state transitions. Still milky and
+   pastel — an instrument panel, not a terminal.
+   ===================================================================== */
+
+.lab {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(40px, 4.2vw, 62px);
+  padding-block: clamp(120px, 12vw, 168px);
+}
+
+/* Stage 08 owns its own list defaults. The global reset zeroes margin but not
+   padding or list-style, and globals.css is never edited for a section. */
+.lflow__list,
+.lrate__dots,
+.lwh__attempts,
+.lq__jobs,
+.lq__backoff-marks,
+.lidem__timeline,
+.lab__pattern-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* --- Introduction ------------------------------------------------------ */
+
+.lab__intro {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(22px, 2.8vw, 36px);
+}
+
+.lab__intro-lead {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.lab__title-heading {
+  max-width: var(--measure-display-2);
+  color: var(--text-primary);
+  font-size: var(--type-display-2);
+  font-weight: var(--weight-heading);
+  line-height: var(--leading-display-2);
+  letter-spacing: var(--tracking-display-2);
+  text-wrap: balance;
+}
+
+.lab__intro-support {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.lab__lead {
+  max-width: 54ch;
+  color: var(--text-secondary);
+  font-size: var(--type-lead);
+  font-weight: var(--weight-lead);
+  line-height: var(--leading-lead);
+  letter-spacing: var(--tracking-lead);
+  text-wrap: pretty;
+}
+
+.lab__capabilities {
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: var(--weight-ui);
+  line-height: 1.5;
+  letter-spacing: 0.075em;
+}
+
+/* The lead column is narrower than Stage 05's and the support column wider,
+   so the two sections share a rhythm without repeating a geometry. */
+@media (min-width: 1000px) {
+  .lab__intro {
+    display: grid;
+    grid-template-columns: minmax(0, 1.18fr) minmax(0, 1fr);
+    gap: clamp(30px, 3.6vw, 64px);
+    align-items: end;
+  }
+}
+
+/* --- Workspace shell ---------------------------------------------------- */
+
+.lab__workspace {
+  --surface-radius: var(--radius-panel-lg);
+  /* Set per experiment; used only for small accents, never a whole surface. */
+  --accent: var(--aurora-sky);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 740px;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.lab__workspace::before {
+  content: "";
+  position: absolute;
+  inset: -10%;
+  z-index: 0;
+  background:
+    radial-gradient(40% 36% at 16% 14%, rgba(220, 238, 255, 0.14), transparent 70%),
+    radial-gradient(38% 34% at 84% 20%, rgba(233, 224, 255, 0.11), transparent 72%),
+    radial-gradient(44% 38% at 56% 94%, rgba(217, 244, 243, 0.12), transparent 74%);
+  pointer-events: none;
+}
+
+.lab__workspace::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  padding: 1px;
+  border-radius: inherit;
+  background: linear-gradient(
+    138deg,
+    rgba(220, 238, 255, 0.58) 0%,
+    rgba(255, 255, 255, 0.3) 34%,
+    rgba(255, 255, 255, 0.18) 62%,
+    rgba(233, 224, 255, 0.4) 84%,
+    rgba(217, 244, 243, 0.46) 100%
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.lab__workspace > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* --- Workspace header --------------------------------------------------- */
+
+.lab__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 62px;
+  padding: 12px clamp(16px, 2vw, 24px);
+  border-bottom: 1px solid var(--line-subtle);
+}
+
+.lab__identity {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.lab__title {
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: var(--weight-ui);
+  line-height: 1.3;
+  letter-spacing: 0.08em;
+}
+
+.lab__subtitle {
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  line-height: 1.4;
+  letter-spacing: 0.09em;
+}
+
+.lab__ident {
+  padding: 4px 10px;
+  border: 1px solid var(--line-subtle);
+  border-radius: var(--radius-control);
+  background: rgba(255, 255, 255, 0.5);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  line-height: 1.4;
+  letter-spacing: 0.09em;
+}
+
+/* --- Experiment selector: an instrument index --------------------------- */
+
+.lab__selector-row {
+  padding: 10px clamp(16px, 2vw, 24px);
+  border-bottom: 1px solid var(--line-subtle);
+}
+
+.lexps {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.52);
+  border-radius: var(--radius-button);
+  background: rgba(255, 255, 255, 0.26);
+}
+
+.lexp {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding-inline: 12px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  font-weight: var(--weight-ui);
+  line-height: 1.15;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color 200ms var(--ease-standard),
+    color 200ms var(--ease-standard);
+}
+
+.lexp:hover {
+  color: var(--text-primary);
+}
+
+.lexp.is-active {
+  background: rgba(255, 255, 255, 0.76);
+  color: var(--text-primary);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
+.lexp__index {
+  flex: 0 0 auto;
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+}
+
+.lexp.is-active .lexp__index {
+  color: var(--text-secondary);
+}
+
+.lexp__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lab__workspace :focus-visible {
+  outline: 2px solid rgba(81, 86, 102, 0.48);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 5px rgba(233, 224, 255, 0.42);
+}
+
+/* --- Body: input | system | observation --------------------------------- */
+
+.lab__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 16px;
+  padding: clamp(16px, 2vw, 22px) clamp(16px, 2vw, 24px);
+}
+
+.lab__body:focus-visible {
+  outline: 2px solid rgba(81, 86, 102, 0.4);
+  outline-offset: -4px;
+}
+
+/* Experiment accent. Used on a handful of small marks only - the workspace
+   itself never changes colour. */
+.lab__body--sky { --accent: var(--aurora-sky); }
+.lab__body--lavender { --accent: var(--aurora-lavender); }
+.lab__body--mint { --accent: var(--aurora-mint); }
+.lab__body--peach { --accent: var(--aurora-peach); }
+.lab__body--aqua { --accent: var(--aurora-aqua); }
+
+.lab__centre {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+@media (min-width: 1100px) {
+  .lab__body {
+    display: grid;
+    grid-template-columns: 278px minmax(0, 1fr) 278px;
+    gap: 20px;
+    /* The centre fills the workspace; the side panels sit at the top. Letting
+       all three size to content left a large void above the footer. */
+    align-items: stretch;
+  }
+
+  .lpanel--input,
+  .lpanel--observation {
+    align-self: start;
+  }
+}
+
+/* --- Shared panels (input, observation) --------------------------------- */
+
+.lpanel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 15px 15px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: var(--radius-card-sm);
+  background: rgba(255, 255, 255, 0.52);
+  box-shadow:
+    var(--shadow-inner-light),
+    0 12px 30px -26px rgba(56, 60, 74, 0.38);
+}
+
+.lpanel__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.lpanel__title {
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: var(--weight-ui);
+  line-height: 1.4;
+  letter-spacing: 0.1em;
+}
+
+.lpanel__badge {
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  line-height: 1.4;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+/* --- Input panel -------------------------------------------------------- */
+
+.linput {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.linput__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.linput__row dt {
+  flex: 0 0 auto;
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.07em;
+}
+
+.linput__row dd {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text-primary);
+  font-size: 11.5px;
+  font-weight: var(--weight-ui);
+  line-height: 1.35;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.linput__body,
+.lresp__body {
+  margin: 0;
+  padding: 10px 11px;
+  overflow-x: auto;
+  border: 1px solid var(--line-subtle);
+  border-radius: var(--radius-control);
+  background: rgba(255, 255, 255, 0.62);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  line-height: 1.55;
+  white-space: pre;
+}
+
+/* --- Variant toggle ----------------------------------------------------- */
+
+.lvariants {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.lvariant {
+  padding: 7px 10px;
+  border: 1px solid var(--line-subtle);
+  border-radius: var(--radius-control);
+  background: rgba(255, 255, 255, 0.5);
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: var(--weight-ui);
+  line-height: 1.2;
+  cursor: pointer;
+  transition:
+    background-color 200ms var(--ease-standard),
+    border-color 200ms var(--ease-standard),
+    color 200ms var(--ease-standard);
+}
+
+.lvariant:hover:not(:disabled) {
+  color: var(--text-primary);
+}
+
+.lvariant.is-active {
+  border-color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.86);
+  color: var(--text-primary);
+}
+
+.lvariant:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+/* --- Observation -------------------------------------------------------- */
+
+.lobs {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.lobs__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.lobs__row--stacked {
+  flex-direction: column;
+  gap: 4px;
+}
+
+.lobs dt {
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.09em;
+}
+
+.lobs__state {
+  padding: 3px 9px;
+  border-radius: var(--radius-pill);
+  background: rgba(233, 224, 255, 0.6);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: var(--weight-ui);
+  letter-spacing: 0.06em;
+}
+
+/* Semantic state colours, all soft: success mint, failure peach, waiting
+   lavender, in-progress sky. Never a saturated traffic light. */
+.lobs__state--success,
+.lobs__state--acknowledged,
+.lobs__state--accepted,
+.lobs__state--deduplicated { background: rgba(221, 245, 232, 0.9); }
+
+.lobs__state--rejected,
+.lobs__state--failed,
+.lobs__state--blocked,
+.lobs__state--deadletter { background: rgba(251, 228, 215, 0.9); }
+
+.lobs__state--running,
+.lobs__state--queued,
+.lobs__state--burst { background: rgba(220, 238, 255, 0.9); }
+
+.lobs__state--retrying,
+.lobs__state--duplicate,
+.lobs__state--ready { background: rgba(233, 224, 255, 0.72); }
+
+.lobs__event {
+  color: var(--text-primary);
+  font-size: 11.5px;
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+.lobs__pattern {
+  color: var(--text-secondary);
+  font-size: 11.5px;
+  font-style: italic;
+  line-height: 1.5;
+}
+
+/* --- System flow --------------------------------------------------------- */
+
+.lflow {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 12px 14px 14px;
+  border: 1px solid var(--line-subtle);
+  border-radius: var(--radius-card-sm);
+  background: rgba(255, 255, 255, 0.42);
+}
+
+.lflow__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.lflow__title {
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: var(--weight-ui);
+  line-height: 1.4;
+  letter-spacing: 0.1em;
+}
+
+.lflow__tag {
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  line-height: 1.4;
+  letter-spacing: 0.09em;
+}
+
+.lflow__list {
+  display: grid;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  gap: 8px;
+}
+
+.lstage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  min-height: 40px;
+  padding: 7px 9px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+  transition:
+    background-color 200ms var(--ease-standard),
+    border-color 200ms var(--ease-standard);
+}
+
+.lstage.is-passed {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.lstage.is-active {
+  border-color: rgba(255, 255, 255, 0.86);
+  background: rgba(255, 255, 255, 0.84);
+}
+
+.lstage.is-active::after {
+  content: "";
+  position: absolute;
+  bottom: 5px;
+  left: 9px;
+  width: 20px;
+  height: 2px;
+  border-radius: var(--radius-pill);
+  background: var(--accent);
+}
+
+/* A stage that failed stops the flow visibly rather than passing quietly. */
+.lstage.is-failed {
+  border-color: rgba(221, 174, 144, 0.7);
+  background: rgba(251, 228, 215, 0.6);
+}
+
+.lstage__label {
+  color: var(--text-secondary);
+  font-size: 11px;
+  line-height: 1.3;
+  transition: color 200ms var(--ease-standard);
+}
+
+.lstage.is-active .lstage__label,
+.lstage.is-failed .lstage__label {
+  color: var(--text-primary);
+  font-weight: var(--weight-ui);
+}
+
+.lstage__code {
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  line-height: 1.4;
+  letter-spacing: 0.09em;
+}
+
+/* The stages are boxes in a row and already read as a sequence. An inter-box
+   connector landed between each stage's two text lines and read as a stray
+   dash, so it is drawn only as the gap between them. */
+.lstage__link {
+  display: none;
+}
+
+/* --- 01 API response ----------------------------------------------------- */
+
+.lresp {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 10px;
+  padding: 13px 14px 14px;
+  border: 1px solid var(--line-subtle);
+  border-radius: var(--radius-card-sm);
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.lresp__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.lresp__title {
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: var(--weight-ui);
+  letter-spacing: 0.1em;
+}
+
+.lresp__sim {
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  background: rgba(233, 224, 255, 0.6);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  letter-spacing: 0.08em;
+}
+
+.lresp__line {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.lresp__status {
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: var(--weight-ui);
+  letter-spacing: 0.03em;
+}
+
+.lresp__status.is-ok { background: rgba(221, 245, 232, 0.92); }
+.lresp__status.is-error { background: rgba(251, 228, 215, 0.92); }
+
+.lresp__time {
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.05em;
+}
+
+.lresp__headers {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.lresp__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.lresp__header dt { color: var(--text-annotation); }
+
+.lresp__empty {
+  padding: 18px 0;
+  color: var(--text-secondary);
+  font-size: 11.5px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+/* --- 02 Rate limit -------------------------------------------------------- */
+
+.lrate {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 12px;
+  padding: 13px 14px 15px;
+  border: 1px solid var(--line-subtle);
+  border-radius: var(--radius-card-sm);
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.lrate__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.lrate__title {
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: var(--weight-ui);
+  letter-spacing: 0.1em;
+}
+
+.lrate__window {
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.09em;
+}
+
+.lrate__dots {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.lrdot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.lrdot__mark {
+  width: 100%;
+  max-width: 34px;
+  height: 34px;
+  border: 1.5px solid var(--line-subtle);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.6);
+  transition:
+    background-color 220ms var(--ease-standard),
+    border-color 220ms var(--ease-standard);
+}
+
+/* Accepted is filled, refused is outlined and dim: the difference is legible
+   without relying on the hue. */
+.lrdot--accepted .lrdot__mark {
+  border-color: rgba(133, 172, 212, 0.85);
+  background: rgba(220, 238, 255, 0.95);
+}
+
+.lrdot--rejected .lrdot__mark {
+  border-style: dashed;
+  border-color: rgba(214, 158, 121, 0.85);
+  background: transparent;
+}
+
+.lrdot__n {
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  line-height: 1.3;
+}
+
+.lrdot--rejected .lrdot__n { color: var(--text-secondary); }
+
+.lrate__window-bar {
+  overflow: hidden;
+  height: 5px;
+  border-radius: var(--radius-pill);
+  background: rgba(61, 68, 88, 0.11);
+}
+
+.lrate__window-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, rgba(180, 168, 226, 0.95), rgba(168, 205, 238, 0.95));
+  transition: width 220ms var(--ease-standard);
+}
+
+.lrate__quota {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.lrate__used {
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: var(--weight-ui);
+}
+
+.lrate__remaining {
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+}
+
+.lrate__blocked {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 11px;
+  border: 1px solid rgba(221, 174, 144, 0.5);
+  border-radius: var(--radius-control);
+  background: rgba(251, 228, 215, 0.55);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  line-height: 1.4;
+  letter-spacing: 0.06em;
+}
+
+.lrate__blocked-code {
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.78);
+  font-weight: var(--weight-ui);
+}
+
+/* --- 03 Webhook ----------------------------------------------------------- */
+
+.lwh {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.lwh__checks {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.lwh__check {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 11px;
+  border: 1px solid var(--line-subtle);
+  border-radius: var(--radius-control);
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.lwh__check--verified,
+.lwh__check--unique {
+  border-color: rgba(146, 198, 172, 0.6);
+  background: rgba(221, 245, 232, 0.5);
+}
+
+.lwh__check-key {
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+}
+
+.lwh__check-value {
+  color: var(--text-primary);
+  font-size: 11.5px;
+  font-weight: var(--weight-ui);
+  line-height: 1.35;
+}
+
+.lwh__history {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 8px;
+  justify-content: flex-start;
+  padding: 12px 13px 13px;
+  border: 1px solid var(--line-subtle);
+  border-radius: var(--radius-card-sm);
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.lwh__history-title {
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: var(--weight-ui);
+  letter-spacing: 0.1em;
+}
+
+.lwh__empty {
+  color: var(--text-secondary);
+  font-size: 11.5px;
+  line-height: 1.5;
+}
+
+.lwh__attempts {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.lwatt {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 11px;
+  border: 1px solid var(--line-subtle);
+  border-radius: var(--radius-control);
+  background: rgba(255, 255, 255, 0.62);
+}
+
+.lwatt.is-ok {
+  border-color: rgba(146, 198, 172, 0.6);
+  background: rgba(221, 245, 232, 0.55);
+}
+
+.lwatt.is-failed {
+  border-color: rgba(221, 174, 144, 0.55);
+  background: rgba(251, 228, 215, 0.5);
+}
+
+.lwatt__n {
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.05em;
+}
+
+.lwatt__result {
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: var(--weight-ui);
+}
+
+/* The recovery arrow: a quarter turn from the failed attempt down to the
+   retry beneath it. Drawn, not animated. */
+.lwatt__arrow {
+  position: absolute;
+  bottom: -8px;
+  left: 22px;
+  width: 14px;
+  height: 9px;
+  border-bottom: 1.5px solid rgba(150, 178, 206, 0.8);
+  border-left: 1.5px solid rgba(150, 178, 206, 0.8);
+  border-bottom-left-radius: 8px;
+}
+
+/* --- 04 Queue ------------------------------------------------------------- */
+
+.lq {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.lq__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.lq__title {
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: var(--weight-ui);
+  letter-spacing: 0.1em;
+}
+
+.lq__depth {
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.06em;
+}
+
+.lq__jobs {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.lqjob {
+  display: grid;
+  grid-template-columns: 74px 84px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  padding: 8px 11px;
+  border: 1px solid var(--line-subtle);
+  border-radius: var(--radius-control);
+  background: rgba(255, 255, 255, 0.56);
+  transition:
+    background-color 220ms var(--ease-standard),
+    border-color 220ms var(--ease-standard);
+}
+
+.lqjob--processing {
+  border-color: rgba(150, 178, 206, 0.6);
+  background: rgba(220, 238, 255, 0.6);
+}
+
+.lqjob--complete {
+  border-color: rgba(146, 198, 172, 0.5);
+  background: rgba(221, 245, 232, 0.5);
+}
+
+.lqjob--retrying {
+  border-color: rgba(221, 174, 144, 0.5);
+  background: rgba(251, 228, 215, 0.5);
+}
+
+/* Dead-letter is set apart, not alarmed: dashed, dimmer, still legible. */
+.lqjob--dead {
+  border-style: dashed;
+  border-color: rgba(206, 156, 156, 0.65);
+  background: rgba(255, 226, 234, 0.42);
+}
+
+.lqjob__id {
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: var(--weight-ui);
+  letter-spacing: 0.04em;
+}
+
+.lqjob__state {
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.06em;
+}
+
+.lqjob__note {
+  overflow: hidden;
+  color: var(--text-secondary);
+  font-size: 10.5px;
+  line-height: 1.35;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lq__backoff {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--line-subtle);
+  border-radius: var(--radius-control);
+  background: rgba(255, 255, 255, 0.44);
+}
+
+.lq__backoff-title {
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.09em;
+}
+
+/* Each retry sits further right than the last: the delay widens, the run
+   does not. The whole sequence is still under two seconds. */
+.lq__backoff-marks {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 4px;
+}
+
+.lqmark {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: var(--gap, 0);
+  opacity: 0.35;
+  transition: opacity 220ms var(--ease-standard);
+}
+
+.lqmark.is-on { opacity: 1; }
+
+.lqmark__dot {
+  width: 7px;
+  height: 7px;
+  border: 1.5px solid rgba(214, 158, 121, 0.8);
+  border-radius: 50%;
+  background: rgba(251, 228, 215, 0.8);
+}
+
+.lqmark__label {
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  white-space: nowrap;
+}
+
+.lq__backoff-note {
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+/* --- 05 Idempotency ------------------------------------------------------- */
+
+.lidem {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 13px 14px 14px;
+  border: 1px solid var(--line-subtle);
+  border-radius: var(--radius-card-sm);
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.lidem__timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.lidstep {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  gap: 11px;
+  padding-left: 15px;
+  opacity: 0.45;
+  transition: opacity 220ms var(--ease-standard);
+}
+
+.lidstep.is-done { opacity: 1; }
+
+.lidstep::before {
+  content: "";
+  position: absolute;
+  top: 5px;
+  left: 0;
+  width: 7px;
+  height: 7px;
+  border: 1.5px solid rgba(150, 190, 190, 0.75);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  transition: background-color 220ms var(--ease-standard);
+}
+
+.lidstep.is-done::before { background: rgba(217, 244, 243, 0.95); }
+
+.lidstep__t {
+  flex: 0 0 auto;
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.05em;
+}
+
+.lidstep__label {
+  color: var(--text-secondary);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.lidstep.is-done .lidstep__label { color: var(--text-primary); }
+
+.lidem__counters {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 9px;
+  padding-top: 11px;
+  border-top: 1px solid var(--line-subtle);
+}
+
+.lidem__counter {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.lidem__counter dt {
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  letter-spacing: 0.07em;
+}
+
+.lidem__counter dd {
+  color: var(--text-secondary);
+  font-size: 10.5px;
+  line-height: 1.3;
+}
+
+.lidem__value {
+  color: var(--text-primary);
+  font-size: 19px;
+  font-weight: var(--weight-heading);
+  letter-spacing: -0.015em;
+}
+
+.lidem__note {
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  line-height: 1.4;
+}
+
+/* --- Controls ------------------------------------------------------------- */
+
+.lab__foot {
+  padding: 12px clamp(16px, 2vw, 24px);
+  border-top: 1px solid var(--line-subtle);
+}
+
+.lab__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+}
+
+.lab__run {
+  position: relative;
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 168px;
+  padding: 9px 18px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: var(--radius-button);
+  background: rgba(255, 255, 255, 0.68);
+  box-shadow: var(--shadow-inner-light);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition:
+    background-color 200ms var(--ease-standard),
+    transform 200ms var(--ease-standard);
+}
+
+.lab__run:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.84);
+  transform: translateY(-1px);
+}
+
+.lab__run:disabled { cursor: default; }
+
+.lab__run-label {
+  font-size: 12.5px;
+  font-weight: var(--weight-ui);
+  line-height: 1.3;
+  text-align: left;
+}
+
+.lab__run-track {
+  overflow: hidden;
+  height: 2px;
+  border-radius: var(--radius-pill);
+  background: var(--line-subtle);
+}
+
+.lab__run-fill {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, rgba(168, 205, 238, 0.95), rgba(160, 214, 208, 0.95));
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+/* The bar runs for exactly as long as the active variant's frames. */
+.lab__run-track.is-running .lab__run-fill {
+  animation: lab-run var(--run-ms, 1400ms) linear forwards;
+}
+
+.lab__reset {
+  flex: 0 0 auto;
+  height: 40px;
+  padding-inline: 16px;
+  border: 1px solid var(--line-subtle);
+  border-radius: var(--radius-button);
+  background: rgba(255, 255, 255, 0.5);
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  font-weight: var(--weight-ui);
+  cursor: pointer;
+  transition:
+    background-color 200ms var(--ease-standard),
+    color 200ms var(--ease-standard);
+}
+
+.lab__reset:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.74);
+  color: var(--text-primary);
+}
+
+.lab__reset:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
+.lab__status {
+  flex: 1;
+  min-width: 0;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  line-height: 1.5;
+  letter-spacing: 0.03em;
+}
+
+/* --- Explanation ---------------------------------------------------------- */
+
+.lab__explanation {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 16px clamp(16px, 2vw, 22px) 18px;
+  border: 1px solid var(--line-subtle);
+  border-radius: var(--radius-card);
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.lab__explanation-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.lab__explanation-title {
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: var(--weight-ui);
+  letter-spacing: 0.1em;
+}
+
+/* A mono tag, not a coloured pill badge. */
+.lab__explanation-tag {
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.1em;
+}
+
+.lab__explanation-body {
+  max-width: 76ch;
+  color: var(--text-primary);
+  font-size: 13.5px;
+  line-height: 1.62;
+  text-wrap: pretty;
+}
+
+/* --- Pattern rail --------------------------------------------------------- */
+
+.lab__patterns {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.lab__patterns-title {
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: var(--weight-ui);
+  letter-spacing: 0.1em;
+}
+
+.lab__pattern-list {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.lab__pattern {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  padding-inline: clamp(12px, 1.6vw, 20px);
+  border-left: 1px solid var(--line-subtle);
+}
+
+.lab__pattern:first-child {
+  padding-left: 0;
+  border-left: 0;
+}
+
+.lab__pattern-index {
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  line-height: 1.4;
+  letter-spacing: 0.08em;
+}
+
+.lab__pattern-title {
+  color: var(--text-primary);
+  font-size: 12.5px;
+  font-weight: var(--weight-ui);
+  line-height: 1.4;
+}
+
+@keyframes lab-run {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+/* =====================================================================
+   RESPONSIVE
+   Below the three-region desktop workspace the experiment leads: the
+   system visualisation first, then what was fed in, then what was
+   observed. Reading the observation before seeing the system is
+   meaningless, which is why this order is not the DOM order.
+   ===================================================================== */
+
+/* Tablet: the experiment across the full width, observation beneath it. */
+@media (min-width: 700px) and (max-width: 1099px) {
+  .lab__body {
+    display: grid;
+    grid-template-columns: 258px minmax(0, 1fr);
+    grid-template-areas:
+      "input centre"
+      "obs obs";
+    gap: 16px;
+    align-items: start;
+  }
+
+  .lpanel--input { grid-area: input; }
+  .lab__centre { grid-area: centre; }
+  .lpanel--observation { grid-area: obs; }
+
+  .lobs {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr);
+    gap: 14px;
+    align-items: start;
+  }
+
+  .lab__workspace { min-height: 0; }
+
+  .lexps { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .lexp:nth-child(4) { grid-column: 1 / 2; }
+}
+
+/* Phone: one column, experiment first. */
+@media (max-width: 699px) {
+  .lab__workspace { min-height: 0; }
+
+  .lab__head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  /* 2 + 2 + 1. No horizontal scrolling at any width. */
+  .lexps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .lexp {
+    height: auto;
+    min-height: 44px;
+    padding-block: 7px;
+    padding-inline: 10px;
+  }
+
+  .lexp__label {
+    overflow: visible;
+    white-space: normal;
+  }
+
+  .lab__body { gap: 14px; }
+
+  .lab__centre { order: 1; }
+  .lpanel--input { order: 2; }
+  .lpanel--observation { order: 3; }
+
+  /* System flows read top to bottom on a phone rather than being crushed
+     into six columns. */
+  .lflow__list {
+    grid-auto-flow: row;
+    grid-auto-columns: auto;
+    gap: 5px;
+  }
+
+  .lstage__link { display: none; }
+
+  .lqjob {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "id state"
+      "note note";
+    gap: 3px 10px;
+  }
+
+  .lqjob__id { grid-area: id; }
+  .lqjob__state { grid-area: state; text-align: right; }
+  .lqjob__note { grid-area: note; text-align: left; }
+
+  .lq__backoff-marks { width: 100%; }
+
+  .lidem__counters { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+  .lidem__value { font-size: 17px; }
+
+  .lab__run { width: 100%; }
+  .lab__reset { width: 100%; }
+  .lab__status { flex: 1 1 100%; }
+}
+
+/* Below the three-region desktop the backoff row stacks: its marks carry
+   cumulative left margins, which pushed the trailing note past the workspace
+   edge once the centre column narrowed. */
+@media (max-width: 1099px) {
+  .lq__backoff {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .lq__backoff-marks { width: 100%; }
+
+  .lq__backoff-note { white-space: normal; }
+}
+
+/* The narrowest phones stack the selector rather than squeeze two columns. */
+@media (max-width: 399px) {
+  .lexps { grid-template-columns: minmax(0, 1fr); }
+  .lwh__checks { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Pattern rail: six across, then three, then two. */
+@media (max-width: 1099px) {
+  .lab__pattern-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px 0;
+  }
+
+  .lab__pattern:nth-child(3n + 1) {
+    padding-left: 0;
+    border-left: 0;
+  }
+}
+
+@media (max-width: 639px) {
+  .lab__pattern-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 0;
+  }
+
+  .lab__pattern:nth-child(3n + 1) {
+    padding-left: clamp(12px, 1.6vw, 20px);
+    border-left: 1px solid var(--line-subtle);
+  }
+
+  .lab__pattern:nth-child(odd) {
+    padding-left: 0;
+    border-left: 0;
+  }
+}
+
+/* =====================================================================
+   REDUCED MOTION
+   The experiments still run and every state still appears; only the
+   movement between states is removed.
+   ===================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .lab__run-track.is-running .lab__run-fill {
+    animation: none;
+    transform: scaleX(1);
+  }
+
+  .lab__run:hover:not(:disabled) { transform: none; }
+
+  .lstage,
+  .lstage__label,
+  .lstage__link,
+  .lqjob,
+  .lqmark,
+  .lidstep,
+  .lidstep::before,
+  .lrdot__mark,
+  .lrate__window-fill,
+  .lvariant,
+  .lexp {
+    transition: none;
+  }
+}

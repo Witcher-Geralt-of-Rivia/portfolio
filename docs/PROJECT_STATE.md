@@ -1,4 +1,4 @@
-<!-- PROJECT_STAGE: 7 -->
+<!-- PROJECT_STAGE: 8 -->
 <!-- DOCUMENT_STATUS: CURRENT -->
 
 # Project State
@@ -9,13 +9,13 @@ Everything below was read from the repository, not recalled from conversation.
 ## Stage Status
 
 ```
-Stages 01-07   COMPLETE and FROZEN
+Stages 01-08   COMPLETE and FROZEN
 Deployment     LIVE at https://intelligent-systems-lab.duckdns.org
-Stage 08       NOT STARTED
+Stage 09       NOT STARTED
 ```
 
-The next task is Stage 08 - Engineering Lab, filling `#lab`.
-See `docs/NEXT_STAGE.md`.
+The next task is Stage 09 - Work / Selected Engineering Case Studies, filling
+`#work`. See `docs/NEXT_STAGE.md`.
 
 ## Toolchain
 
@@ -46,13 +46,9 @@ no AI SDK. That is intentional.
 ## Scripts
 
 ```
-dev          next dev
-dev:remote   next dev --hostname 0.0.0.0 --port 3000
-build        next build
-start        next start
-lint         eslint
+dev, dev:remote (0.0.0.0:3000), build, start, start:portfolio, lint
 qa:memory    node qa/project-memory-check.mjs
-deploy:safe  powershell -NoProfile -ExecutionPolicy Bypass -File deploy/safe-deploy.ps1
+deploy:safe  powershell ... deploy/safe-deploy.ps1
 ```
 
 `deploy:safe` is the only supported production deployment path. Production
@@ -68,10 +64,12 @@ active-section tracking via IntersectionObserver, Escape handling, body scroll
 lock), plus one lab and one stateless ARIA tablist for each built capability
 section. `project-state.json` holds the authoritative list.
 
-No `requestAnimationFrame` loop and no pointer tracking runs anywhere. The only
-timers are the user-triggered Stage 06 flow and Stage 07 adapt sequences, each
-a single interval torn down on scenario change, restart and unmount - see D-035
-and D-042. Nothing animates on a timer at rest.
+No `requestAnimationFrame` loop and no pointer tracking runs anywhere. Timers
+exist only inside the three user-triggered sequences - the Stage 06 flow, the
+Stage 07 adaptation (an interval plus a settle timeout) and the Stage 08
+experiments - and every one is torn down by effect cleanup on scenario change,
+restart and unmount. See D-035, D-042 and D-044. Nothing runs on a timer at
+rest.
 
 ## Routes
 
@@ -81,8 +79,8 @@ and D-042. Nothing animates on a timer at rest.
 | `/specimen` | Stage 02 typography specimen, unlinked | Static (prerendered) |
 
 Section ids on `/`: `hero`, `systems`, `products`, `ai-learning`, `lab`, `work`.
-`#systems` (05), `#products` (06) and `#ai-learning` (07) are real sections.
-`#lab` and `#work` are still Stage 03 QA placeholders with no real content.
+`#systems` (05), `#products` (06), `#ai-learning` (07) and `#lab` (08) are
+real sections. `#work` is the last Stage 03 QA placeholder.
 
 ## Source Tree
 
@@ -102,30 +100,21 @@ src/
     navigation/nav-items.ts
     hero/{Hero,IntelligenceConstellation,CapabilityRail}.tsx
     hero/constellation-geometry.ts
-    systems/IntelligentSystemsSection.tsx    section shell (server)
-    systems/ArchitectureLab.tsx              "use client"
-    systems/ArchitectureModeSelector.tsx     full ARIA tablist
-    systems/{ArchitectureCanvas,ExecutionTrace,EngineeringPrinciples}.tsx
-    systems/architecture-{data,geometry}.ts  four modes; orthogonal routing
-    products/ProductEngineeringSection.tsx   section shell (server)
-    products/ProductStudio.tsx               "use client" - flow state machine
-    products/ProductScenarioSelector.tsx     full ARIA tablist
-    products/{WebProductSurface,MobileProductSurface,AiAssistSurface}.tsx
-    products/{ProductEventFlow,ProductCapabilityRail}.tsx
-    products/product-scenarios.ts            three scenarios + event rail
-    learning/AILearningSection.tsx           section shell (server)
-    learning/LearningLab.tsx                 "use client" - adapt state machine
-    learning/LearningScenarioSelector.tsx    full ARIA tablist
-    learning/{KnowledgeMap,LearnerStatePanel,TutorPanel}.tsx
-    learning/{LearningJourney,LearningPrinciples}.tsx
-    learning/learning-{scenarios,geometry}.ts  three scenarios; curved links
+    (each capability section below has the same shape: a server section
+     shell, one "use client" lab holding the state, one "use client" ARIA
+     tablist holding none, presentational renderers, and a data module)
+    systems/    Stage 05 - ArchitectureLab; canvas, trace, principles;
+                architecture-{data,geometry}.ts (four modes)
+    products/   Stage 06 - ProductStudio; web/mobile/assist surfaces, event
+                rail, capability rail; product-scenarios.ts (three scenarios)
+    learning/   Stage 07 - LearningLab; knowledge map, learner and tutor
+                panels, journey; learning-{scenarios,geometry}.ts
+    lab/        Stage 08 - LabWorkspace; flow, experiment views, observation,
+                controls, pattern rail; lab-experiments.ts (five experiments)
   styles/
     tokens.css            all design tokens - the source of truth for values
-    typography.css        type roles and base elements
-    motion.css            aurora/prism keyframes + reduced motion
-    layers.css            four background layers + responsive behaviour
-    surfaces.css          Milk / Frost / Prism
-    navigation.css, hero.css, systems.css, products.css, learning.css
+    typography.css, motion.css, layers.css, surfaces.css   foundations
+    navigation.css, hero.css, systems.css, products.css, learning.css, lab.css
 
 public/
   textures/micro-grain.svg    locally generated SVG turbulence tile
@@ -136,29 +125,21 @@ docs/                          canonical project memory (this directory)
 ```
 
 Stylesheet import order in `globals.css`: tokens, typography, motion, layers,
-surfaces, navigation, hero, systems, products, learning.
+surfaces, navigation, hero, systems, products, learning, lab.
 
 ## Stage 01 - Background (FROZEN)
 
 Four fixed, inert layers painted behind all content:
 
-| Layer | Element | z-index |
-|---|---|---|
-| A base surface | `.backdrop-base` | -4 |
-| B aurora fields | `.aurora` | -3 |
-| C prism light | `.prism` | -2 |
-| D micro grain | `.grain` | -1 |
-
+`.backdrop-base` (-4), `.aurora` (-3), `.prism` (-2) and `.grain` (-1).
 Backgrounds, the seven-hue aurora palette and the three surface recipes are
-declared in `src/styles/tokens.css`, which is their source of truth. Layer A is
-a 135deg gradient across the three background tones.
+declared in `src/styles/tokens.css`, their source of truth; layer A is a 135deg
+gradient across the three background tones.
 
-Six aurora fields are implemented in `src/styles/layers.css`, in the order
-lavender, sky, mint, rose, peach and lemon-over-aqua, at 130-150px blur and
-0.38-0.55 opacity. Cycles are 31-47s, all `ease-in-out`, `alternate`,
-`infinite`, with negative delays so they never synchronise. Blur is static;
-only `transform` and `opacity` animate.
-
+Six aurora fields in `src/styles/layers.css` - lavender, sky, mint, rose, peach
+and lemon-over-aqua - at 130-150px blur and 0.38-0.55 opacity, cycling over
+31-47s, all `ease-in-out`, `alternate`, `infinite`, with negative delays so
+they never synchronise. Blur is static; only `transform` and `opacity` animate.
 Prism: two beams, 58s and 68s, opacity 0.22 and 0.16, beam B `soft-light`.
 
 Grain: `/textures/micro-grain.svg`, 256px tile, opacity **0.024**, blend
@@ -186,16 +167,12 @@ Working weights: 400 body, 450 lead, 500 UI, 520 subhead, 560 heading,
 
 ### Text colour roles - important
 
-```
---text-primary     #191b24    headings, important body and UI
---text-secondary   #515666    supporting paragraphs, lead copy
---text-annotation  #595e6c    captions, technical labels, metadata
---text-muted       #7c8190    decorative only
-```
+Four roles, declared in `tokens.css`: primary for headings and important body,
+secondary for supporting paragraphs, annotation for captions and technical
+labels, muted for decoration only.
 
 **`--text-muted` must NOT be used for meaningful small text.** It measures
-approximately 3.2:1 against the live background, below WCAG AA. It is reserved
-for decorative indexes and intentionally low-priority annotation.
+approximately 3.2:1 against the live background, below WCAG AA.
 `--text-annotation` is the accessible small-technical role and measures
 5.2-6.4:1 in actual use.
 
@@ -225,12 +202,11 @@ Compact (< 900px): a 56px bar with a 40x40 trigger and a panel whose items are
 one presentation is in the accessibility tree at a time; the other is
 `display: none`.
 
-Behaviours: IntersectionObserver active-section tracking with
-`rootMargin: "-30% 0px -55% 0px"`, resolved in document order so only one item is
-ever current; Escape closes the panel; focus moves into the panel on open and
-returns to the trigger on close; Tab is confined to trigger plus panel links;
-body scroll lock with `scrollbar-gutter: stable` on `html` so locking cannot
-shift layout.
+Behaviours: IntersectionObserver active-section tracking (`rootMargin
+"-30% 0px -55% 0px"`, resolved in document order so only one item is ever
+current); Escape closes; focus moves into the panel on open and returns to the
+trigger on close; Tab is confined to trigger plus panel links; body scroll lock
+with `scrollbar-gutter: stable` so locking cannot shift layout.
 
 **No navigation item is active while the hero owns the viewport.** `activeId`
 starts empty and clears when no section intersects. Systems becomes active only
@@ -309,11 +285,9 @@ pipeline beneath. Three scenarios switch through a real ARIA tablist, each
 declared in `product-scenarios.ts`; the surfaces are block renderers over that
 data, not hand-built JSX per scenario.
 
-| Scenario | Route | Web blocks | Phone blocks |
-|---|---|---|---|
-| Operations SaaS (default) | `/app/overview` | tiles, chart, rows, rows | cards |
-| Commerce Platform | `/app/commerce` | tiles, cards, timeline, rows | card, progress, suggestion |
-| Field Workflow | `/app/dispatch` | tiles, map, rows, rows | card, checklist |
+Scenarios: Operations SaaS (default, `/app/overview`), Commerce Platform
+(`/app/commerce`) and Field Workflow (`/app/dispatch`), each declaring its own
+web and phone block lists.
 
 `Run product flow` walks a seven-step local state machine across the six-stage
 event rail (UI Event, API, Service, Data, Background Job, Sync), lighting each
@@ -343,10 +317,10 @@ learning journey beneath. Three scenarios switch through an ARIA tablist, each
 declared in `learning-scenarios.ts` and rendered by one set of components.
 
 Adaptive Tutor (default) draws a 15-node knowledge map over a 7-step journey;
-Assessment Engine an 11-node evaluation graph over 6 steps; Learning Path
-Builder an 8-milestone roadmap with 2 optional branches over 6 steps. All three
-share the 520x340 viewBox and one renderer. Every scenario declares two
-deterministic variants. `Adapt` walks a five-stage
+Assessment Engine an 11-node evaluation graph; Learning Path Builder an
+8-milestone roadmap with 2 optional branches. All three share the 520x340
+viewBox and one renderer, and each declares two deterministic variants.
+`Adapt` walks a five-stage
 reducer - analysing, selecting, assessing, feedback, updated - then swaps the
 variant, so map states, highlighted route, journey position, mastery figures
 and tutor brief all move together. Measured at 340ms per stage, 1.70s end to
@@ -355,25 +329,49 @@ again".
 
 Knowledge state is never carried by colour alone: mastered, learning, gap and
 locked each have their own ring pattern and core mark, and the legend names all
-four in text. Link paths are computed at build time in `learning-geometry.ts`,
-bowed away from the canvas centre so arcs stay clear of the labels.
-
-Map type is sized in viewBox units and so shrinks with the container: the phone
-view raises the label size and drops prerequisite labels and in-node codes
-rather than render 8px type. Measured floor 9.38px at 360px.
+four in text. Link paths are computed at build time in `learning-geometry.ts`.
+Map type is sized in viewBox units, so the phone view raises the label size and
+drops prerequisite labels rather than render 8px type - floor 9.38px at 360px.
 
 Nothing here reaches the network: 0 requests across 20 adapt runs and 30
 scenario changes. "Maya" is a fixture, the percentages are not measurements,
 and the lab header carries LOCAL / DETERMINISTIC SIMULATION.
 
+## Stage 08 - Engineering Lab (FROZEN)
+
+Section `#lab`, heading "Small systems. Serious engineering."
+
+Five experiments in one workspace, selected by an ARIA tablist styled as an
+instrument index: API Request Inspector, Rate Limit Simulator, Webhook
+Reliability, Queue & Retry Simulator, Idempotency Guard. The workspace is a
+single 1200x740 surface holding three regions - input left, the system flow and
+the experiment's visual centre, observation right.
+
+Every experiment is a precomputed frame sequence in `lab-experiments.ts`. Each
+frame carries the complete state the UI needs, so the render is a pure function
+of (experiment, variant, frame) and Run always produces the same sequence.
+There is no `Math.random` and no generated timing anywhere in the section.
+
+Runs last 1.2-1.8s: 6 frames at 240ms for the API inspector (2 or 3 when a
+variant fails early), 7 at 200ms for the rate limiter, 5 or 8 at 240ms for the
+webhook, 9 at 200ms for the queue, 6 at 240ms for idempotency. End states are
+fixed - 200/422/401, five admitted and two refused with a 429, acknowledged,
+JOB-108 in the dead-letter queue, and two requests producing one action.
+
+Failure is always attributable to a stage: a validation error stops the flow at
+Validate, an unauthorized call at Authenticate. Failure states are soft peach or
+rose, success mint, waiting lavender, in-progress sky - never a saturated
+traffic light. Each experiment contributes one accent hue used on small marks
+only; the workspace never changes colour.
+
+Nothing here reaches the network, and the illustrative labels ("T+2", "retry
+delay", "simulated step 6 of 6") are sequence positions, not latency.
+
 ## Assets
 
-```
-public/marks/system-mark.svg      890 bytes, viewBox 0 0 28 28, custom
-public/textures/micro-grain.svg   locally generated feTurbulence tile
-```
-
-No stock imagery, no downloaded icons, no external image dependency.
+`public/marks/system-mark.svg` (890 bytes, viewBox 0 0 28 28, custom) and
+`public/textures/micro-grain.svg` (locally generated feTurbulence tile). No
+stock imagery, no downloaded icons, no external image dependency.
 
 ## Deployment
 

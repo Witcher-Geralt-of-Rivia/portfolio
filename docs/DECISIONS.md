@@ -1,4 +1,4 @@
-<!-- PROJECT_STAGE: 7 -->
+<!-- PROJECT_STAGE: 8 -->
 <!-- DOCUMENT_STATUS: CURRENT -->
 
 # Decisions
@@ -843,10 +843,11 @@ Status: Accepted
 Stage: 6 (post-stage hardening)
 
 ### Decision
-`deploy/safe-deploy.ps1` asserts three markers in the smoke server's rendered
-HTML before switching production: `id="systems"`, `id="products"`, and the
-Stage 06 heading `One product. Every surface.` Each stage that fills a
-placeholder adds its own marker to that list.
+`deploy/safe-deploy.ps1` asserts the markup of every built section in the smoke
+server's rendered HTML before switching production. Each stage that fills a
+placeholder adds its own id and, more importantly, its heading. As of Stage 08
+that is seven assertions: the ids `#systems`, `#products`, `#ai-learning` and
+`#lab`, plus the Stage 06, 07 and 08 headings.
 
 ### Reason
 The gate previously checked `#systems` alone, so a build that compiled but
@@ -855,10 +856,11 @@ rendered any later section as an empty placeholder would have deployed clean.
 The heading is the load-bearing assertion, not decoration. `src/app/page.tsx`
 renders every navigation id that is not yet built as a placeholder section, so
 `id="products"` was already present in pre-Stage-06 output. Measured against
-real build directories: `.next-release-a` (Stage 06) passes all three;
-`.next-release-b` (pre-Stage-06) is rejected with "Stage 06 heading missing
-from HTML" while its `id="products"` assertion passes. An id-only check would
-have let that build through.
+real build directories, a pre-Stage-06 build is rejected with "Stage 06 heading
+missing from HTML" while its `id="products"` assertion passes. An id-only check
+would have let that build through. The same held at each later stage: the
+Stage 07 build is rejected by the Stage 08 heading assertion and passes every
+id.
 
 ### Consequence
 Changing the `#products` heading copy aborts deployment at phase 7 until the
@@ -980,3 +982,59 @@ accessible summary carries the naming at every width.
 Rendered floor is 9.38px at 360px, 10.4px at 390px and 9.69px at desktop, with
 zero collisions and zero spill outside the map box in all three scenarios. If
 a node is ever added, re-run that harness rather than eyeballing the result.
+
+---
+
+## D-044 — Every experiment is a precomputed frame list
+
+Status: Accepted
+Stage: 8
+
+### Decision
+Each Engineering Lab experiment declares a list of frames in
+`lab-experiments.ts`. A frame carries the complete state the UI needs — the
+active flow stage, the observation state and event, and a typed view model.
+Running an experiment is an index walking forward on one interval, and the
+render is a pure function of that index. There is no `Math.random` and no
+generated timing anywhere in the section.
+
+### Reason
+Five experiments that each own their own ad-hoc state would have been five
+places to leak a timer and five different ideas of what "reset" means. A frame
+list makes the whole sequence inspectable, makes Reset a single assignment back
+to the initial view, and makes the end state assertable: twenty runs of an
+experiment must produce exactly one end state, which the harness checks.
+
+It also keeps the screenshots reproducible, which the specification required.
+Variable timing or a random failure would have made every capture a different
+picture and every regression ambiguous.
+
+### Consequence
+Adding an experiment means writing frames and one view renderer, not a new
+component tree. The typed view union is what lets `LabExperimentView` switch
+over five visuals while the workspace shell, flow, observation and controls are
+written once.
+
+---
+
+## D-045 — The lab shows a TIME field, and never a fabricated one
+
+Status: Accepted
+Stage: 8
+
+### Decision
+Where an experiment would normally display a latency, it displays a sequence
+position instead, labelled as one: "simulated step 6 of 6", "T+2", "retry
+delay, widening", "simulated delay". The rate limiter's window is a parameter,
+not an elapsed measurement.
+
+### Reason
+An API inspector with no timing field looks incomplete, but a fabricated
+"42ms" would be a false claim about a system that does not exist — the project
+forbids invented metrics outright. Naming the sequence position keeps the
+field, keeps it honest, and still communicates that stages happen in order.
+
+### Consequence
+If real measurements ever back these surfaces, the labels change from sequence
+positions to measurements and the wording must change with them. Until then,
+no number in this section may be read as performance.

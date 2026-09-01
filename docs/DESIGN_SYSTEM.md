@@ -1,4 +1,4 @@
-<!-- PROJECT_STAGE: 7 -->
+<!-- PROJECT_STAGE: 8 -->
 <!-- DOCUMENT_STATUS: CURRENT -->
 
 # Milky Intelligence Design System
@@ -199,6 +199,26 @@ the hero constellation. At most two signals travel it at a time.
 Simulated learner data is labelled once, at the lab header, and not repeated on
 every panel. One honest annotation is enough to stop a visitor reading
 synthetic mastery figures as real assessment.
+
+## Engineering Lab Language
+
+Stage 08 is the most technical surface in the project and the least decorated:
+precise grids, small diagnostic labels, controlled state transitions. It is an
+instrument panel, not a terminal — no dark theme, no monospace wall, no
+scrolling log.
+
+State colour is semantic and always soft: mint for success, peach or rose for
+failure, lavender for waiting, sky for in progress. Never a saturated traffic
+light. Each experiment carries one accent hue — sky, lavender, mint, peach,
+aqua — used on a handful of small marks; the workspace itself never changes
+colour with the experiment.
+
+Failure is shown, not alarmed. A refused request is an outlined dashed dot
+beside filled ones, a dead-lettered job is a dashed row set slightly apart, and
+a failed delivery attempt is a peach row with a recovery arrow to the retry
+beneath it. Nothing flashes and nothing turns red.
+
+Numbers that would normally be latency are sequence positions, and say so.
 
 ## Responsive Principles
 

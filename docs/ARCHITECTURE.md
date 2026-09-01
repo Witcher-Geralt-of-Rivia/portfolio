@@ -1,4 +1,4 @@
-<!-- PROJECT_STAGE: 7 -->
+<!-- PROJECT_STAGE: 8 -->
 <!-- DOCUMENT_STATUS: CURRENT -->
 
 # Architecture
@@ -8,7 +8,7 @@ How the code is actually organised, and the principles that keep it that way.
 ## Shape
 
 A single Next.js App Router application. Static, server-rendered, no backend.
-Two prerendered routes. Seven client components; everything else is server-
+Two prerendered routes. Nine client components; everything else is server-
 rendered markup and CSS.
 
 ```
@@ -50,13 +50,9 @@ src/
       architecture-geometry.ts        orthogonal routing
   styles/
     tokens.css              every design token
-    typography.css
-    motion.css
-    layers.css
-    surfaces.css
-    navigation.css
-    hero.css
-    systems.css
+    typography.css, motion.css, layers.css, surfaces.css
+    navigation.css, hero.css
+    systems.css, products.css, learning.css, lab.css   one per section
 
 public/
   textures/micro-grain.svg
@@ -96,8 +92,8 @@ opens with the hero sets its own larger clearance, so
 ## Styling
 
 Plain CSS, no framework. `globals.css` is a composition root that imports the
-ten stylesheets in a fixed order: tokens, typography, motion, layers, surfaces,
-navigation, hero, systems, products, learning. A new section appends its own
+eleven stylesheets in a fixed order: tokens, typography, motion, layers,
+surfaces, navigation, hero, systems, products, learning, lab. A new section appends its own
 stylesheet to the end of that chain and never edits an earlier one.
 
 Every principal value is a custom property in `tokens.css`. Components reference
@@ -109,7 +105,7 @@ hero rules do not live in `navigation.css`.
 
 ## Client/Server Boundary
 
-There are seven `"use client"` modules, each with deliberately bounded
+There are nine `"use client"` modules, each with deliberately bounded
 responsibilities. `docs/project-state.json` holds the authoritative list.
 
 `SiteNavigation.tsx`:
@@ -137,10 +133,15 @@ sequence. It is the one place in the project that uses a reducer: the sequence
 has to move four surfaces together, and a reducer keeps that transition in one
 readable function. Both of its timers are cleared by effect cleanup.
 
-`ArchitectureModeSelector.tsx`, `ProductScenarioSelector.tsx` and
-`LearningScenarioSelector.tsx` are client only because a tablist needs key
-handling and roving tabindex. They own no state; the selection lives in their
-parent.
+`LabWorkspace.tsx` holds the selected experiment, its variant, and how far the
+frame sequence has advanced. Each experiment is a precomputed frame list, so
+running one is an index walking forward and the render is a pure function of
+that index — which is what makes the sequences reproducible.
+
+The four selectors (`ArchitectureModeSelector`, `ProductScenarioSelector`,
+`LearningScenarioSelector`, `LabExperimentSelector`) are client only because a
+tablist needs key handling and roving tabindex. They own no state; the
+selection lives in their parent.
 
 Everything else - the aurora, the prism, the grain, the hero, the
 constellation, all three section shells, the product surfaces, the event rail,
@@ -177,9 +178,9 @@ a fan-in reads as a routing bundle instead of one overdrawn line.
   state, focus control or an observer.
 - No continuous JavaScript animation: no `requestAnimationFrame` loop, no
   pointer tracking, and nothing running on a timer at rest. A user-triggered
-  sequence may use a single `setInterval` when it has to move several surfaces
-  together, provided effect cleanup tears it down on every exit - see D-035 and
-  D-042. That is the only sanctioned use of a timer.
+  sequence may use timers when it has to move several surfaces together,
+  provided effect cleanup tears every one of them down on each exit - see
+  D-035, D-042 and D-044. That is the only sanctioned use of a timer.
 - Animate compositor-friendly properties: `transform`, `opacity`, and where
   necessary `offset-distance` and `stroke-dashoffset`.
 - Use IntersectionObserver rather than scroll polling.

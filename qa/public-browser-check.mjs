@@ -64,10 +64,21 @@ for (const [w, h] of [[1440, 900], [390, 844]]) {
   await p.waitForFunction(() => /Adapt again/.test(document.querySelector(".llab__run-label").textContent), null, { timeout: 12000, polling: 120 });
   await frame(p); await p.waitForTimeout(400); await frame(p);
 
+  await p.evaluate(() => document.querySelector("#lab").scrollIntoView({ block: "start" }));
+  await p.waitForTimeout(500);
+  for (const id of ["ratelimit", "webhook", "queue", "idempotency", "api"]) {
+    await p.click(`#lexp-tab-${id}`);
+    await p.waitForTimeout(280);
+  }
+  await p.click(".lab__run");
+  await p.waitForFunction(() => !document.querySelector(".lab__run").disabled, null, { timeout: 12000, polling: 120 });
+  await p.click(".lab__reset");
+  await frame(p); await p.waitForTimeout(400); await frame(p);
+
   // The list reset, measured on the live page.
   const lists = await p.evaluate(() => {
     const out = {};
-    for (const sel of [".products__rail", ".pweb__rows", ".pflow__rail", ".ljourney__list", ".lmeters__list", ".llegend"]) {
+    for (const sel of [".products__rail", ".pweb__rows", ".pflow__rail", ".ljourney__list", ".lmeters__list", ".llegend", ".lflow__list", ".lab__pattern-list"]) {
       const el = document.querySelector(sel);
       if (!el) { out[sel] = null; continue; }
       const cs = getComputedStyle(el);

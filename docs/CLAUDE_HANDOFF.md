@@ -1,4 +1,4 @@
-<!-- PROJECT_STAGE: 7 -->
+<!-- PROJECT_STAGE: 8 -->
 <!-- DOCUMENT_STATUS: CURRENT -->
 
 # Claude Handoff
@@ -57,9 +57,9 @@ Both rules hold until the user explicitly changes them. See
 | Backend | None. No database, API route or server action |
 | QA | Playwright + pngjs (devDependencies), scripts in `qa/` |
 
-Rendering is almost entirely server-side. Seven `"use client"` modules exist:
+Rendering is almost entirely server-side. Nine `"use client"` modules exist:
 `navigation/SiteNavigation.tsx`, and one lab plus one tablist for each of the
-three built capability sections. Everything else is server-rendered markup and
+four built capability sections. Everything else is server-rendered markup and
 CSS. `docs/project-state.json` holds the authoritative list.
 
 ## Current Runtime
@@ -90,7 +90,7 @@ production domain is deliberately not listed. See `docs/DEPLOYMENT.md`.
 
 ## Frozen Stages
 
-Stages 01-07 are complete, QA-verified and **frozen**. Do not redesign them.
+Stages 01-08 are complete, QA-verified and **frozen**. Do not redesign them.
 
 | Stage | Scope | Status |
 |---|---|---|
@@ -99,6 +99,9 @@ Stages 01-07 are complete, QA-verified and **frozen**. Do not redesign them.
 | 03 | Navigation + SiteShell | FROZEN |
 | 04 | Hero + Intelligence Constellation | FROZEN |
 | 05 | Intelligent Systems architecture lab | FROZEN |
+| 06 | Product Engineering studio | FROZEN |
+| 07 | AI Learning Systems adaptive lab | FROZEN |
+| 08 | Engineering Lab experiments | FROZEN |
 
 Details in `docs/PROJECT_STATE.md`. History in `docs/CHANGELOG.md`.
 
@@ -118,11 +121,11 @@ generic glassmorphism, gaming UI, crypto UI. Full anti-pattern list in
 
 Two routes:
 
-- **`/`** — hero (`#hero`), then the three built capability sections
-  `#systems` (05), `#products` (06) and `#ai-learning` (07), then the two
-  remaining anchor sections `#lab` and `#work`.
-  Those two are **QA placeholders only** — an eyebrow label and the words
-  "Navigation specimen section". One stage replaces one; leave the other.
+- **`/`** — hero (`#hero`), then the four built capability sections
+  `#systems` (05), `#products` (06), `#ai-learning` (07) and `#lab` (08),
+  then `#work`, the last anchor section.
+  `#work` is a **QA placeholder only** — an eyebrow label and the words
+  "Navigation specimen section". Stage 09 replaces it.
 - **`/specimen`** — Stage 02 typography specimen, kept so the type scale stays
   verifiable. Not linked from the site.
 
@@ -138,25 +141,17 @@ src/components/
   navigation/SiteNavigation.tsx   CLIENT - navigation state and observers
   navigation/{DesktopNavigation,MobileNavigation,SystemMarkImage}.tsx
   navigation/nav-items.ts         single source for the five destinations
-  learning/AILearningSection.tsx  section shell (server)
-  learning/LearningLab.tsx        CLIENT - scenario + adapt state machine
-  learning/LearningScenarioSelector.tsx   CLIENT - ARIA tablist
-  learning/{KnowledgeMap,LearnerStatePanel,TutorPanel,LearningJourney,LearningPrinciples}.tsx
-  learning/learning-{scenarios,geometry}.ts  three scenarios; curved links
   hero/{Hero,IntelligenceConstellation,CapabilityRail}.tsx
   hero/constellation-geometry.ts  node/link maths, evaluated at build time
-  systems/IntelligentSystemsSection.tsx   section shell (server)
-  systems/ArchitectureLab.tsx     CLIENT - architecture mode + hovered node
-  systems/ArchitectureModeSelector.tsx    CLIENT - ARIA tablist
-  systems/{ArchitectureCanvas,ExecutionTrace,EngineeringPrinciples}.tsx
-  systems/architecture-{data,geometry}.ts  four modes; orthogonal routing
-  products/ProductEngineeringSection.tsx  section shell (server)
-  products/ProductStudio.tsx      CLIENT - scenario + flow state machine
-  products/ProductScenarioSelector.tsx    CLIENT - ARIA tablist
-  products/{WebProductSurface,MobileProductSurface,AiAssistSurface,
-            ProductEventFlow,ProductCapabilityRail}.tsx
-  products/product-scenarios.ts   three scenarios, event rail, capabilities
+  learning/  07 - LearningLab; knowledge map, learner and tutor panels
+  systems/   05 - ArchitectureLab; canvas, trace, principles; four modes
+  products/  06 - ProductStudio; web/mobile/assist surfaces, event rail
+  lab/       08 - LabWorkspace; flow, experiment views, observation, controls
 ```
+
+Each capability directory has the same shape: a server section shell, one
+CLIENT lab holding the state, one CLIENT ARIA tablist holding none,
+presentational renderers, and a `*-{data,scenarios,experiments}.ts` module.
 
 Full tree and architectural principles in `docs/ARCHITECTURE.md`.
 
@@ -190,7 +185,7 @@ Each is an entry in `docs/DECISIONS.md` with its measured reason.
 
 | Item | State |
 |---|---|
-| Git | Repository initialised. Branch `main`. Tags: `portfolio-production-v1`, `portfolio-safe-deployment-v1`, and `portfolio-stage-0N-verified` for stages 04-07 |
+| Git | Repository initialised. Branch `main`. Tags: `portfolio-production-v1`, `portfolio-safe-deployment-v1`, and `portfolio-stage-0N-verified` for stages 04-08 |
 | Production | LIVE at `https://intelligent-systems-lab.duckdns.org` |
 | Dev preview | `npm run dev:remote` on `0.0.0.0:3000`, still available |
 | Host firewall | 80/443 allowed; 3000 allowed; 3100 has no inbound rule |
@@ -225,13 +220,13 @@ tokens. Documentation must not duplicate it.
 
 ## Current Task Status
 
-Stages 01-07 complete and frozen. The persistent context system is complete and
-the site is live over HTTPS. Stage 08 has **not** started.
+Stages 01-08 complete and frozen. The persistent context system is complete and
+the site is live over HTTPS. Stage 09 has **not** started.
 
 ## Next Allowed Task
 
-**Stage 08 - Engineering Lab**, filling `#lab`. The user will supply that
-specification separately. See `docs/NEXT_STAGE.md`.
+**Stage 09 - Work / Selected Engineering Case Studies**, filling `#work`. The
+user will supply that specification separately. See `docs/NEXT_STAGE.md`.
 
 Do not begin it automatically.
 

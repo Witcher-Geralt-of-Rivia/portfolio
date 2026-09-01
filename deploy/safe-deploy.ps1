@@ -366,6 +366,12 @@ try {
     if ($smokeHtml -notmatch 'Learning paths that adapt\.') { $smokeFailed += "Stage 07 heading missing from HTML" }
     else { Write-Step "Stage 07 heading present in rendered HTML" "OK" }
 
+    if ($smokeHtml -notmatch 'id="lab"') { $smokeFailed += "#lab section missing from HTML" }
+    else { Write-Step "#lab section present in rendered HTML" "OK" }
+
+    if ($smokeHtml -notmatch 'Small systems\. Serious engineering\.') { $smokeFailed += "Stage 08 heading missing from HTML" }
+    else { Write-Step "Stage 08 heading present in rendered HTML" "OK" }
+
     if ($smokeFailed.Count -gt 0) { throw "Smoke test failed: $($smokeFailed -join '; ')" }
 
     Stop-SmokeServer

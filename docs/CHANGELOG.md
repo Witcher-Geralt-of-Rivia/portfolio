@@ -1,4 +1,4 @@
-<!-- PROJECT_STAGE: 7 -->
+<!-- PROJECT_STAGE: 8 -->
 <!-- DOCUMENT_STATUS: CURRENT -->
 
 # Project Changelog
@@ -496,3 +496,65 @@ labels clear the 9px rendered floor at every viewport with zero collisions.
 Cancellation and unmount during a run both leave no stale state. Under reduced
 motion no keyframe animation runs at all while every content change still
 happens. Stages 01-06 regression all PASS.
+
+---
+
+## Stage 08 - Engineering Lab
+
+Status: **Frozen**
+
+### Summary
+Built `#lab`, heading "Small systems. Serious engineering." Five interactive
+experiments in one workspace — API Request Inspector, Rate Limit Simulator,
+Webhook Reliability, Queue & Retry Simulator, Idempotency Guard — covering
+validation, traffic control, signature verification and deduplication, retry
+with backoff and dead-lettering, and safe retries under an idempotency key.
+
+### Files
+`src/components/lab/{EngineeringLabSection,LabWorkspace,LabExperimentSelector,
+LabFlow,LabExperimentView,LabObservation,LabControls,LabPatternRail}.tsx`,
+`src/components/lab/lab-experiments.ts`, `src/styles/lab.css`,
+`src/app/page.tsx`, `src/app/globals.css`, `deploy/safe-deploy.ps1`,
+`qa/stage08-*.mjs`
+
+### Notable during implementation
+- The rate limiter was wrong on the first pass. Limit 5 plus burst 2 was read
+  as 7 units of capacity, so a sequence of exactly 7 requests admitted all of
+  them and nothing was ever refused — the opposite of what a rate-limit demo
+  should show. The window now admits five, two of which may arrive back to
+  back on the burst allowance, and refuses the rest with a 429.
+- Three columns sized to their content left roughly 200px of empty surface
+  above the workspace footer, because the workspace height is fixed by design.
+  The centre column now stretches and the side panels stay at the top.
+- The flow's inter-stage connector rendered between each stage's two text
+  lines and read as a stray dash. The gap between the boxes does that job.
+- The queue drew Producer → Queue → Worker above the job list while the system
+  flow above it already showed the same five stages. Replaced with a queue
+  depth readout.
+- Job rows printed "complete" in both the state and note columns; the note now
+  reports attempts, which is the part that differs between jobs.
+- At 768px the queue's backoff note escaped the workspace: the marks carry
+  cumulative left margins to widen the gaps, and the trailing note was pushed
+  past the edge. The row stacks below 1100px.
+
+### Documentation corrections
+Six inconsistencies, four of them left behind by Stage 07's own update, were
+found during the bootstrap and fixed here. `CLAUDE.md` — the file loaded first
+in every session — still said "Stages 01-04 are frozen", three stages behind.
+`CLAUDE_HANDOFF.md` said stages 01-07 were frozen two lines above a table that
+stopped at 05. `ARCHITECTURE.md` had its stylesheet prose corrected in Stage 07
+but not its source-tree fence, which still listed eight of ten. `PROJECT_STATE.md`
+described the Stage 07 sequence as "a single interval" when it uses an interval
+and a settle timeout. `DEPLOYMENT.md` named three smoke markers when the script
+asserted five, and still described the smoke port as fixed. D-039 carried the
+same stale count.
+
+### QA
+67 text roles pass contrast (worst 6.13:1). CLS 0.00000 at load, 0.00053 after
+five experiments and five runs. 50 experiment switches — 17 of them
+mid-execution — 100 executions and 100 run/reset cycles all clean, with 0
+network requests. Every experiment ends in exactly one state across 20 runs.
+8 viewports x 5 experiments with no overflow, no overlap, no text under 8.4px
+and the phone order held at system, input, observation. Idle long-task time 0ms
+over six seconds. Under reduced motion no keyframe animation runs while every
+experiment still completes. Stages 01-07 regression all PASS.
