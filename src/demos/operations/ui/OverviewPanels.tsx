@@ -68,9 +68,13 @@ export function KpiGrid({ keys, values }: { keys: KpiKey[]; values: Record<KpiKe
             <p className="ops-kpi__value">{v.value}</p>
             {v.parts ? (
               <p className="ops-kpi__parts">
-                {v.parts.map((part, i) => (
+                {/* Separated by a flex gap rather than a middle dot. Each part
+                    is nowrap and nothing sat between two of them, so the line
+                    had no break opportunity and the fourth part was clipped
+                    from 1180px to 1440px. A gap wraps and leaves no orphaned
+                    separator at the start of the second line. */}
+                {v.parts.map((part) => (
                   <span className="ops-kpi__part" key={part.label}>
-                    {i > 0 && <span className="ops-kpi__sep" aria-hidden="true"> · </span>}
                     <span className="ops-kpi__part-count">{part.count}</span>{" "}
                     <span className="ops-kpi__part-label">{part.label}</span>
                   </span>

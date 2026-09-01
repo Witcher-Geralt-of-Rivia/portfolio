@@ -965,7 +965,7 @@ qa:memory          18/18
 
 ## Stage 09C2.1 - Operations Shell Hardening
 
-PASS. Harness: `qa/stage09c21-operations-hardening.mjs` (107 checks), plus the
+PASS. Harness: `qa/stage09c21-operations-hardening.mjs` (111 checks), plus the
 full regression below.
 
 Run against a **local production build**, never the dev server:
@@ -1015,7 +1015,15 @@ bar duplicated name   "Operations Console" three times in the top 120px
                       -> the shared bar's title stands down (D-060)
 query blanked on      the badge cleared and the list emptied while six of
   every revalidation   eight writes were still outstanding      -> D-058
+KPI breakdown clipped  each part is nowrap and nothing sat between two of
+                       them, so the line had no break opportunity and the
+                       fourth part was cut off from 1180px to 1440px
+                       -> a wrapping flex gap replaces the middle dot
 ```
+
+The last one was found by reading a production screenshot after deployment,
+which is the review workflow this stage exists to establish (D-061) doing its
+job on the first pass. The harness now asserts the fit, not only the sums.
 
 The last one was found by the harness as an intermittent failure and confirmed
 by reading IndexedDB directly at the moment the badge cleared: the store still
@@ -1072,12 +1080,12 @@ stage09a-shell                  85/85
 stage09b-operations-spec        96/96
 stage09c1-operations          211/211
 stage09c2-operations-ui       140/140
-stage09c21-hardening          107/107
+stage09c21-hardening          111/111
 qa:memory                       18/18
 tsc --noEmit                    clean
 eslint                          0 errors (1 pre-existing warning in qa/texture.mjs)
                               ------
-                              715 checks
+                              719 checks
 ```
 
 Two assertions in the 09C2 harness were updated rather than removed: the demo

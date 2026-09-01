@@ -305,10 +305,10 @@ what is on screen.
 
 ### QA
 
-`qa/stage09c21-operations-hardening.mjs`, 107 checks against a local production
-build: KPI semantics and sums, the role matrix, role containment, the mobile
-sheet at 390 and 360, the master logo's bytes and the derived mark's geometry,
-and reset. Full regression is 715 checks across seven suites; see
+`qa/stage09c21-operations-hardening.mjs`, 111 checks against a local production
+build: KPI semantics, sums and fit, the role matrix, role containment, the
+mobile sheet at 390 and 360, the master logo's bytes and the derived mark's
+geometry, and reset. Full regression is 719 checks across seven suites; see
 `docs/QA_BASELINE.md`.
 
 ### Deployment

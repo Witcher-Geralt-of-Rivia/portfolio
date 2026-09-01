@@ -218,6 +218,19 @@ section("KPI CARDS CARRY MEANING, NOT DECORATION");
   check("no KPI draws a progress bar", m.bars === 0, `${m.bars} found`);
   check("four KPI cards for Admin", m.cards.length === 4, `${m.cards.length}`);
 
+  /* A breakdown that is cut off mid-part is worse than no breakdown: it reads
+     as a complete list and is not one. Each part is nowrap by design, so the
+     container has to be free to wrap between them. */
+  const fit = await page.evaluate(() =>
+    [...document.querySelectorAll(".ops-kpi__parts, .ops-kpi__note")].map((el) => ({
+      label: el.closest(".ops-kpi")?.querySelector(".ops-kpi__label")?.textContent ?? "?",
+      overflow: el.scrollWidth - el.clientWidth,
+    }))
+  );
+  for (const f of fit) {
+    check(`${f.label.toLowerCase()}: the breakdown is not clipped`, f.overflow <= 0, `${f.overflow}px`);
+  }
+
   for (const card of m.cards) {
     const name = card.label.toLowerCase();
     check(`${name}: the headline is a number`, Number.isFinite(card.value), `${card.value}`);

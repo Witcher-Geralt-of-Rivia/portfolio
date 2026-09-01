@@ -1004,12 +1004,19 @@ drops it when the question changes. That distinction is the whole fix: keeping
 stale data across a role change would have leaked the previous role's records
 for a frame, which is the failure D-056 closes (D-058).
 
+- **The KPI breakdown was clipped** between 1180px and 1440px. Each part is
+  `nowrap` by design and nothing sat between two of them, so the line had no
+  break opportunity and "7 Proposal" was cut off — a list that reads as
+  complete and is not. A wrapping flex gap replaced the middle dot. Found by
+  reading a production screenshot after the first deployment, which is the
+  review workflow of D-061 working on its first pass.
+
 ### QA
 
-`qa/stage09c21-operations-hardening.mjs`, 107 checks: KPI semantics and sums,
+`qa/stage09c21-operations-hardening.mjs`, 111 checks: KPI semantics and sums,
 the role composition matrix, role containment, the mobile sheet at 390 and 360,
 the master logo's bytes and the derived mark's geometry, and reset. Full
-regression is 715 checks across seven suites, all against a local production
+regression is 719 checks across seven suites, all against a local production
 build on port 3001 — never 3200, which belongs to the other application here.
 
 Two 09C2 assertions were updated rather than removed: the demo bar mark is no
