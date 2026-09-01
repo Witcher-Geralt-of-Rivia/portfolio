@@ -1,17 +1,18 @@
 {
   "project": "Milky Intelligence Technical Portfolio",
   "purpose": "Demonstrate engineering capability to freelance clients. Technical portfolio, not a personal site.",
-  "currentStage": 6,
+  "currentStage": 7,
   "stage05Started": true,
-  "nextStage": "stage-07",
-  "nextStageTitle": "Stage 07 - AI Learning Systems",
+  "nextStage": "stage-08",
+  "nextStageTitle": "Stage 08 - Engineering Lab",
   "frozenStages": [
     1,
     2,
     3,
     4,
     5,
-    6
+    6,
+    7
   ],
   "stageNames": {
     "1": "Visual foundation - Milky Intelligence background",
@@ -20,7 +21,8 @@
     "4": "Hero and Intelligence Constellation",
     "5": "Intelligent Systems - architecture lab",
     "6": "Product Engineering - cross-surface product studio",
-    "7": "AI Learning Systems"
+    "7": "AI Learning Systems - adaptive learning laboratory",
+    "8": "Engineering Lab"
   },
   "constraints": {
     "contactInformation": false,
@@ -60,7 +62,9 @@
       "src/components/systems/ArchitectureLab.tsx",
       "src/components/systems/ArchitectureModeSelector.tsx",
       "src/components/products/ProductStudio.tsx",
-      "src/components/products/ProductScenarioSelector.tsx"
+      "src/components/products/ProductScenarioSelector.tsx",
+      "src/components/learning/LearningLab.tsx",
+      "src/components/learning/LearningScenarioSelector.tsx"
     ]
   },
   "routes": [
@@ -108,7 +112,8 @@
       3,
       4,
       5,
-      6
+      6,
+      7
     ],
     "cls": 0,
     "thirdPartyRequests": 0,
@@ -143,7 +148,10 @@
     "underVersionControl": true,
     "branch": "main",
     "stage04Tag": "portfolio-stage-04-verified",
-    "stage05Tag": "portfolio-stage-05-verified"
+    "stage05Tag": "portfolio-stage-05-verified",
+    "stage06Tag": "portfolio-stage-06-verified",
+    "stage07Tag": "portfolio-stage-07-verified"
   },
-  "stage06Started": true
+  "stage06Started": true,
+  "stage07Started": true
 }

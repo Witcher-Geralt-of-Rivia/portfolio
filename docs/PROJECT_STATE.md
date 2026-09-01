@@ -1,4 +1,4 @@
-<!-- PROJECT_STAGE: 6 -->
+<!-- PROJECT_STAGE: 7 -->
 <!-- DOCUMENT_STATUS: CURRENT -->
 
 # Project State
@@ -9,12 +9,12 @@ Everything below was read from the repository, not recalled from conversation.
 ## Stage Status
 
 ```
-Stages 01-06   COMPLETE and FROZEN
+Stages 01-07   COMPLETE and FROZEN
 Deployment     LIVE at https://intelligent-systems-lab.duckdns.org
-Stage 07       NOT STARTED
+Stage 08       NOT STARTED
 ```
 
-The next task is Stage 07 - AI Learning Systems, filling `#ai-learning`.
+The next task is Stage 08 - Engineering Lab, filling `#lab`.
 See `docs/NEXT_STAGE.md`.
 
 ## Toolchain
@@ -62,18 +62,16 @@ serves an alternating release slot and never the default `.next`, so a plain
 ## Rendering Architecture
 
 Server-first. The entire hero, the whole background system and both navigation
-presentations are server components.
+presentations are server components. Seven `"use client"` modules exist:
+`navigation/SiteNavigation.tsx` (compact menu state, focus management,
+active-section tracking via IntersectionObserver, Escape handling, body scroll
+lock), plus one lab and one stateless ARIA tablist for each built capability
+section. `project-state.json` holds the authoritative list.
 
-Two `"use client"` entry points exist:
-
-- `src/components/navigation/SiteNavigation.tsx` - compact menu state, focus
-  management, active-section tracking via IntersectionObserver, Escape
-  handling, body scroll lock.
-- `src/components/systems/ArchitectureLab.tsx` - the architecture mode and the
-  hovered/focused node. Everything visual below it is CSS.
-
-No `requestAnimationFrame` loop, no `setInterval` animation and no pointer
-tracking runs anywhere in the project.
+No `requestAnimationFrame` loop and no pointer tracking runs anywhere. The only
+timers are the user-triggered Stage 06 flow and Stage 07 adapt sequences, each
+a single interval torn down on scenario change, restart and unmount - see D-035
+and D-042. Nothing animates on a timer at rest.
 
 ## Routes
 
@@ -83,8 +81,8 @@ tracking runs anywhere in the project.
 | `/specimen` | Stage 02 typography specimen, unlinked | Static (prerendered) |
 
 Section ids on `/`: `hero`, `systems`, `products`, `ai-learning`, `lab`, `work`.
-`#systems` (Stage 05) and `#products` (Stage 06) are real sections. The
-remaining three are still Stage 03 QA placeholders with no real content.
+`#systems` (05), `#products` (06) and `#ai-learning` (07) are real sections.
+`#lab` and `#work` are still Stage 03 QA placeholders with no real content.
 
 ## Source Tree
 
@@ -108,21 +106,26 @@ src/
     systems/ArchitectureLab.tsx              "use client"
     systems/ArchitectureModeSelector.tsx     full ARIA tablist
     systems/{ArchitectureCanvas,ExecutionTrace,EngineeringPrinciples}.tsx
-    systems/architecture-data.ts             four modes
-    systems/architecture-geometry.ts         orthogonal routing
+    systems/architecture-{data,geometry}.ts  four modes; orthogonal routing
     products/ProductEngineeringSection.tsx   section shell (server)
     products/ProductStudio.tsx               "use client" - flow state machine
     products/ProductScenarioSelector.tsx     full ARIA tablist
     products/{WebProductSurface,MobileProductSurface,AiAssistSurface}.tsx
     products/{ProductEventFlow,ProductCapabilityRail}.tsx
     products/product-scenarios.ts            three scenarios + event rail
+    learning/AILearningSection.tsx           section shell (server)
+    learning/LearningLab.tsx                 "use client" - adapt state machine
+    learning/LearningScenarioSelector.tsx    full ARIA tablist
+    learning/{KnowledgeMap,LearnerStatePanel,TutorPanel}.tsx
+    learning/{LearningJourney,LearningPrinciples}.tsx
+    learning/learning-{scenarios,geometry}.ts  three scenarios; curved links
   styles/
     tokens.css            all design tokens - the source of truth for values
     typography.css        type roles and base elements
     motion.css            aurora/prism keyframes + reduced motion
     layers.css            four background layers + responsive behaviour
     surfaces.css          Milk / Frost / Prism
-    navigation.css, hero.css, systems.css, products.css   per-section styles
+    navigation.css, hero.css, systems.css, products.css, learning.css
 
 public/
   textures/micro-grain.svg    locally generated SVG turbulence tile
@@ -133,7 +136,7 @@ docs/                          canonical project memory (this directory)
 ```
 
 Stylesheet import order in `globals.css`: tokens, typography, motion, layers,
-surfaces, navigation, hero, systems, products.
+surfaces, navigation, hero, systems, products, learning.
 
 ## Stage 01 - Background (FROZEN)
 
@@ -146,34 +149,21 @@ Four fixed, inert layers painted behind all content:
 | C prism light | `.prism` | -2 |
 | D micro grain | `.grain` | -1 |
 
-Backgrounds: `--background-base #f7f7fb`, `--background-warm #faf7f4`,
-`--background-cool #f5f8fb`. Layer A is a 135deg gradient across those three.
+Backgrounds, the seven-hue aurora palette and the three surface recipes are
+declared in `src/styles/tokens.css`, which is their source of truth. Layer A is
+a 135deg gradient across the three background tones.
 
-Aurora palette: lavender `#e9e0ff`, sky `#dceeff`, aqua `#d9f4f3`,
-mint `#ddf5e8`, rose `#f9dfeb`, peach `#fbe4d7`, lemon `#f8efc9`.
-
-Six aurora fields as implemented in `src/styles/layers.css`:
-
-| # | Colour | Blur | Opacity | Cycle |
-|---|---|---|---|---|
-| 1 | lavender | 140px | 0.55 | 31s |
-| 2 | sky | 140px | 0.55 | 37s |
-| 3 | mint | 150px | 0.45 | 43s |
-| 4 | rose | 140px | 0.42 | 35s |
-| 5 | peach | 130px | 0.38 | 47s |
-| 6 | lemon over aqua | 140px | 0.38 | 41s |
-
-All six use `ease-in-out`, `alternate`, `infinite`, with negative delays so they
-never synchronise. Blur is static; only `transform` and `opacity` animate.
+Six aurora fields are implemented in `src/styles/layers.css`, in the order
+lavender, sky, mint, rose, peach and lemon-over-aqua, at 130-150px blur and
+0.38-0.55 opacity. Cycles are 31-47s, all `ease-in-out`, `alternate`,
+`infinite`, with negative delays so they never synchronise. Blur is static;
+only `transform` and `opacity` animate.
 
 Prism: two beams, 58s and 68s, opacity 0.22 and 0.16, beam B `soft-light`.
 
 Grain: `/textures/micro-grain.svg`, 256px tile, opacity **0.024**, blend
 **multiply**. Below roughly 0.021 the dither rounds away entirely, which is why
 the value is not the lower figure originally sketched.
-
-Surfaces: `.surface-milk` `rgba(255,255,255,0.68)`, `.surface-frost`
-`rgba(248,249,253,0.46)`, `.surface-prism` `rgba(255,255,255,0.60)`.
 
 Under `prefers-reduced-motion: reduce` every field parks at a composed offset,
 zero animations run, and the colour composition remains complete.
@@ -228,17 +218,12 @@ Do not revert these to `ch`. See decision D-006.
 `SiteShell` composes the background layers, the navigation and a `<main>`
 content frame. Content max width 1200px, gutters `clamp(20px, 5vw, 72px)`.
 
-Desktop (>= 900px): fixed bar, 1060px max width, 64px tall, 18px from the top,
-20px radius, z-index 100, centred, Frost surface at `rgba(248,249,253,0.53)`.
-Identity cluster reserves 210px. Five links, 40px tall, 13px Geist Sans.
-
-Compact (< 900px): 56px bar inset 12px, z-index 110, 18px radius, 40x40 menu
-trigger. Panel fixed at top 78px and inset 12px, 28px radius,
-`rgba(248,249,253,0.62)`, items 74px tall, labels `clamp(28px, 8vw, 36px)`.
-Panel order follows the hue wheel so the compact stack stays colourful.
-
-Exactly one navigation presentation is in the accessibility tree at a time; the
-other is `display: none`.
+Desktop (>= 900px): a fixed, centred Frost bar on the geometry declared by the
+`--nav-*` tokens; identity cluster reserves 210px; five links 40px tall.
+Compact (< 900px): a 56px bar with a 40x40 trigger and a panel whose items are
+74px tall, ordered along the hue wheel so the stack stays colourful. Exactly
+one presentation is in the accessibility tree at a time; the other is
+`display: none`.
 
 Behaviours: IntersectionObserver active-section tracking with
 `rootMargin: "-30% 0px -55% 0px"`, resolved in document order so only one item is
@@ -280,48 +265,33 @@ text first; text column max 560px.
 
 ### Intelligence Constellation
 
-```
-viewBox              0 0 640 640
-principal nodes      8    Agents, Automation, CRM / ERP, API, Data,
-                          Learning, Mobile, Web
-auxiliary nodes      6    (3 hidden below 500px)
-connections          21   8 central spokes, 8 ring, 5 cross
-signals              5    (2 hidden below 500px)
-centre               ORCHESTRATOR
-SVG shape elements   38
-hero DOM elements    130
-```
+A 640x640 viewBox around an ORCHESTRATOR centre: 8 principal nodes (Agents,
+Automation, CRM / ERP, API, Data, Learning, Mobile, Web), 6 auxiliary nodes and
+5 signals, of which 3 and 2 respectively hide below 500px, joined by 21
+connections - 8 central spokes, 8 ring, 5 cross. 38 SVG shapes, 130 hero DOM
+elements.
 
-Implementation: HTML node chips positioned in percentages over an SVG connection
-layer. Hover is CSS `:has()`. Motion is CSS `offset-path` for signals and CSS
-keyframes for drift. No Canvas, no WebGL, no Three.js, no animation library, no
-AI API, and no client JavaScript in the hero at all.
-
-Geometry is computed once in `constellation-geometry.ts` at module scope, so the
-browser receives finished path strings.
+Implementation: HTML node chips positioned in percentages over an SVG
+connection layer. Hover is CSS `:has()`, motion is CSS `offset-path` and
+keyframes, and geometry is computed once in `constellation-geometry.ts` at
+module scope so the browser receives finished path strings. No Canvas, WebGL,
+animation library, AI API, or client JavaScript in the hero at all.
 
 ## Stage 05 - Intelligent Systems (FROZEN)
 
 Section `#systems`, heading "From event to decision to execution."
 
-The System Architecture Lab holds four modes, switched by a real ARIA tablist
-with arrow-key navigation. Every mode is declared in `architecture-data.ts`;
-there is no hand-built JSX per mode.
-
-| Mode | Nodes | Connections | Trace rows |
-|---|---|---|---|
-| Agent Workflow (default) | 10 | 11 | 8 |
-| Automation | 10 | 12 | 8 |
-| CRM / ERP | 9 | 10 | 8 |
-| SaaS Backend | 10 | 12 | 8 |
+The System Architecture Lab holds four modes - Agent Workflow (default),
+Automation, CRM / ERP and SaaS Backend - of 9-10 nodes, 10-12 connections and 8
+trace rows each, switched by a real ARIA tablist. Every mode is declared in
+`architecture-data.ts`; there is no hand-built JSX per mode.
 
 Implementation: SVG connections beneath HTML node surfaces, the Stage 04
 pattern. Routing is soft-orthogonal with rounded turns and separated corridors
 where links converge. Packets move on CSS `offset-path`; the mode transition,
-node highlighting and trace stagger are all CSS.
-
-Below 700px the positioned topology is replaced by a vertical execution flow
-built from the same data, with the parallel band as a three-column row.
+node highlighting and trace stagger are all CSS. Below 700px the positioned
+topology is replaced by a vertical execution flow built from the same data,
+with the parallel band as a three-column row.
 
 Nothing in this section reaches the network. Switching mode is local state over
 static TypeScript. The trace timings are labelled LOCAL SIMULATION and are not
@@ -335,9 +305,9 @@ Section `#products`, heading "One product. Every surface."
 
 The Product Engineering Studio shows one product across four surfaces at once:
 a web application frame, a phone, an AI-assist panel and the backend event
-pipeline beneath them. Three scenarios are switched by a real ARIA tablist with
-arrow-key navigation. Each is declared in `product-scenarios.ts`; the surfaces
-are block renderers over that data, not hand-built JSX per scenario.
+pipeline beneath. Three scenarios switch through a real ARIA tablist, each
+declared in `product-scenarios.ts`; the surfaces are block renderers over that
+data, not hand-built JSX per scenario.
 
 | Scenario | Route | Web blocks | Phone blocks |
 |---|---|---|---|
@@ -354,14 +324,47 @@ leaves no stale state.
 
 Every frame is authored in HTML and CSS: no screenshot, no device mockup, no
 browser facsimile, no vendor chrome. The phone is a neutral container with a
-sensor capsule - no camera, no notch clone, no manufacturer detail.
+sensor capsule - no camera, no notch clone, no manufacturer detail. Surfaces
+stay anchored when the scenario changes - the phone holds one height (367px)
+across all three - so only the contents transform.
 
 Nothing here reaches the network: 0 requests across 15 flow runs and 30
 scenario changes. The AI panel is provider-neutral with no input and no model,
 labelled AI ASSIST / LOCAL SIMULATION; web frames are labelled DEMO DATA. These
-are engineering simulations, not client work. Surfaces stay anchored when the
-scenario changes - the phone holds one height (367px) across all three - so
-only the contents transform.
+are engineering simulations, not client work.
+
+## Stage 07 - AI Learning Systems (FROZEN)
+
+Section `#ai-learning`, heading "Learning paths that adapt."
+
+The Adaptive Learning Laboratory shows a system changing its own next move:
+learner state left, a knowledge model centre, a tutor surface right, the
+learning journey beneath. Three scenarios switch through an ARIA tablist, each
+declared in `learning-scenarios.ts` and rendered by one set of components.
+
+Adaptive Tutor (default) draws a 15-node knowledge map over a 7-step journey;
+Assessment Engine an 11-node evaluation graph over 6 steps; Learning Path
+Builder an 8-milestone roadmap with 2 optional branches over 6 steps. All three
+share the 520x340 viewBox and one renderer. Every scenario declares two
+deterministic variants. `Adapt` walks a five-stage
+reducer - analysing, selecting, assessing, feedback, updated - then swaps the
+variant, so map states, highlighted route, journey position, mastery figures
+and tutor brief all move together. Measured at 340ms per stage, 1.70s end to
+end, then a 1.4s hold on "Path updated" before the control returns to "Adapt
+again".
+
+Knowledge state is never carried by colour alone: mastered, learning, gap and
+locked each have their own ring pattern and core mark, and the legend names all
+four in text. Link paths are computed at build time in `learning-geometry.ts`,
+bowed away from the canvas centre so arcs stay clear of the labels.
+
+Map type is sized in viewBox units and so shrinks with the container: the phone
+view raises the label size and drops prerequisite labels and in-node codes
+rather than render 8px type. Measured floor 9.38px at 360px.
+
+Nothing here reaches the network: 0 requests across 20 adapt runs and 30
+scenario changes. "Maya" is a fixture, the percentages are not measurements,
+and the lab header carries LOCAL / DETERMINISTIC SIMULATION.
 
 ## Assets
 
@@ -380,10 +383,8 @@ The site is live. Full detail in `docs/DEPLOYMENT.md`.
 Public URL       https://intelligent-systems-lab.duckdns.org
 Reverse proxy    Caddy v2.11.4 (shared host infrastructure, another project's)
 Internal bind    127.0.0.1:3100, loopback only, no public inbound rule
-Release slots    .next-release-a / .next-release-b (alternating; .next is dev only)
-Deploy command   npm run deploy:safe
-Process manager  PM2, app name "portfolio"
-Certificate      Caddy automatic HTTPS (Let's Encrypt)
+Release slots    .next-release-a / .next-release-b (.next is dev only)
+Process manager  PM2, app name "portfolio"; Caddy automatic HTTPS
 Dev preview      still available at http://108.186.112.75:3000
 ```
 

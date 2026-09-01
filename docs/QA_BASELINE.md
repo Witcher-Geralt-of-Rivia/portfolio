@@ -1,4 +1,4 @@
-<!-- PROJECT_STAGE: 6 -->
+<!-- PROJECT_STAGE: 7 -->
 <!-- DOCUMENT_STATUS: CURRENT -->
 
 # QA Baseline
@@ -16,6 +16,7 @@ Stage 03   PASS
 Stage 04   PASS
 Stage 05   PASS
 Stage 06   PASS
+Stage 07   PASS
 ```
 
 ## Validated Viewports
@@ -167,6 +168,16 @@ Stage 06 added four more, all harness faults rather than application faults:
   indicator, does the same and exists only under `next dev`. Remove both for
   capture with `display: none` — `visibility: hidden` is not enough, because
   nav children re-assert `visibility: visible`.
+- **Page-wide assertions rot as the page grows.** `stage05-a11y.mjs` counted
+  every `[role="tab"]` in the document and asserted exactly one was tabbable.
+  That was right while Stage 05 owned the only tablist and wrong from Stage 06
+  onward: roving tabindex is a property of each tablist, so three tablists
+  correctly yield three tabbable tabs. It reported 2/7 on the Stage 06 build
+  and 3/10 on Stage 07 - a false failure both times, and one that went unseen
+  in Stage 06 because only the tail of that harness's output was read. The
+  assertion is now one tabbable tab per tablist. When a harness starts failing
+  as a new section lands, check whether it was scoped to the page or to the
+  component before touching the application.
 - **`document.getAnimations()` counts transitions.** A snapshot taken just
   after an interaction is full of 180-260ms colour transitions at
   `currentTime: 0`. To ask "does this section animate at rest", filter to
@@ -298,6 +309,53 @@ Surface stability across scenarios: the phone holds 367px at every viewport and
 every frame keeps its position; only the web frame's height follows its content
 (566-682px at desktop).
 
+## Stage 07 - AI Learning Systems
+
+Harness: `qa/stage07-*.mjs`. 1440x900 unless stated.
+
+| Check | Result |
+|---|---|
+| Contrast, 40 text roles, 3 scenarios, after adaptation | all PASS, worst 4.85:1 |
+| CLS at load | 0.00000 |
+| CLS after 3 scenario changes + 3 adaptations | 0.00027 |
+| Scenario changes | 30/30 clean |
+| Adapt runs | 20/20 clean |
+| Network requests during those 50 interactions | 0 |
+| Console errors and warnings | 0 |
+| Viewports without overflow, overlap or escape | 8/8 |
+| Adapt sequence, 5 stages | 340ms per stage, 1.70s |
+| Idle long-task time over 6s with the section on screen | 0-77ms |
+| Standing animations owned by Stage 07 | 2 route signals, capped |
+| Reduced motion: keyframe animations during a run | 0 |
+| DOM nodes in `#ai-learning` | 210 |
+
+Worst contrast is a map node label at 4.85:1 against the map's own panel;
+every other role clears 5.9:1. No role uses `--text-muted`.
+
+Map type, measured by `qa/stage07-maptype.mjs` as rendered CSS pixels rather
+than viewBox units:
+
+| Viewport | Map box | Scale | Smallest label | Collisions |
+|---|---|---|---|---|
+| 1440x900 | 560x367 | 1.077 | 9.69px | 0 |
+| 1024x768 | 640x419 | 1.231 | 11.08px | 0 |
+| 768x1024 | 642x421 | 1.235 | 11.12px | 0 |
+| 390x844 | 301x336 | 0.579 | 10.42px | 0 |
+| 360x800 | 271x336 | 0.521 | 9.38px | 0 |
+
+Cancellation: switching scenario mid-sequence leaves the control at its idle
+label, an empty live region and the new scenario's own journey step. Removing
+the section from the document mid-sequence raises no error. The button is
+disabled while running, so a second sequence cannot start.
+
+**No mid-sequence screenshot exists, deliberately.** Even a small clip of the
+journey and footer takes longer to composite than the 1.7s sequence lasts: the
+DOM already reads "Adapt again" by the time the shutter fires, measured on
+three consecutive attempts. `learning-adapt-active-1440x900.png` therefore
+shows the state the adapt action produces. The running state is verified by
+assertion instead - label "Adapting...", button disabled, journey tagged
+STATE / ADAPTING, on 20 of 20 runs.
+
 ## Deployment Safety (A/B release slots)
 
 Production serves `.next-release-a` or `.next-release-b`, never `.next`. These
@@ -341,11 +399,12 @@ exit code 1 (a successful rollback is still a failed deployment)
 (`NODE_ENV`, `PORTFOLIO_DIST_DIR`), down from 69. No tooling or credential
 variable names present.
 
-**Smoke gate coverage.** Before the switch, the loopback smoke server on
-127.0.0.1:3199 must serve the page, the CSS and JS chunks, both WOFF2 fonts and
-both SVG assets, and its HTML must contain `id="systems"`, `id="products"` and
-the Stage 06 heading `One product. Every surface.` A release that compiles but
-renders a section-less page cannot reach production.
+**Smoke gate coverage.** Before the switch, the loopback smoke server must
+serve the page, the CSS and JS chunks, both WOFF2 fonts and both SVG assets,
+and its HTML must contain `id="systems"`, `id="products"`, `id="ai-learning"`,
+the Stage 06 heading `One product. Every surface.` and the Stage 07 heading
+`Learning paths that adapt.` A release that compiles but renders a section-less
+page cannot reach production.
 
 The heading assertion is the load-bearing one and must not be dropped as
 redundant: before Stage 06 the navigation placeholder emitted `id="products"`
@@ -462,6 +521,7 @@ qa/shots/stage02/       Stage 02 baselines (12 PNG)
 qa/shots/stage03/       Stage 03 baselines (15 PNG)
 qa/shots/stage04/       Stage 04 baselines (14 PNG)
 qa/shots/stage06/       Stage 06 baselines (6 PNG, captured from production)
+qa/shots/stage07/       Stage 07 baselines (5 PNG, captured from production)
 qa/report.json          Stage 01 machine-readable results
 qa/stage02-report.json  Stage 02 machine-readable results
 qa/stage02-measurements.txt
@@ -494,6 +554,12 @@ qa/stage06-timing.mjs       in-page flow timing (no screenshots during the run)
 qa/stage06-listreset.mjs    semantic list marker inset, reset on vs neutralised
 qa/public-browser-check.mjs console, failed requests and mixed content over
                             real HTTPS against the public origin
+qa/stage07-responsive.mjs   8 viewports: surfaces, overflow, overlap, order
+qa/stage07-interaction.mjs  30 scenario changes, 20 adapt runs, cleanup, keys
+qa/stage07-contrast.mjs     40 text roles across all three scenarios
+qa/stage07-perf.mjs         CLS, idle cost, animation cost, reduced motion
+qa/stage07-maptype.mjs      rendered map type size and label collisions
+qa/stage07-shots.mjs        Stage 07 screenshot set
 qa/stage06-shots.mjs        Stage 06 screenshot set
 qa/project-memory-check.mjs canonical documentation consistency
 ```

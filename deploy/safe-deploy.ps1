@@ -360,6 +360,12 @@ try {
     if ($smokeHtml -notmatch 'One product\. Every surface\.') { $smokeFailed += "Stage 06 heading missing from HTML" }
     else { Write-Step "Stage 06 heading present in rendered HTML" "OK" }
 
+    if ($smokeHtml -notmatch 'id="ai-learning"') { $smokeFailed += "#ai-learning section missing from HTML" }
+    else { Write-Step "#ai-learning section present in rendered HTML" "OK" }
+
+    if ($smokeHtml -notmatch 'Learning paths that adapt\.') { $smokeFailed += "Stage 07 heading missing from HTML" }
+    else { Write-Step "Stage 07 heading present in rendered HTML" "OK" }
+
     if ($smokeFailed.Count -gt 0) { throw "Smoke test failed: $($smokeFailed -join '; ')" }
 
     Stop-SmokeServer

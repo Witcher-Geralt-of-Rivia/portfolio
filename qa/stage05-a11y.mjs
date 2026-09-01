@@ -23,12 +23,21 @@ const browser = await chromium.launch({ args: [
     seq.push(`${key}->${await p.evaluate(() => document.querySelector('[role="tab"][aria-selected="true"]')?.textContent?.trim())}`);
   }
   console.log("  " + seq.join("  |  "));
+  /* Roving tabindex is a property of EACH tablist, not of the page. This once
+     counted every [role="tab"] in the document and asserted exactly one was
+     tabbable, which was right while Stage 05 owned the only tablist and wrong
+     from Stage 06 onward: three tablists correctly yield three tabbable tabs.
+     Assert the real invariant - one tabbable tab per tablist. */
   const roving = await p.evaluate(() => {
-    const tabs = [...document.querySelectorAll('[role="tab"]')];
-    return { total: tabs.length, tabbable: tabs.filter(t => t.tabIndex === 0).length,
-             focusFollows: document.activeElement?.getAttribute("role") === "tab" };
+    const lists = [...document.querySelectorAll('[role="tablist"]')].map((list) => {
+      const tabs = [...list.querySelectorAll('[role="tab"]')];
+      return { label: list.getAttribute("aria-label"), total: tabs.length, tabbable: tabs.filter((t) => t.tabIndex === 0).length };
+    });
+    return { lists, focusFollows: document.activeElement?.getAttribute("role") === "tab" };
   });
-  console.log(`  roving tabindex: ${roving.tabbable}/${roving.total} tabbable ${pass(roving.tabbable === 1)}   focus follows selection ${pass(roving.focusFollows)}`);
+  const rovingOk = roving.lists.length > 0 && roving.lists.every((l) => l.tabbable === 1);
+  console.log(`  roving tabindex, one tabbable per tablist: ${pass(rovingOk)}  ${roving.lists.map((l) => `${l.label} ${l.tabbable}/${l.total}`).join(" | ")}`);
+  console.log(`  focus follows selection ${pass(roving.focusFollows)}`);
 
   console.log("\n=== NODE FOCUS + DETAIL STRIP ===");
   await p.evaluate(() => document.querySelector('[role="tab"]').click());

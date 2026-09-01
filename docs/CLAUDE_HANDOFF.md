@@ -1,4 +1,4 @@
-<!-- PROJECT_STAGE: 6 -->
+<!-- PROJECT_STAGE: 7 -->
 <!-- DOCUMENT_STATUS: CURRENT -->
 
 # Claude Handoff
@@ -57,10 +57,10 @@ Both rules hold until the user explicitly changes them. See
 | Backend | None. No database, API route or server action |
 | QA | Playwright + pngjs (devDependencies), scripts in `qa/` |
 
-Rendering is almost entirely server-side. The **only** client component in the
-project are `src/components/navigation/SiteNavigation.tsx` and
-`src/components/systems/ArchitectureLab.tsx` (plus the two presentational
-modules the lab imports).
+Rendering is almost entirely server-side. Seven `"use client"` modules exist:
+`navigation/SiteNavigation.tsx`, and one lab plus one tablist for each of the
+three built capability sections. Everything else is server-rendered markup and
+CSS. `docs/project-state.json` holds the authoritative list.
 
 ## Current Runtime
 
@@ -90,7 +90,7 @@ production domain is deliberately not listed. See `docs/DEPLOYMENT.md`.
 
 ## Frozen Stages
 
-Stages 01-05 are complete, QA-verified and **frozen**. Do not redesign them.
+Stages 01-07 are complete, QA-verified and **frozen**. Do not redesign them.
 
 | Stage | Scope | Status |
 |---|---|---|
@@ -118,11 +118,11 @@ generic glassmorphism, gaming UI, crypto UI. Full anti-pattern list in
 
 Two routes:
 
-- **`/`** — hero (`#hero`), the Stage 05 Intelligent Systems section
-  (`#systems`), the Stage 06 Product Engineering section (`#products`), then
-  three remaining anchor sections: `#ai-learning`, `#lab`, `#work`.
-  Those three are **QA placeholders only** — an eyebrow label and the words
-  "Navigation specimen section". One stage replaces one; leave the rest alone.
+- **`/`** — hero (`#hero`), then the three built capability sections
+  `#systems` (05), `#products` (06) and `#ai-learning` (07), then the two
+  remaining anchor sections `#lab` and `#work`.
+  Those two are **QA placeholders only** — an eyebrow label and the words
+  "Navigation specimen section". One stage replaces one; leave the other.
 - **`/specimen`** — Stage 02 typography specimen, kept so the type scale stays
   verifiable. Not linked from the site.
 
@@ -138,15 +138,20 @@ src/components/
   navigation/SiteNavigation.tsx   CLIENT - navigation state and observers
   navigation/{DesktopNavigation,MobileNavigation,SystemMarkImage}.tsx
   navigation/nav-items.ts         single source for the five destinations
+  learning/AILearningSection.tsx  section shell (server)
+  learning/LearningLab.tsx        CLIENT - scenario + adapt state machine
+  learning/LearningScenarioSelector.tsx   CLIENT - ARIA tablist
+  learning/{KnowledgeMap,LearnerStatePanel,TutorPanel,LearningJourney,LearningPrinciples}.tsx
+  learning/learning-{scenarios,geometry}.ts  three scenarios; curved links
   hero/{Hero,IntelligenceConstellation,CapabilityRail}.tsx
   hero/constellation-geometry.ts  node/link maths, evaluated at build time
   systems/IntelligentSystemsSection.tsx   section shell (server)
-  systems/ArchitectureLab.tsx     CLIENT - that section's only client component
-  systems/{ArchitectureCanvas,ArchitectureModeSelector,ExecutionTrace,
-           EngineeringPrinciples}.tsx
+  systems/ArchitectureLab.tsx     CLIENT - architecture mode + hovered node
+  systems/ArchitectureModeSelector.tsx    CLIENT - ARIA tablist
+  systems/{ArchitectureCanvas,ExecutionTrace,EngineeringPrinciples}.tsx
   systems/architecture-{data,geometry}.ts  four modes; orthogonal routing
   products/ProductEngineeringSection.tsx  section shell (server)
-  products/ProductStudio.tsx      CLIENT - scenario state + flow state machine
+  products/ProductStudio.tsx      CLIENT - scenario + flow state machine
   products/ProductScenarioSelector.tsx    CLIENT - ARIA tablist
   products/{WebProductSurface,MobileProductSurface,AiAssistSurface,
             ProductEventFlow,ProductCapabilityRail}.tsx
@@ -185,7 +190,7 @@ Each is an entry in `docs/DECISIONS.md` with its measured reason.
 
 | Item | State |
 |---|---|
-| Git | Repository initialised. Branch `main`. Tags `portfolio-stage-04-verified`, `portfolio-production-v1`, `portfolio-stage-05-verified`, `portfolio-stage-06-verified` |
+| Git | Repository initialised. Branch `main`. Tags: `portfolio-production-v1`, `portfolio-safe-deployment-v1`, and `portfolio-stage-0N-verified` for stages 04-07 |
 | Production | LIVE at `https://intelligent-systems-lab.duckdns.org` |
 | Dev preview | `npm run dev:remote` on `0.0.0.0:3000`, still available |
 | Host firewall | 80/443 allowed; 3000 allowed; 3100 has no inbound rule |
@@ -220,13 +225,13 @@ tokens. Documentation must not duplicate it.
 
 ## Current Task Status
 
-Stages 01-06 complete and frozen. The persistent context system is complete and
-the site is live over HTTPS. Stage 07 has **not** started.
+Stages 01-07 complete and frozen. The persistent context system is complete and
+the site is live over HTTPS. Stage 08 has **not** started.
 
 ## Next Allowed Task
 
-**Stage 07**, filling the next placeholder (`#ai-learning`). The user will
-supply that specification separately. See `docs/NEXT_STAGE.md`.
+**Stage 08 - Engineering Lab**, filling `#lab`. The user will supply that
+specification separately. See `docs/NEXT_STAGE.md`.
 
 Do not begin it automatically.
 
@@ -253,16 +258,11 @@ procedure in `docs/DEPLOYMENT.md` and never point the domain at `next dev`.
 
 Run this before editing anything:
 
-1. Read `docs/CLAUDE_HANDOFF.md`
-2. Read `docs/PROJECT_STATE.md`
-3. Read `docs/DESIGN_SYSTEM.md`
-4. Read `docs/DECISIONS.md`
-5. Read `docs/QA_BASELINE.md`
-6. Read `docs/PRIVACY_AND_SECURITY.md`
-7. Read `docs/NEXT_STAGE.md`
-8. `git status`
-9. `git log --oneline -10`
-10. Inspect the files relevant to the requested task
+1. Read, in order: this file, then `PROJECT_STATE.md`, `DESIGN_SYSTEM.md`,
+   `DECISIONS.md`, `QA_BASELINE.md`, `PRIVACY_AND_SECURITY.md`,
+   `NEXT_STAGE.md` (all under `docs/`)
+2. `git status` and `git log --oneline -10`
+3. Inspect the files relevant to the requested task
 
 ### Conflict rule
 

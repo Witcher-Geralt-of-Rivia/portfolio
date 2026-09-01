@@ -1,0 +1,1235 @@
+/* =====================================================================
+   MILKY INTELLIGENCE — 03 / AI LEARNING SYSTEMS
+   The adaptive learning laboratory. Cooler and more cognitive than the
+   Stage 05 architecture lab: mint, aqua and sky lead, with lavender,
+   peach and rose kept for state accents only.
+   ===================================================================== */
+
+.learning {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(44px, 4.5vw, 68px);
+  padding-block: clamp(120px, 12vw, 168px);
+}
+
+/* Stage 07 owns its own list defaults. The global reset zeroes margin but not
+   padding or list-style, and globals.css is never modified for a section. */
+.lmeters__list,
+.lgaps__list,
+.llegend,
+.ljourney__list,
+.learning__principles {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* --- Introduction ------------------------------------------------------ */
+
+.learning__intro {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(24px, 3vw, 40px);
+}
+
+.learning__intro-lead {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.learning__title {
+  max-width: var(--measure-display-2);
+  color: var(--text-primary);
+  font-size: var(--type-display-2);
+  font-weight: var(--weight-heading);
+  line-height: var(--leading-display-2);
+  letter-spacing: var(--tracking-display-2);
+  text-wrap: balance;
+}
+
+.learning__intro-support {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.learning__lead {
+  max-width: 52ch;
+  color: var(--text-secondary);
+  font-size: var(--type-lead);
+  font-weight: var(--weight-lead);
+  line-height: var(--leading-lead);
+  letter-spacing: var(--tracking-lead);
+  text-wrap: pretty;
+}
+
+.learning__capabilities {
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: var(--weight-ui);
+  line-height: 1.5;
+  letter-spacing: 0.075em;
+}
+
+@media (min-width: 1000px) {
+  .learning__intro {
+    display: grid;
+    grid-template-columns: minmax(0, 1.32fr) minmax(0, 1fr);
+    gap: clamp(32px, 4vw, 72px);
+    align-items: end;
+  }
+}
+
+/* --- Lab shell --------------------------------------------------------- */
+
+.learning__lab {
+  position: relative;
+}
+
+.llab {
+  --surface-radius: var(--radius-panel-lg);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 740px;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+/* Local atmosphere only. The Stage 01 aurora is untouched. */
+.llab::before {
+  content: "";
+  position: absolute;
+  inset: -10%;
+  z-index: 0;
+  background:
+    radial-gradient(42% 38% at 18% 16%, rgba(217, 244, 243, 0.16), transparent 70%),
+    radial-gradient(40% 36% at 78% 22%, rgba(220, 238, 255, 0.14), transparent 72%),
+    radial-gradient(46% 40% at 58% 92%, rgba(221, 245, 232, 0.13), transparent 74%);
+  pointer-events: none;
+}
+
+.llab::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  padding: 1px;
+  border-radius: inherit;
+  background: linear-gradient(
+    142deg,
+    rgba(217, 244, 243, 0.6) 0%,
+    rgba(255, 255, 255, 0.3) 32%,
+    rgba(255, 255, 255, 0.18) 62%,
+    rgba(221, 245, 232, 0.44) 84%,
+    rgba(220, 238, 255, 0.48) 100%
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.llab > * {
+  position: relative;
+  z-index: 1;
+}
+
+.llab__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  min-height: 70px;
+  padding: 12px clamp(16px, 2vw, 24px);
+  border-bottom: 1px solid var(--line-subtle);
+}
+
+.llab__identity {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.llab__title {
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: var(--weight-ui);
+  line-height: 1.3;
+  letter-spacing: 0.08em;
+}
+
+/* The single simulation annotation, next to the lab title. It is not repeated
+   on every panel: once, where the lab identifies itself, is enough. */
+.llab__subtitle {
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  line-height: 1.4;
+  letter-spacing: 0.09em;
+}
+
+/* --- Scenario selector -------------------------------------------------- */
+
+.lscenarios {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.52);
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.26);
+}
+
+.lscenario {
+  position: relative;
+  height: 40px;
+  padding-inline: 15px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  font-weight: var(--weight-ui);
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color 180ms var(--ease-standard),
+    color 180ms var(--ease-standard);
+}
+
+.lscenario:hover {
+  color: var(--text-primary);
+}
+
+.lscenario.is-active {
+  background: rgba(255, 255, 255, 0.74);
+  color: var(--text-primary);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
+.lscenario.is-active::after {
+  content: "";
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  width: 20px;
+  height: 1.5px;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--aurora-aqua), var(--aurora-sky), var(--aurora-mint));
+  opacity: 0.95;
+}
+
+.llab :focus-visible {
+  outline: 2px solid rgba(81, 86, 102, 0.48);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 5px rgba(217, 244, 243, 0.5);
+}
+
+/* --- Body and three-area composition ------------------------------------ */
+
+.llab__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: clamp(16px, 1.8vw, 22px);
+  padding: clamp(16px, 2vw, 22px) clamp(16px, 2vw, 24px);
+}
+
+.llab__body:focus-visible {
+  outline: 2px solid rgba(81, 86, 102, 0.4);
+  outline-offset: -4px;
+}
+
+.llab__surfaces {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.llab__centre {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+/* Desktop: learner state, the map, and the tutor, with the journey beneath.
+   The centre is the widest column by design - it is what the section is about. */
+@media (min-width: 1100px) {
+  .llab__surfaces {
+    display: grid;
+    grid-template-columns: 270px minmax(0, 1fr) 280px;
+    gap: 20px;
+    align-items: start;
+  }
+}
+
+/* =====================================================================
+   PANELS — learner state (left) and tutor (right)
+   ===================================================================== */
+
+.lpanel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 15px 16px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: var(--radius-card-sm);
+  background: rgba(255, 255, 255, 0.52);
+  box-shadow:
+    var(--shadow-inner-light),
+    0 14px 34px -28px rgba(56, 60, 74, 0.4);
+}
+
+.lpanel--tutor {
+  background: rgba(248, 249, 253, 0.5);
+  backdrop-filter: blur(var(--surface-prism-blur)) saturate(1.05);
+  -webkit-backdrop-filter: blur(var(--surface-prism-blur)) saturate(1.05);
+  transition:
+    border-color 260ms var(--ease-standard),
+    box-shadow 260ms var(--ease-standard);
+}
+
+.lpanel--tutor.is-adapting {
+  border-color: rgba(196, 232, 231, 0.95);
+  box-shadow:
+    var(--shadow-inner-light),
+    0 0 0 3px rgba(217, 244, 243, 0.46),
+    0 16px 34px -26px rgba(56, 60, 74, 0.44);
+}
+
+.lpanel__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.lpanel__title {
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: var(--weight-ui);
+  line-height: 1.4;
+  letter-spacing: 0.1em;
+}
+
+.lpanel__badge {
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(221, 245, 232, 0.85);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  line-height: 1.4;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.lpanel__badge--sim {
+  background: rgba(217, 244, 243, 0.9);
+}
+
+.lpanel__label {
+  margin-bottom: 8px;
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  line-height: 1.4;
+  letter-spacing: 0.09em;
+}
+
+/* --- Learner profile ---------------------------------------------------- */
+
+.lprofile {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding-bottom: 13px;
+  border-bottom: 1px solid var(--line-subtle);
+}
+
+.lprofile__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.lprofile__row dt {
+  flex: 0 0 auto;
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.07em;
+}
+
+.lprofile__row dd {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: var(--weight-ui);
+  line-height: 1.35;
+  text-align: right;
+}
+
+.lprofile__confidence {
+  display: block;
+  overflow: hidden;
+  width: 52px;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(61, 68, 88, 0.12);
+}
+
+.lprofile__confidence-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--aurora-aqua), var(--aurora-mint));
+  transition: width 320ms var(--ease-standard);
+}
+
+/* --- Mastery / rubric meters -------------------------------------------- */
+
+.lmeters__list {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.lmeter {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 64px 30px;
+  align-items: center;
+  gap: 8px;
+}
+
+.lmeter__label {
+  overflow: hidden;
+  color: var(--text-secondary);
+  font-size: 11px;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lmeter__track {
+  overflow: hidden;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(61, 68, 88, 0.11);
+}
+
+.lmeter__fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, rgba(160, 214, 208, 0.95), rgba(168, 205, 238, 0.95));
+  transition: width 340ms var(--ease-standard);
+}
+
+.lmeter__value {
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  line-height: 1.4;
+  text-align: right;
+}
+
+/* --- Knowledge gaps ------------------------------------------------------ */
+
+.lgaps__list {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.lgap {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: var(--text-secondary);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+/* A gap is an open ring, never a red error marker. */
+.lgap__mark {
+  flex: 0 0 auto;
+  width: 9px;
+  height: 9px;
+  margin-top: 4px;
+  border: 1.5px dashed rgba(214, 158, 121, 0.85);
+  border-radius: 50%;
+  background: rgba(251, 228, 215, 0.55);
+}
+
+/* =====================================================================
+   KNOWLEDGE MAP
+   ===================================================================== */
+
+.llab__map-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.llab__map-title {
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: var(--weight-ui);
+  line-height: 1.4;
+  letter-spacing: 0.1em;
+}
+
+/* The legend is how knowledge state stops being colour-only: every state is
+   named in text here, and each node carries a distinct ring pattern too. */
+.llegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+}
+
+.llegend__item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  line-height: 1.4;
+}
+
+.llegend__mark {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.llegend__item--mastered .llegend__mark {
+  border: 1.5px solid rgba(122, 186, 160, 0.95);
+  background: rgba(221, 245, 232, 0.95);
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.9), inset 0 0 0 3.4px rgba(122, 186, 160, 0.9);
+}
+
+.llegend__item--learning .llegend__mark {
+  border: 1.5px solid rgba(133, 172, 212, 0.95);
+  background: rgba(220, 238, 255, 0.95);
+}
+
+.llegend__item--gap .llegend__mark {
+  border: 1.5px dashed rgba(214, 158, 121, 0.95);
+  background: rgba(251, 228, 215, 0.7);
+}
+
+.llegend__item--locked .llegend__mark {
+  border: 1.5px dotted rgba(146, 142, 178, 0.9);
+  background: rgba(233, 224, 255, 0.5);
+}
+
+.lmap {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--line-subtle);
+  border-radius: var(--radius-card-sm);
+  background:
+    radial-gradient(70% 60% at 50% 40%, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.28));
+}
+
+/* --- Connections --------------------------------------------------------- */
+
+.lmap__link {
+  fill: none;
+  stroke: rgba(61, 68, 88, 0.16);
+  stroke-width: 1.3;
+  stroke-linecap: round;
+  transition: stroke 300ms var(--ease-standard), stroke-width 300ms var(--ease-standard);
+}
+
+/* An optional route is dashed, so "you may take this" reads differently from
+   "you must clear this" without relying on colour. */
+.lmap__link--branch {
+  stroke-dasharray: 4 5;
+  stroke: rgba(61, 68, 88, 0.13);
+}
+
+.lmap__link.is-route {
+  stroke: rgba(122, 186, 160, 0.85);
+  stroke-width: 2.1;
+}
+
+/* --- Ambient signals: never more than two, always on the adaptive route --- */
+
+.lmap__signal {
+  fill: rgba(140, 200, 190, 0.9);
+  offset-path: var(--path);
+  offset-rotate: 0deg;
+  offset-distance: 0%;
+  animation: lsignal-travel 5.2s linear var(--delay, 0s) infinite;
+}
+
+@keyframes lsignal-travel {
+  0% { offset-distance: 0%; opacity: 0; }
+  12% { opacity: 0.9; }
+  84% { opacity: 0.9; }
+  100% { offset-distance: 100%; opacity: 0; }
+}
+
+/* --- Nodes ---------------------------------------------------------------- */
+
+.lnode__ring {
+  fill: rgba(255, 255, 255, 0.86);
+  stroke: rgba(61, 68, 88, 0.3);
+  stroke-width: 1.5;
+  transition:
+    fill 300ms var(--ease-standard),
+    stroke 300ms var(--ease-standard),
+    stroke-width 300ms var(--ease-standard);
+}
+
+.lnode__core {
+  fill: rgba(103, 168, 143, 0.95);
+}
+
+.lnode__core--hollow {
+  fill: none;
+  stroke: rgba(114, 158, 202, 0.95);
+  stroke-width: 1.6;
+}
+
+.lnode__code {
+  fill: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.02em;
+  text-anchor: middle;
+}
+
+.lnode__label {
+  fill: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.03em;
+  text-anchor: middle;
+}
+
+.lnode--prereq .lnode__label {
+  font-size: 9.5px;
+}
+
+/* State: hue AND ring pattern AND core mark. Three cues, not one. */
+.lnode--mastered .lnode__ring {
+  fill: rgba(221, 245, 232, 0.95);
+  stroke: rgba(112, 176, 150, 0.95);
+  stroke-width: 1.8;
+}
+
+.lnode--learning .lnode__ring {
+  fill: rgba(220, 238, 255, 0.95);
+  stroke: rgba(124, 166, 212, 0.95);
+}
+
+.lnode--gap .lnode__ring {
+  fill: rgba(251, 228, 215, 0.9);
+  stroke: rgba(207, 150, 112, 0.95);
+  stroke-dasharray: 4.5 3.5;
+}
+
+.lnode--locked .lnode__ring {
+  fill: rgba(238, 234, 248, 0.8);
+  stroke: rgba(146, 142, 178, 0.85);
+  stroke-dasharray: 1.5 3.5;
+}
+
+.lnode--locked .lnode__code,
+.lnode--locked .lnode__label {
+  fill: var(--text-secondary);
+}
+
+/* The adaptive route brightens; it never flashes. */
+.lnode.is-route .lnode__ring {
+  stroke-width: 2.4;
+  filter: drop-shadow(0 0 5px rgba(160, 214, 208, 0.75));
+}
+
+/* --- Milestone order badges (path builder) -------------------------------- */
+
+.lnode__order circle {
+  fill: rgba(255, 255, 255, 0.96);
+  stroke: rgba(124, 166, 212, 0.9);
+  stroke-width: 1.3;
+}
+
+.lnode__order text {
+  fill: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  text-anchor: middle;
+}
+
+/* --- Artifact card (assessment item / goal) ------------------------------- */
+
+.lartifact {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 11px 13px;
+  border: 1px solid var(--line-subtle);
+  border-radius: var(--radius-card-sm);
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.lartifact__title {
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  line-height: 1.4;
+  letter-spacing: 0.09em;
+}
+
+.lartifact__body {
+  color: var(--text-primary);
+  font-size: 12.5px;
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+.lartifact__tag {
+  align-self: flex-start;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(233, 224, 255, 0.7);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  line-height: 1.4;
+  letter-spacing: 0.08em;
+}
+
+/* =====================================================================
+   TUTOR PANEL
+   ===================================================================== */
+
+.ltutor__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 9px;
+  animation: lcontent-in 320ms var(--ease-standard) both;
+}
+
+.ltutor__brief {
+  color: var(--text-primary);
+  font-size: 12.5px;
+  font-weight: var(--weight-ui);
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+.ltutor__focus {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 11px;
+  border: 1px solid rgba(255, 255, 255, 0.66);
+  border-radius: var(--radius-control);
+  background: rgba(217, 244, 243, 0.34);
+}
+
+.ltutor__focus-label {
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.09em;
+}
+
+.ltutor__focus-text {
+  color: var(--text-secondary);
+  font-size: 11.5px;
+  line-height: 1.5;
+}
+
+.ltutor__action {
+  align-self: flex-start;
+  margin-top: 2px;
+  padding: 7px 13px;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.76);
+  color: var(--text-primary);
+  font-size: 11px;
+  font-weight: var(--weight-ui);
+  line-height: 1.3;
+}
+
+.lpanel__foot {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line-subtle);
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  line-height: 1.4;
+}
+
+.lpanel__dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(140, 200, 190, 0.95);
+}
+
+/* =====================================================================
+   LEARNING JOURNEY
+   ===================================================================== */
+
+.ljourney {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 13px clamp(12px, 1.6vw, 18px) 15px;
+  border: 1px solid var(--line-subtle);
+  border-radius: var(--radius-card-sm);
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.ljourney__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.ljourney__title {
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: var(--weight-ui);
+  line-height: 1.4;
+  letter-spacing: 0.1em;
+}
+
+.ljourney__tag {
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  line-height: 1.4;
+  letter-spacing: 0.09em;
+}
+
+.ljourney__list {
+  display: grid;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  gap: 8px;
+}
+
+.ljstep {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+  min-height: 40px;
+  padding: 7px 10px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+  transition:
+    background-color 240ms var(--ease-standard),
+    border-color 240ms var(--ease-standard);
+}
+
+.ljstep.is-passed {
+  background: rgba(255, 255, 255, 0.42);
+}
+
+/* The current step is a milk surface with a soft pastel underline. */
+.ljstep.is-current {
+  border-color: rgba(196, 232, 231, 0.9);
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.ljstep.is-current::after {
+  content: "";
+  position: absolute;
+  bottom: 5px;
+  left: 10px;
+  width: 24px;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--aurora-aqua), var(--aurora-mint));
+}
+
+.ljstep__label {
+  color: var(--text-secondary);
+  font-size: 11px;
+  line-height: 1.3;
+  transition: color 240ms var(--ease-standard);
+}
+
+.ljstep.is-current .ljstep__label {
+  color: var(--text-primary);
+  font-weight: var(--weight-ui);
+}
+
+.ljstep__code {
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  line-height: 1.4;
+  letter-spacing: 0.09em;
+}
+
+.ljstep__link {
+  position: absolute;
+  top: 50%;
+  right: -5px;
+  width: 10px;
+  height: 1.5px;
+  border-radius: 999px;
+  background: var(--line-subtle);
+  transition: background-color 240ms var(--ease-standard);
+}
+
+.ljstep.is-passed .ljstep__link,
+.ljstep.is-current .ljstep__link {
+  background: rgba(160, 214, 208, 0.9);
+}
+
+/* =====================================================================
+   ADAPT CONTROL
+   ===================================================================== */
+
+.llab__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  min-height: 64px;
+  padding: 12px clamp(16px, 2vw, 24px);
+  border-top: 1px solid var(--line-subtle);
+}
+
+.llab__run {
+  position: relative;
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 176px;
+  padding: 9px 18px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: var(--radius-button);
+  background: rgba(255, 255, 255, 0.68);
+  box-shadow: var(--shadow-inner-light);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition:
+    background-color 200ms var(--ease-standard),
+    border-color 200ms var(--ease-standard),
+    transform 200ms var(--ease-standard);
+}
+
+.llab__run:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.84);
+  transform: translateY(-1px);
+}
+
+.llab__run:disabled {
+  cursor: default;
+}
+
+.llab__run-label {
+  font-size: 12.5px;
+  font-weight: var(--weight-ui);
+  line-height: 1.3;
+  text-align: left;
+}
+
+.llab__run-track {
+  overflow: hidden;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--line-subtle);
+}
+
+.llab__run-fill {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, rgba(160, 214, 208, 0.95), rgba(168, 205, 238, 0.95));
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+.llab__run-track.is-running .llab__run-fill {
+  animation: ladapt 1700ms linear forwards;
+}
+
+.llab__stage {
+  flex: 1;
+  min-width: 0;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  line-height: 1.5;
+  letter-spacing: 0.03em;
+}
+
+/* =====================================================================
+   PRINCIPLES — same strip language as Stage 05
+   ===================================================================== */
+
+.learning__principles {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.learning__principle {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding-inline: clamp(14px, 2vw, 24px);
+  border-left: 1px solid var(--line-subtle);
+}
+
+.learning__principle:first-child {
+  padding-left: 0;
+  border-left: 0;
+}
+
+.learning__principle-index {
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  line-height: 1.4;
+  letter-spacing: 0.08em;
+}
+
+.learning__principle-title {
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: var(--weight-ui);
+  line-height: 1.4;
+}
+
+/* =====================================================================
+   MOTION
+   ===================================================================== */
+
+@keyframes lcontent-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes ladapt {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+/* =====================================================================
+   RESPONSIVE
+   Below the three-area desktop composition the map leads, because it is
+   what the section is about; the panels follow it.
+   ===================================================================== */
+
+/* Tablet: map full width, learner and tutor side by side beneath it. */
+@media (min-width: 700px) and (max-width: 1099px) {
+  .llab__surfaces {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas:
+      "map map"
+      "learner tutor";
+    gap: 18px;
+    align-items: start;
+  }
+
+  .llab__centre { grid-area: map; }
+  .lpanel--learner { grid-area: learner; }
+  .lpanel--tutor { grid-area: tutor; }
+
+  /* Cap the drawing width. Left to fill an 864px column the viewBox scales by
+     1.66 and the 9px map labels render at 15px, bigger than any other
+     technical label on the site. Capped, they land near 11px. */
+  .lmap,
+  .lartifact {
+    width: 100%;
+    max-width: 640px;
+    margin-inline: auto;
+  }
+
+  .llab { min-height: 0; }
+}
+
+/* Phone: a single column in the order learner state, map, tutor, journey.
+   That order is deliberate - the tutor's advice is meaningless before the
+   state it is reasoning about and the map it is pointing at. */
+@media (max-width: 699px) {
+  .llab {
+    min-height: 0;
+  }
+
+  .llab__head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .lscenarios {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 3px;
+    width: 100%;
+  }
+
+  /* 2 + 1: the third scenario spans the row rather than scrolling sideways. */
+  .lscenario:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .lscenario {
+    padding-inline: 10px;
+  }
+
+  .lpanel--learner {
+    min-height: 232px;
+  }
+
+  /* Two columns of metrics while the width still allows a readable label. */
+  .lmeters__list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px 14px;
+  }
+
+  .lmeter {
+    grid-template-columns: minmax(0, 1fr) 34px;
+    grid-template-areas:
+      "label value"
+      "track track";
+    gap: 3px 6px;
+  }
+
+  .lmeter__label { grid-area: label; }
+  .lmeter__value { grid-area: value; }
+  .lmeter__track { grid-area: track; }
+
+  /* The viewBox is unchanged; only the box it is drawn into grows, so the
+     graph is not squeezed into a 200px band on a phone. */
+  .lmap {
+    height: 336px;
+  }
+
+  /* Map type is sized in viewBox units, so it shrinks with the scale factor:
+     a 10px label renders at ~6px once 520 units are drawn into ~318. Raising
+     the size alone makes the labels wide enough to collide with each other,
+     so the phone view also drops the prerequisite labels and the in-node
+     codes. The circles, their states and the route all survive; the naming
+     of the smaller prerequisites is carried by the accessible summary.
+     Calibrated by measurement, not guessed - see qa/stage07-maptype.mjs. */
+  .lnode__label { font-size: 16px; }
+  .lnode--prereq .lnode__label { display: none; }
+  .lnode__code { display: none; }
+
+  .ljourney__list {
+    grid-auto-flow: row;
+    grid-auto-columns: auto;
+    gap: 6px;
+  }
+
+  .ljstep__link {
+    display: none;
+  }
+
+  .llab__run {
+    width: 100%;
+  }
+}
+
+/* Principles: four across, two by two, then a single column. */
+@media (max-width: 999px) {
+  .learning__principles {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px 0;
+  }
+
+  .learning__principle:nth-child(odd) {
+    padding-left: 0;
+    border-left: 0;
+  }
+}
+
+/* At 360px the container scales the viewBox by 0.52, so 16 units render at
+   8.3px - under the floor. Measured, then corrected. */
+@media (max-width: 400px) {
+  .lnode__label { font-size: 18px; }
+}
+
+@media (max-width: 479px) {
+  .learning__principles {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+
+  .learning__principle {
+    padding-left: 0;
+    border-left: 0;
+  }
+}
+
+/* =====================================================================
+   REDUCED MOTION
+   The lab stays fully usable and fully legible. Content still changes;
+   only the movement is removed.
+   ===================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .lmap__signal {
+    animation: none;
+    offset-distance: 50%;
+    opacity: 0.85;
+  }
+
+  .ltutor__body {
+    animation: none;
+  }
+
+  .llab__run-track.is-running .llab__run-fill {
+    animation: none;
+    transform: scaleX(1);
+  }
+
+  .llab__run:hover:not(:disabled) {
+    transform: none;
+  }
+
+  .lprofile__confidence-fill,
+  .lmeter__fill {
+    transition: none;
+  }
+}

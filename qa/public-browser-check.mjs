@@ -45,7 +45,7 @@ for (const [w, h] of [[1440, 900], [390, 844]]) {
   await p.waitForTimeout(600);
   await frame(p);
 
-  // Exercise the section so lazily-triggered errors surface too.
+  // Exercise every interactive section so lazily-triggered errors surface too.
   for (const id of ["commerce", "field", "operations"]) {
     await p.click(`#pscenario-tab-${id}`);
     await p.waitForTimeout(350);
@@ -54,10 +54,20 @@ for (const [w, h] of [[1440, 900], [390, 844]]) {
   await p.waitForFunction(() => document.querySelector(".pstudio__run-label").textContent === "Run again", null, { timeout: 12000, polling: 120 });
   await frame(p); await p.waitForTimeout(400); await frame(p);
 
+  await p.evaluate(() => document.querySelector("#ai-learning").scrollIntoView({ block: "start" }));
+  await p.waitForTimeout(500);
+  for (const id of ["assessment", "path", "tutor"]) {
+    await p.click(`#lscenario-tab-${id}`);
+    await p.waitForTimeout(350);
+  }
+  await p.click(".llab__run");
+  await p.waitForFunction(() => /Adapt again/.test(document.querySelector(".llab__run-label").textContent), null, { timeout: 12000, polling: 120 });
+  await frame(p); await p.waitForTimeout(400); await frame(p);
+
   // The list reset, measured on the live page.
   const lists = await p.evaluate(() => {
     const out = {};
-    for (const sel of [".products__rail", ".pweb__rows", ".pflow__rail"]) {
+    for (const sel of [".products__rail", ".pweb__rows", ".pflow__rail", ".ljourney__list", ".lmeters__list", ".llegend"]) {
       const el = document.querySelector(sel);
       if (!el) { out[sel] = null; continue; }
       const cs = getComputedStyle(el);

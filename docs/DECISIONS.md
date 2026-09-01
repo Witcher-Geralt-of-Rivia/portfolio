@@ -1,4 +1,4 @@
-<!-- PROJECT_STAGE: 6 -->
+<!-- PROJECT_STAGE: 7 -->
 <!-- DOCUMENT_STATUS: CURRENT -->
 
 # Decisions
@@ -896,3 +896,87 @@ specificity; that 14px is the timeline panel's design inset, not leftover
 marker indentation. Moving the reset later, or raising its specificity, would
 silently collapse that panel. `qa/stage06-listreset.mjs` measures all six lists
 with the reset neutralised and in force, and encodes the 14px expectation.
+
+---
+
+## D-041 — One renderer draws all three learning visuals
+
+Status: Accepted
+Stage: 7
+
+### Decision
+A knowledge map, an evaluation graph and a path roadmap are all drawn by
+`KnowledgeMap.tsx` from the same `{nodes, links, highlight}` structure in a
+shared 520x340 viewBox. Scenarios differ only in data.
+
+### Reason
+The three scenarios look like different diagrams but are the same object: a set
+of concepts, the dependencies between them, and a route through. Writing three
+canvases would have meant three sets of label-collision bugs and three places
+to fix a state colour. The single renderer also made the phone treatment a
+one-line change rather than three.
+
+### Consequence
+A scenario's `highlight` must name nodes that are actually joined by links. The
+path builder originally highlighted `validation -> testing -> persistence`, an
+edge that does not exist, and the map silently drew one signal instead of two.
+The interaction harness now asserts the signal count.
+
+---
+
+## D-042 — The adapt sequence is a reducer with two timers, both torn down
+
+Status: Accepted
+Stage: 7
+
+### Decision
+`LearningLab` holds scenario, variant index and sequence position in a
+`useReducer`. `Adapt` runs a five-stage interval, then a second timer holds
+"Path updated" before the control returns to "Adapt again". Both timers live in
+effects keyed on the scenario and are cleared by effect cleanup.
+
+### Reason
+This is the first sequence in the project that has to move four surfaces
+together - map states, highlighted route, journey position and tutor brief. A
+reducer keeps that transition in one readable function and makes the illegal
+states unreachable: a queued tick cannot advance a finished sequence, and
+selecting the current scenario is a no-op rather than a reset.
+
+The teardown is the load-bearing part, as in D-035. Measured: switching
+scenario mid-sequence leaves no stale label, no stale announcement and no stale
+journey step, and unmounting the section mid-sequence raises no error.
+
+### Consequence
+`ARCHITECTURE.md` previously stated an absolute "no `setInterval`" principle
+while its own Client/Server Boundary section described the Stage 06 interval.
+That contradiction has been resolved in favour of the narrower rule the project
+actually follows: nothing runs on a timer at rest, and a user-triggered
+sequence may use one interval provided it is torn down on every exit.
+
+---
+
+## D-043 — Map type is sized in viewBox units, so the phone view sheds labels
+
+Status: Accepted
+Stage: 7
+
+### Decision
+Below 700px the knowledge map raises its label size and hides the prerequisite
+labels and the in-node codes. The circles, their states and the highlighted
+route all remain.
+
+### Reason
+SVG text inside a fixed viewBox scales with the container. At 360px wide the
+520-unit box is drawn at 0.52, so a 10px label renders at 5.2px. Raising the
+size alone is not enough: bigger labels are proportionally wider, and fifteen
+of them collide. Measured before choosing - `qa/stage07-maptype.mjs` reports
+rendered size and label-to-label collisions at all eight viewports.
+
+A phone does not need the name of every prerequisite node; it needs to see that
+prerequisites exist, what state they are in, and where the route goes. The
+accessible summary carries the naming at every width.
+
+### Consequence
+Rendered floor is 9.38px at 360px, 10.4px at 390px and 9.69px at desktop, with
+zero collisions and zero spill outside the map box in all three scenarios. If
+a node is ever added, re-run that harness rather than eyeballing the result.

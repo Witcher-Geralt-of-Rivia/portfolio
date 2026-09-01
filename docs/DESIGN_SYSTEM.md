@@ -1,4 +1,4 @@
-<!-- PROJECT_STAGE: 6 -->
+<!-- PROJECT_STAGE: 7 -->
 <!-- DOCUMENT_STATUS: CURRENT -->
 
 # Milky Intelligence Design System
@@ -178,6 +178,27 @@ badged `LOCAL SIMULATION` on the surface itself, not only in a caption.
 When a scenario changes, frames stay where they are and only their contents
 transform. A surface that jumped position or resized on every switch would read
 as a page reload rather than one product with several faces.
+
+## Learning Surface Language
+
+Stage 07 is the cognitive end of the palette. Mint, aqua and sky lead; lavender,
+peach and rose appear only as state accents. The register is calm and
+human-centred without becoming soft: this is education technology, so there are
+no graduation caps, no books, no pencils, no classroom illustration and no
+cartoon anything.
+
+Knowledge state is never carried by colour alone. Each of mastered, learning,
+gap and locked has a distinct ring pattern and core mark as well as a hue, and
+the legend names all four in text. A gap is an open dashed ring, never a red
+error marker - a gap is where the learner is going next, not a fault.
+
+The knowledge map reads as knowledge rather than circuitry: connections are
+soft curves bowed away from the canvas centre, and the graph stays sparser than
+the hero constellation. At most two signals travel it at a time.
+
+Simulated learner data is labelled once, at the lab header, and not repeated on
+every panel. One honest annotation is enough to stop a visitor reading
+synthetic mastery figures as real assessment.
 
 ## Responsive Principles
 

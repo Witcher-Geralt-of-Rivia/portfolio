@@ -1,4 +1,4 @@
-<!-- PROJECT_STAGE: 6 -->
+<!-- PROJECT_STAGE: 7 -->
 <!-- DOCUMENT_STATUS: CURRENT -->
 
 # Architecture
@@ -8,7 +8,8 @@ How the code is actually organised, and the principles that keep it that way.
 ## Shape
 
 A single Next.js App Router application. Static, server-rendered, no backend.
-Two prerendered routes. One client component in the entire project.
+Two prerendered routes. Seven client components; everything else is server-
+rendered markup and CSS.
 
 ```
 src/
@@ -28,7 +29,7 @@ src/
       PrismLight.tsx        background layer C
       GrainOverlay.tsx      background layer D
     navigation/
-      SiteNavigation.tsx    "use client" - the only client component
+      SiteNavigation.tsx    "use client" - navigation state and observers
       DesktopNavigation.tsx presentational
       MobileNavigation.tsx  presentational
       SystemMarkImage.tsx   wraps the canonical mark asset
@@ -95,8 +96,9 @@ opens with the hero sets its own larger clearance, so
 ## Styling
 
 Plain CSS, no framework. `globals.css` is a composition root that imports the
-seven stylesheets in a fixed order: tokens, typography, motion, layers, surfaces,
-navigation, hero.
+ten stylesheets in a fixed order: tokens, typography, motion, layers, surfaces,
+navigation, hero, systems, products, learning. A new section appends its own
+stylesheet to the end of that chain and never edits an earlier one.
 
 Every principal value is a custom property in `tokens.css`. Components reference
 tokens; they do not hard-code colours, radii, shadows or timings. When a value
@@ -107,8 +109,8 @@ hero rules do not live in `navigation.css`.
 
 ## Client/Server Boundary
 
-There are four `"use client"` modules, each with deliberately bounded
-responsibilities.
+There are seven `"use client"` modules, each with deliberately bounded
+responsibilities. `docs/project-state.json` holds the authoritative list.
 
 `SiteNavigation.tsx`:
 
@@ -129,13 +131,21 @@ abandon the run rather than letting it write into a stale scenario. The lit
 stage, the phone's sync marker and the assist panel's resolved brief are all
 derived from that one index.
 
-`ArchitectureModeSelector.tsx` and `ProductScenarioSelector.tsx` are client
-only because a tablist needs key handling and roving tabindex. They own no
-state; the selection lives in their parent.
+`LearningLab.tsx` holds the selected learning scenario, which of that
+scenario's two deterministic variants is showing, and the position of the adapt
+sequence. It is the one place in the project that uses a reducer: the sequence
+has to move four surfaces together, and a reducer keeps that transition in one
+readable function. Both of its timers are cleared by effect cleanup.
+
+`ArchitectureModeSelector.tsx`, `ProductScenarioSelector.tsx` and
+`LearningScenarioSelector.tsx` are client only because a tablist needs key
+handling and roving tabindex. They own no state; the selection lives in their
+parent.
 
 Everything else - the aurora, the prism, the grain, the hero, the
-constellation, both section shells, the four product surfaces, the event rail
-and the principles and capability strips - is server-rendered markup plus CSS.
+constellation, all three section shells, the product surfaces, the event rail,
+the knowledge map, the learner and tutor panels, the learning journey and the
+principles and capability strips - is server-rendered markup plus CSS.
 
 The constellation's hover uses CSS `:has()` specifically so the hero does not
 need to become a client component.
@@ -165,8 +175,11 @@ a fan-in reads as a routing bundle instead of one overdrawn line.
 - Prefer CSS and SVG for visual effects.
 - Avoid client components; reach for one only when behaviour genuinely requires
   state, focus control or an observer.
-- No continuous JavaScript animation. No `requestAnimationFrame` loop, no
-  `setInterval`, no pointer tracking.
+- No continuous JavaScript animation: no `requestAnimationFrame` loop, no
+  pointer tracking, and nothing running on a timer at rest. A user-triggered
+  sequence may use a single `setInterval` when it has to move several surfaces
+  together, provided effect cleanup tears it down on every exit - see D-035 and
+  D-042. That is the only sanctioned use of a timer.
 - Animate compositor-friendly properties: `transform`, `opacity`, and where
   necessary `offset-distance` and `stroke-dashoffset`.
 - Use IntersectionObserver rather than scroll polling.

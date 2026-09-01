@@ -1,6 +1,7 @@
 import Hero from "@/components/hero/Hero";
 import IntelligentSystemsSection from "@/components/systems/IntelligentSystemsSection";
 import ProductEngineeringSection from "@/components/products/ProductEngineeringSection";
+import AILearningSection from "@/components/learning/AILearningSection";
 import { NAV_ITEMS } from "@/components/navigation/nav-items";
 
 import "./page.css";
@@ -9,7 +10,7 @@ import "./page.css";
    the remaining navigation anchor zones. Those remaining zones are still
    Stage 03 QA placeholders and are replaced one per stage. */
 
-const BUILT = new Set(["systems", "products"]);
+const BUILT = new Set(["systems", "products", "ai-learning"]);
 const PLACEHOLDERS = NAV_ITEMS.filter((item) => !BUILT.has(item.id));
 
 export default function Home() {
@@ -20,6 +21,8 @@ export default function Home() {
       <IntelligentSystemsSection />
 
       <ProductEngineeringSection />
+
+      <AILearningSection />
 
       {PLACEHOLDERS.map((item) => (
         <section key={item.id} id={item.id} className="nav-specimen">

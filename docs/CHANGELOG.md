@@ -1,4 +1,4 @@
-<!-- PROJECT_STAGE: 6 -->
+<!-- PROJECT_STAGE: 7 -->
 <!-- DOCUMENT_STATUS: CURRENT -->
 
 # Project Changelog
@@ -419,3 +419,80 @@ findings. Smoke assertions exercised against both real build directories: the
 Stage 06 build passes all three, the pre-Stage-06 build is correctly rejected.
 Stage 06 responsive, interaction, contrast, performance and list-reset harnesses
 all PASS; Stages 01–05 regression all PASS.
+
+---
+
+## Stage 07 - AI Learning Systems
+
+Status: **Frozen**
+
+### Summary
+Built `#ai-learning`, heading "Learning paths that adapt." An Adaptive Learning
+Laboratory shows a system changing its own next move: learner state, a
+knowledge model, a tutor surface and the learning journey beneath them. Three
+scenarios — Adaptive Tutor, Assessment Engine, Learning Path Builder — switch
+through a real ARIA tablist. `Adapt` walks a five-stage reducer and swaps the
+scenario to its second deterministic variant, moving all four surfaces together.
+
+### Files
+`src/components/learning/{AILearningSection,LearningLab,LearningScenarioSelector,
+KnowledgeMap,LearnerStatePanel,TutorPanel,LearningJourney,LearningPrinciples}.tsx`,
+`src/components/learning/learning-{scenarios,geometry}.ts`,
+`src/styles/learning.css`, `src/app/page.tsx`, `src/app/globals.css`,
+`deploy/safe-deploy.ps1`, `qa/stage07-*.mjs`
+
+### Notable during implementation
+- Primary map nodes rendered a code inside the circle *and* a label below,
+  giving "REST" under "REST". The code is now drawn only where it says
+  something the label does not — "DB" inside "Persistence" survives, "HTTP"
+  inside "HTTP" does not.
+- The phone map was illegible on the first pass. SVG text inside a fixed
+  viewBox scales with the container, so 10px labels rendered at 5.2px at 360px;
+  raising the size alone made fifteen labels collide. The phone view now raises
+  the size and sheds the prerequisite labels and in-node codes. Measured
+  throughout rather than eyeballed.
+- Left unconstrained, the tablet layout drew the 520-unit viewBox into an 864px
+  column, rendering 9px technical labels at 15px — larger than any other label
+  on the site. The drawing width is capped at 640px there.
+- The path builder's adapted route named `validation -> testing -> persistence`,
+  an edge that does not exist, so the map drew one signal instead of two. The
+  route now follows real edges.
+- Panels were stretching to the map's height and opening a large void under the
+  tutor's next action; they are sized to content instead.
+- Three contrast roles first measured below AA because the element box included
+  a decorative marker — a dashed gap ring, a legend swatch, a context dot —
+  whose colour was sampled as the text's background. The text nodes are now
+  wrapped so the measurement lands on the real background. Same class of
+  artifact as Stage 06's assist-context row.
+
+### Documentation corrections
+Eight pre-existing inconsistencies were found during the bootstrap and fixed
+here rather than left to drift further. `ARCHITECTURE.md` claimed one client
+component in one place and four in another while the code had five; it also
+carried an absolute "no `setInterval`" principle directly above a paragraph
+describing the Stage 06 interval, and listed seven stylesheets where there were
+nine. `CLAUDE_HANDOFF.md` said stages 01-05 were frozen in one section and
+01-06 in another. `PROJECT_STATE.md` reported two client entry points and
+repeated the absolute timer claim. `project-state.json` was missing the Stage
+06 tag, and `DEPLOYMENT.md` described the smoke port as fixed when the script
+picks the first free one of four. All were stale documentation lagging code the
+user had already approved, tagged and deployed.
+
+### QA harness corrections
+`stage05-a11y.mjs` asserted that exactly one `[role="tab"]` in the whole
+document was tabbable. Roving tabindex is a per-tablist property, so three
+tablists correctly give three tabbable tabs; the check reported a false failure
+on the Stage 06 build (2/7) as well as on Stage 07 (3/10), and it went unnoticed
+in Stage 06 because only the tail of that harness's output was read. It now
+asserts one tabbable tab per tablist. `public-browser-check.mjs` was extended to
+exercise the Stage 07 lab and its lists over real HTTPS.
+
+### QA
+40 text roles pass contrast (worst 4.85:1). CLS 0.00000 at load, 0.00027 after
+three scenario changes and three adaptations. 30/30 scenario changes and 20/20
+adapt runs clean with 0 network requests. 8/8 viewports with no overflow, no
+panel overlap and the phone order held at learner, map, tutor, journey. Map
+labels clear the 9px rendered floor at every viewport with zero collisions.
+Cancellation and unmount during a run both leave no stale state. Under reduced
+motion no keyframe animation runs at all while every content change still
+happens. Stages 01-06 regression all PASS.
