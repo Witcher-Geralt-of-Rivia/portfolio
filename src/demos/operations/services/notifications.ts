@@ -89,9 +89,15 @@ export async function listNotifications(
   ctx: OperationsContext
 ): Promise<DemoRecord<Notification>[]> {
   const all = await ctx.runtime.repository.all<Notification>(C.notifications);
-  /* Newest first by id, which is also creation order because ids are a
-     monotonic counter. */
-  return [...all].sort((a, b) => b.id.localeCompare(a.id));
+  /* Unread first, then newest. Sorting by recency alone would bury the unread
+     items whenever they are not the most recent — which is exactly the seeded
+     case — and a panel showing only read rows beside a badge reading "8
+     unread" is worse than no panel. Id descending is newest first, because
+     ids are a monotonic counter. */
+  return [...all].sort((a, b) => {
+    if (a.data.read !== b.data.read) return a.data.read ? 1 : -1;
+    return b.id.localeCompare(a.id);
+  });
 }
 
 /* `must` and `read` are re-exported so notification consumers do not reach

@@ -13,7 +13,7 @@ records how the project got there. Full reasoning is in `docs/DECISIONS.md`.
 Status: **Frozen**
 
 ### Summary
-Established the Milky Intelligence atmosphere: a four-layer fixed background
+Established the portfolio atmosphere: a four-layer fixed background
 (base gradient, six drifting aurora fields, two prism light sweeps, a micro-grain
 dither) plus the three reusable surfaces. Scaffolded the Next.js App Router
 project with TypeScript and no CSS framework.
@@ -76,7 +76,7 @@ the only client component in the project.
 
 ### Files
 `src/components/navigation/*`, `src/components/layout/SiteShell.tsx`,
-`src/styles/navigation.css`, `public/marks/system-mark.svg`,
+`src/styles/navigation.css`, the Stage 03 system mark (retired in 09C2),
 `src/app/page.tsx` (anchor sections), `tokens.css` (nav tokens)
 
 ### Notable during implementation
@@ -837,3 +837,117 @@ performance tripwire.
 No UI. `/demos/operations` is still not a route, `#work` still renders its
 placeholder, `currentStage` stays 8, and nothing was deployed. The registry now
 reads `operations = building`.
+
+---
+
+## Stage 09C2 - Branding, Operations Shell and Overview
+
+Status: **Complete** (Stage 09 remains in progress)
+
+The first visible substage of 09C, and a user-approved branding change that
+crosses the Stage 03 freeze.
+
+### Branding
+
+The user supplied an approved logo at `logo.png`. It is canonical source
+artwork and is never modified or served; `qa/brand-derive.mjs` produces the
+deployable sizes from it with `pngjs`, already a devDependency, rather than
+adding an image library.
+
+Measured before use rather than assumed: 1254x1254, 64% fully transparent with
+`rgba(0,0,0,0)` corners, so the transparency is real and no plate is needed
+behind it on any background. Downsampling premultiplies alpha before averaging,
+because straight RGBA averaging would drag the colour of transparent pixels
+into every edge of a mark that is 35% partial alpha.
+
+`icon.png` is 256 rather than 512. The mark is a soft gradient that PNG
+compresses poorly — 512 costs 164 KB against 55 KB — and a 164 KB tab icon
+would be disproportionate in a project whose previous mark was 890 bytes. No
+`favicon.ico` exists to shadow it.
+
+At 16px the fine detail dissolves and the silhouette and colour identity
+survive; at 20px and above the mark is clearly itself. That was rendered and
+looked at, not assumed.
+
+The Stage 03 four-node SVG mark is retired: `SystemMarkImage` became
+`PortfolioMark`, the asset is deleted, and the deployment smoke gate now
+asserts `/brand/logo-96.png` — a smoke test should check what the site
+actually serves.
+
+The design language's previous name is retired across the working tree, and
+the site title is now "Intelligent Systems Lab". CSS token names were left
+alone: renaming `--aurora-lavender` to satisfy a wording change would risk a
+regression across eight frozen stages for nothing (D-054).
+
+### Operations shell and Overview
+
+`/demos/operations` exists in the source build. A Server Component page carries
+the metadata and inherits the subtree's `noindex, nofollow`; everything needing
+the browser sits below one client boundary.
+
+The shell is a 240px sidebar, a 66px top bar and the content area, inside the
+Stage 09A demo chrome. Role and build state are answered independently: a
+module the role cannot view is not rendered at all, and a module that exists
+but is unbuilt renders as a non-interactive label rather than a link to a 404.
+That second state is temporary, carried by an `implemented` flag, and is
+deleted as each module lands.
+
+Overview's four KPIs derive to 38 / 4 / 10 / 8 with nothing hard-coded. Which
+KPIs appear follows the role matrix: a KPI summarises a module's data, so
+showing one for a module the role cannot open would make the Overview a hole in
+its own policy. Sales Agent sees two, Fleet Coordinator two, Finance Analyst
+one — no filler cards are invented to keep the row at four, and there are no
+trend badges, because there is no previous period to compare against.
+
+Eleven navigation icons and the funnel and fleet visuals are authored SVG. No
+chart library, no icon package, no new dependency of any kind.
+
+### Two contradictions found and resolved
+
+- **Action queue order.** Stage 09B froze notifications first; Stage 09C2 froze
+  overdue payments first. The contradiction was visible on the first render:
+  the queue opened with six identical "Lead assigned" rows and pushed all three
+  overdue payments off the six-item list. Resolved in favour of most-urgent
+  first (D-055), with the spec amended and the labels rewritten to carry the
+  amount, date or name that tells the rows apart.
+- **Main landmark.** `SiteShell` already renders the document's `<main>`, so
+  the shell's own would have made two. The route keeps its `<h1>` inside the
+  single existing landmark.
+
+### Bugs found by measuring
+
+- The notification panel emptied itself on open: its query was keyed on the
+  open state, so toggling discarded the settled result. The badge said eight
+  unread beside a list showing none.
+- The panel sorted by recency alone, and the seeded unread items are the
+  oldest, so the twelve rows shown were all read ones.
+- The badge was white on the sky accent at 4.04:1, below AA for 10px text.
+- Adding the mark to the demo bar cost the row 26px, squeezing the title to
+  57px at 768px. The bar now wraps at 860px instead of 640px.
+
+### Harness artifacts, not product defects
+
+Three, each worth recording because each would otherwise read as a failure:
+`visually-hidden` text is clipped to 1px by design and counted as clipped;
+the notification badge deliberately overhangs its trigger; and Playwright's
+`waitForFunction` defaults to rAF polling, which starves against an application
+that schedules no frames at rest — reporting 19 seconds for a 74ms operation.
+Interactions are now measured inside the page.
+
+### QA
+
+`qa/stage09c2-operations-ui.mjs`, 140 checks against a **local production
+build** on port 3001. Port 3200 was tried first and turned out to belong to the
+other application on this host; the attempt failed to bind and disturbed
+nothing.
+
+Covers brand terminology and assets, route metadata and robots, the disclosure
+and mark, every Overview figure, the full role matrix, role persistence,
+notification behaviour, reset, accessibility, contrast, nine viewports, the
+memory fallback, CLS, idle cost and network.
+
+### Not done
+
+Ten module screens. `#work` is untouched, the registry still reads
+`operations = building`, `currentStage` stays 8, and nothing was deployed —
+production remains on the previous release with no Operations route.

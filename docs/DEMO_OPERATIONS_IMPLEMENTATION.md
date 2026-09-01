@@ -8,18 +8,18 @@ How the Operations domain is built. The product contract it implements is
 the code beneath it.
 
 ```
-STATUS      domain complete / UI not built
-STAGE       09C1 complete
+STATUS      domain complete / shell + Overview complete / ten modules unbuilt
+STAGE       09C1 and 09C2 complete
 REGISTRY    operations = building
-ROUTE       /demos/operations is not a route yet
+ROUTE       /demos/operations exists in the source build; not deployed
 ```
 
 ## Stage 09C programme
 
 ```
 09C1  domain + seed + runtime audit extension        COMPLETE
-09C2  shell + routes + Overview                      NEXT
-09C3  Leads + Customers + Inbox
+09C2  shell + routes + Overview                      COMPLETE
+09C3  Leads + Customers + Inbox                      NEXT
 09C4  Reservations + Contracts + Fleet + Maintenance + Payments
 09C5  Automations + Reports + notifications + integrated workflows
 09C6  full QA + Work integration eligibility + deployment
@@ -46,9 +46,20 @@ src/demos/operations/
     context.ts          service context, typed reads, vehicle refresh
     leads.ts customers.ts reservations.ts contracts.ts
     payments.ts maintenance.ts inbox.ts notifications.ts automations.ts
+  ui/                   Stage 09C2
+    modules.ts          the eleven routes + the temporary `implemented` flag
+    icons.tsx           eleven navigation glyphs, authored locally
+    OperationsProvider  role -> OperationsContext, and the actor behind it
+    OperationsRoute     the client boundary
+    OperationsAppShell  sidebar, top bar, drawer, role control slot
+    OperationsSidebar   role-filtered navigation
+    OperationsOverview  reads collections, calls the selector, renders
+    OverviewPanels      KPI grid, lead funnel, fleet ring, tables, queue
+    NotificationCenter  disclosure popover
 ```
 
-Twenty-one modules. Validation lives with the service that enforces it rather
+Twenty-one domain modules plus nine interface modules. Validation lives with
+the service that enforces it rather
 than in a parallel `validation/` tree: a rule and its only caller drifting
 apart is the failure that arrangement invites.
 
@@ -61,7 +72,7 @@ runtime code once comments are stripped — the runtime's own prose explains wha
 it must not know, and that explanation is not a leak.
 
 ```
-Operations UI          (09C2 onward — does not exist yet)
+Operations UI          shell + Overview (09C2); ten modules to come
       ↓
 Operations services    leads · customers · reservations · contracts
                        payments · maintenance · inbox · notifications
@@ -197,6 +208,11 @@ memory fallback       forced IndexedDB failure still seeds, runs a workflow,
 performance sanity    a regression tripwire, never published as a benchmark
 ```
 
+`qa/stage09c2-operations-ui.mjs` adds 140 checks against a local production
+build, covering branding, route metadata, the Overview figures, the role
+matrix, notifications, reset, accessibility, contrast, nine viewports, the
+memory fallback, CLS and idle cost.
+
 ### Running it
 
 The domain is browser code and cannot be exercised in Node. The fixture lives
@@ -211,11 +227,38 @@ rm -r src/app/demos/qa-operations
 
 No QA route exists in the committed tree or in production.
 
+## The interface (09C2)
+
+`/demos/operations` is a Server Component page carrying the metadata and
+inheriting the subtree's `noindex, nofollow`; one client boundary sits beneath
+it, because everything below needs the browser.
+
+**Two independent questions.** A module the selected role cannot view is not
+rendered at all — the navigation never advertises data the role has no access
+to. A module that exists for the role but is unbuilt renders as a
+non-interactive label, because a link to a 404 is worse than one that is
+plainly not ready. The second is temporary build state carried by
+`implemented` in `ui/modules.ts`, and it disappears module by module through
+09C3 to 09C5 along with the styling that reads it.
+
+**KPIs follow the role too.** A KPI summarises a module's data, so showing one
+for a module the role cannot open would make the Overview a hole in its own
+policy. Admin sees four, Sales Agent two, Fleet Coordinator two, Finance
+Analyst one. No filler card is invented to keep the row at four, and there are
+no trend badges — there is no previous period to compare against, and a "+12%"
+would be a fabricated metric.
+
+**Everything derived.** The screen computes nothing: it reads the collections
+once, hands them to `selectors/overview.ts` and renders the result. Nothing on
+it is written as a literal.
+
+Visuals are CSS and authored SVG — no chart library, no icon package. Where an
+SVG carries data it is `aria-hidden` and the same values appear in text beside
+it, so nothing depends on distinguishing four soft hues.
+
 ## Remaining UI work
 
-Everything visible. 09C1 built no screen, no route and no component: the eleven
-modules, the shell, the tables, forms, drawers and charts all belong to 09C2
-onward, and every one of them consumes the selectors and services above rather
-than reaching for the runtime directly.
-
-`/demos/operations` is still not a route. `#work` still renders its placeholder.
+Ten module screens: Leads, Customers, Reservations, Contracts, Fleet,
+Maintenance, Payments, Automations, Inbox and Reports. Every service and
+selector they need already exists. `#work` still renders its placeholder, and
+nothing is deployed.

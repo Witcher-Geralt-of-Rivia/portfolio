@@ -11,13 +11,14 @@ Everything below was read from the repository, not recalled from conversation.
 ```
 Stages 01-08   COMPLETE and FROZEN
 Deployment     LIVE at https://intelligent-systems-lab.duckdns.org
-Stage 09       IN PROGRESS - 09A/09B/09C1 done, 0 of 3 demos built
+Stage 09       IN PROGRESS - 09A/09B/09C1/09C2 done, 0 of 3 demos built
 ```
 
 Stage 09 changed direction: `#work` becomes a launcher into three interactive
 frontend-only product demos, not case studies. 09A froze the shared runtime;
-09B froze Demo 01's contract; 09C1 built its domain, seed and services with no
-UI. Nothing is wired into the page and `currentStage` stays 8. See
+09B froze Demo 01's contract; 09C1 built its domain; 09C2 built the shell and
+Overview at `/demos/operations`. The other ten modules are unbuilt, nothing is
+wired into `#work`, and `currentStage` stays 8. See
 `docs/DEMO_OPERATIONS_IMPLEMENTATION.md` and `docs/NEXT_STAGE.md`. The case-study framework and its one verified internal
 case are preserved, unpublished; see `docs/CASE_STUDY_SOURCE_AUDIT.md`.
 
@@ -58,12 +59,11 @@ serves an alternating release slot and never the default `.next`, so a plain
 
 ## Rendering Architecture
 
-Server-first. The entire hero, the whole background system and both navigation
-presentations are server components. Thirteen `"use client"` modules exist.
-Nine belong to the site: `SiteNavigation.tsx`, plus one lab and one stateless
-ARIA tablist for each of the four built capability sections. Four belong to the
-demo platform and nothing imports them yet - the runtime provider and hooks,
-the demo shell and its reset control. `project-state.json` holds the list.
+Server-first. The hero, the background system and both navigation
+presentations are server components. Twenty `"use client"` modules exist: nine
+on the site (`SiteNavigation.tsx`, plus a lab and a tablist per capability
+section), four in the demo platform, and seven in the Operations demo's own
+interface. `project-state.json` holds the authoritative list.
 
 No `requestAnimationFrame` loop and no pointer tracking runs anywhere. Timers
 exist only inside the three user-triggered sequences - the Stage 06 flow, the
@@ -92,8 +92,9 @@ src/
     layout.tsx            root layout, loads Geist, renders SiteShell
     globals.css           composition root; imports every site stylesheet
     page.tsx, page.css    hero + anchor sections
-    demos/layout.tsx      Stage 09A - demo frame, robots noindex; no page
-                          beneath it, so /demos is a 404 by design
+    demos/layout.tsx      Stage 09A - demo frame, robots noindex
+    demos/operations/     Stage 09C2 - the Operations demo route
+    icon.png, apple-icon.png   derived from the approved logo.png
     specimen/page.tsx     typography specimen
     specimen/page.css
   components/
@@ -118,8 +119,9 @@ src/
     work/       Stage 09 - case-study renderers; built, never wired in
     demos/      Stage 09A - DemoShell, DemoDisclosure, DemoResetControl
   content/case-studies.ts   typed case-study model + render-safety filter
-  demos/operations/         Stage 09C1 - Demo 01 domain (21 modules): types,
-                constants, permissions, seed/, selectors/, services/. No UI.
+  demos/operations/         Stage 09C1 domain (21 modules) + Stage 09C2 ui/
+                (shell, sidebar, top bar, Overview panels, notifications,
+                icons, module routes). Overview only; ten modules unbuilt.
   demo-runtime/             Stage 09A - shared demo platform (18 modules):
                 types, config, demo-registry, clock, ids, repository,
                 async-service, events, audit, jobs, session, connectivity,
@@ -129,11 +131,11 @@ src/
     tokens.css            all design tokens - the source of truth for values
     typography.css, motion.css, layers.css, surfaces.css   foundations
     navigation.css, hero.css, systems.css, products.css, learning.css, lab.css
-    work.css        written, not imported   demo-shell.css  loaded by demos/
+    work.css  written, not imported   demo-shell.css, operations.css  demo only
 
 public/
   textures/micro-grain.svg    locally generated SVG turbulence tile
-  marks/system-mark.svg       custom four-node system mark, 890 bytes
+  brand/logo-*.png            approved portfolio mark, derived from logo.png
 
 qa/                            Playwright QA harness (see QA_BASELINE.md)
 docs/                          canonical project memory (this directory)
@@ -378,18 +380,16 @@ delay", "simulated step 6 of 6") are sequence positions, not latency.
 
 ## Assets
 
-`public/marks/system-mark.svg` (890 bytes, custom) and
-`public/textures/micro-grain.svg` (generated feTurbulence tile). No stock
-imagery, icons or external image dependency.
+`public/brand/logo-*.png`, derived from the approved `logo.png` (never served),
+plus `public/textures/micro-grain.svg`. No stock imagery or icon package.
 
 ## Deployment
 
 Live at `https://intelligent-systems-lab.duckdns.org`. PM2 app "portfolio" on
-127.0.0.1:3100, behind a Caddy instance shared with another project. Production
-serves `.next-release-a` / `.next-release-b`; `.next` is development only.
-Update with `npm run deploy:safe`, which is the only supported path and leaves
-Caddy untouched. Full detail, including the host safety rules, in
-`docs/DEPLOYMENT.md`.
+127.0.0.1:3100, behind a Caddy instance shared with another project, which also
+runs its own app on 3200. Production serves `.next-release-a` / `-b`; `.next`
+is development only. Update with `npm run deploy:safe` and nothing else. Host
+safety rules in `docs/DEPLOYMENT.md`.
 
 ## Known Gaps
 

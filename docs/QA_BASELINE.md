@@ -501,7 +501,7 @@ Stage 03   5 navigation links
 Stage 04   hero title correct, 8 constellation nodes, 21 links, 5 signals
 ```
 
-Static resources over public HTTPS, all 200: `/marks/system-mark.svg`,
+Static resources over public HTTPS, all 200: the portfolio mark,
 `/textures/micro-grain.svg`, `/specimen`, the CSS chunk, the JS chunk and both
 WOFF2 fonts.
 
@@ -824,3 +824,139 @@ reset                  207 / 203 ms
 `qa/stage09a-runtime.mjs` 76/76 and `qa/stage09a-shell.mjs` 85/85 after the
 audit extension. The optional field changed nothing for the demos that do not
 use it.
+
+---
+
+## Stage 09C2 - Operations Shell, Overview and Branding
+
+PASS. Harness: `qa/stage09c2-operations-ui.mjs` (140 checks).
+
+Run against a **local production build**, not the dev server:
+
+```
+npm run build
+npx next start --hostname 127.0.0.1 --port 3001
+node qa/stage09c2-operations-ui.mjs
+```
+
+Port 3001, not 3200: 3200 belongs to the other application on this host, and
+3100 is this portfolio's live production.
+
+### Branding
+
+```
+master            logo.png, 1254x1254, 844406 bytes, unmodified
+transparency      64.0% fully transparent, 35.7% partial, 0.3% opaque
+                  corners rgba(0,0,0,0) - measured, not inferred
+derived           src/app/icon.png 256px 54.7 KB
+                  src/app/apple-icon.png 180px 31.8 KB
+                  public/brand/logo-192.png 35.0 KB, logo-96.png 11.9 KB
+favicon           <link rel="icon"> resolves to /icon.png, served 256x256
+                  image/png, byte-identical to src/app/icon.png (0 diff)
+old favicon.ico   none exists, so nothing shadows the new icon
+old system mark   deleted; 404 from the local build; 0 active references
+retired name      0 occurrences in the working tree
+navigation mark   28px from a 96px source
+demo bar mark     20px, square, undistorted
+small sizes       32px clearly the mark; 16px keeps silhouette and colour,
+                  loses node dots and cube facets
+```
+
+### Overview, as rendered
+
+```
+open leads                    38
+confirmed reservations         4
+vehicles available            10
+payments requiring attention   8
+unread notifications           8
+lead funnel                   New 12  Contacted 10  Qualified 9
+                              Proposal 7  Won 6   (4 lost, shown separately)
+fleet                         Available 10  Reserved 4  Rented 7  Maintenance 3
+upcoming reservations         4 rows
+action queue                  6 of 11, led by the three overdue payments
+```
+
+### Role matrix, as rendered
+
+```
+Admin              Morgan Reed    11 modules   4 KPIs
+Sales Agent        Avery Chen      6 modules   2 KPIs  (leads, reservations)
+Fleet Coordinator  Jordan Blake    5 modules   2 KPIs  (reservations, fleet)
+Finance Analyst    Taylor Quinn    5 modules   1 KPI   (payments)
+```
+
+Only Overview is interactive in this build; the other ten render as
+non-interactive labels rather than links to a 404.
+
+### Interaction
+
+```
+role switch, all four            PASS, persists across reload
+notification open / read / all   PASS, badge 8 -> 7 -> none
+Escape closes, focus returns     PASS
+action queue drops read items    PASS
+read state survives reload       PASS
+reset                            PASS, restores 38/4/10/8, 8 unread, Admin
+memory fallback                  PASS, renders, mutates and resets
+```
+
+### Responsive
+
+All PASS at 1920x1080, 1440x900, 1366x768, 1180x820, 1024x768, 768x1024,
+430x932, 390x844 and 360x800: no horizontal overflow, no clipped text, exactly
+one navigation presentation at every width, and the role control inside the
+bar. KPI columns are intrinsic on phones — two at 430 (188px) and 390 (168px),
+one at 360 (321px).
+
+### Accessibility and contrast
+
+```
+26 text roles meet WCAG AA, worst 4.55:1 (sidebar tagline)
+one main landmark, route h1 inside it
+sidebar is nav[aria-label="Operations"], active item aria-current="page"
+notification trigger carries aria-expanded and aria-controls
+role control labelled "Demo role"; one polite status region
+data SVG aria-hidden with every value written in text beside it
+reservations table has four scope="col" headers
+```
+
+### Performance
+
+Measured inside the page. Driving these through Playwright reports seconds,
+because its default rAF polling starves against an application that schedules
+no frames at rest — the delay is in the harness, not the product.
+
+```
+role switch                 9-34 ms
+notification panel open    13-14 ms
+mark all read (8 rows)     74-82 ms
+CLS after initialization    0.00000
+intervals while idle        0
+animation frames while idle 0
+```
+
+QA SANITY MEASUREMENT - NOT A PRODUCTION BENCHMARK.
+
+### Network
+
+0 external requests, 0 `/api/` calls, logo served locally. Two Next.js preload
+hints for a route stylesheet appear in the console; they are framework asset
+hints, not errors, hydration warnings or failed resources, and are reported
+rather than suppressed.
+
+### Screenshots
+
+`qa/shots/stage09c2/` — overview at 1440x900, 1024x768 and 390x844, the
+Finance Analyst role at 1440x900, and the notification panel at 390x844.
+
+### Regression
+
+```
+stage09a-runtime   76/76
+stage09a-shell     85/85   (after raising the chrome wrap breakpoint to 860px,
+                            which the added mark made necessary)
+stage09b-spec      96/96
+stage09c1-domain   211/211
+qa:memory          18/18
+```

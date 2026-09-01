@@ -10,6 +10,7 @@
 import type { DemoRecord } from "@/demo-runtime/types";
 
 import { DAY_MS, type ReportPeriod } from "../constants";
+import { formatCents } from "./derive";
 import type {
   Contract,
   ContractStatus,
@@ -53,6 +54,15 @@ export type OverviewData = {
   actionQueue: ActionQueueItem[];
 };
 
+/** A compact day and month, on the logical clock, for queue labels. */
+function shortDate(iso: string): string {
+  return new Date(iso).toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    timeZone: "UTC",
+  });
+}
+
 /** The funnel excludes Lost, which is reported separately rather than as a stage. */
 const FUNNEL_STAGES: LeadStage[] = ["New", "Contacted", "Qualified", "Proposal", "Won"];
 
@@ -83,36 +93,68 @@ export function selectOverview(input: OverviewInput): OverviewData {
     .filter((r) => Date.parse(r.data.startAt) >= Date.parse(now))
     .sort((a, b) => Date.parse(a.data.startAt) - Date.parse(b.data.startAt));
 
-  /* The queue's order is fixed: unread notifications, then leads whose
-     follow-up is due, then overdue payments, then open high-priority work.
-     Deterministic order matters — an action list that reshuffles between
-     renders is unusable. */
+  /* Most urgent first: an overdue payment, then work holding a vehicle, then
+     a follow-up that has come due, then an unread notification. Within a
+     category the oldest relevant timestamp leads, with the id as a tie-break,
+     so the list never reshuffles between renders.
+
+     Stage 09B froze the reverse of this. It was corrected in 09C2 (D-055): a
+     queue that opens with six identical notifications buries the overdue
+     payment underneath them. */
+  const byTimeThenId = <T,>(
+    rows: T[],
+    at: (row: T) => string,
+    id: (row: T) => string
+  ): T[] =>
+    [...rows].sort((a, b) => {
+      const delta = Date.parse(at(a)) - Date.parse(at(b));
+      return delta !== 0 ? delta : id(a).localeCompare(id(b));
+    });
+
   const actionQueue: ActionQueueItem[] = [
-    ...notifications
-      .filter((n) => !n.data.read)
-      .sort((a, b) => a.id.localeCompare(b.id))
-      .map((n) => ({ kind: "notification" as const, id: n.id, label: n.data.title })),
-    ...openLeads
-      .filter(
+    ...byTimeThenId(
+      payments.filter((p) => p.effectiveStatus === "Overdue"),
+      (p) => p.data.dueAt,
+      (p) => p.id
+    ).map((p) => ({
+      kind: "payment" as const,
+      id: p.id,
+      /* The amount and due date are what tell three overdue payments apart.
+         A queue of identical rows is a queue nobody can act on. */
+      label: `USD ${formatCents(p.data.amount)} ${p.data.category.toLowerCase()} payment, due ${shortDate(p.data.dueAt)}`,
+    })),
+
+    ...byTimeThenId(
+      maintenance.filter((w) => w.data.status === "Open" && w.data.priority === "High"),
+      (w) => w.data.openedAt,
+      (w) => w.id
+    ).map((w) => ({ kind: "maintenance" as const, id: w.id, label: w.data.summary })),
+
+    ...byTimeThenId(
+      openLeads.filter(
         (l) =>
           l.data.priority === "High" &&
           l.data.nextFollowUpAt !== null &&
           Date.parse(l.data.nextFollowUpAt) <= Date.parse(now)
-      )
-      .sort((a, b) => a.id.localeCompare(b.id))
-      .map((l) => ({
-        kind: "lead" as const,
-        id: l.id,
-        label: `Follow up with ${l.data.displayName}`,
-      })),
-    ...payments
-      .filter((p) => p.effectiveStatus === "Overdue")
-      .sort((a, b) => a.id.localeCompare(b.id))
-      .map((p) => ({ kind: "payment" as const, id: p.id, label: "Overdue payment" })),
-    ...maintenance
-      .filter((w) => w.data.status === "Open" && w.data.priority === "High")
-      .sort((a, b) => a.id.localeCompare(b.id))
-      .map((w) => ({ kind: "maintenance" as const, id: w.id, label: w.data.summary })),
+      ),
+      (l) => l.data.nextFollowUpAt ?? now,
+      (l) => l.id
+    ).map((l) => ({
+      kind: "lead" as const,
+      id: l.id,
+      label: `Follow up with ${l.data.displayName}`,
+    })),
+
+    ...byTimeThenId(
+      notifications.filter((n) => !n.data.read),
+      (n) => n.createdAt,
+      (n) => n.id
+    ).map((n) => ({
+      kind: "notification" as const,
+      id: n.id,
+      /* The body names the record; the title is a category and repeats. */
+      label: n.data.body || n.data.title,
+    })),
   ];
 
   return {

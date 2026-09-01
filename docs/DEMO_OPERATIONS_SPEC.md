@@ -595,9 +595,18 @@ Upcoming reservations
 Action queue
 ```
 
-The action queue is derived from unread notifications, high-priority leads with
-follow-up due, overdue payments, and open high-priority maintenance, in that
-deterministic order.
+The action queue is derived from overdue payments, open high-priority
+maintenance, high-priority leads whose follow-up is due, and unread
+notifications — in that order, most urgent first. Within a category the oldest
+relevant timestamp comes first, then the entity id, so the list never
+reshuffles between renders.
+
+Stage 09B first froze the reverse of this, leading with unread notifications.
+Stage 09C2 corrected it (D-055): a queue that opens with six identical
+notifications buries the overdue payment underneath them, which is the opposite
+of what an action list is for.
+
+At most six items appear on the Overview.
 
 ### Leads
 
@@ -1072,7 +1081,7 @@ lavender secondary
 ```
 
 Bright throughout. The homepage aurora is not reused as the background of every
-application screen — the demo lives in the Milky Intelligence palette without
+application screen — the demo lives in the portfolio palette without
 wearing the portfolio's atmosphere.
 
 Originality is required. The Fuse React reference is an **interaction

@@ -78,7 +78,7 @@ export type CaseStudy = {
    */
   disclosure: string;
   category: string;
-  /** Accent family. All remain Milky Intelligence; this is a tint, not a theme. */
+  /** Accent family. All stay within the portfolio palette; a tint, not a theme. */
   accent: "sky" | "mint" | "peach";
   summary: string;
   problem: string[];

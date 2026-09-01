@@ -16,7 +16,7 @@
 ## Project
 
 A technical portfolio built to demonstrate engineering capability to clients on
-freelance platforms. Internal identity: **Milky Intelligence**.
+freelance platforms. Internal identity: **Intelligent Systems Lab**.
 
 It is a technical portfolio, **not** a personal or social website. There is no
 biography, no photograph, and no contact route of any kind.
@@ -42,8 +42,8 @@ demonstrations must be deterministic local simulations, static JSON, scripted
 sequences or client-side interaction.
 
 **No backend.** No database server, API route, server action or external
-persistence service. The demo platform stores synthetic data in the visitor's
-own browser through IndexedDB; D-046 records why that is not a departure.
+persistence service. The demo platform stores synthetic data in the browser
+through IndexedDB; D-046 records why that is not a departure.
 
 Both rules hold until the user explicitly changes them. See
 `docs/PRIVACY_AND_SECURITY.md`.
@@ -69,12 +69,13 @@ and CSS. `docs/project-state.json` holds the authoritative list.
 
 ## Current Runtime
 
-Windows Server VPS.
+Windows Server VPS, shared with another application on port 3200.
 
 ```
 dev preview   npm run dev:remote      http://108.186.112.75:3000
 production    https://intelligent-systems-lab.duckdns.org
               Caddy v2.11.4 -> 127.0.0.1:3100 (PM2 app "portfolio")
+local prod    npx next start --port 3001   (QA only; 3200 is not ours)
 ```
 
 **Deploy with `npm run deploy:safe`. Nothing else.** Production serves an
@@ -102,7 +103,10 @@ Details in `docs/PROJECT_STATE.md`. History in `docs/CHANGELOG.md`.
 
 ## Design Identity
 
-**Milky Intelligence** — premium, bright, soft, technical, calm, futuristic,
+The approved logo at `logo.png` is canonical source artwork, never modified or
+served; sizes are derived by `qa/brand-derive.mjs` (D-054).
+
+**Intelligent Systems Lab** — premium, bright, soft, technical, calm, futuristic,
 precise, advanced engineering.
 
 Colours are soft, bright, milky, multi-hue and continuously transitioning. The
@@ -124,9 +128,8 @@ Two routes:
 - **`/specimen`** — Stage 02 typography specimen, kept so the type scale stays
   verifiable. Not linked from the site.
 
-`src/app/demos/layout.tsx` exists but has no `page.tsx` beneath it, so it adds
-no route and `/demos` is a 404. That is deliberate: an unfinished demo must not
-be reachable.
+`/demos/operations` is the Operations demo, added in 09C2 and not deployed.
+`/demos` itself is a 404 — the layout has no page of its own.
 
 Navigation destinations are exactly: Systems, Products, AI Learning, Lab, Work.
 There is deliberately no Contact, Hire Me, About, Blog or social link.
@@ -152,9 +155,8 @@ src/demo-runtime/   09A - shared demo platform; see docs/DEMO_PLATFORM.md
 ```
 
 Each capability directory has the same shape: a server section shell, one
-CLIENT lab holding the state, one CLIENT ARIA tablist holding none,
-presentational renderers, and a data module. Full tree and architectural
-principles in `docs/ARCHITECTURE.md`.
+CLIENT lab, one CLIENT ARIA tablist, presentational renderers and a data
+module. Full tree in `docs/ARCHITECTURE.md`.
 
 ## Current QA Status
 
@@ -172,14 +174,14 @@ measurements showing the original approach is better. Reasons in
 - Display measures use calibrated `em`, not `ch` (`ch` caused font-swap CLS).
 - Constellation chips are HTML over SVG, with no `backdrop-filter`.
 - Cross-link routing bows asymmetrically, avoiding a wireframe-orb look.
-- Mobile capability rail drops its vertical dividers.
-- `.site-main:has(.hero)` zeroes the shell's top padding.
+- Mobile capability rail drops its vertical dividers; `:has()` zeroes the
+  shell's top padding for the hero and hides site chrome on demo routes.
 - No scroll cue; no forced `<br>` in the hero heading.
 - No navigation item is active while the hero owns the viewport.
 - Architecture gradients use `userSpaceOnUse` (the default degenerates on
   horizontal paths); the trace drops below the canvas at 1149px, not 999px.
-- The demo runtime hand-rolls IndexedDB rather than adding a library (D-047),
-  and `#work` waits for all three demos rather than shipping one (D-050).
+- The demo runtime hand-rolls IndexedDB (D-047); `#work` waits for all three
+  demos (D-050); the action queue leads with the most urgent item (D-055).
 
 Each is an entry in `docs/DECISIONS.md` with its measured reason.
 
@@ -218,20 +220,21 @@ The VPS already hosts other services. Read the safety rules in
 | What to do next | `docs/NEXT_STAGE.md` |
 | Machine-readable state | `docs/project-state.json` |
 
-Raw design values live in `src/styles/tokens.css`, the source of truth for
-tokens. Documentation must not duplicate it.
+Raw design values live in `src/styles/tokens.css`. Docs must not duplicate it.
 
 ## Current Task Status
 
 Stages 01-08 complete and frozen; the site is live over HTTPS. Stage 09 is **in
-progress**: 09A froze the shared runtime, 09B froze Demo 01's product
-contract, 09C1 built its domain and seed. No demo UI exists, and `#work` still
-renders its placeholder.
+progress**: 09A froze the shared runtime, 09B froze Demo 01's contract, 09C1
+built its domain, 09C2 built the shell and Overview at `/demos/operations`. Ten
+module screens remain, `#work` still renders its placeholder, and nothing is
+deployed.
 
 ## Next Allowed Task
 
-**Stage 09C2 - Operations App Shell + Routing + Overview.** The first visible
-substage; the domain beneath it is built. See `docs/NEXT_STAGE.md`.
+**Stage 09C3 - Operations CRM: Leads + Customers + Inbox.** The first three
+module screens; the shell and every service they need are built. See
+`docs/NEXT_STAGE.md`.
 
 Do not begin it automatically.
 
@@ -241,12 +244,9 @@ procedure in `docs/DEPLOYMENT.md` and never point the domain at `next dev`.
 ## Forbidden Actions
 
 - Redesigning any frozen stage without an explicit user instruction
-- Adding contact information of any kind
-- Adding a paid AI provider, API key or hosted inference
-- Adding a backend, database, API route or server action
-- Installing GSAP, Motion, Three.js, React Three Fiber, D3, Lottie or Spline
-- Configuring DNS, HTTPS, Certbot, nginx, Caddy, IIS or Apache in a task that
-  did not ask for it
+- Adding contact information, a paid AI provider, or a server backend
+- Installing an animation, chart, icon, state or image library
+- Configuring DNS, HTTPS, Certbot, nginx, Caddy, IIS or Apache uninvited
 - Altering ports 80/443 or existing web-server configuration on the VPS
 - Removing the QA harness (`qa/`, `playwright`, `pngjs`)
 - Breaking `npm run dev`, `npm run dev:remote` or `npm run build`

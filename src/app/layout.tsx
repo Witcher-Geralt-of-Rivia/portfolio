@@ -7,7 +7,7 @@ import SiteShell from "@/components/layout/SiteShell";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Milky Intelligence",
+  title: "Intelligent Systems Lab",
   description:
     "A calm, precise visual foundation for an engineering and design portfolio.",
 };

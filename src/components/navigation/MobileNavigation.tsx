@@ -1,7 +1,7 @@
 import type { CSSProperties, RefObject } from "react";
 
 import { NAV_ITEMS } from "./nav-items";
-import SystemMarkImage from "./SystemMarkImage";
+import PortfolioMark from "./PortfolioMark";
 
 type Props = {
   open: boolean;
@@ -39,7 +39,7 @@ export default function MobileNavigation({
           aria-label="Return to portfolio introduction"
           onClick={onNavigate}
         >
-          <SystemMarkImage />
+          <PortfolioMark />
           <span className="site-nav__wordmark">Engineering</span>
         </a>
 

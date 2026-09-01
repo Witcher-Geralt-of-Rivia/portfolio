@@ -43,8 +43,19 @@ export default function DemoShell({ title, roleControl, children }: DemoShellPro
       <header className="demo-chrome">
         <div className="demo-chrome__inner">
           {/* Back to the portfolio's Work section, which is where a visitor
-              arrived from. No contact route, here or anywhere. */}
+              arrived from. The mark travels with it: together they say whose
+              frame this is, which is the whole job of this bar. No contact
+              route, here or anywhere. */}
           <Link className="demo-chrome__back" href="/#work">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/brand/logo-96.png"
+              alt=""
+              width={20}
+              height={20}
+              className="demo-chrome__mark"
+              draggable={false}
+            />
             <span aria-hidden="true">←</span> Portfolio
           </Link>
 

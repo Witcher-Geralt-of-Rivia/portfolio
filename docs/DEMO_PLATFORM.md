@@ -19,7 +19,7 @@ Work section becomes a launcher into three substantial interactive product
 demonstrations that a visitor can use:
 
 ```
-Demo 01   Operations / CRM / ERP SaaS        /demos/operations   DOMAIN BUILT
+Demo 01   Operations / CRM / ERP SaaS        /demos/operations   SHELL + OVERVIEW
 Demo 02   Field Operations Web + Mobile      /demos/field        PLANNED
 Demo 03   Adaptive Learning Platform         /demos/learning     PLANNED
 ```

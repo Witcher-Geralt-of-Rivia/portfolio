@@ -74,7 +74,8 @@ src/
 
 public/
   textures/micro-grain.svg
-  marks/system-mark.svg
+  brand/logo-96.png            portfolio mark, 28px in navigation
+  brand/logo-192.png           larger derivative
 
 deploy/
   safe-deploy.ps1           the production deployment (build inactive slot,
@@ -96,7 +97,7 @@ Portfolio application
   └── Demo platform                 src/demo-runtime/, src/app/demos/
         ├── Shared runtime          persistence, clock, ids, events,
         │                           audit, jobs, session, connectivity
-        ├── Operations domain       BUILT (09C1) - domain only, no UI
+        ├── Operations domain       BUILT - domain 09C1, shell + Overview 09C2
         ├── Field domain            PLANNED - not built
         └── Learning domain         PLANNED - not built
 ```
@@ -117,9 +118,11 @@ touches IndexedDB; everything above the persistence adapter speaks to its
 interface. Dependency direction is one-way — types, then persistence/clock/ids,
 then repository, then runtime, then React, then a demo's domain, then its UI.
 
-`src/app/demos/layout.tsx` has no `page.tsx` beneath it, so `/demos` and every
-route under it is a 404. That is deliberate: an unfinished demonstration must
-not be reachable, and a demo becomes a route only when it is finished.
+`src/app/demos/layout.tsx` sets `robots: noindex` for the subtree. Its only
+route is `/demos/operations`, added in 09C2; the module segments beneath it do
+not exist yet, and the sidebar renders those modules as non-interactive rather
+than linking to a 404. That temporary state is carried by an `implemented`
+flag in `ui/modules.ts` and is deleted as each module lands.
 
 Full detail, including the persistence schema and the QA contracts, is in
 `docs/DEMO_PLATFORM.md`; Demo 01's frozen product contract is in
@@ -247,8 +250,8 @@ a fan-in reads as a routing bundle instead of one overdrawn line.
 - No external image dependency unless explicitly justified. All artwork is
   authored locally as SVG or CSS.
 - Keep one canonical source per asset. The system mark exists once, at
-  `public/marks/system-mark.svg`, and is referenced rather than duplicated
-  into JSX.
+  `public/brand/logo-96.png`, derived from the approved master at `logo.png`
+  by `qa/brand-derive.mjs`, and is referenced rather than duplicated into JSX.
 - Keep one canonical source per data set. The five navigation destinations exist
   once, in `nav-items.ts`, and are consumed by the desktop bar, the compact panel
   and the page's anchor sections.

@@ -13,7 +13,8 @@ Stage 09                IN PROGRESS
   09B Operations spec   COMPLETE - product contract frozen
   09C Operations build  IN PROGRESS
     09C1 domain + seed  COMPLETE
-    09C2 shell + routes NEXT
+    09C2 shell + Overview  COMPLETE
+    09C3 Leads/Customers/Inbox  NEXT
 ```
 
 `currentStage` stays at **8**. Neither 09A nor 09B completes Stage 09: the
@@ -34,8 +35,9 @@ placeholder.
 8.  Stage 09A - Demo platform foundation        DONE
 9.  Stage 09B - Operations product spec         DONE
 10. Stage 09C1 - Operations domain + seed       DONE
-11. Stage 09C2 - Shell + routes + Overview      NEXT
-12. Stage 09C3-C6 - modules, then QA/deploy     LATER
+11. Stage 09C2 - Shell + routes + Overview      DONE
+12. Stage 09C3 - Leads + Customers + Inbox      NEXT
+13. Stage 09C4-C6 - modules, then QA/deploy     LATER
 13. Field and Learning specs, then builds       LATER
 14. Stage 09 - #work launcher integration       LATER
 ```
@@ -87,17 +89,17 @@ production is untouched.
 
 ## NEXT TASK
 
-**Stage 09C2 - Operations App Shell + Routing + Overview.**
+**Stage 09C3 - Operations CRM: Leads + Customers + Inbox.**
 
-The first visible substage. 09C1 built the whole domain beneath it: the
-canonical seed, the derived-state selectors, the nine services, permissions and
-the automation engine, all documented in
-`docs/DEMO_OPERATIONS_IMPLEMENTATION.md` and covered by
-`qa/stage09c1-operations.mjs` (211 checks).
+The first three module screens. The shell, routing, role policy, notification
+centre and Overview are built and measured; every service and selector these
+screens need already exists and is covered by `qa/stage09c1-operations.mjs`.
 
-09C2 builds the product shell, the eleven routes and the Overview screen. Every
-figure on Overview comes from `selectors/overview.ts`; nothing may be
-hard-coded, and the four KPIs read 38 / 4 / 10 / 8 on seeded data.
+Each module that lands must flip its `implemented` flag in
+`src/demos/operations/ui/modules.ts` from false to true, which turns its
+sidebar entry from a non-interactive label into a link. That flag and the
+styling that reads it are temporary build state and disappear entirely once all
+eleven modules exist.
 
 Do not begin it until instructed.
 

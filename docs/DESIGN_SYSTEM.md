@@ -1,7 +1,12 @@
 <!-- PROJECT_STAGE: 8 -->
 <!-- DOCUMENT_STATUS: CURRENT -->
 
-# Milky Intelligence Design System
+# Design System
+
+The portfolio visual system, also called the Intelligent Systems visual
+language. The design language's previous name was retired in Stage 09C2
+(D-054) at the user's instruction; the palette and every rule below are
+unchanged. That was a terminology change, not a redesign.
 
 Canonical design language. Numeric values live in `src/styles/tokens.css`; this
 document explains the intent so future work stays coherent. Where the two
@@ -300,7 +305,7 @@ likely to drift into. None of them belong in this project.
 
 Before declaring visual work complete, ask:
 
-1. Does this still read as Milky Intelligence, or has it drifted toward a
+1. Does this still read as the portfolio visual system, or has it drifted toward a
    generic template?
 2. If the word "AI" were removed from every string, would the visual still
    communicate advanced systems engineering? It must.

@@ -1,5 +1,5 @@
 import { NAV_ITEMS } from "./nav-items";
-import SystemMarkImage from "./SystemMarkImage";
+import PortfolioMark from "./PortfolioMark";
 
 /**
  * The floating desktop bar (>= 900px). Purely presentational — the active
@@ -18,7 +18,7 @@ export default function DesktopNavigation({ activeId }: { activeId: string }) {
         className="site-nav__identity site-nav__identity--link"
         aria-label="Return to portfolio introduction"
       >
-        <SystemMarkImage />
+        <PortfolioMark />
         <span className="site-nav__wordmark">Engineering Lab</span>
       </a>
 

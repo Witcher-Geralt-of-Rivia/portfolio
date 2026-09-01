@@ -1,10 +1,10 @@
 {
-  "project": "Milky Intelligence Technical Portfolio",
+  "project": "Intelligent Systems Lab Technical Portfolio",
   "purpose": "Demonstrate engineering capability to freelance clients. Technical portfolio, not a personal site.",
   "currentStage": 8,
   "stage05Started": true,
-  "nextStage": "stage-09c2",
-  "nextStageTitle": "Stage 09C2 - Operations App Shell + Routing + Overview",
+  "nextStage": "stage-09c3",
+  "nextStageTitle": "Stage 09C3 - Operations CRM: Leads + Customers + Inbox",
   "frozenStages": [
     1,
     2,
@@ -16,7 +16,7 @@
     8
   ],
   "stageNames": {
-    "1": "Visual foundation - Milky Intelligence background",
+    "1": "Visual foundation - portfolio background system",
     "2": "Typography - Geist Sans and Geist Mono",
     "3": "Navigation and site shell",
     "4": "Hero and Intelligence Constellation",
@@ -38,7 +38,7 @@
     "browserStorageForSyntheticDemoData": true
   },
   "design": {
-    "identity": "Milky Intelligence",
+    "identity": "Intelligent Systems Lab",
     "primaryFont": "Geist Sans",
     "technicalFont": "Geist Mono",
     "fontPackage": "geist",
@@ -49,7 +49,14 @@
       "Prism"
     ],
     "auroraFields": 6,
-    "prismBeams": 2
+    "prismBeams": 2,
+    "logoSource": "logo.png (approved master, never modified)",
+    "derivedBrandAssets": [
+      "src/app/icon.png",
+      "src/app/apple-icon.png",
+      "public/brand/logo-96.png",
+      "public/brand/logo-192.png"
+    ]
   },
   "technology": {
     "framework": "Next.js",
@@ -73,12 +80,20 @@
       "src/demo-runtime/react/DemoRuntimeProvider.tsx",
       "src/demo-runtime/react/hooks.ts",
       "src/components/demos/DemoShell.tsx",
-      "src/components/demos/DemoResetControl.tsx"
+      "src/components/demos/DemoResetControl.tsx",
+      "src/demos/operations/ui/OperationsRoute.tsx",
+      "src/demos/operations/ui/OperationsProvider.tsx",
+      "src/demos/operations/ui/OperationsAppShell.tsx",
+      "src/demos/operations/ui/OperationsSidebar.tsx",
+      "src/demos/operations/ui/OperationsOverview.tsx",
+      "src/demos/operations/ui/OverviewPanels.tsx",
+      "src/demos/operations/ui/NotificationCenter.tsx"
     ]
   },
   "routes": [
     "/",
-    "/specimen"
+    "/specimen",
+    "/demos/operations"
   ],
   "navigationDestinations": [
     "Systems",
@@ -172,7 +187,7 @@
   "stage08Started": true,
   "stage09aComplete": true,
   "demoPlatform": {
-    "status": "09A foundation + Operations domain complete; no demo UI built",
+    "status": "09A foundation + Operations domain, shell and Overview; ten modules unbuilt",
     "routes": [
       "/demos/operations",
       "/demos/field",
@@ -202,5 +217,6 @@
     "operationsDomain": "built; docs/DEMO_OPERATIONS_IMPLEMENTATION.md"
   },
   "stage09bComplete": true,
-  "stage09c1Complete": true
+  "stage09c1Complete": true,
+  "stage09c2Complete": true
 }

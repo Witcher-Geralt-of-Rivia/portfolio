@@ -5,7 +5,7 @@
    never uses it.
 
    Everything here is expressed in existing tokens. The demos live in the
-   Milky Intelligence atmosphere and inherit its palette, type and radii; what
+   portfolio's visual system and inherit its palette, type and radii; what
    they do not inherit is the portfolio's own navigation, because a demo is a
    product and a product has one header.
    ===================================================================== */
@@ -70,7 +70,10 @@ body:has(.demo-shell) .site-nav {
 }
 
 .demo-chrome__back {
+  display: flex;
   flex: none;
+  align-items: center;
+  gap: 6px;
   padding: 4px 8px;
   border-radius: var(--radius-control);
   color: var(--text-secondary);
@@ -79,6 +82,15 @@ body:has(.demo-shell) .site-nav {
   letter-spacing: var(--tracking-technical);
   text-decoration: none;
   transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+/* The mark carries real transparency, so it needs no plate behind it on the
+   frosted bar. */
+.demo-chrome__mark {
+  display: block;
+  width: 20px;
+  height: 20px;
+  flex: none;
 }
 
 .demo-chrome__back:hover {
@@ -331,7 +343,11 @@ body:has(.demo-shell) .site-nav {
   display: none;
 }
 
-@media (max-width: 640px) {
+/* Wrapping starts at 860px rather than 640px. Stage 09C2 added the portfolio
+   mark beside the back link, which costs the row 26px; at 768px that left the
+   title 57px — four characters and an ellipsis. Giving the title its own row
+   is better than shrinking it past legibility. */
+@media (max-width: 860px) {
   /* "Reset demo data" is 135px of a 350px bar. The short form keeps Back and
      Reset on one row; the confirmation dialog still states in full what the
      control does. */

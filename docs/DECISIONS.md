@@ -11,7 +11,7 @@ Status values: `Accepted`, `Superseded`, `Reversed`.
 
 ---
 
-## D-001 — Milky Intelligence visual identity
+## D-001 — The portfolio visual identity
 
 Status: Accepted
 Stage: 01
@@ -218,7 +218,7 @@ Status: Accepted
 Stage: 03
 
 ### Decision
-`public/marks/system-mark.svg` — 890 bytes, viewBox `0 0 28 28`, four connected
+The Stage 03 mark — 890 bytes, viewBox `0 0 28 28`, four connected
 nodes plus a central hub. Referenced through a thin `SystemMarkImage` component
 using a plain `<img>`.
 
@@ -1322,3 +1322,81 @@ cannot quietly make it one.
 Formatting cents into "USD 24.00" is a presentation concern and belongs at the
 UI edge, not in the domain. No stored field anywhere in Operations may carry a
 value the clock can invalidate.
+
+---
+
+## D-054 — The approved logo is canonical, and the old design-language name is retired
+
+Status: Accepted
+Stage: 9C2
+
+### Decision
+`logo.png` at the repository root is the canonical approved portfolio logo,
+supplied by the user. It is source artwork: never overwritten, recompressed,
+cropped, recoloured or served. Deployable assets are derived from it by
+`qa/brand-derive.mjs`.
+
+The design language's previous name is retired. Neutral terminology is the
+"Intelligent Systems visual language" or simply the portfolio visual system;
+the site identity is "Intelligent Systems Lab", matching the production
+domain. The palette, tokens and every visual rule are unchanged.
+
+### Reason
+Both are explicit user instructions, and the second is deliberately narrow: a
+terminology change, not a redesign. CSS token names were left alone — renaming
+`--aurora-lavender` to satisfy a wording change would risk a regression across
+eight frozen stages for no gain.
+
+The logo replaces the Stage 03 four-node SVG mark, which is an approved
+exception to that stage's freeze. It suits the palette it is joining: a navy
+isometric core with sky, mint and lavender orbits, already the project's
+colours.
+
+Deriving rather than shipping the master matters. The master is 1254px and
+844 KB; the navigation needs 28px and the tab needs 256. `icon.png` is 256
+rather than the more usual 512 because the mark is a soft gradient that PNG
+compresses poorly — 512 costs 164 KB against 55 KB — and a 164 KB tab icon
+would be out of proportion in a project whose previous mark was 890 bytes.
+
+At 16px the fine detail dissolves and what survives is the silhouette and the
+colour identity; at 20px and above the mark is clearly itself. That is the
+stated objective and it was measured rather than assumed.
+
+### Consequence
+`qa/stage09c2-operations-ui.mjs` asserts the master's byte size, the presence
+of every derivative, that no `favicon.ico` shadows the new icon, that the
+retired name appears nowhere in the working tree, and that the old mark has no
+remaining references. The old mark file is deleted and the deployment smoke
+gate now asserts the new asset instead — a smoke test should check what the
+site actually serves.
+
+---
+
+## D-055 — The action queue leads with what is most urgent
+
+Status: Accepted
+Stage: 9C2
+
+### Decision
+The Overview action queue is ordered overdue payments, then open high-priority
+maintenance, then high-priority leads whose follow-up is due, then unread
+notifications. Within a category the oldest relevant timestamp comes first,
+with the entity id as a tie-break.
+
+### Reason
+Stage 09B froze the reverse of this, leading with unread notifications, and
+09C2 froze the order above. The two contradicted each other and the
+contradiction was visible the moment the screen rendered: the queue opened with
+six identical "Lead assigned" rows and the three overdue payments were pushed
+off the six-item list entirely. An action list whose first job is to bury the
+most urgent item is not doing its job.
+
+The within-category tie-break exists because a list that reshuffles between
+renders cannot be acted on, and because it makes the order assertable.
+
+### Consequence
+The queue labels carry the data that distinguishes their rows — an amount and
+a due date, a customer name — rather than a category that repeats. Raw entity
+ids stay in the model for the later stages that will link these rows to their
+records, and are not displayed: they are internal plumbing, not product
+content.

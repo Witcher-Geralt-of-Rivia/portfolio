@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Safe alternating-slot production deployment for the Milky Intelligence portfolio.
+    Safe alternating-slot production deployment for the Intelligent Systems Lab portfolio.
 
 .DESCRIPTION
     Production serves one of two release directories, never `.next`:
@@ -335,7 +335,7 @@ try {
     $smokeAssets["js"]   = ([regex]::Match($smokeHtml, '/_next/static/[^"]*\.js')).Value
     $smokeAssets["font sans"] = ([regex]::Match($smokeHtml, '/_next/static/media/Geist_Variable[^"]*\.woff2')).Value
     $smokeAssets["font mono"] = ([regex]::Match($smokeHtml, '/_next/static/media/GeistMono_Variable[^"]*\.woff2')).Value
-    $smokeAssets["system mark"] = "/marks/system-mark.svg"
+    $smokeAssets["portfolio mark"] = "/brand/logo-96.png"
     $smokeAssets["micro grain"] = "/textures/micro-grain.svg"
 
     $smokeFailed = @()
