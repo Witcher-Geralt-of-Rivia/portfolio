@@ -11,11 +11,12 @@ Everything below was read from the repository, not recalled from conversation.
 ```
 Stages 01-08   COMPLETE and FROZEN
 Deployment     LIVE at https://intelligent-systems-lab.duckdns.org
-Stage 09       NOT STARTED
+Stage 09       BLOCKED - 1 of 3 case studies verified, section unwired
 ```
 
 The next task is Stage 09 - Work / Selected Engineering Case Studies, filling
-`#work`. See `docs/NEXT_STAGE.md`.
+`#work`. It is blocked on content: one verified case study exists where three
+are required. See `docs/NEXT_STAGE.md` and `docs/CASE_STUDY_SOURCE_AUDIT.md`.
 
 ## Toolchain
 

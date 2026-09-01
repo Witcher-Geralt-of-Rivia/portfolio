@@ -11,6 +11,17 @@ import type { CaseConnection, CaseNode } from "@/content/case-studies";
  * labels stay real text at any width. The diagram is hidden from assistive
  * technology and the case supplies one written summary instead.
  */
+/**
+ * Which side of a node its hover note hangs from. The note has a fixed maximum
+ * width, so on the outer columns a centred note would leave the panel; anchoring
+ * it inward keeps every note on the canvas without measuring anything at runtime.
+ */
+function noteAnchor(x: number): "start" | "middle" | "end" {
+  if (x <= 30) return "start";
+  if (x >= 70) return "end";
+  return "middle";
+}
+
 export default function CaseArchitecture({
   summary,
   nodes,
@@ -54,7 +65,14 @@ export default function CaseArchitecture({
           >
             <span className="warch__node-label">{node.label}</span>
             <span className="warch__node-code">{node.code}</span>
-            {node.note && <span className="warch__node-note">{node.note}</span>}
+            {node.note && (
+              /* The note is a fixed-width popover. Centred on an edge column it
+                 would hang outside the panel, so it anchors to whichever side of
+                 the node keeps it inside the canvas. */
+              <span className={`warch__node-note warch__node-note--${noteAnchor(node.x)}`}>
+                {node.note}
+              </span>
+            )}
           </div>
         ))}
       </div>

@@ -628,7 +628,14 @@
 
   .windex__number { grid-area: number; }
   .windex__label { grid-area: label; white-space: normal; }
-  .windex__category { grid-area: category; }
+
+  /* On its own row the category has no reason to stay on one line, and a long
+     stack list overruns the card at 360px if it does. */
+  .windex__category {
+    grid-area: category;
+    line-height: 1.5;
+    white-space: normal;
+  }
 }
 
 @media (max-width: 699px) {
@@ -684,4 +691,57 @@
   .windex__link {
     transition: none;
   }
+}
+
+/* --- Case marks: number and disclosure ----------------------------------- */
+
+.wcase__marks {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+}
+
+/* The disclosure sits beside the case number, at the top of the case, so it
+   is read before the title rather than after the claims. */
+.wcase__disclosure {
+  padding: 4px 10px;
+  border: 1px solid var(--line-subtle);
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.6);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  line-height: 1.4;
+  letter-spacing: 0.09em;
+}
+
+.wresult__evidence-title {
+  margin-top: 16px;
+  margin-bottom: 10px;
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: var(--weight-ui);
+  letter-spacing: 0.1em;
+}
+
+.wresult__metrics {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
+/* The hover note anchors inward on the outer columns so a fixed-width popover
+   never hangs outside the architecture panel. See noteAnchor() in
+   CaseArchitecture.tsx, which picks the side from the node's own x. */
+.warch__node-note--start {
+  left: 0;
+  transform: translateX(0);
+}
+
+.warch__node-note--end {
+  left: auto;
+  right: 0;
+  transform: translateX(0);
 }

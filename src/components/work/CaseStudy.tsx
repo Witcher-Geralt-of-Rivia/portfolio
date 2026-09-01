@@ -29,7 +29,12 @@ export default function CaseStudy({
       aria-labelledby={`${study.id}-title`}
     >
       <header className="wcase__head">
-        <p className="wcase__number">CASE / {number}</p>
+        <div className="wcase__marks">
+          <p className="wcase__number">CASE / {number}</p>
+          {/* Stated on the case itself, not in a caption: an internal project
+              must never be able to read as delivered client work. */}
+          <p className="wcase__disclosure">{study.disclosure}</p>
+        </div>
         <h3 id={`${study.id}-title`} className="wcase__title">
           {study.title}
         </h3>

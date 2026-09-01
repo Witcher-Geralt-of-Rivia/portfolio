@@ -7,9 +7,11 @@ Stage 09 publishes case studies about real engineering work. Before any of it
 can be written, the sources have to exist and be checked. This document records
 what was searched, what was found, and what is still needed.
 
-**Result: 0 of 3 required case studies are publishable. Stage 09 is BLOCKED.**
+**Result: 1 of 3 required case studies are publishable. Stage 09 is BLOCKED.**
 
-The `#work` placeholder stays live and `currentStage` stays at 8.
+The `#work` placeholder stays live and `currentStage` stays at 8. Candidate 04
+was approved by the user on 2026-08-30 and is now published as Case 01; two
+further case studies are still required before the section can render.
 
 ## What was searched
 
@@ -96,18 +98,26 @@ safe public facts:    the problem, the architecture, the decisions and the
                       repository
 missing facts:        none factually - but this is the portfolio describing
                       itself, not delivered client work
-publishable:          NO - pending an explicit decision by the user
+publishable:          YES - approved by the user on 2026-08-30
+published as:         case-01, "Internal Production Delivery System"
+condition:            must carry the visible disclosure INTERNAL ENGINEERING
+                      CASE STUDY and must never read as client work; the
+                      measurements are presented as test evidence and are
+                      never restated as a percentage or reliability claim
 ```
 
-This is the only body of genuinely verified engineering evidence available. It
-is recorded here because it is the honest answer to "is there anything real to
-show?", not because it should be published. Whether a self-referential case
-study belongs in a Selected Work section is a content decision for the user,
-not one to make on their behalf.
+This was the only body of genuinely verified engineering evidence available.
+Whether a self-referential case study belongs in a Selected Work section was a
+content decision for the user, and they made it: the case is published, on the
+condition that it states on its own surface that it is internal work.
+
+The approved content added no technologies beyond those already documented, and
+the three measurements are rendered under a TEST EVIDENCE heading rather than as
+outcome claims. `qa/stage09-render-safety.mjs` asserts both conditions.
 
 ## What is needed to unblock Stage 09
 
-Three case studies, each requiring the following. Metrics are optional; a case
+Two further case studies, each requiring the following. Metrics are optional; a case
 study without numbers is acceptable and preferred over an invented one.
 
 ```
@@ -141,14 +151,21 @@ The system is built and waiting for content:
 
 ```
 src/content/case-studies.ts        typed model, render-safety filter,
-                                   three empty entries marked status: "draft"
+                                   case-01 verified, two entries still empty
+                                   and marked status: "draft"
 src/components/work/               section, index, case study, architecture,
                                    decisions and result renderers
 src/styles/work.css                section styling
-qa/stage09-render-safety.mjs       proves a draft can never reach the page
+qa/stage09-render-safety.mjs       proves a draft can never reach the page,
+                                   and that case-01 stays disclosed as internal
 ```
 
 Nothing is wired into `src/app/page.tsx`. The `#work` placeholder renders
-exactly as before, and production is unchanged. When verified content arrives,
-promoting a case study means setting `status: "verified"` and adding one import
-and one line to `page.tsx`.
+exactly as before, and production is unchanged: `sectionIsPublishable()` still
+returns false because one verified case is below the minimum of three. Case 01
+was rendered locally to measure the stylesheet, then unwired again; it has never
+been deployed.
+
+When the two remaining case studies arrive, promoting the section means setting
+their `status` to `"verified"` and adding one import and one line to
+`page.tsx`.

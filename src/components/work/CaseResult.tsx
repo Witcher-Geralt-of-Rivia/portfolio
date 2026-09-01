@@ -24,6 +24,10 @@ export default function CaseResult({ study }: { study: CaseStudy }) {
       </ul>
 
       {metrics.length > 0 && (
+        <>
+        {/* Labelled as evidence, not as an outcome claim. These are observed
+            request counts; they are never restated as a percentage. */}
+        <p className="wresult__evidence-title">TEST EVIDENCE</p>
         <dl className="wresult__metrics">
           {metrics.map((metric) => (
             <div key={metric.label} className="wresult__metric">
@@ -32,6 +36,7 @@ export default function CaseResult({ study }: { study: CaseStudy }) {
             </div>
           ))}
         </dl>
+        </>
       )}
     </div>
   );
