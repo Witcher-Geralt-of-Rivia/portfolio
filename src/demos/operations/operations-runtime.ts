@@ -69,6 +69,7 @@ export const DEFAULT_OPERATIONS_ROLE = DEFAULT_ROLE;
 /* --- domain surface ------------------------------------------------- */
 
 export * as leads from "./services/leads";
+export * as leadWorkflows from "./services/lead-workflows";
 export * as customers from "./services/customers";
 export * as reservations from "./services/reservations";
 export * as contracts from "./services/contracts";
@@ -81,6 +82,7 @@ export * as automations from "./services/automations";
 export * as derive from "./selectors/derive";
 export * as overview from "./selectors/overview";
 export * as queries from "./selectors/queries";
+export * as leadsList from "./selectors/leads-list";
 
 export * as permissions from "./permissions";
 export * from "./constants";

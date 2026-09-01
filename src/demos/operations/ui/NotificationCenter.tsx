@@ -23,6 +23,7 @@ import type { Notification } from "../types";
 import { IconBell } from "./icons";
 import { useOperations } from "./OperationsProvider";
 import { canSeeNotification } from "./overview-policy";
+import { lockPageScroll } from "./scroll-lock";
 
 const PANEL_ID = "ops-notifications-panel";
 
@@ -85,11 +86,15 @@ export default function NotificationCenter() {
       document.documentElement.style.setProperty("--ops-sheet-top", `${Math.round(bottom + 8)}px`);
     };
 
+    /* The page behind a sheet should not scroll with it. Taken through the
+       shared counter rather than written directly: the Leads module puts its
+       own sheets on the same page, and whichever closed first used to restore
+       scrolling underneath one that was still open. */
+    let releaseScroll: (() => void) | null = null;
     if (sheet) {
       measure();
       window.addEventListener("resize", measure);
-      /* The page behind a sheet should not scroll with it. */
-      document.body.style.overflow = "hidden";
+      releaseScroll = lockPageScroll();
     }
 
     document.addEventListener("keydown", onKey);
@@ -99,7 +104,7 @@ export default function NotificationCenter() {
       document.removeEventListener("pointerdown", onPointer);
       if (sheet) {
         window.removeEventListener("resize", measure);
-        document.body.style.overflow = "";
+        releaseScroll?.();
       }
     };
   }, [open, close]);

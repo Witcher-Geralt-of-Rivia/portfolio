@@ -232,7 +232,12 @@ const readOverview = async (p = page) =>
   check("the default actor is Morgan Reed, Admin", o.actor === "Morgan Reed" && o.role === "Admin",
     `${o.actor} / ${o.role}`);
   check("all eleven modules are listed for Admin", o.modules.length === 11, String(o.modules.length));
-  check("only Overview is interactive in this build", JSON.stringify(o.interactive) === '["Overview"]',
+  /* This asserts temporary build state, and it moves each time a module is
+     built: 09C2 shipped Overview alone, 09C3.1 added Leads. By 09C5 every
+     module is interactive and the `implemented` flag that drives this — and
+     this check with it — is deleted. */
+  check("only the built modules are interactive",
+    JSON.stringify(o.interactive) === '["Overview","Leads"]',
     JSON.stringify(o.interactive));
 }
 

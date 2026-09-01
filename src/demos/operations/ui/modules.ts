@@ -24,6 +24,8 @@ export type ModuleRoute = {
   label: string;
   href: string;
   group: ModuleGroup;
+  /** The top bar's secondary line for this module. */
+  context: string;
   /** TEMPORARY: false until that module's stage builds it. */
   implemented: boolean;
 };
@@ -35,20 +37,20 @@ const ROOT = "/demos/operations";
  * freezes. `Overview` sits alone above the groups.
  */
 export const MODULE_ROUTES: readonly ModuleRoute[] = [
-  { id: "Overview", label: "Overview", href: ROOT, group: "primary", implemented: true },
+  { id: "Overview", label: "Overview", href: ROOT, group: "primary", context: "Rental operations at a glance", implemented: true },
 
-  { id: "Leads", label: "Leads", href: `${ROOT}/leads`, group: "Customer operations", implemented: false },
-  { id: "Customers", label: "Customers", href: `${ROOT}/customers`, group: "Customer operations", implemented: false },
-  { id: "Reservations", label: "Reservations", href: `${ROOT}/reservations`, group: "Customer operations", implemented: false },
-  { id: "Contracts", label: "Contracts", href: `${ROOT}/contracts`, group: "Customer operations", implemented: false },
+  { id: "Leads", label: "Leads", href: `${ROOT}/leads`, group: "Customer operations", context: "CRM pipeline", implemented: true },
+  { id: "Customers", label: "Customers", href: `${ROOT}/customers`, group: "Customer operations", context: "Accounts and history", implemented: false },
+  { id: "Reservations", label: "Reservations", href: `${ROOT}/reservations`, group: "Customer operations", context: "Bookings and availability", implemented: false },
+  { id: "Contracts", label: "Contracts", href: `${ROOT}/contracts`, group: "Customer operations", context: "Active and closed agreements", implemented: false },
 
-  { id: "Fleet", label: "Fleet", href: `${ROOT}/fleet`, group: "Operations", implemented: false },
-  { id: "Maintenance", label: "Maintenance", href: `${ROOT}/maintenance`, group: "Operations", implemented: false },
-  { id: "Payments", label: "Payments", href: `${ROOT}/payments`, group: "Operations", implemented: false },
+  { id: "Fleet", label: "Fleet", href: `${ROOT}/fleet`, group: "Operations", context: "Vehicles and status", implemented: false },
+  { id: "Maintenance", label: "Maintenance", href: `${ROOT}/maintenance`, group: "Operations", context: "Work orders", implemented: false },
+  { id: "Payments", label: "Payments", href: `${ROOT}/payments`, group: "Operations", context: "Balances and settlement", implemented: false },
 
-  { id: "Automations", label: "Automations", href: `${ROOT}/automations`, group: "System", implemented: false },
-  { id: "Inbox", label: "Inbox", href: `${ROOT}/inbox`, group: "System", implemented: false },
-  { id: "Reports", label: "Reports", href: `${ROOT}/reports`, group: "System", implemented: false },
+  { id: "Automations", label: "Automations", href: `${ROOT}/automations`, group: "System", context: "Rules and runs", implemented: false },
+  { id: "Inbox", label: "Inbox", href: `${ROOT}/inbox`, group: "System", context: "Conversations", implemented: false },
+  { id: "Reports", label: "Reports", href: `${ROOT}/reports`, group: "System", context: "Derived figures", implemented: false },
 ];
 
 export const MODULE_GROUPS: readonly ModuleGroup[] = [
@@ -66,4 +68,19 @@ export function routeFor(id: ModuleName): ModuleRoute {
   const hit = MODULE_ROUTES.find((m) => m.id === id);
   if (!hit) throw new Error(`No route configured for module "${id}".`);
   return hit;
+}
+
+/**
+ * The module a pathname belongs to.
+ *
+ * The shell reads this instead of being told by each page, so the URL is the
+ * one thing that decides which navigation entry is current and what the top
+ * bar says. Longest match wins, or `/demos/operations/leads` would resolve to
+ * Overview, whose href is a prefix of every other module's.
+ */
+export function routeForPath(pathname: string): ModuleRoute {
+  const matches = MODULE_ROUTES.filter(
+    (m) => pathname === m.href || pathname.startsWith(`${m.href}/`)
+  ).sort((a, b) => b.href.length - a.href.length);
+  return matches[0] ?? routeFor("Overview");
 }

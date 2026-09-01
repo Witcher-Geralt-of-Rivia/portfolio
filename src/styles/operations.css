@@ -27,6 +27,12 @@
   --ops-lavender-soft: rgba(178, 164, 235, 0.2);
   --ops-mint-soft: rgba(120, 200, 165, 0.22);
   --ops-peach-soft: rgba(232, 165, 120, 0.22);
+  /* Added for the lead pipeline (09C3.1). Qualified and Won are the two
+     stages it is expensive to confuse, so they do not share a tone; Lost is
+     deliberately colourless rather than red, because a lost prospect is a
+     normal outcome and not a fault. */
+  --ops-aqua-soft: rgba(120, 195, 200, 0.22);
+  --ops-slate-soft: rgba(120, 130, 155, 0.16);
   --ops-sidebar: 240px;
   --ops-topbar: 66px;
 
@@ -1239,5 +1245,959 @@
     border: 0;
     background: rgba(30, 38, 60, 0.28);
     inset: 0;
+  }
+}
+
+/* =====================================================================
+   LEADS (Stage 09C3.1)
+   ===================================================================== */
+
+.ops-leads {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* --- toolbar ---------------------------------------------------------- */
+
+.ops-leads__toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ops-leads__lead-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.ops-leads__search {
+  flex: 1 1 220px;
+  min-width: 0;
+}
+
+.ops-input,
+.ops-select {
+  width: 100%;
+  padding: 8px 11px;
+  border: 1px solid var(--ops-line);
+  border-radius: 9px;
+  background: #fff;
+  color: var(--ops-ink);
+  font-family: var(--font-sans);
+  font-size: 13px;
+}
+
+.ops-select {
+  cursor: pointer;
+}
+
+.ops-input:focus-visible,
+.ops-select:focus-visible {
+  outline: 2px solid var(--ops-sky);
+  outline-offset: 1px;
+}
+
+.ops-input::placeholder {
+  color: var(--ops-ink-3);
+}
+
+/* The Filters button is the phone's way in; above 768px the controls are
+   inline and a button that opens a sheet would be a second route to the same
+   three selects. */
+.ops-leads__filter-button {
+  display: none;
+  align-items: center;
+  gap: 6px;
+}
+
+.ops-leads__filter-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  border-radius: 9px;
+  background: var(--ops-sky-strong);
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+
+.ops-leads__filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.ops-field {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+
+.ops-field--stacked {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 5px;
+}
+
+.ops-field__label {
+  color: var(--ops-ink-3);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.ops-field__pair {
+  display: flex;
+  gap: 6px;
+}
+
+.ops-field__hint {
+  color: var(--ops-ink-3);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.ops-sort-dir {
+  padding: 8px 10px;
+}
+
+.ops-leads__result {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  min-height: 18px;
+}
+
+.ops-leads__count {
+  color: var(--ops-ink-2);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+}
+
+.ops-link-button {
+  border: 0;
+  background: none;
+  padding: 0;
+  color: var(--ops-sky-strong);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* --- buttons ---------------------------------------------------------- */
+
+.ops-button--primary {
+  border-color: transparent;
+  background: var(--ops-sky-strong);
+  color: #fff;
+}
+
+.ops-button--quiet {
+  background: var(--ops-surface-quiet);
+}
+
+.ops-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ops-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--ops-line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ops-ink-2);
+  font-size: 17px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.ops-icon-button:focus-visible,
+.ops-link-button:focus-visible {
+  outline: 2px solid var(--ops-sky);
+  outline-offset: 2px;
+}
+
+/* --- table ------------------------------------------------------------ */
+
+.ops-leads__table-wrap {
+  border: 1px solid var(--ops-line);
+  border-radius: 12px;
+  background: var(--ops-surface);
+  padding: 4px 14px 6px;
+  overflow-x: auto;
+}
+
+.ops-leads__table {
+  min-width: 720px;
+}
+
+.ops-leads__table th,
+.ops-leads__table td {
+  padding-right: 12px;
+}
+
+.ops-th-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+}
+
+.ops-th-sort:focus-visible {
+  outline: 2px solid var(--ops-sky);
+  outline-offset: 3px;
+}
+
+.ops-th-sort--active {
+  color: var(--ops-ink);
+}
+
+.ops-th-sort__mark {
+  font-size: 9px;
+  opacity: 0.7;
+}
+
+/* The shared table drops the rule under its last row, but that rule only
+   reaches `td` — leaving a stub of border under the final lead's name. */
+.ops-leads__table tr:last-child th.ops-leads__name-cell {
+  border-bottom: 0;
+}
+
+.ops-leads__row:hover {
+  background: var(--ops-surface-quiet);
+}
+
+.ops-leads__row--selected {
+  background: var(--ops-sky-soft);
+}
+
+/* Qualified past `.ops-table th`, which is written for the *column* headers
+   and sets monospace 10px uppercase with no top padding. A row header is a
+   cell of data, and inheriting the header styling left every lead name small,
+   letter-spaced and sitting ten pixels above the row it belongs to. */
+.ops-leads__table th.ops-leads__name-cell {
+  padding: 10px 12px 10px 0;
+  border-bottom: 1px solid var(--ops-line-soft);
+  color: var(--ops-ink);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: normal;
+  text-transform: none;
+  vertical-align: top;
+}
+
+.ops-leads__name {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ops-ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ops-leads__name:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.ops-leads__name:focus-visible {
+  outline: 2px solid var(--ops-sky);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.ops-leads__unassigned,
+.ops-leads__none {
+  color: var(--ops-ink-3);
+}
+
+.ops-leads__date {
+  white-space: nowrap;
+}
+
+/* --- stage and priority marks ----------------------------------------- */
+
+.ops-pill--aqua { background: var(--ops-aqua-soft); color: #1f6068; }
+.ops-pill--slate { background: var(--ops-slate-soft); color: #4a4f61; }
+
+/* Priority is a dot and a word. A red badge on a third of the table would
+   make urgency the loudest thing on a screen about prospects. */
+.ops-prio {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.ops-prio__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
+}
+
+.ops-prio--quiet { color: var(--ops-ink-3); }
+.ops-prio--normal { color: var(--ops-ink-2); }
+.ops-prio--high { color: #9a5322; }
+
+/* --- mobile cards ----------------------------------------------------- */
+
+.ops-leads__cards {
+  display: none;
+  flex-direction: column;
+  gap: 8px;
+  list-style: none;
+  padding: 0;
+}
+
+.ops-leadcard {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 13px;
+  border: 1px solid var(--ops-line);
+  border-radius: 12px;
+  background: var(--ops-surface);
+  font-family: var(--font-sans);
+  text-align: left;
+  cursor: pointer;
+}
+
+.ops-leadcard--selected {
+  border-color: var(--ops-sky);
+  background: var(--ops-sky-soft);
+}
+
+.ops-leadcard:focus-visible {
+  outline: 2px solid var(--ops-sky);
+  outline-offset: 2px;
+}
+
+.ops-leadcard__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.ops-leadcard__name {
+  color: var(--ops-ink);
+  font-size: 14px;
+}
+
+.ops-leadcard__meta,
+.ops-leadcard__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--ops-ink-2);
+  font-size: 12px;
+}
+
+.ops-leadcard__foot {
+  padding-top: 8px;
+  border-top: 1px solid var(--ops-line-soft);
+  color: var(--ops-ink-3);
+}
+
+.ops-leadcard__follow-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* --- pagination ------------------------------------------------------- */
+
+.ops-pager {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.ops-pager__range,
+.ops-pager__page {
+  color: var(--ops-ink-3);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.ops-pager__controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ops-pager__size {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.ops-pager__size-label {
+  color: var(--ops-ink-3);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ops-pager__size .ops-select {
+  width: auto;
+  padding: 6px 8px;
+}
+
+/* --- empty and unavailable -------------------------------------------- */
+
+.ops-leads__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 34px 20px;
+  border: 1px dashed var(--ops-line);
+  border-radius: 12px;
+  background: var(--ops-surface-quiet);
+}
+
+.ops-leads__empty-text {
+  color: var(--ops-ink-2);
+  font-size: 14px;
+}
+
+.ops-unavailable {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 62ch;
+  padding: 26px 22px;
+  border: 1px solid var(--ops-line);
+  border-radius: 12px;
+  background: var(--ops-surface);
+}
+
+.ops-unavailable__eyebrow {
+  color: var(--ops-ink-3);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.ops-unavailable__text {
+  color: var(--ops-ink);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.ops-unavailable__note {
+  color: var(--ops-ink-3);
+  font-size: 12.5px;
+  line-height: 1.6;
+}
+
+/* --- overlays --------------------------------------------------------- */
+
+/* The project's reset sets `* { margin: 0 }`, which beats the user agent's
+   `margin: auto` on a modal dialog and pins it to the top-left corner. Each
+   variant restates the margins it needs. The user agent also caps a dialog at
+   `calc(100% - 6px - 2em)`, so the sizes below undo that too. */
+.ops-overlay {
+  max-width: none;
+  max-height: none;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  overscroll-behavior: contain;
+}
+
+.ops-overlay::backdrop {
+  background: rgba(23, 26, 36, 0.32);
+}
+
+.ops-overlay__panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: 100%;
+  border-radius: 14px;
+  background: var(--ops-surface);
+  box-shadow: 0 24px 60px rgba(23, 26, 36, 0.18);
+  overflow: hidden;
+}
+
+/* Beside the table, not over it: the list stays readable so the record keeps
+   its context. */
+.ops-overlay--drawer {
+  margin: 0 0 0 auto;
+  width: min(460px, 100vw);
+  height: 100dvh;
+}
+
+.ops-overlay--drawer .ops-overlay__panel {
+  border-radius: 0;
+}
+
+.ops-overlay--sheet {
+  margin: auto;
+  width: min(560px, calc(100vw - 32px));
+  max-height: min(86dvh, 720px);
+  height: auto;
+}
+
+.ops-overlay--dialog {
+  margin: auto;
+  width: min(430px, calc(100vw - 32px));
+  height: auto;
+}
+
+.ops-sheet__head,
+.ops-detail__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 15px 16px;
+  border-bottom: 1px solid var(--ops-line-soft);
+}
+
+.ops-sheet__title {
+  color: var(--ops-ink);
+  font-size: 15px;
+  font-weight: var(--weight-ui, 500);
+}
+
+.ops-sheet__body {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.ops-sheet__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--ops-line-soft);
+  background: var(--ops-surface-quiet);
+}
+
+.ops-sheet__result {
+  color: var(--ops-ink-3);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+/* --- detail ----------------------------------------------------------- */
+
+.ops-detail__identity {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.ops-detail__title {
+  color: var(--ops-ink);
+  font-size: 17px;
+  line-height: 1.25;
+}
+
+.ops-detail__title:focus-visible {
+  outline: 2px solid var(--ops-sky);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
+/* The name pool repeats every twenty leads, so the id is what tells three
+   identically named records apart. Quiet, but present. */
+.ops-detail__id {
+  color: var(--ops-ink-3);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+}
+
+.ops-detail__marks {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 3px;
+  color: var(--ops-ink-2);
+  font-size: 12px;
+}
+
+.ops-detail__interest {
+  color: var(--ops-ink-3);
+}
+
+.ops-detail__body {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 16px;
+  overflow-y: auto;
+  flex: 1 1 auto;
+}
+
+.ops-detail__banner {
+  padding: 9px 11px;
+  border-radius: 9px;
+  background: var(--ops-slate-soft);
+  color: var(--ops-ink-2);
+  font-size: 12.5px;
+}
+
+.ops-detail__section {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.ops-detail__section-title {
+  color: var(--ops-ink-3);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.ops-detail__missing {
+  color: var(--ops-ink-2);
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+
+.ops-detail__missing code {
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.ops-facts {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.ops-facts__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.ops-facts__label {
+  flex: none;
+  color: var(--ops-ink-3);
+  font-size: 12.5px;
+}
+
+.ops-facts__value {
+  color: var(--ops-ink);
+  font-size: 13px;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.ops-brief__head {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+/* Names where the brief comes from without a paragraph of disclaimer. */
+.ops-assist {
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: var(--ops-lavender-soft);
+  color: #4c4179;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.09em;
+}
+
+.ops-brief__summary {
+  color: var(--ops-ink);
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+
+.ops-brief__action {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  padding-top: 3px;
+}
+
+.ops-brief__action-label {
+  color: var(--ops-ink-3);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ops-brief__action-value {
+  color: var(--ops-ink);
+  font-size: 13px;
+  font-weight: var(--weight-ui, 500);
+}
+
+.ops-activity {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  list-style: none;
+  padding: 0;
+}
+
+.ops-activity__item {
+  padding-left: 11px;
+  border-left: 2px solid var(--ops-line);
+}
+
+.ops-activity__summary {
+  color: var(--ops-ink);
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.ops-activity__meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+  color: var(--ops-ink-3);
+  font-size: 11px;
+}
+
+.ops-activity__actor {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+}
+
+.ops-detail__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  padding: 13px 16px;
+  border-top: 1px solid var(--ops-line-soft);
+  background: var(--ops-surface-quiet);
+}
+
+.ops-detail__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ops-detail__converted {
+  color: var(--ops-ink-2);
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+/* --- form and confirm -------------------------------------------------- */
+
+.ops-form {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  max-height: 100%;
+}
+
+.ops-form__note {
+  padding-top: 2px;
+}
+
+.ops-form__foot {
+  justify-content: flex-end;
+}
+
+.ops-confirm .ops-overlay__panel {
+  gap: 11px;
+  padding: 20px;
+}
+
+.ops-confirm__title {
+  color: var(--ops-ink);
+  font-size: 16px;
+  line-height: 1.35;
+}
+
+.ops-confirm__subject {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  color: var(--ops-ink);
+  font-size: 13.5px;
+}
+
+.ops-confirm__id {
+  color: var(--ops-ink-3);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+}
+
+.ops-confirm__body {
+  color: var(--ops-ink-2);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.ops-confirm__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+.ops-alert {
+  padding: 9px 11px;
+  border-radius: 9px;
+  background: var(--ops-peach-soft);
+  color: #7a3f18;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+/* --- skeletons -------------------------------------------------------- */
+
+.ops-skeleton--table {
+  height: 340px;
+  border-radius: 8px;
+}
+
+.ops-skeleton--cards {
+  height: 260px;
+  border-radius: 12px;
+}
+
+.ops-skeleton--line {
+  height: 34px;
+  border-radius: 7px;
+}
+
+/* --- responsive ------------------------------------------------------- */
+
+/* The table loses its least distinguishing column before it loses legibility.
+   Source is stated again in the detail, so nothing becomes unreachable. */
+@media (max-width: 1179px) {
+  .ops-col--source {
+    display: none;
+  }
+
+  .ops-leads__table {
+    min-width: 620px;
+  }
+}
+
+@media (max-width: 767px) {
+  /* One list presentation at a time. `display: none` keeps the hidden one out
+     of the accessibility tree as well as off the screen, so a screen reader
+     is never read the same forty-eight records twice. */
+  .ops-leads__table-wrap {
+    display: none;
+  }
+
+  .ops-leads__cards {
+    display: flex;
+  }
+
+  .ops-leads__filters {
+    display: none;
+  }
+
+  .ops-leads__filter-button {
+    display: inline-flex;
+  }
+
+  .ops-leads__lead-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "search search"
+      "filters new";
+    gap: 8px;
+  }
+
+  .ops-leads__search {
+    grid-area: search;
+  }
+
+  .ops-leads__filter-button {
+    grid-area: filters;
+    justify-content: center;
+  }
+
+  .ops-leads__lead-row .ops-button--primary {
+    grid-area: new;
+  }
+
+  /* Full surface rather than a 460px drawer inside a 390px screen. */
+  .ops-overlay--drawer,
+  .ops-overlay--sheet {
+    margin: 0;
+    width: 100vw;
+    max-width: 100vw;
+    height: 100dvh;
+    max-height: 100dvh;
+  }
+
+  .ops-overlay--drawer .ops-overlay__panel,
+  .ops-overlay--sheet .ops-overlay__panel {
+    border-radius: 0;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .ops-overlay--dialog {
+    width: calc(100vw - 24px);
+  }
+
+  .ops-pager {
+    justify-content: center;
+  }
+
+  .ops-pager__range {
+    width: 100%;
+    text-align: center;
   }
 }

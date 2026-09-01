@@ -1614,3 +1614,204 @@ nothing links to them from the site, and `currentStage` stays at 8.
 The next task is blocked, deliberately, on a human looking at the live URL.
 Deployment used `npm run deploy:safe` and the shared host's other application
 was verified healthy afterwards.
+
+---
+
+## D-062 — Stage 09C3 is built one module at a time
+
+Status: Accepted
+Stage: 9C3.1
+
+### Decision
+The 09C3 umbrella — Leads, Customers and Inbox — is built as three stages:
+09C3.1 Leads, 09C3.2 Customers, 09C3.3 Inbox and the integrated CRM workflow.
+The scope of 09C3 is unchanged; only its sequencing is.
+
+### Reason
+Leads is the module that establishes the patterns the others reuse: a data
+table, a mobile record list, search, filters, sort, pagination, a detail
+drawer, forms, confirmations, URL-driven selection and mutation feedback.
+Building three screens before any of those patterns had been reviewed would
+mean discovering a problem in the pattern three times over — the same argument
+D-061 makes about the shell, one level down.
+
+### Consequence
+Each sub-stage ends the way 09C2.1 did: local QA, a safe deployment, and a stop
+for external review before the next begins. `docs/NEXT_STAGE.md` names 09C3.2
+as the next task and records that it is blocked until Leads has been reviewed.
+
+---
+
+## D-063 — Mutations wake the automation rules through a workflow layer
+
+Status: Accepted
+Stage: 9C3.1
+
+### Decision
+`src/demos/operations/services/lead-workflows.ts` runs a lead mutation, collects
+the domain events it published on the runtime's event bus, and hands them to
+`processEvents`. The Leads screen calls these workflows rather than the bare
+services wherever a rule is meant to fire.
+
+### Reason
+The rules were not running at all.
+
+The lead services build the correct domain events and hand them to
+`runtime.commit`, which publishes them. `processEvents` in `automations.ts`
+says of itself: *"Called by workflows after the mutation that produced the
+events."* No workflow existed, `processEvents` had no caller outside its own
+module, and the runtime's event bus — built for exactly this — had no
+subscribers. So creating a website lead never assigned it, and qualifying a
+lead never set a follow-up date, both of which the frozen 09B contract
+requires.
+
+The QA harness appeared to prove otherwise because it hand-wrote the events
+itself, with invented ids (`"e1"`, `"e2"`), and called `processEvents`
+directly. It was testing the rules, correctly, while the path production would
+take did not exist.
+
+Collecting from the bus rather than changing the services is what keeps the
+change small: no service signature moves, no existing caller breaks, and the
+rules stay entirely in `automations.ts`. A screen asks for "this mutation and
+whatever it sets off" without knowing what that is.
+
+### Consequence
+Creating a Website lead now assigns it to a sales agent and raises a
+notification; qualifying a lead sets the follow-up two logical days out and
+raises another. Both are visible in the product immediately, and both appear in
+the lead's activity.
+
+The collector is unsubscribed before the rules run, so the rules' own commits
+are not fed back in. The bus is per-runtime rather than per-caller, so two
+mutations genuinely in flight together would each collect the other's events;
+every caller is a control that disables itself while its own mutation is
+pending, and the module says so rather than leaving it to be discovered.
+
+---
+
+## D-064 — The lead domain gained the guards the screen would otherwise have faked
+
+Status: Accepted
+Stage: 9C3.1
+
+### Decision
+`services/leads.ts` now refuses to edit, restage or reassign an archived lead,
+refuses to restage a converted one, and records an audit entry when a lead is
+edited. `UpdateLeadInput` accepts `source`. `services/context.ts` gained
+`read.actors`.
+
+### Reason
+Four gaps, each of which would otherwise have been papered over by a hidden
+button:
+
+- **Archived leads were mutable.** Only conversion refused them. A screen that
+  merely hides the controls is the pattern `permissions.ts` explicitly warns
+  against: a rule enforced by a hidden button is not enforced.
+- **A converted lead could be moved back down the pipeline.** `changeLeadStage`
+  refused Won so that a Won lead always has a customer behind it, and then
+  allowed the same contradiction from the other side — a Won lead with a live
+  `convertedCustomerId` could be set back to New.
+- **Editing was not audited**, while every other lead mutation was. The detail
+  drawer's activity was silent about a change the visitor had just made and
+  could see in the fields above it.
+- **Source could not be corrected.** Recording where a lead came from is
+  ordinary record-keeping.
+
+### Consequence
+The audit entry lists only the fields that actually moved, so resubmitting a
+form unchanged does not add noise to the activity feed.
+
+Making `source` editable does **not** re-run the website assignment rule, and
+not because anything checks for it: the rule is triggered by
+`lead.created.website`, and an edit emits no domain event at all. The guarantee
+is structural rather than a condition someone has to remember to write.
+
+---
+
+## D-065 — A lead reaches Won by being converted, and the menu says so
+
+Status: Accepted
+Stage: 9C3.1
+
+### Decision
+The stage control offers New, Contacted, Qualified, Proposal and Lost. Won is
+absent. A lead reaches Won through **Convert to customer**, which creates the
+customer and closes the lead in one commit.
+
+### Reason
+The domain already refused Won as a manual stage change, so offering it would
+have been a menu item that exists to fail. The rule behind that refusal is the
+one worth stating: a Won lead with no customer behind it is a contradiction the
+product would then have to explain.
+
+This is product interaction policy, not a schema change. `LeadStage` still
+contains Won, because that is what a converted lead is.
+
+### Consequence
+The Convert action is withdrawn once a lead is converted, and the drawer says
+where the lead ended up instead. The domain still raises CONFLICT on a second
+conversion, and the QA suite asserts both layers — the button that is not there
+and the service that would refuse anyway.
+
+---
+
+## D-066 — The selected record lives in the URL; the list query does not
+
+Status: Accepted
+Stage: 9C3.1
+
+### Decision
+`?selected=lead_0007` is the whole of the selection contract. Search, filters,
+sort, page and page size are local component state.
+
+### Reason
+Selection is the thing a visitor expects to be able to link to, and the thing
+Back should undo. Holding it in React as well would create a second answer the
+address bar could contradict.
+
+The list query is deliberately not in the URL. Every keystroke in the search
+box would become a history entry, and Back would then walk letter by letter out
+of a search term instead of closing what the visitor opened — which is the one
+job Back has on this screen.
+
+### Consequence
+Row click pushes, so Back closes the detail and Forward reopens it. A deep link
+opens the record it names. An id that matches nothing renders a contained
+"Lead unavailable" panel rather than an empty drawer or a crash.
+
+Archiving **replaces** its history entry instead of pushing, so Back cannot
+return to a record that no longer exists.
+
+"Not in the list" and "not read yet" are different answers, and conflating them
+was a real defect: creating a lead opens it immediately as confirmation, at
+which point the list query has not revalidated, so the new record genuinely is
+not in `data` yet. Reporting that as an unknown id told the visitor their new
+lead did not exist, half a second after they made it. Absence only means
+anything once the query has settled.
+
+---
+
+## D-067 — Leads is deployed for external review before Customers is built
+
+Status: Accepted
+Stage: 9C3.1
+
+### Decision
+`/demos/operations/leads` ships to production. The registry keeps
+`operations = building`, `#work` is untouched, `currentStage` stays 8, and
+Stage 09C3.2 does not begin until the deployed screen has been reviewed live.
+
+### Reason
+The same argument as D-061, now with evidence behind it. This stage's own
+review found defects that the suite had passed over: lead names rendered in the
+column-header face and sat ten pixels above the row they belonged to, because
+`.ops-table th` out-specifies a row-header class; the last row carried a stub
+of border under its name alone.
+
+Leads is also the pattern every later module reuses. A shell-level problem
+found after Customers, Reservations and Contracts exist is a problem fixed four
+times.
+
+### Consequence
+The demo routes remain `noindex, nofollow` and nothing links to them. The next
+task is blocked, deliberately, on a person looking at the live URL.

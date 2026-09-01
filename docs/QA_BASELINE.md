@@ -1118,3 +1118,157 @@ Two assertions in the 09C2 harness were updated rather than removed: the demo
 bar mark is no longer square, and the queue's re-render is now waited for as a
 condition instead of a fixed 150ms sleep. A wait that never resolves still
 fails its check.
+
+---
+
+## Stage 09C3.1 - Operations Leads
+
+PASS. Harness: `qa/stage09c31-leads.mjs`.
+
+```
+281 checks   with the domain probe fixture in place
+252 checks   without it - the domain section skips itself when the probe
+             route is absent, which is what happens against production
+```
+
+Run against a **local production build**, never the dev server, and never on
+port 3200 (the other application on this host):
+
+```
+cp qa/fixtures/demos-operations-probe.page.tsx src/app/demos/qa-operations/page.tsx
+npm run build
+npx next start --hostname 127.0.0.1 --port 3001
+node qa/stage09c31-leads.mjs
+rm -r src/app/demos/qa-operations
+```
+
+### Two layers
+
+The suite drives the domain through the probe and the product through the
+browser, because this stage's rules have to hold whether or not a screen
+remembers to ask.
+
+```
+domain    Rule 01 and Rule 02 firing, the follow-up offset measured against
+          the automation's own clock, the archived/converted guards, the
+          audited edit, the role matrix, the list selector's ordering
+product   the list, search, filters, sorts, paging, URL selection, deep
+          links, the detail, create, edit, stage, assignment, conversion,
+          archive, roles, Overview regression, persistence, reset
+```
+
+### Measured through the product
+
+```
+initial list          48 leads, 10 rows, page 1 of 5, last activity desc
+stage distribution    New 12  Contacted 10  Qualified 9  Proposal 7
+                      Won 6  Lost 4        - each asserted by filtering
+owners offered        Unassigned, Avery Chen        - derived, not listed
+search "  ALINA  "    3 leads (trimmed, case-insensitive; the name pool
+                      repeats every twenty leads, so three match)
+paging                all 48 rows visited across five pages, none repeated
+create Website        owner becomes Avery Chen, badge +1, two audit entries
+create Walk-in        owner stays Unassigned, no rule wakes
+qualify               follow-up "In 2 days", badge +1, audit entry
+convert               stage Won, customer created, both links set, the
+                      Convert action withdrawn, second attempt CONFLICT
+archive               48 -> 47, row gone, URL cleared, focus recovered
+Overview regression   create +1 open, qualify +0, Lost -1
+```
+
+### Automations
+
+The finding of the stage: they were not running at all outside the QA harness.
+
+```
+before   processEvents had no caller outside automations.ts;
+         the runtime event bus had no subscribers
+after    services/lead-workflows.ts joins them (D-063)
+Rule 01  website lead -> assigned to actor_0002, CRM notification, run
+Rule 02  qualified -> follow-up exactly FOLLOW_UP_OFFSET_MS out, notification
+```
+
+The follow-up assertion is anchored on the AutomationRun record and expects the
+offset **minus one clock tick**, computed from the domain's own constants: the
+run is written by a second commit, and every commit advances the logical clock.
+
+### Accessibility and contrast
+
+```
+semantic table with scope=col headers and scope=row row headers
+aria-sort on the sorted column only; five sortable headings are buttons
+a lead opens from the keyboard; Escape closes the drawer
+focus returns to the row that opened the detail
+focus moves to the region heading when archiving removes that row
+labels on search, all three filters, page size and every form field
+one polite live region; the result count is announced
+contrast, every stage and priority tone measured over its composited
+background: 4.55:1 worst, 17.36:1 best - all pass AA
+```
+
+Measuring a translucent pill against its own tint rather than the tint over
+the surface beneath it understates contrast badly; the harness composites
+every layer, as the browser does.
+
+### Responsive
+
+PASS at 1920x1080, 1440x900, 1366x768, 1180x820, 1024x768, 768x1024, 430x932,
+390x844 and 360x800: no horizontal overflow, exactly one list presentation and
+one filter presentation at every width, ten records listed.
+
+```
+>= 1180px   eight columns
+<  1180px   Source hidden; it is stated again in the detail
+<  768px    record cards; filters move into a sheet; the detail becomes a
+            full surface rather than a 460px drawer inside a 390px screen
+```
+
+### Overlays
+
+One `<dialog>` with `showModal()` in three geometries, so modality, focus
+trapping, inertness and Escape are the platform's rather than reimplemented.
+Page scrolling is held by a counted lock, so whichever overlay closes first
+cannot restore scrolling underneath one that is still open. The notification
+sheet's scrim covers the module beneath it, so a second overlay cannot be
+reached while it is open.
+
+### Network and cost
+
+```
+0 external requests, 0 /api calls, 0 console errors
+0 animation frames and 0 intervals while idle
+search 34 ms, clear 17 ms, filter 21 ms   (QA SANITY, NOT A BENCHMARK)
+CLS 0.00000
+no email, telephone, handle or manufacturer brand anywhere in the module
+```
+
+### Defects found by looking, after the suite passed
+
+```
+lead names rendered in the column-header face and sat ten pixels above
+  their row: `.ops-table th` out-specifies a row-header class
+a stub of border under the last row's name: `tr:last-child td` does not
+  reach a `th`
+a just-created lead was reported as an unknown id for half a second,
+  because "not in the list" and "not read yet" were the same branch
+```
+
+### Regression
+
+```
+stage09a-runtime                76/76
+stage09a-shell                  85/85
+stage09b-operations-spec        96/96
+stage09c1-operations          211/211
+stage09c2-operations-ui       140/140
+stage09c21-hardening          111/111
+stage09c31-leads              281/281
+qa:memory                       18/18
+tsc --noEmit                    clean
+eslint                          0 errors (1 pre-existing warning in qa/texture.mjs)
+                              ------
+                             1000 checks
+```
+
+One 09C2 assertion moved rather than being removed: it asserted that Overview
+alone was interactive, which was temporary build state this stage changes.

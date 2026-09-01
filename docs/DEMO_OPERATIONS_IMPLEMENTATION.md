@@ -8,10 +8,12 @@ How the Operations domain is built. The product contract it implements is
 the code beneath it.
 
 ```
-STATUS      domain complete / shell + Overview complete / ten modules unbuilt
-STAGE       09C1, 09C2 and 09C2.1 complete
+STATUS      domain complete / shell, Overview and Leads complete /
+            nine modules unbuilt
+STAGE       09C1, 09C2, 09C2.1 and 09C3.1 complete
 REGISTRY    operations = building
-ROUTE       /demos/operations DEPLOYED, noindex, for external live review
+ROUTE       /demos/operations and /demos/operations/leads DEPLOYED,
+            noindex, for external live review
 ```
 
 ## Stage 09C programme
@@ -20,7 +22,10 @@ ROUTE       /demos/operations DEPLOYED, noindex, for external live review
 09C1  domain + seed + runtime audit extension        COMPLETE
 09C2  shell + routes + Overview                      COMPLETE
 09C2.1 shell hardening + review deployment           COMPLETE
-09C3  Leads + Customers + Inbox                      BLOCKED on live review
+09C3  built one module per stage (D-062)
+  09C3.1 Leads                                       COMPLETE
+  09C3.2 Customers                                   BLOCKED on live review
+  09C3.3 Inbox + integrated CRM workflow
 09C4  Reservations + Contracts + Fleet + Maintenance + Payments
 09C5  Automations + Reports + notifications + integrated workflows
 09C6  full QA + Work integration eligibility + deployment
@@ -318,10 +323,93 @@ keeps `operations = building`, the route stays `noindex, nofollow`, nothing
 links to it, and `#work` is untouched. Stage 09C3 is blocked until the review
 comes back (D-061).
 
+## Leads (09C3.1)
+
+The first module that writes, and the pattern the other nine reuse: a data
+table, a mobile record list, search, three filters, six sorts, pagination, a
+detail drawer, create and edit forms, confirmations, URL-driven selection and
+mutation feedback.
+
+```
+src/demos/operations/
+  services/lead-workflows.ts   the missing join between mutations and rules
+  selectors/leads-list.ts      matching, ordering, owners, activity, dates
+  ui/scroll-lock.ts            one counted page-scroll lock for every overlay
+  ui/leads/
+    LeadsScreen.tsx            state, selection, composition
+    LeadsToolbar.tsx           search, filters, sort, the one primary action
+    LeadsTable.tsx             desktop table, aria-sort, row headers
+    LeadsMobileList.tsx        the same records as cards below 768px
+    LeadDetail.tsx             drawer on desktop, full surface on a phone
+    LeadForm.tsx               create and edit, one form
+    LeadConfirm.tsx            convert and archive
+    OpsOverlay.tsx             one <dialog>, three geometries
+    use-lead-action.ts         pending, error text, no double submit
+    leads-view.ts              tones, sort labels, failure wording
+```
+
+### The route became a layout
+
+`/demos/operations/layout.tsx` holds the provider and the shell, so navigating
+between Overview and Leads no longer disposes the runtime and rebuilds it. When
+each page carried its own provider, every module change reopened IndexedDB and
+put both screens back to their skeletons.
+
+The shell asks `usePathname()` which module it is showing rather than being
+told by the page, so one pathname decides the active navigation entry, the
+heading and the top bar's second line. Only `useSearchParams` needs a Suspense
+boundary — the pathname resolves at prerender because every route here is
+static with no dynamic segment.
+
+### Automations actually run now
+
+This is the substantial finding of the stage. `processEvents` had no caller
+outside its own module and the runtime's event bus had no subscribers, so
+creating a website lead never assigned it and qualifying a lead never scheduled
+a follow-up — both of which the frozen contract requires. The QA harness had
+been hand-writing the events and calling the engine directly, which tested the
+rules correctly while the production path did not exist. See D-063.
+
+### Ordering and matching live in the domain
+
+`selectLeadList` filters through the shared `queryList` matcher, then sorts and
+pages itself. That split is not a preference: `QuerySpec.sort` takes `keyof T`,
+and three of the six sorts are not lead fields. Stage and Priority are ranks —
+sorting their strings gives Contacted, Lost, New, Proposal, Qualified, Won,
+which is alphabetical and meaningless — and Created lives on the record
+envelope. The default is last activity descending with an explicit id
+tie-break, written out rather than inherited from the adapters three layers
+down.
+
+Owner options are derived, not listed: an actor qualifies by being an active
+Sales Agent — the same test Rule 01 applies — or by already owning a lead. A
+Fleet Coordinator does not become a CRM owner by existing in the seed.
+
+### The id is on screen, quietly
+
+`personName(i)` repeats every twenty leads, so three of the forty-eight are
+called "Alina Danforth". A drawer headed by the name alone cannot say which one
+is open, and "Archive Alina Danforth?" is ambiguous across three records. The
+id appears under the name in the detail and beside the name in confirmations —
+never as a table column.
+
+### QA
+
+`qa/stage09c31-leads.mjs`, 281 checks with the domain probe in place and 252
+without it (the domain section skips itself when the fixture route is absent,
+which is what happens against production). It covers the seeded distribution
+through the product, search, every filter and sort, pagination across all five
+pages, URL selection with Back and Forward, deep links valid and invalid, the
+detail's three sections, create for both automation paths, edit, qualify,
+assign, convert, archive, the role matrix, the role-switch leak D-058 guards
+against, Overview regression, persistence, reset, nine viewports, the mobile
+sheets, accessibility, every stage and priority tone's contrast, network,
+idle cost and CLS.
+
 ## Remaining UI work
 
-Ten module screens: Leads, Customers, Reservations, Contracts, Fleet,
-Maintenance, Payments, Automations, Inbox and Reports. Every service and
-selector they need already exists. `#work` still renders its placeholder, and
-the demo is deployed but unadvertised — `noindex, nofollow`, linked from
-nowhere.
+Nine module screens: Customers, Reservations, Contracts, Fleet, Maintenance,
+Payments, Automations, Inbox and Reports. Every service and selector they need
+already exists, and Leads has established the interaction patterns they reuse.
+`#work` still renders its placeholder, and the demo is deployed but
+unadvertised — `noindex, nofollow`, linked from nowhere.

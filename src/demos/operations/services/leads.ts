@@ -76,6 +76,17 @@ export type UpdateLeadInput = {
   displayName?: string;
   priority?: Priority;
   vehicleInterest?: VehicleClass;
+  /**
+   * Correcting where a lead came from is ordinary record-keeping, and the
+   * Leads screen offers it.
+   *
+   * It does **not** re-run the website assignment rule. That rule is triggered
+   * by `lead.created.website`, and an edit emits no domain event at all — so
+   * re-describing an existing lead cannot make the system treat it as newly
+   * arrived. The guarantee is structural rather than a condition someone has
+   * to remember to write.
+   */
+  source?: LeadSource;
 };
 
 export async function updateLead(
@@ -88,6 +99,12 @@ export async function updateLead(
   if (input.displayName !== undefined && !input.displayName.trim()) {
     throw invalid("A lead needs a name.", "displayName");
   }
+  /* An archived lead is out of the working list, so editing one would change a
+     record the product says is put away. The guard lives here rather than in
+     the screen: a rule enforced only by a hidden button is not enforced. */
+  if (lead.data.archived) {
+    throw conflict("An archived lead cannot be edited.", leadId);
+  }
 
   const result = await ctx.runtime.commit<DemoRecord<Lead>>((m) => {
     const next: Lead = {
@@ -95,10 +112,48 @@ export async function updateLead(
       ...(input.displayName !== undefined ? { displayName: input.displayName.trim() } : {}),
       ...(input.priority !== undefined ? { priority: input.priority } : {}),
       ...(input.vehicleInterest !== undefined ? { vehicleInterest: input.vehicleInterest } : {}),
+      ...(input.source !== undefined ? { source: input.source } : {}),
       lastActivityAt: m.now(),
     };
+
+    /* Only what actually moved. An audit entry listing fields that were
+       resubmitted unchanged would make the activity feed noise. */
+    const changes = (
+      [
+        ["displayName", lead.data.displayName, next.displayName],
+        ["priority", lead.data.priority, next.priority],
+        ["vehicleInterest", lead.data.vehicleInterest, next.vehicleInterest],
+        ["source", lead.data.source, next.source],
+      ] as const
+    )
+      .filter(([, from, to]) => from !== to)
+      .map(([field, from, to]) => ({ field, from, to }));
+
     const record = m.record<Lead>(C.leads, leadId, next, lead);
-    return { ops: [{ kind: "put", record }], data: record };
+    return {
+      ops: [
+        { kind: "put", record },
+        /* Every other lead mutation records itself; editing did not, which
+           left the detail drawer's activity silent about a change the visitor
+           had just made and could see in the fields above it. */
+        ...(changes.length > 0
+          ? [
+              {
+                kind: "audit" as const,
+                entry: {
+                  actor: m.actor,
+                  action: "lead.updated",
+                  collection: C.leads,
+                  entityId: leadId,
+                  summary: `Lead ${next.displayName} updated`,
+                  changes,
+                },
+              },
+            ]
+          : []),
+      ],
+      data: record,
+    };
   });
 
   return result.data;
@@ -119,6 +174,16 @@ export async function changeLeadStage(
      lead could be Won with no customer behind it. */
   if (stage === "Won") {
     throw conflict("A lead reaches Won by being converted to a customer.", leadId);
+  }
+  if (lead.data.archived) {
+    throw conflict("An archived lead cannot change stage.", leadId);
+  }
+  /* The mirror of the rule above. Won is only ever reached by conversion, so
+     moving a converted lead back down the pipeline would leave a customer
+     whose originating lead claims it never closed — the same contradiction,
+     approached from the other side. */
+  if (lead.data.convertedCustomerId) {
+    throw conflict("A converted lead cannot change stage.", leadId);
   }
 
   const from = lead.data.stage;
@@ -166,6 +231,9 @@ export async function assignLead(
 ): Promise<DemoRecord<Lead>> {
   requireWrite(ctx.session, "Leads");
   const lead = await must.lead(ctx, leadId);
+  if (lead.data.archived) {
+    throw conflict("An archived lead cannot be reassigned.", leadId);
+  }
 
   const result = await ctx.runtime.commit<DemoRecord<Lead>>((m) => {
     const record = m.record<Lead>(

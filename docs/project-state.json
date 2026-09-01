@@ -3,8 +3,8 @@
   "purpose": "Demonstrate engineering capability to freelance clients. Technical portfolio, not a personal site.",
   "currentStage": 8,
   "stage05Started": true,
-  "nextStage": "stage-09c3",
-  "nextStageTitle": "Stage 09C3 - Operations CRM: Leads + Customers + Inbox (BLOCKED UNTIL EXTERNAL LIVE REVIEW OF 09C2.1)",
+  "nextStage": "stage-09c3-2",
+  "nextStageTitle": "Stage 09C3.2 - Operations CRM: Customers (BLOCKED UNTIL EXTERNAL LIVE REVIEW OF LEADS)",
   "frozenStages": [
     1,
     2,
@@ -88,13 +88,23 @@
       "src/demos/operations/ui/OperationsSidebar.tsx",
       "src/demos/operations/ui/OperationsOverview.tsx",
       "src/demos/operations/ui/OverviewPanels.tsx",
-      "src/demos/operations/ui/NotificationCenter.tsx"
+      "src/demos/operations/ui/NotificationCenter.tsx",
+      "src/demos/operations/ui/leads/LeadsScreen.tsx",
+      "src/demos/operations/ui/leads/LeadsToolbar.tsx",
+      "src/demos/operations/ui/leads/LeadsTable.tsx",
+      "src/demos/operations/ui/leads/LeadsMobileList.tsx",
+      "src/demos/operations/ui/leads/LeadDetail.tsx",
+      "src/demos/operations/ui/leads/LeadForm.tsx",
+      "src/demos/operations/ui/leads/LeadConfirm.tsx",
+      "src/demos/operations/ui/leads/OpsOverlay.tsx",
+      "src/demos/operations/ui/leads/use-lead-action.ts"
     ]
   },
   "routes": [
     "/",
     "/specimen",
-    "/demos/operations"
+    "/demos/operations",
+    "/demos/operations/leads"
   ],
   "navigationDestinations": [
     "Systems",
@@ -188,7 +198,7 @@
   "stage08Started": true,
   "stage09aComplete": true,
   "demoPlatform": {
-    "status": "09A foundation + Operations domain, shell and Overview, hardened and deployed for external review; ten modules unbuilt",
+    "status": "09A foundation + Operations domain, shell, Overview and Leads; nine modules unbuilt",
     "routes": [
       "/demos/operations",
       "/demos/field",
@@ -216,10 +226,11 @@
     "disclosure": "INTERACTIVE ENGINEERING DEMO / SYNTHETIC DATA - FRONTEND ONLY",
     "operationsSpec": "frozen; docs/DEMO_OPERATIONS_SPEC.md",
     "operationsDomain": "built; docs/DEMO_OPERATIONS_IMPLEMENTATION.md",
-    "operationsReview": "deployed for external live review; 09C3 blocked until reviewed"
+    "operationsReview": "Leads deployed for external live review; 09C3.2 blocked until reviewed"
   },
   "stage09bComplete": true,
   "stage09c1Complete": true,
   "stage09c2Complete": true,
-  "stage09c21Complete": true
+  "stage09c21Complete": true,
+  "stage09c31Complete": true
 }

@@ -11,19 +11,18 @@ Everything below was read from the repository, not recalled from conversation.
 ```
 Stages 01-08   COMPLETE and FROZEN
 Deployment     LIVE at https://intelligent-systems-lab.duckdns.org
-Stage 09       IN PROGRESS - through 09C2.1, 0 of 3 demos built
-Demo 01        /demos/operations DEPLOYED; 09C3 blocked on live review
+Stage 09       IN PROGRESS - through 09C3.1, 0 of 3 demos built
+Demo 01        Overview + Leads DEPLOYED; 09C3.2 blocked on live review
 ```
 
 Stage 09 changed direction: `#work` becomes a launcher into three interactive
 frontend-only product demos, not case studies. 09A froze the shared runtime;
 09B froze Demo 01's contract; 09C1 built its domain; 09C2 built the shell and
-Overview at `/demos/operations`; 09C2.1 hardened it and deployed it to be
-judged on a real screen before ten more modules are built on it. Those ten are
-unbuilt, `#work` still renders its Stage 03 placeholder, and `currentStage`
-stays 8. See `docs/DEMO_OPERATIONS_IMPLEMENTATION.md` and `docs/NEXT_STAGE.md`.
-The case-study framework and its one verified internal case are preserved,
-unpublished; see `docs/CASE_STUDY_SOURCE_AUDIT.md`.
+Overview; 09C2.1 hardened both; 09C3.1 built Leads, the first module that
+writes. Nine modules remain, `#work` still renders its Stage 03 placeholder,
+and `currentStage` stays 8. See `docs/DEMO_OPERATIONS_IMPLEMENTATION.md` and
+`docs/NEXT_STAGE.md`. The case-study framework and its one verified internal
+case are preserved, unpublished; see `docs/CASE_STUDY_SOURCE_AUDIT.md`.
 
 ## Toolchain
 
@@ -61,8 +60,8 @@ and never the default `.next`, so `npm run build` cannot disturb the live site.
 ## Rendering Architecture
 
 Server-first. The hero, the background system and both navigation presentations
-are server components. Twenty `"use client"` modules exist: nine on the site,
-four in the demo platform and seven in the Operations demo's own interface.
+are server components. Twenty-nine `"use client"` modules exist: nine on the
+site, four in the demo platform and sixteen in the Operations interface.
 `project-state.json` holds the authoritative list.
 
 No `requestAnimationFrame` loop and no pointer tracking runs anywhere. Timers
@@ -78,6 +77,7 @@ runs on a timer at rest.
 | `/` | Hero + five navigation anchor sections | Static (prerendered) |
 | `/specimen` | Stage 02 typography specimen, unlinked | Static (prerendered) |
 | `/demos/operations` | Demo 01 shell + Overview, `noindex`, unlinked | Static page, client subtree |
+| `/demos/operations/leads` | Demo 01 CRM pipeline, `noindex`, unlinked | Static page, client subtree |
 
 Section ids on `/`: `hero`, `systems`, `products`, `ai-learning`, `lab`, `work`.
 `#systems` (05), `#products` (06), `#ai-learning` (07) and `#lab` (08) are real

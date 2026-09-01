@@ -21,6 +21,11 @@ src/
     demos/
       layout.tsx            09A - demo platform frame; robots noindex.
                             No page beneath it, so /demos is a 404 by design
+      operations/
+        layout.tsx          09C3.1 - holds the product's client boundary, so
+                            the runtime survives navigation between modules
+        page.tsx            "/demos/operations"  Overview
+        leads/page.tsx      "/demos/operations/leads"  CRM pipeline
     specimen/
       page.tsx              "/specimen"  Stage 02 typography specimen
       page.css
@@ -97,7 +102,8 @@ Portfolio application
   └── Demo platform                 src/demo-runtime/, src/app/demos/
         ├── Shared runtime          persistence, clock, ids, events,
         │                           audit, jobs, session, connectivity
-        ├── Operations domain       BUILT - domain 09C1, shell + Overview 09C2
+        ├── Operations domain       BUILT - domain 09C1, shell + Overview
+        │                           09C2, Leads 09C3.1
         ├── Field domain            PLANNED - not built
         └── Learning domain         PLANNED - not built
 ```
@@ -110,6 +116,14 @@ unspecified and unbuilt.
 
 The dependency runs one way and is asserted by QA: no runtime module imports
 from `src/demos/`, and no Operations entity name appears in runtime code.
+
+One layer was missing until Stage 09C3.1 and is worth naming, because its
+absence was invisible: **workflows**. A service commits and publishes domain
+events; the automation engine evaluates events; nothing joined the two, so the
+rules never ran outside the QA harness. `services/lead-workflows.ts` is that
+join — it runs a mutation, collects what it published on the runtime's event
+bus, and hands it to the rule engine (D-063). Screens call workflows where a
+rule is meant to fire, and services directly where none is.
 
 The rule that keeps one runtime serving three unrelated products: the runtime
 knows records, collections, events, jobs, audit, roles, a clock and

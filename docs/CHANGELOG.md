@@ -1035,3 +1035,79 @@ design-language name, a mutex name in the deploy script, was renamed with it.
 
 Ten module screens. Stage 09C3 is blocked until the deployed build has been
 reviewed on a real screen (D-061).
+
+---
+
+## Stage 09C3.1 - Operations Leads
+
+Status: **Complete**
+
+### Summary
+Built the Leads module: the first screen in this product that writes, and the
+pattern the remaining nine reuse. Deployed for external review before Customers
+begins (D-062, D-067).
+
+Stage 09C3 was split into three — Leads, Customers, then Inbox and the
+integrated workflow — because Leads establishes the table, the mobile records,
+the detail drawer, the forms, the confirmations and the URL contract that the
+others inherit. A problem in the pattern found after three screens exist is a
+problem fixed three times.
+
+### The automations were never running
+
+The finding of the stage, and it was invisible from the outside.
+
+The lead services build the right domain events and hand them to
+`runtime.commit`, which publishes them on the runtime's event bus.
+`processEvents` in `automations.ts` describes itself as *"called by workflows
+after the mutation that produced the events"* — and no workflow existed. It had
+no caller outside its own module, and the bus had no subscribers. So creating a
+website lead never assigned it, and qualifying a lead never scheduled its
+follow-up, both of which the frozen 09B contract requires.
+
+The QA harness had appeared to prove otherwise, because it hand-wrote the
+events itself with invented ids and called the engine directly. It was testing
+the rules correctly while the path production would take did not exist.
+
+`services/lead-workflows.ts` is the join: it runs a mutation, collects what it
+published on the bus, and hands that to the rule engine. No service signature
+moved and the rules stayed where they were (D-063).
+
+### Also fixed in the domain
+
+Four gaps that a screen would otherwise have papered over with a hidden button
+(D-064): archived leads could be edited, restaged and reassigned; a converted
+lead could be moved back down the pipeline, contradicting the rule that made
+Won unreachable by hand in the first place; editing was the one lead mutation
+that wrote no audit entry; and `source` could not be corrected.
+
+### The route became a layout
+
+The provider and shell moved into `/demos/operations/layout.tsx`, so moving
+between Overview and Leads no longer disposes the runtime and rebuilds it. The
+shell now asks the URL which module it is showing rather than being told.
+
+### Defects the suite passed over
+
+Three, found by reading rendered pixels after the harness was green:
+
+- Lead names rendered in the column headers' monospace face and sat ten pixels
+  above their own row — `.ops-table th` out-specifies a row-header class, and a
+  row header is data, not a header.
+- The last row carried a stub of border under its name alone, because
+  `tr:last-child td` does not reach a `th`.
+- A just-created lead was reported as an unknown id for about half a second:
+  creating one opens it immediately as confirmation, before the list query has
+  revalidated, and "not in the list" and "not read yet" were the same branch.
+
+### QA
+
+`qa/stage09c31-leads.mjs`, 281 checks against a local production build (252
+against production, where the domain probe route does not exist). Full
+regression is 1000 checks across eight suites; see `docs/QA_BASELINE.md`.
+
+### Not done
+
+Nine module screens. `#work` is untouched, the registry still reads
+`operations = building`, and `currentStage` stays 8. Stage 09C3.2 is blocked
+until the deployed Leads screen has been reviewed live.

@@ -15,21 +15,30 @@ Stage 09                IN PROGRESS
     09C1 domain + seed  COMPLETE
     09C2 shell + Overview  COMPLETE
     09C2.1 shell hardening + review deployment  COMPLETE
-    09C3 Leads/Customers/Inbox  BLOCKED - awaiting external live review
+    09C3 Leads/Customers/Inbox  IN PROGRESS, one module per stage (D-062)
+      09C3.1 Leads     COMPLETE and deployed
+      09C3.2 Customers BLOCKED - awaiting external live review of Leads
+      09C3.3 Inbox + integrated CRM workflow
 ```
 
 ## The block
 
-Next task: Stage 09C3 - Operations CRM: Leads + Customers + Inbox (BLOCKED UNTIL EXTERNAL LIVE REVIEW OF 09C2.1)
+Next task: Stage 09C3.2 - Operations CRM: Customers (BLOCKED UNTIL EXTERNAL LIVE REVIEW OF LEADS)
 
-Stage 09C3 does not start until a human has looked at
-`https://intelligent-systems-lab.duckdns.org/demos/operations` on a real
+Stage 09C3.2 does not start until a human has looked at
+`https://intelligent-systems-lab.duckdns.org/demos/operations/leads` on a real
 screen and said what they think of it.
 
-This is deliberate. Every defect 09C2.1 fixed was found by looking at rendered
-pixels, and three of the four survived a QA suite that passed. Ten more module
-screens will be built on this shell; discovering a shell-level problem after
-they exist means fixing it eleven times.
+This is deliberate, and this stage earned it twice over. Every defect 09C2.1
+fixed was found by looking at rendered pixels, three of four while the QA suite
+passed — and 09C3.1's own review found two more the suite had no opinion about:
+lead names rendering in the column-header face and sitting ten pixels above
+their row, and a stub of border under the last row's name.
+
+Leads is also the pattern every later module reuses: the table, the mobile
+records, the detail drawer, the forms, the confirmations and the URL contract.
+A problem in the pattern, found after Customers and Inbox exist, is a problem
+fixed three times.
 
 Nothing about the block is technical. The build is deployed, the regression is
 green, and the work is ready to continue the moment the review comes back.
@@ -54,8 +63,10 @@ placeholder.
 10. Stage 09C1 - Operations domain + seed       DONE
 11. Stage 09C2 - Shell + routes + Overview      DONE
 12. Stage 09C2.1 - Hardening + review deploy    DONE
-13. Stage 09C3 - Leads + Customers + Inbox      BLOCKED on live review
-14. Stage 09C4-C6 - modules, then QA/deploy     LATER
+13. Stage 09C3.1 - Leads                        DONE
+14. Stage 09C3.2 - Customers                    BLOCKED on live review
+15. Stage 09C3.3 - Inbox + CRM workflow         LATER
+16. Stage 09C4-C6 - modules, then QA/deploy     LATER
 13. Field and Learning specs, then builds       LATER
 14. Stage 09 - #work launcher integration       LATER
 ```

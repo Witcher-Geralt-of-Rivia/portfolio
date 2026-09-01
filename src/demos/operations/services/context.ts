@@ -15,6 +15,7 @@ import { DemoError } from "@/demo-runtime/types";
 import { C } from "../constants";
 import { deriveVehicleLinks, deriveVehicleStatus } from "../selectors/derive";
 import type {
+  Actor,
   Contract,
   Conversation,
   Customer,
@@ -34,6 +35,10 @@ export type OperationsContext = {
 
 /** Typed collection reads. Services go through these rather than raw strings. */
 export const read = {
+  /* Actors are read by the Leads owner control, which has to name the people a
+     lead can belong to. Reaching for the collection string in a screen is what
+     this map exists to prevent. */
+  actors: (ctx: OperationsContext) => ctx.runtime.repository.all<Actor>(C.actors),
   leads: (ctx: OperationsContext) => ctx.runtime.repository.all<Lead>(C.leads),
   customers: (ctx: OperationsContext) => ctx.runtime.repository.all<Customer>(C.customers),
   vehicles: (ctx: OperationsContext) => ctx.runtime.repository.all<Vehicle>(C.vehicles),
