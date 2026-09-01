@@ -1253,6 +1253,37 @@ a just-created lead was reported as an unknown id for half a second,
   because "not in the list" and "not read yet" were the same branch
 ```
 
+### Public verification
+
+Run with `QA_BASE=https://intelligent-systems-lab.duckdns.org` after
+`npm run deploy:safe`.
+
+```
+suites            09C2 140/140, 09C2.1 111/111, 09C3.1 252/252
+routes            / 200, /demos/operations 200,
+                  /demos/operations/leads 200, /demos 404,
+                  /demos/qa-operations 404 (no QA route in production)
+robots            <meta name="robots" content="noindex, nofollow">
+disclosure        INTERACTIVE ENGINEERING DEMO / SYNTHETIC DATA present
+#work             still the Stage 03 placeholder
+CRUD over HTTPS   create Website lead -> assigned to Avery Chen, 49 leads;
+                  edit; qualify -> follow-up "In 2 days", badge 8 -> 10;
+                  reload -> state survives; convert -> Won, action withdrawn;
+                  reset -> 48 leads, Admin, badge 8
+roles             Admin and Sales Agent see 10 records and may create;
+                  Fleet and Finance see none, get the unavailable state,
+                  no navigation entry, no lead id anywhere in the page
+direct load       a barred role loading the URL gets the contained state,
+                  not a redirect
+responsive        1440, 1024, 390, 360 - no horizontal overflow
+network           0 external, 0 /api, 0 console errors
+shared host       appclubedaeconomia.com.br still 200 afterwards
+```
+
+Screenshots: `qa/shots/stage09c31/` from a local build (list, detail, create,
+empty, confirmation, tablet, mobile list, mobile filters, mobile detail) and
+`qa/shots/stage09c31/public/` from production over HTTPS.
+
 ### Regression
 
 ```
