@@ -46,6 +46,8 @@ const REQUIRED_DOCS = [
   "docs/DEPLOYMENT.md",
   "docs/CHANGELOG.md",
   "docs/NEXT_STAGE.md",
+  "docs/DEMO_PLATFORM.md",
+  "docs/CASE_STUDY_SOURCE_AUDIT.md",
   "docs/project-state.json",
   "CLAUDE.md",
 ];
@@ -112,6 +114,24 @@ record(
   !(state.constraints.paidAiApis === true && forbidsPaidAi),
   "paidAiApis agrees with PRIVACY_AND_SECURITY.md",
   `json=${state.constraints.paidAiApis}, doc forbids=${forbidsPaidAi}`
+);
+
+/* ---- 5b. the two canonical lists agree --------------------------------- */
+
+/* `canonicalDocs` in the state file and REQUIRED_DOCS here must name the same
+   set. A document cited as canonical by other documents but absent from both
+   lists is one nothing verifies, which is how `CASE_STUDY_SOURCE_AUDIT.md`
+   drifted out of date unnoticed. */
+const declared = new Set(state.canonicalDocs ?? []);
+const enforced = new Set(REQUIRED_DOCS.filter((d) => d.endsWith(".md") && d.startsWith("docs/")));
+const onlyDeclared = [...declared].filter((d) => !enforced.has(d));
+const onlyEnforced = [...enforced].filter((d) => !declared.has(d));
+record(
+  onlyDeclared.length === 0 && onlyEnforced.length === 0,
+  "project-state.json canonicalDocs matches the enforced list",
+  onlyDeclared.length || onlyEnforced.length
+    ? `json-only: ${onlyDeclared.join(", ") || "none"}; harness-only: ${onlyEnforced.join(", ") || "none"}`
+    : `${declared.size} documents`
 );
 
 /* ---- 6. NEXT_STAGE agrees with the state file --------------------------- */

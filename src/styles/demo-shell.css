@@ -1,0 +1,396 @@
+/* =====================================================================
+   DEMO SHELL
+   Shared chrome for the demo platform. Loaded by src/app/demos/layout.tsx,
+   not by globals.css: it belongs to the /demos subtree, and the site itself
+   never uses it.
+
+   Everything here is expressed in existing tokens. The demos live in the
+   Milky Intelligence atmosphere and inherit its palette, type and radii; what
+   they do not inherit is the portfolio's own navigation, because a demo is a
+   product and a product has one header.
+   ===================================================================== */
+
+/* ---------------------------------------------------------------------
+   1. Neutralising the site chrome
+
+   The demos sit under the site's root layout, so SiteShell's fixed
+   navigation and its top clearance are already on the page. Both are
+   removed here for demo routes only, using the same `:has()` mechanism
+   D-017 established for the hero's padding.
+
+   `display: none` rather than `visibility: hidden`: the navigation must
+   leave the accessibility tree, not merely become invisible.
+   --------------------------------------------------------------------- */
+
+body:has(.demo-shell) .site-nav {
+  display: none;
+}
+
+.site-main:has(.demo-shell) {
+  padding-top: 0;
+  padding-bottom: 0;
+  /* Full bleed. The site's reading gutter is right for prose and wrong for an
+     application: it costs the chrome 40-144px of the width its controls need,
+     and a product does not sit inside someone else's margin. */
+  padding-inline: 0;
+}
+
+.demo-root {
+  display: contents;
+}
+
+/* ---------------------------------------------------------------------
+   2. The chrome bar
+   --------------------------------------------------------------------- */
+
+.demo-shell {
+  display: flex;
+  min-height: 100dvh;
+  flex-direction: column;
+}
+
+.demo-chrome {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  border-bottom: var(--border-technical);
+  /* Frost, carried denser than the base surface so the bar's small mono text
+     never depends on which aurora field is drifting underneath it. */
+  background: rgba(248, 249, 253, 0.82);
+  backdrop-filter: blur(var(--surface-frost-blur));
+  -webkit-backdrop-filter: blur(var(--surface-frost-blur));
+}
+
+.demo-chrome__inner {
+  display: flex;
+  min-height: 34px;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 0 var(--space-sm);
+}
+
+.demo-chrome__back {
+  flex: none;
+  padding: 4px 8px;
+  border-radius: var(--radius-control);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: var(--type-technical-micro);
+  letter-spacing: var(--tracking-technical);
+  text-decoration: none;
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.demo-chrome__back:hover {
+  background: var(--nav-link-hover-bg);
+  color: var(--text-primary);
+}
+
+.demo-chrome__title {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text-primary);
+  font-size: var(--type-caption);
+  font-weight: var(--weight-ui);
+  letter-spacing: var(--tracking-caption);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.demo-chrome__controls {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--space-2xs);
+}
+
+.demo-chrome__slot {
+  display: flex;
+  align-items: center;
+}
+
+/* The session-only warning. Peach rather than red: the demo still works, and
+   the project shows failure without alarming. */
+.demo-chrome__notice {
+  padding: 3px 8px;
+  border: 1px solid rgba(203, 128, 74, 0.28);
+  border-radius: var(--radius-pill);
+  background: rgba(251, 228, 215, 0.5);
+  color: #7a4a24;
+  font-family: var(--font-mono);
+  font-size: var(--type-technical-micro);
+  letter-spacing: var(--tracking-technical-micro);
+  white-space: nowrap;
+}
+
+.demo-chrome__action {
+  padding: 5px 10px;
+  border: var(--border-technical);
+  border-radius: var(--radius-control);
+  background: rgba(255, 255, 255, 0.6);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: var(--type-technical-micro);
+  letter-spacing: var(--tracking-technical);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
+}
+
+.demo-chrome__action:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.86);
+  color: var(--text-primary);
+}
+
+.demo-chrome__action:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ---------------------------------------------------------------------
+   3. Disclosure
+   --------------------------------------------------------------------- */
+
+.demo-disclosure {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--space-2xs);
+  padding: 3px 10px;
+  border: 1px solid rgba(74, 80, 104, 0.14);
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.52);
+}
+
+.demo-disclosure__primary,
+.demo-disclosure__secondary {
+  font-family: var(--font-mono);
+  font-size: var(--type-technical-micro);
+  letter-spacing: var(--tracking-technical-micro);
+  white-space: nowrap;
+}
+
+.demo-disclosure__primary {
+  color: var(--text-primary);
+}
+
+.demo-disclosure__secondary {
+  color: var(--text-annotation);
+}
+
+.demo-disclosure__divider {
+  width: 1px;
+  height: 10px;
+  flex: none;
+  background: var(--line-subtle);
+}
+
+/* ---------------------------------------------------------------------
+   4. Demo surface
+   --------------------------------------------------------------------- */
+
+.demo-surface {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* ---------------------------------------------------------------------
+   5. Reset dialog
+
+   A native <dialog>. The platform supplies focus containment, Escape and
+   inertness of the page behind; only the appearance is ours.
+   --------------------------------------------------------------------- */
+
+.demo-dialog {
+  /* The global reset sets `* { margin: 0 }`, which beats the user-agent's
+     `dialog:modal { margin: auto }` and pins the dialog to the top-left
+     corner. Centring has to be restated here. */
+  margin: auto;
+  max-width: min(420px, calc(100vw - 2 * var(--space-md)));
+  padding: var(--space-md);
+  border: var(--border-glass);
+  border-radius: var(--radius-card);
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: var(--shadow-card-lg);
+  color: var(--text-primary);
+}
+
+.demo-dialog::backdrop {
+  background: rgba(41, 47, 70, 0.22);
+}
+
+.demo-dialog__title {
+  margin-bottom: var(--space-2xs);
+  font-size: var(--type-h4);
+  font-weight: var(--weight-subhead);
+  letter-spacing: var(--tracking-h4);
+}
+
+.demo-dialog__body {
+  margin-bottom: var(--space-md);
+  color: var(--text-secondary);
+  font-size: var(--type-small);
+  line-height: var(--leading-small);
+}
+
+.demo-dialog__error {
+  margin-bottom: var(--space-sm);
+  padding: 8px 10px;
+  border-radius: var(--radius-control);
+  background: rgba(251, 228, 215, 0.6);
+  color: #7a4a24;
+  font-size: var(--type-caption);
+  line-height: var(--leading-caption);
+}
+
+.demo-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2xs);
+}
+
+.demo-dialog__button {
+  padding: 8px 14px;
+  border: var(--border-technical);
+  border-radius: var(--radius-control);
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
+  font-size: var(--type-caption);
+  font-weight: var(--weight-ui);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
+}
+
+.demo-dialog__button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--text-primary);
+}
+
+.demo-dialog__button--primary {
+  border-color: rgba(74, 80, 104, 0.2);
+  background: var(--nav-link-active-bg);
+  color: var(--text-primary);
+}
+
+.demo-dialog__button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+/* ---------------------------------------------------------------------
+   6. Focus
+
+   The project's ring, not the browser default.
+   --------------------------------------------------------------------- */
+
+.demo-chrome__back:focus-visible,
+.demo-chrome__action:focus-visible,
+.demo-dialog__button:focus-visible {
+  outline: 2px solid rgba(81, 86, 102, 0.48);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 6px rgba(214, 204, 255, 0.32);
+}
+
+/* ---------------------------------------------------------------------
+   7. Compact widths
+
+   The disclosure is the widest fixed thing in the bar and the one item that
+   may not be shortened, so it is what the layout is planned around. On one
+   line it measures about 480px, which leaves nothing for the title below
+   roughly 1200px and overflows outright on a phone.
+
+   So it stacks instead of shrinking: below 1120px the pill puts its two
+   halves on two lines, which more than halves its width and keeps the whole
+   bar on a single row down to tablet sizes. Below 640px the bar wraps, and
+   the row that survives intact is the one carrying Back and Reset — a visitor
+   must always be able to leave and to restore the data.
+   --------------------------------------------------------------------- */
+
+@media (max-width: 1119px) {
+  .demo-disclosure {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+    /* Two 12px lines plus this padding is what holds the stacked pill, and
+       therefore the whole bar, inside the 32-40px the chrome is budgeted. */
+    padding: 2px 9px;
+    line-height: 1.25;
+  }
+
+  .demo-disclosure__divider {
+    display: none;
+  }
+}
+
+.demo-chrome__reset-short {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  /* "Reset demo data" is 135px of a 350px bar. The short form keeps Back and
+     Reset on one row; the confirmation dialog still states in full what the
+     control does. */
+  .demo-chrome__reset-long {
+    display: none;
+  }
+
+  .demo-chrome__reset-short {
+    display: inline;
+  }
+
+  .demo-chrome__inner {
+    flex-wrap: wrap;
+    gap: 6px var(--space-2xs);
+    padding: 6px var(--space-xs);
+  }
+
+  /* Row one: the two controls that must never become unreachable.
+     Row two: the disclosure, with the title beside it. */
+  .demo-chrome__back {
+    order: 1;
+  }
+
+  .demo-chrome__controls {
+    order: 2;
+    margin-left: auto;
+  }
+
+  .demo-disclosure {
+    order: 3;
+    flex-basis: auto;
+  }
+
+  .demo-chrome__title {
+    order: 4;
+    flex: 1 1 60px;
+  }
+}
+
+/* Narrow enough that the title has no useful room left. It is the one item
+   the product beneath also states, so it is what gives way rather than the
+   disclosure or the controls. */
+@media (max-width: 430px) {
+  .demo-chrome__title {
+    display: none;
+  }
+}
+
+/* ---------------------------------------------------------------------
+   8. Reduced motion
+
+   The shell has almost none to remove, and no runtime behaviour depends on
+   a transition finishing.
+   --------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .demo-chrome__back,
+  .demo-chrome__action,
+  .demo-dialog__button {
+    transition: none;
+  }
+}

@@ -40,8 +40,9 @@ host were left untouched, per the standing instruction.
 **No record of any client engagement exists in this repository, and none ever
 has.** `git log --all --diff-filter=A --name-only` shows no case-study,
 content, client or project-data file has been added at any point in the
-project's history. There is no `src/content/`, no `work/` directory and no
-drafts.
+project's history. At the time of this search there was no `src/content/`, no
+`work/` directory and no drafts; the framework recorded under "Framework
+status" below was created afterwards, by this stage.
 
 Every "project-like" artefact in the tree is synthetic demonstration content
 built for Stages 06-08, and each module says so at the top of its own file:

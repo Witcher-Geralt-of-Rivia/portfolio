@@ -558,3 +558,118 @@ network requests. Every experiment ends in exactly one state across 20 runs.
 and the phone order held at system, input, observation. Idle long-task time 0ms
 over six seconds. Under reduced motion no keyframe animation runs while every
 experiment still completes. Stages 01-07 regression all PASS.
+
+---
+
+## Stage 09A - Demo Platform Foundation
+
+Status: **Complete** (Stage 09 remains in progress)
+
+### The strategy change
+
+Stage 09 changed direction. It was Work / Selected Engineering Case Studies;
+it is now three disclosed interactive frontend-only product demos backed by one
+reusable demo runtime, with `#work` becoming a launcher into them.
+
+The reason the original route stalled is preserved rather than rewritten.
+Case studies were blocked on content: the repository holds no verified client
+engagement, and `docs/CASE_STUDY_SOURCE_AUDIT.md` records the exhaustive search
+that established it — three parallel read-only sweeps plus direct searches over
+every tracked file and every commit, finding that every project-shaped artefact
+in the tree declares itself synthetic in its own source. Writing case studies
+from that material would have meant inventing clients, problems and outcomes on
+a live public site, which D-045 forbids at the scale of a single number and
+therefore forbids at the scale of an engagement.
+
+One verified case survives from that work — Internal Production Delivery
+System, the portfolio's own A/B release system, approved by the user on
+2026-08-30. It is preserved, unpublished, and is not one of the three demos.
+Its provenance must never be mixed with them.
+
+### Scope
+
+Only the shared foundation. No CRM screens, no dashboards, no field-service or
+learning screens, no Demo 01 visual design, and no business seed data — those
+belong to each product specification, starting with 09B.
+
+### Runtime
+
+`src/demo-runtime/`, eighteen modules in one dependency direction: types, then
+persistence/clock/ids/events, then repository, then runtime, then React. It
+knows records, collections, events, jobs, audit, roles, a clock and
+persistence, and never what a lead, a vehicle or a lesson is — which is what
+lets three unrelated products share it (D-049).
+
+Persistence is native IndexedDB with a memory fallback and no library (D-047).
+One database, `portfolio-demo-runtime`, four stores, five indexes, and `demoId`
+leading every composite key so cross-demo reads are structurally impossible.
+UI never touches IndexedDB; everything speaks to the adapter interface.
+
+Ids are per-collection counters, time is a logical clock, and mutation plans
+are computed before anything is written (D-048). No `Math.random`, no
+`crypto.randomUUID` for canonical entities, no `Date.now()`.
+
+### Chrome and routing
+
+`src/app/demos/layout.tsx` sets `robots: index false, follow false` and imports
+`demo-shell.css` itself, so no demo CSS ships on the homepage. It has no
+`page.tsx` beneath it, so `/demos` is a 404: an unfinished demonstration must
+not be reachable, and a demo becomes a route only when it is finished.
+
+The shared bar carries `← Portfolio`, the disclosure, the title, a role slot, a
+persistence notice and Reset. 36-37px at desktop widths, 87px in two rows on
+phones.
+
+### Bugs found and fixed
+
+- `resetDemo` purged with a cursor. A cursor's `continue()` queues a fresh
+  request, so its deletes landed *after* the synchronous seed writes and wiped
+  the data being restored — IndexedDB reset left the collection empty while the
+  memory adapter passed. Replaced with a keyed range delete issued before the
+  first put; reset also went from 1444ms to ~400ms.
+- The global `* { margin: 0 }` reset beats the user agent's
+  `dialog:modal { margin: auto }`, pinning the confirmation dialog to the
+  top-left corner. Centring is restated locally.
+- The disclosure pill measured 481px on one line: it overflowed a 430px
+  viewport by 84px and squeezed the demo title to 3px at 1024px. It now stacks
+  its two halves below 1120px, and the bar wraps below 640px.
+- The demo shell sat inside the site's reading gutter, leaving 335px of usable
+  width on a phone — not enough for Back and Reset to share a row. A demo is an
+  application surface and now runs full bleed.
+- A folder named `__probe` produced a 404: a leading underscore marks a Next.js
+  private folder, which is excluded from routing.
+
+### Documentation corrections
+
+Nine inconsistencies were found during the bootstrap audit and fixed.
+`PROJECT_STATE.md` said seven `"use client"` modules where the code, three
+other canonical documents and `project-state.json` all said nine.
+`DESIGN_SYSTEM.md` still carried the absolute "no `setInterval`" rule that
+D-042 had already retired from `ARCHITECTURE.md`, contradicting three frozen
+stages that use one. `CLAUDE_HANDOFF.md` said Stage 09 had not started while
+four Stage 09 files existed. `NEXT_STAGE.md` was stale by one commit, still
+describing three empty drafts and "nothing truthful to publish" after case-01
+was approved. `ARCHITECTURE.md`'s source tree was missing four component
+directories and `src/content/`. `QA_BASELINE.md` declared every number measured
+against production while its Stage 06 section said dev server — that section
+was re-measured in 840381b and only the header was left behind.
+`CASE_STUDY_SOURCE_AUDIT.md` denied, in the present tense, directories it later
+listed. The audit itself was cited as canonical by two documents but was in
+neither `canonicalDocs` nor the memory harness, so nothing checked it.
+
+### QA
+
+`qa/stage09a-runtime.mjs` 76 checks and `qa/stage09a-shell.mjs` 85 checks, all
+passing, run against real browser IndexedDB through two temporary fixtures that
+were deleted before commit. Covers seed, CRUD, atomic failure, typed errors,
+demo isolation, reset determinism across repeated cycles, the query layer, the
+seed-version policy, 500 generic records, reload persistence, forced IndexedDB
+failure into the memory fallback, and cross-tab invalidation carrying no record
+data. Idle cost: 0 intervals, 0 rAF, 0 timers over three seconds. Network: 0
+API requests, 0 external requests.
+
+### Not done
+
+`#work` is untouched and still renders its Stage 03 placeholder. Nothing is
+wired into `page.tsx` or `globals.css`, `currentStage` stays 8, and production
+was not deployed — Stage 09A changes no user-visible route.

@@ -1038,3 +1038,166 @@ field, keeps it honest, and still communicates that stages happen in order.
 If real measurements ever back these surfaces, the labels change from sequence
 positions to measurements and the wording must change with them. Until then,
 no number in this section may be read as performance.
+
+---
+
+## D-046 — "No database" means no server database; browser-local synthetic storage is permitted
+
+Status: Accepted
+Stage: 9A
+
+### Decision
+D-024 records the project-wide rule as "no AI provider, no API key, no backend,
+no database and no contact route". That entry governs server infrastructure.
+The demo platform stores synthetic demo data in the visitor's own browser
+through IndexedDB, and this is not a departure from D-024.
+
+### Reason
+The Stage 09A specification requires IndexedDB as the primary persistence and,
+in the same document, forbids a database server, an API route, a server action,
+Redis, a WebSocket server, Firebase, Supabase and any external persistence
+service. So the user's explicit instruction both permits browser storage and
+restates the prohibition D-024 was written to express.
+
+D-024's own future-modification condition asks that any request implying a
+change be reported rather than absorbed silently, which is why this entry
+exists instead of a quiet reinterpretation. The distinction is real: a server
+database is a request-handling attack surface, an operational dependency and a
+running cost. `indexedDB` in the visitor's browser is none of those. Nothing
+leaves the machine, nothing is served, and `docs/PRIVACY_AND_SECURITY.md`
+already describes the constraint in server terms — "no database connection, so
+there is no request-handling attack surface".
+
+### Consequence
+D-024 stands unchanged for servers. Browser storage is permitted for synthetic
+demo data only, and never for a secret, token, API key or private material.
+Anyone reading "no database" in D-024 should read this entry beside it.
+
+---
+
+## D-047 — Native IndexedDB with a memory fallback, and no library
+
+Status: Accepted
+Stage: 9A
+
+### Decision
+`src/demo-runtime/persistence/` implements the `DemoPersistenceAdapter`
+contract twice: over native IndexedDB, and over memory. No Dexie, no idb, no
+localForage. Domain services depend on the interface and never on IndexedDB.
+
+### Reason
+The required surface is four stores, five indexes, one transaction shape and
+one upgrade path. That is less code than the adapter that would wrap a
+dependency, and the project already refuses a UI kit, an icon package and an
+animation library for the same reason.
+
+The interface is what earns its keep. It makes the memory fallback possible, so
+a private window with storage disabled gets a working demo instead of a crash,
+and it keeps the runtime's dependency direction pointing one way.
+
+Parity between the two is a requirement, not an aspiration. The memory adapter
+structurally clones on read and write, because IndexedDB serialises and a
+caller must not be able to reach back into storage through a retained
+reference; and it stages writes into copies so a commit is all-or-nothing. A
+simplified stand-in would hide exactly the bugs it exists to survive.
+
+### Consequence
+Two implementations must be changed together, and the QA harness runs the same
+assertions against both. Adding a store means editing `upgrade()` and bumping
+`RUNTIME_SCHEMA_VERSION`; it must never mean deleting the database.
+
+---
+
+## D-048 — Deterministic ids, a logical clock, and plans computed before they are written
+
+Status: Accepted
+Stage: 9A
+
+### Decision
+Entity ids are a monotonic counter per demo and collection, formatted
+`customer_0001`. Timestamps come from a logical clock — a seed instant plus a
+tick per mutation — never from `Date.now()`. Domain services compute a complete
+mutation plan first; the runtime then commits every operation in one
+transaction, allocating ids and time against a scratch copy of the demo's
+metadata.
+
+### Reason
+D-026 and D-044 already establish that this project does not use `Math.random`,
+because reproducible screenshots and assertable end states depend on it. Stored
+data raises the stakes: a random id or a wall-clock timestamp would mean the
+same reset produces a different dataset, so "Reset demo data" would not restore
+the state it claims to, a documented example id would be a lie, and no harness
+could assert anything about a specific record.
+
+Computing before writing is a correctness requirement rather than a
+preference. An IndexedDB transaction commits as soon as control returns to the
+event loop with no request outstanding, so a transaction that pauses to compute
+has already ended and the rest of its writes land outside it.
+
+The scratch copy is what keeps a failure clean: a builder that throws, or a
+write persistence rejects, leaves counters and clock untouched and burns no id.
+
+### Consequence
+`crypto.randomUUID()` is not used for canonical entities. Seed data must be
+plain data — no generated values, nothing derived from the wall clock — because
+reset replays it verbatim and two resets have to produce identical state. The
+QA harness asserts that the same reset yields the same dataset, clock and
+counters.
+
+---
+
+## D-049 — The runtime knows records; it never knows leads, vehicles or lessons
+
+Status: Accepted
+Stage: 9A
+
+### Decision
+`src/demo-runtime/` may know records, collections, events, jobs, audit, roles, a
+clock and persistence. It may not know any product entity. Each demo's domain
+layer sits on top and owns its own vocabulary. The dependency direction is
+types → persistence/clock/ids/events → repository → runtime → React → domain →
+UI, and nothing flows back.
+
+### Reason
+Three unrelated products — an operations SaaS, a field service tool and a
+learning platform — can share one runtime only if the runtime has no opinion
+about what they store. The moment it learns what a lead is, the second demo
+starts working around it and the third rewrites it.
+
+It also keeps the honest claim available. A generic record store with a
+deterministic clock is the reusable engineering; the products are what it is
+demonstrated with.
+
+### Consequence
+Business seeds belong to each product specification, not to Stage 09A. The
+runtime QA harness supplies its own generic fixtures — "alpha", "beta" — rather
+than importing anything from `src/`, so it cannot drift into asserting product
+behaviour.
+
+---
+
+## D-050 — Three verified demos are required before `#work` is integrated
+
+Status: Accepted
+Stage: 9A
+
+### Decision
+`demo-registry.ts` gives every demo a status of `planned`, `building` or
+`verified`. The Work launcher may expose only `verified` demos, and
+`workSectionIsPublishable()` returns false until all three are. Until then the
+`#work` placeholder stays live and `currentStage` stays at 8.
+
+### Reason
+The same gate the case-study framework uses, for the same reason: a launcher
+that advertises applications which are not finished is a promise the site
+cannot keep, and a visitor who follows a link into a half-built demo learns the
+opposite of what the section is for.
+
+`building` exists so a demo under construction can be reachable during
+development without becoming publishable by accident.
+
+### Consequence
+Stage 09 completes only when all three demos are verified and `#work` has been
+integrated and QA'd. Until that point no demo route is created at all — an
+unfinished product must not be reachable, so a demo becomes a route only when
+it is finished.

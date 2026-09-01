@@ -41,6 +41,10 @@ key, no `.env` requirement for AI, no hosted inference dependency. Future AI
 demonstrations must be deterministic local simulations, static JSON, scripted
 sequences or client-side interaction.
 
+**No backend.** No database server, API route, server action or external
+persistence service. The demo platform stores synthetic data in the visitor's
+own browser through IndexedDB; D-046 records why that is not a departure.
+
 Both rules hold until the user explicitly changes them. See
 `docs/PRIVACY_AND_SECURITY.md`.
 
@@ -57,25 +61,20 @@ Both rules hold until the user explicitly changes them. See
 | Backend | None. No database, API route or server action |
 | QA | Playwright + pngjs (devDependencies), scripts in `qa/` |
 
-Rendering is almost entirely server-side. Nine `"use client"` modules exist:
-`navigation/SiteNavigation.tsx`, and one lab plus one tablist for each of the
-four built capability sections. Everything else is server-rendered markup and
-CSS. `docs/project-state.json` holds the authoritative list.
+Rendering is almost entirely server-side. Thirteen `"use client"` modules
+exist: nine on the site - `navigation/SiteNavigation.tsx`, plus one lab and one
+tablist for each of the four built capability sections - and four in the demo
+platform, which nothing imports yet. Everything else is server-rendered markup
+and CSS. `docs/project-state.json` holds the authoritative list.
 
 ## Current Runtime
 
-Development preview on a Windows Server VPS:
+Windows Server VPS.
 
 ```
-npm run dev:remote     # next dev --hostname 0.0.0.0 --port 3000
-http://108.186.112.75:3000
-```
-
-Production, live:
-
-```
-https://intelligent-systems-lab.duckdns.org
-Caddy v2.11.4  ->  127.0.0.1:3100  (PM2 app "portfolio")
+dev preview   npm run dev:remote      http://108.186.112.75:3000
+production    https://intelligent-systems-lab.duckdns.org
+              Caddy v2.11.4 -> 127.0.0.1:3100 (PM2 app "portfolio")
 ```
 
 **Deploy with `npm run deploy:safe`. Nothing else.** Production serves an
@@ -92,16 +91,12 @@ production domain is deliberately not listed. See `docs/DEPLOYMENT.md`.
 
 Stages 01-08 are complete, QA-verified and **frozen**. Do not redesign them.
 
-| Stage | Scope | Status |
-|---|---|---|
-| 01 | Background: aurora, prism, grain, 3 surfaces | FROZEN |
-| 02 | Typography: Geist Sans + Mono, scale, text roles | FROZEN |
-| 03 | Navigation + SiteShell | FROZEN |
-| 04 | Hero + Intelligence Constellation | FROZEN |
-| 05 | Intelligent Systems architecture lab | FROZEN |
-| 06 | Product Engineering studio | FROZEN |
-| 07 | AI Learning Systems adaptive lab | FROZEN |
-| 08 | Engineering Lab experiments | FROZEN |
+```
+01 background (aurora, prism, grain, 3 surfaces)   05 systems architecture lab
+02 typography (Geist Sans + Mono, scale, roles)    06 product engineering studio
+03 navigation + SiteShell                          07 AI learning adaptive lab
+04 hero + Intelligence Constellation               08 engineering lab
+```
 
 Details in `docs/PROJECT_STATE.md`. History in `docs/CHANGELOG.md`.
 
@@ -129,6 +124,10 @@ Two routes:
 - **`/specimen`** — Stage 02 typography specimen, kept so the type scale stays
   verifiable. Not linked from the site.
 
+`src/app/demos/layout.tsx` exists but has no `page.tsx` beneath it, so it adds
+no route and `/demos` is a 404. That is deliberate: an unfinished demo must not
+be reachable.
+
 Navigation destinations are exactly: Systems, Products, AI Learning, Lab, Work.
 There is deliberately no Contact, Hire Me, About, Blog or social link.
 
@@ -147,20 +146,21 @@ src/components/
   systems/   05 - ArchitectureLab; canvas, trace, principles; four modes
   products/  06 - ProductStudio; web/mobile/assist surfaces, event rail
   lab/       08 - LabWorkspace; flow, experiment views, observation, controls
+  work/      09 - case-study renderers, built but never wired in
+  demos/     09A - DemoShell, DemoDisclosure, DemoResetControl
+src/demo-runtime/   09A - shared demo platform; see docs/DEMO_PLATFORM.md
 ```
 
 Each capability directory has the same shape: a server section shell, one
 CLIENT lab holding the state, one CLIENT ARIA tablist holding none,
-presentational renderers, and a `*-{data,scenarios,experiments}.ts` module.
-
-Full tree and architectural principles in `docs/ARCHITECTURE.md`.
+presentational renderers, and a data module. Full tree and architectural
+principles in `docs/ARCHITECTURE.md`.
 
 ## Current QA Status
 
-All four stages PASS. Baseline evidence and numbers in `docs/QA_BASELINE.md`.
-
-Headline invariants: CLS 0 at every tested viewport, zero third-party requests,
-zero horizontal overflow, zero console errors, all meaningful text at or above
+All stages PASS; evidence and numbers in `docs/QA_BASELINE.md`. Headline
+invariants: CLS 0 at every tested viewport, zero third-party requests, zero
+horizontal overflow, zero console errors, all meaningful text at or above
 WCAG AA.
 
 ## Known Intentional Deviations
@@ -178,6 +178,8 @@ measurements showing the original approach is better. Reasons in
 - No navigation item is active while the hero owns the viewport.
 - Architecture gradients use `userSpaceOnUse` (the default degenerates on
   horizontal paths); the trace drops below the canvas at 1149px, not 999px.
+- The demo runtime hand-rolls IndexedDB rather than adding a library (D-047),
+  and `#work` waits for all three demos rather than shipping one (D-050).
 
 Each is an entry in `docs/DECISIONS.md` with its measured reason.
 
@@ -190,11 +192,9 @@ Each is an entry in `docs/DECISIONS.md` with its measured reason.
 | Dev preview | `npm run dev:remote` on `0.0.0.0:3000`, still available |
 | Host firewall | 80/443 allowed; 3000 allowed; 3100 has no inbound rule |
 | Provider firewall | Reachable on 443 - proven by external ACME validation |
-| Domain / DNS | DuckDNS A record to 108.186.112.75 |
-| HTTPS / TLS | Caddy automatic HTTPS (Let's Encrypt) |
+| Domain / TLS | DuckDNS A record to 108.186.112.75; Caddy automatic HTTPS |
 | Reverse proxy | Caddy v2.11.4, shared with another project - append only |
-| Production deploy | COMPLETE (PM2 app `portfolio`, `127.0.0.1:3100`) |
-| Deployment | `npm run deploy:safe` - alternating release slots, smoke test, auto-rollback |
+| Deployment | `npm run deploy:safe` - PM2 app `portfolio` on `127.0.0.1:3100`, alternating release slots, smoke test, auto-rollback |
 
 The VPS already hosts other services. Read the safety rules in
 `docs/DEPLOYMENT.md` before touching any server configuration.
@@ -211,6 +211,7 @@ The VPS already hosts other services. Read the safety rules in
 | Verified QA numbers and evidence | `docs/QA_BASELINE.md` |
 | Hard restrictions | `docs/PRIVACY_AND_SECURITY.md` |
 | Runtime and server state | `docs/DEPLOYMENT.md` |
+| Demo platform architecture | `docs/DEMO_PLATFORM.md` |
 | Stage history | `docs/CHANGELOG.md` |
 | What to do next | `docs/NEXT_STAGE.md` |
 | Machine-readable state | `docs/project-state.json` |
@@ -220,13 +221,15 @@ tokens. Documentation must not duplicate it.
 
 ## Current Task Status
 
-Stages 01-08 complete and frozen. The persistent context system is complete and
-the site is live over HTTPS. Stage 09 has **not** started.
+Stages 01-08 complete and frozen; the site is live over HTTPS. Stage 09 is **in
+progress**: 09A built and froze the shared demo runtime. No demo exists, and
+`#work` still renders its placeholder.
 
 ## Next Allowed Task
 
-**Stage 09 - Work / Selected Engineering Case Studies**, filling `#work`. The
-user will supply that specification separately. See `docs/NEXT_STAGE.md`.
+**Stage 09B - Operations / CRM / ERP SaaS Product Specification.** Product and
+domain planning, not implementation. The user will supply it separately. See
+`docs/NEXT_STAGE.md`.
 
 Do not begin it automatically.
 

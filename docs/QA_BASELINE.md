@@ -18,6 +18,8 @@ Stage 05   PASS
 Stage 06   PASS
 Stage 07   PASS
 Stage 08   PASS
+Stage 09A  PASS   demo platform foundation
+Stage 09    IN PROGRESS   0 of 3 demos built; #work not integrated
 ```
 
 ## Validated Viewports
@@ -263,7 +265,8 @@ Screenshots in `qa/shots/stage05/`.
 
 ## Stage 06 - Product Engineering
 
-Dev server, 1440x900 unless stated. Harness: `qa/stage06-*.mjs`.
+Measured against a production build. 1440x900 unless stated. Harness:
+`qa/stage06-*.mjs`.
 
 | Check | Result |
 |---|---|
@@ -631,3 +634,103 @@ CLS
 Because the atmosphere animates continuously, screenshots will not be
 pixel-identical between runs. Compare structural geometry and QA metrics instead.
 Never "fix" the animation to make screenshots match.
+
+---
+
+## Stage 09A - Demo Platform Foundation
+
+PASS. Harnesses: `qa/stage09a-runtime.mjs` (76 checks) and
+`qa/stage09a-shell.mjs` (85 checks). Both honour `QA_BASE`.
+
+### How the browser integration was performed
+
+The demo runtime is browser code — IndexedDB, a memory fallback, cross-tab
+invalidation — and cannot be exercised in Node. Two temporary routes were
+created for the run and **deleted before commit**:
+
+```
+qa/fixtures/demos-qa-probe.page.tsx -> src/app/demos/qa-probe/page.tsx
+qa/fixtures/demos-qa-shell.page.tsx -> src/app/demos/qa-shell/page.tsx
+```
+
+The fixture sources are kept under `qa/fixtures/`, where they create no route.
+Each was copied into the route tree for the run and removed afterwards.
+
+Playwright loaded them and ran every assertion inside `page.evaluate`, so each
+test executed the same compiled modules a demo would. No QA route exists in the
+committed tree or in production. Each harness header carries the procedure for
+recreating its fixture; note that a folder beginning with `_` is a Next.js
+private folder and produces no route.
+
+### Runtime — 76 checks
+
+```
+persistence mode     IndexedDB selected in a normal browser
+seed / CRUD          canonical dataset loads; create, update (version 1 -> 2)
+                     and delete all persist; revision 0 when freshly seeded
+atomicity            a builder that throws writes nothing and burns no id -
+                     the next create still takes alpha_0005
+typed failures       NOT_FOUND for a missing record and a missing job,
+                     VALIDATION for an unknown role, FORBIDDEN for a
+                     cross-demo write; an unknown collection reads as empty;
+                     a duplicate id overwrites rather than duplicating
+isolation            three demos seeded and mutated; resetting Operations
+                     left Field and Learning records, audit and revisions
+                     untouched
+determinism          two churn-and-reset cycles produced identical ids,
+                     timestamps, clock, counters, revision 0, empty audit and
+                     empty job queue
+query                filter, case-insensitive search, ascending and descending
+                     sort, pagination totals and page counts, out-of-range
+                     page clamped to the last
+seed version         a compatible version preserved demo state; an
+                     incompatible one reset that demo to canonical data
+reload               a record, audit entry and revision written before reload
+                     were all present after it, still on IndexedDB
+fallback             with indexedDB.open forced to fail, the runtime fell back
+                     to memory, reached ready, and seeded, mutated, audited
+                     and reset correctly
+cross-tab            a mutation in one tab notified the other, which picked up
+                     the new revision and re-read the record. The message
+                     carried exactly demoId, revision and reason - no record
+                     data crossed the channel
+network              0 external requests, 0 /api/ calls, 0 console errors
+```
+
+### Scale — 500 generic records
+
+A sanity check on this runtime in this browser, not a benchmark, and not a
+statement about production capacity. Three runs:
+
+```
+seed 500 records          223 / 227 / 296 ms
+list 500 records           39 /  32 /  58 ms
+filter+search+sort+page    29 /  71 ms (two runs recorded)
+insert one                  3 /  25 /   4 ms
+reset                     598 / 425 / 345 ms
+```
+
+Reset was 1444ms before the cursor-purge bug was fixed; the keyed range delete
+that replaced it is also what made it correct.
+
+### Shell — 85 checks
+
+```
+geometry     1920/1440/1366  36px    1024  37px    768  37px
+             430/390/360     87px (two rows)
+             zero horizontal overflow and nothing clipped at all eight
+             viewports; the disclosure keeps both halves everywhere; Back and
+             Reset render at every width; the site navigation is removed
+contrast     six text roles, worst 6.06:1 against the live aurora
+dialog       opens modal, labelled by its title, focus moves inside and stays
+             inside across six Tab presses, Escape closes it, confirming
+             closes it, no console errors
+idle         0 intervals, 0 requestAnimationFrame, 0 timer churn over three
+             seconds; CLS 0.00025
+```
+
+### Not covered
+
+No demo exists, so nothing was measured about product behaviour, derived
+dashboard values, or the offline queue. Those become QA contracts for 09B
+onward and are listed in `docs/DEMO_PLATFORM.md`.

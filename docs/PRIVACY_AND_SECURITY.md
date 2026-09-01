@@ -81,6 +81,48 @@ provider variable is referenced.
 
 Current state: no `.env` files exist; no API key of any kind is present.
 
+## Browser Storage
+
+The demo platform stores data in the visitor's own browser: an IndexedDB
+database named `portfolio-demo-runtime`, and a `localStorage` key per demo
+holding the simulated role.
+
+This is not a departure from the no-backend rule. There is no database server,
+no API route, no server action and no external persistence service; nothing
+stored ever leaves the visitor's machine, and the site would work identically
+with the browser's storage disabled. `D-046` records the distinction, because
+`D-024` states the rule as "no backend, no database" and that entry is about
+server infrastructure.
+
+What may be stored:
+
+```
+synthetic demo records      synthetic audit entries
+synthetic job rows          demo metadata (counters, logical clock, revision)
+the selected simulated role
+```
+
+What may never be stored:
+
+```
+a secret, token or API key         a credential of any kind
+real client or customer data       anything from another project on this host
+a contact route of any kind        anything a visitor did not create in a demo
+```
+
+A visitor inspecting browser storage sees clearly synthetic namespaces. No key
+resembles a production credential, and no stored value is treated as trusted
+input: the cross-tab invalidation message is validated for shape before use,
+because anything on that channel came from another script on the origin.
+
+Role switching is an interaction simulation, not a security boundary. Nothing
+is authenticated or authorised, and every record stays readable whatever role
+is selected. It must never be described as RBAC or as access control.
+
+Deleting the database is always available to the visitor through their browser,
+and Reset restores canonical data per demo. A deployment must not erase it; see
+`docs/DEMO_PLATFORM.md`.
+
 ## Exposed Surface
 
 The development preview binds `0.0.0.0:3000` and is reachable from the public
@@ -89,8 +131,9 @@ internet at the VPS address. Consequently:
 - Nothing sensitive may be served from `public/`.
 - Verified: `/.env`, `/.env.local`, `/package.json`, `/next.config.ts`,
   `/src/app/page.tsx` and `/.git/config` all return 404 over the public IP.
-- The app has no API route, no server action and no database connection, so
-  there is no request-handling attack surface beyond static file serving.
+- The app has no API route, no server action and no server-side database
+  connection, so there is no request-handling attack surface beyond static file
+  serving. The demo platform's storage is browser-local and never served.
 
 ## Server Safety
 

@@ -18,6 +18,9 @@ src/
     globals.css             composition root - imports every stylesheet
     page.tsx                "/"  hero + five anchor sections
     page.css
+    demos/
+      layout.tsx            09A - demo platform frame; robots noindex.
+                            No page beneath it, so /demos is a 404 by design
     specimen/
       page.tsx              "/specimen"  Stage 02 typography specimen
       page.css
@@ -48,11 +51,26 @@ src/
       EngineeringPrinciples.tsx
       architecture-data.ts            four modes, declarative
       architecture-geometry.ts        orthogonal routing
+    products/   06 - ProductStudio; web/mobile/assist surfaces, event rail
+    learning/   07 - LearningLab; knowledge map, learner and tutor panels
+    lab/        08 - LabWorkspace; flow, experiment views, observation
+    work/       09 - case-study renderers; built, not wired into the page
+    demos/      09A - DemoShell, DemoDisclosure, DemoResetControl
+  content/
+    case-studies.ts         typed case-study model and render-safety filter
+  demo-runtime/             09A - the shared demo platform runtime
+    types.ts config.ts demo-registry.ts clock.ts ids.ts
+    persistence/{adapter,indexed-db,memory}.ts
+    repository.ts async-service.ts events.ts audit.ts jobs.ts
+    session.ts connectivity.ts broadcast.ts runtime.ts
+    react/{DemoRuntimeProvider.tsx,hooks.ts}
   styles/
     tokens.css              every design token
     typography.css, motion.css, layers.css, surfaces.css
     navigation.css, hero.css
     systems.css, products.css, learning.css, lab.css   one per section
+    work.css        09 - written, not imported (the section is unwired)
+    demo-shell.css  09A - imported by src/app/demos/layout.tsx, not globals.css
 
 public/
   textures/micro-grain.svg
@@ -68,6 +86,37 @@ deploy/
 qa/                         Playwright harness + screenshot baselines
 docs/                       canonical project memory
 ```
+
+## Demo Platform
+
+A second application area, added in Stage 09A and not yet reachable.
+
+```
+Portfolio application
+  └── Demo platform                 src/demo-runtime/, src/app/demos/
+        ├── Shared runtime          persistence, clock, ids, events,
+        │                           audit, jobs, session, connectivity
+        ├── Operations domain       PLANNED - not built
+        ├── Field domain            PLANNED - not built
+        └── Learning domain         PLANNED - not built
+```
+
+The three domain modules do not exist. Stage 09A built only the shared
+foundation and froze it.
+
+The rule that keeps one runtime serving three unrelated products: the runtime
+knows records, collections, events, jobs, audit, roles, a clock and
+persistence, and never knows what a lead, a vehicle or a lesson is. UI never
+touches IndexedDB; everything above the persistence adapter speaks to its
+interface. Dependency direction is one-way — types, then persistence/clock/ids,
+then repository, then runtime, then React, then a demo's domain, then its UI.
+
+`src/app/demos/layout.tsx` has no `page.tsx` beneath it, so `/demos` and every
+route under it is a 404. That is deliberate: an unfinished demonstration must
+not be reachable, and a demo becomes a route only when it is finished.
+
+Full detail, including the persistence schema and the QA contracts, is in
+`docs/DEMO_PLATFORM.md`. Decisions D-046 to D-050.
 
 ## Composition
 
@@ -105,8 +154,9 @@ hero rules do not live in `navigation.css`.
 
 ## Client/Server Boundary
 
-There are nine `"use client"` modules, each with deliberately bounded
-responsibilities. `docs/project-state.json` holds the authoritative list.
+There are thirteen `"use client"` modules, each with deliberately bounded
+responsibilities: nine on the site itself, and four in the demo platform, which
+nothing imports yet. `docs/project-state.json` holds the authoritative list.
 
 `SiteNavigation.tsx`:
 

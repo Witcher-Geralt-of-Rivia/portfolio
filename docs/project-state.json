@@ -3,8 +3,8 @@
   "purpose": "Demonstrate engineering capability to freelance clients. Technical portfolio, not a personal site.",
   "currentStage": 8,
   "stage05Started": true,
-  "nextStage": "stage-09",
-  "nextStageTitle": "Stage 09 - Work / Selected Engineering Case Studies",
+  "nextStage": "stage-09b",
+  "nextStageTitle": "Stage 09B - Operations / CRM / ERP SaaS Product Specification",
   "frozenStages": [
     1,
     2,
@@ -24,7 +24,7 @@
     "6": "Product Engineering - cross-surface product studio",
     "7": "AI Learning Systems - adaptive learning laboratory",
     "8": "Engineering Lab - interactive technical experiments",
-    "9": "Work / Selected Engineering Case Studies"
+    "9": "Work / Interactive Product Demos (09A demo platform complete)"
   },
   "constraints": {
     "contactInformation": false,
@@ -34,7 +34,8 @@
     "externalFontRequests": false,
     "externalImageAssets": false,
     "animationLibrary": false,
-    "webgl": false
+    "webgl": false,
+    "browserStorageForSyntheticDemoData": true
   },
   "design": {
     "identity": "Milky Intelligence",
@@ -68,7 +69,11 @@
       "src/components/learning/LearningLab.tsx",
       "src/components/learning/LearningScenarioSelector.tsx",
       "src/components/lab/LabWorkspace.tsx",
-      "src/components/lab/LabExperimentSelector.tsx"
+      "src/components/lab/LabExperimentSelector.tsx",
+      "src/demo-runtime/react/DemoRuntimeProvider.tsx",
+      "src/demo-runtime/react/hooks.ts",
+      "src/components/demos/DemoShell.tsx",
+      "src/components/demos/DemoResetControl.tsx"
     ]
   },
   "routes": [
@@ -99,7 +104,7 @@
     "productionCommand": "npm run start:portfolio",
     "processManager": "PM2 (app name: portfolio)",
     "reverseProxy": "Caddy v2.11.4",
-    "certificateManagement": "Caddy automatic HTTPS (Let\u2019s Encrypt ACME)",
+    "certificateManagement": "Caddy automatic HTTPS (Let’s Encrypt ACME)",
     "deploymentStatus": "live",
     "deploymentCommand": "npm run deploy:safe",
     "releaseSlots": [
@@ -147,7 +152,9 @@
     "docs/PRIVACY_AND_SECURITY.md",
     "docs/DEPLOYMENT.md",
     "docs/CHANGELOG.md",
-    "docs/NEXT_STAGE.md"
+    "docs/NEXT_STAGE.md",
+    "docs/DEMO_PLATFORM.md",
+    "docs/CASE_STUDY_SOURCE_AUDIT.md"
   ],
   "git": {
     "underVersionControl": true,
@@ -160,5 +167,34 @@
   },
   "stage06Started": true,
   "stage07Started": true,
-  "stage08Started": true
+  "stage08Started": true,
+  "stage09aComplete": true,
+  "demoPlatform": {
+    "status": "09A foundation complete; no demo built",
+    "routes": [
+      "/demos/operations",
+      "/demos/field",
+      "/demos/learning"
+    ],
+    "routesLive": false,
+    "database": "portfolio-demo-runtime",
+    "runtimeSchemaVersion": 1,
+    "stores": [
+      "records",
+      "meta",
+      "audit",
+      "jobs"
+    ],
+    "persistence": [
+      "indexeddb",
+      "memory"
+    ],
+    "demoStatuses": {
+      "operations": "planned",
+      "field": "planned",
+      "learning": "planned"
+    },
+    "requiredVerifiedDemos": 3,
+    "disclosure": "INTERACTIVE ENGINEERING DEMO / SYNTHETIC DATA - FRONTEND ONLY"
+  }
 }

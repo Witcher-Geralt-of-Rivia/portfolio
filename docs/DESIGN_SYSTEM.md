@@ -133,8 +133,11 @@ than a fully rounded pill.
   Never animate blur, box-shadow, width, height, top or left.
 - Ambient motion is continuous, slow, and asynchronous. Nothing pulses.
 - Entrances are under a second, travel at most 8px, and never animate letters.
-- No JavaScript animation loop. No `requestAnimationFrame`, no `setInterval`,
-  no pointer tracking.
+- No JavaScript animation loop, no `requestAnimationFrame`, no pointer
+  tracking, and nothing running on a timer at rest. A user-triggered sequence
+  may use a timer when it has to move several surfaces together, provided
+  effect cleanup tears every one down on each exit. See D-035, D-042 and
+  D-044; that is the only sanctioned use of a timer.
 - `prefers-reduced-motion: reduce` stops movement everywhere while keeping the
   composition visually complete.
 

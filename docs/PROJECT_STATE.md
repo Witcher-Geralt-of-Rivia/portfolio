@@ -11,12 +11,15 @@ Everything below was read from the repository, not recalled from conversation.
 ```
 Stages 01-08   COMPLETE and FROZEN
 Deployment     LIVE at https://intelligent-systems-lab.duckdns.org
-Stage 09       BLOCKED - 1 of 3 case studies verified, section unwired
+Stage 09       IN PROGRESS - 09A complete, 0 of 3 demos built
 ```
 
-The next task is Stage 09 - Work / Selected Engineering Case Studies, filling
-`#work`. It is blocked on content: one verified case study exists where three
-are required. See `docs/NEXT_STAGE.md` and `docs/CASE_STUDY_SOURCE_AUDIT.md`.
+Stage 09 changed direction. `#work` becomes a launcher into three interactive
+frontend-only product demos, not conventional case studies. Stage 09A built and
+froze the shared demo runtime; no demo exists yet and nothing is wired into the
+page. `currentStage` stays 8. See `docs/DEMO_PLATFORM.md` and
+`docs/NEXT_STAGE.md`. The case-study framework and its one verified internal
+case are preserved, unpublished; see `docs/CASE_STUDY_SOURCE_AUDIT.md`.
 
 ## Toolchain
 
@@ -46,11 +49,8 @@ no AI SDK. That is intentional.
 
 ## Scripts
 
-```
-dev, dev:remote (0.0.0.0:3000), build, start, start:portfolio, lint
-qa:memory    node qa/project-memory-check.mjs
-deploy:safe  powershell ... deploy/safe-deploy.ps1
-```
+`dev`, `dev:remote` (0.0.0.0:3000), `build`, `start`, `start:portfolio`,
+`lint`, `qa:memory`, `deploy:safe`. See `package.json`.
 
 `deploy:safe` is the only supported production deployment path. Production
 serves an alternating release slot and never the default `.next`, so a plain
@@ -59,11 +59,11 @@ serves an alternating release slot and never the default `.next`, so a plain
 ## Rendering Architecture
 
 Server-first. The entire hero, the whole background system and both navigation
-presentations are server components. Seven `"use client"` modules exist:
-`navigation/SiteNavigation.tsx` (compact menu state, focus management,
-active-section tracking via IntersectionObserver, Escape handling, body scroll
-lock), plus one lab and one stateless ARIA tablist for each built capability
-section. `project-state.json` holds the authoritative list.
+presentations are server components. Thirteen `"use client"` modules exist.
+Nine belong to the site: `SiteNavigation.tsx`, plus one lab and one stateless
+ARIA tablist for each of the four built capability sections. Four belong to the
+demo platform and nothing imports them yet - the runtime provider and hooks,
+the demo shell and its reset control. `project-state.json` holds the list.
 
 No `requestAnimationFrame` loop and no pointer tracking runs anywhere. Timers
 exist only inside the three user-triggered sequences - the Stage 06 flow, the
@@ -80,8 +80,9 @@ rest.
 | `/specimen` | Stage 02 typography specimen, unlinked | Static (prerendered) |
 
 Section ids on `/`: `hero`, `systems`, `products`, `ai-learning`, `lab`, `work`.
-`#systems` (05), `#products` (06), `#ai-learning` (07) and `#lab` (08) are
-real sections. `#work` is the last Stage 03 QA placeholder.
+`#systems` (05), `#products` (06), `#ai-learning` (07) and `#lab` (08) are real
+sections. `#work` is the last Stage 03 QA placeholder. `src/app/demos/` holds a
+layout with no page beneath it, so it adds no route: `/demos` is a 404.
 
 ## Source Tree
 
@@ -89,8 +90,10 @@ real sections. `#work` is the last Stage 03 QA placeholder.
 src/
   app/
     layout.tsx            root layout, loads Geist, renders SiteShell
-    globals.css           composition root; imports every stylesheet
+    globals.css           composition root; imports every site stylesheet
     page.tsx, page.css    hero + anchor sections
+    demos/layout.tsx      Stage 09A - demo frame, robots noindex; no page
+                          beneath it, so /demos is a 404 by design
     specimen/page.tsx     typography specimen
     specimen/page.css
   components/
@@ -112,10 +115,19 @@ src/
                 panels, journey; learning-{scenarios,geometry}.ts
     lab/        Stage 08 - LabWorkspace; flow, experiment views, observation,
                 controls, pattern rail; lab-experiments.ts (five experiments)
+    work/       Stage 09 - case-study renderers; built, never wired in
+    demos/      Stage 09A - DemoShell, DemoDisclosure, DemoResetControl
+  content/case-studies.ts   typed case-study model + render-safety filter
+  demo-runtime/             Stage 09A - shared demo platform (18 modules):
+                types, config, demo-registry, clock, ids, repository,
+                async-service, events, audit, jobs, session, connectivity,
+                broadcast, runtime, persistence/{adapter,indexed-db,memory},
+                react/{DemoRuntimeProvider,hooks}
   styles/
     tokens.css            all design tokens - the source of truth for values
     typography.css, motion.css, layers.css, surfaces.css   foundations
     navigation.css, hero.css, systems.css, products.css, learning.css, lab.css
+    work.css        written, not imported   demo-shell.css  loaded by demos/
 
 public/
   textures/micro-grain.svg    locally generated SVG turbulence tile
@@ -353,46 +365,35 @@ frame carries the complete state the UI needs, so the render is a pure function
 of (experiment, variant, frame) and Run always produces the same sequence.
 There is no `Math.random` and no generated timing anywhere in the section.
 
-Runs last 1.2-1.8s: 6 frames at 240ms for the API inspector (2 or 3 when a
-variant fails early), 7 at 200ms for the rate limiter, 5 or 8 at 240ms for the
-webhook, 9 at 200ms for the queue, 6 at 240ms for idempotency. End states are
-fixed - 200/422/401, five admitted and two refused with a 429, acknowledged,
-JOB-108 in the dead-letter queue, and two requests producing one action.
+Runs last 1.2-1.8s and every end state is fixed. Frame counts, intervals and
+end states per experiment are in `docs/QA_BASELINE.md`.
 
 Failure is always attributable to a stage: a validation error stops the flow at
 Validate, an unauthorized call at Authenticate. Failure states are soft peach or
 rose, success mint, waiting lavender, in-progress sky - never a saturated
-traffic light. Each experiment contributes one accent hue used on small marks
-only; the workspace never changes colour.
+traffic light. Each experiment contributes one accent hue on small marks only.
 
 Nothing here reaches the network, and the illustrative labels ("T+2", "retry
 delay", "simulated step 6 of 6") are sequence positions, not latency.
 
 ## Assets
 
-`public/marks/system-mark.svg` (890 bytes, viewBox 0 0 28 28, custom) and
-`public/textures/micro-grain.svg` (locally generated feTurbulence tile). No
-stock imagery, no downloaded icons, no external image dependency.
+`public/marks/system-mark.svg` (890 bytes, custom) and
+`public/textures/micro-grain.svg` (generated feTurbulence tile). No stock
+imagery, icons or external image dependency.
 
 ## Deployment
 
-The site is live. Full detail in `docs/DEPLOYMENT.md`.
-
-```
-Public URL       https://intelligent-systems-lab.duckdns.org
-Reverse proxy    Caddy v2.11.4 (shared host infrastructure, another project's)
-Internal bind    127.0.0.1:3100, loopback only, no public inbound rule
-Release slots    .next-release-a / .next-release-b (.next is dev only)
-Process manager  PM2, app name "portfolio"; Caddy automatic HTTPS
-Dev preview      still available at http://108.186.112.75:3000
-```
-
-Update procedure: `npm run deploy:safe`. Caddy is untouched by a release.
+Live at `https://intelligent-systems-lab.duckdns.org`. PM2 app "portfolio" on
+127.0.0.1:3100, behind a Caddy instance shared with another project. Production
+serves `.next-release-a` / `.next-release-b`; `.next` is development only.
+Update with `npm run deploy:safe`, which is the only supported path and leaves
+Caddy untouched. Full detail, including the host safety rules, in
+`docs/DEPLOYMENT.md`.
 
 ## Known Gaps
 
 - LCP timing: UNVERIFIED in the headless QA environment (see QA_BASELINE.md)
-- Reboot survival relies on the host's existing PM2 logon-time resurrection,
-  which fires at Administrator logon rather than at system boot. This affects
-  every service on the host, not just the portfolio. Not reboot-tested, because
-  another production domain is served from the same machine.
+- Reboot survival relies on the host's PM2 logon-time resurrection, which fires
+  at Administrator logon rather than at system boot. This affects every service
+  on the host. Not reboot-tested: another production domain shares the machine.
