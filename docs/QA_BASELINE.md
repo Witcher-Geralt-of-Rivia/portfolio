@@ -1070,6 +1070,32 @@ derived mark  public/brand/mark-120.png, 105x120, 17.3 KB
 rendered      30px tall in site navigation, 22px in the demo bar
 ```
 
+### Screenshots
+
+`qa/shots/stage09c21/` — captured from **production over HTTPS**, not from a
+local build: the Overview at 1440x900, 1024x768 and 390x844, the notification
+sheet at 390x844, and the Finance Analyst role at 1440x900.
+
+### Public verification
+
+Run with `QA_BASE=https://intelligent-systems-lab.duckdns.org`, after
+`npm run deploy:safe`.
+
+```
+09C2 suite / 09C2.1 suite    140/140 and 111/111 against production
+routes                       / 200, /demos/operations 200, /demos 404,
+                             /specimen 200, icons and mark 200
+mark served                  byte-identical to public/brand/mark-120.png
+robots                       <meta name="robots" content="noindex, nofollow">
+                             on the demo route
+role persistence             survives closing and reopening the page in the
+                             same browsing context
+demo isolation               a fresh context sees the pristine seed, not the
+                             first context's state
+reset                        restores Admin, 38/4/10/8 and 8 unread
+shared host                  appclubedaeconomia.com.br still 200 afterwards
+```
+
 ### Regression
 
 All run against the same local production build.
