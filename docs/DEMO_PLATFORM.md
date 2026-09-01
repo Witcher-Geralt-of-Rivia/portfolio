@@ -19,10 +19,14 @@ Work section becomes a launcher into three substantial interactive product
 demonstrations that a visitor can use:
 
 ```
-Demo 01   Operations / CRM / ERP SaaS        /demos/operations
-Demo 02   Field Operations Web + Mobile      /demos/field
-Demo 03   Adaptive Learning Platform         /demos/learning
+Demo 01   Operations / CRM / ERP SaaS        /demos/operations   SPEC FROZEN
+Demo 02   Field Operations Web + Mobile      /demos/field        PLANNED
+Demo 03   Adaptive Learning Platform         /demos/learning     PLANNED
 ```
+
+Demo 01's complete product contract is frozen in
+`docs/DEMO_OPERATIONS_SPEC.md` and guarded by
+`qa/stage09b-operations-spec.mjs`.
 
 Each behaves like real software while being entirely synthetic, entirely
 client-side, and honest about both. Those route identities are frozen; the
@@ -365,4 +369,5 @@ only `verified` demos; `workSectionIsPublishable()` enforces it. Until then the
 
 No customer names, fleet records, orders, technicians, courses or learners. No
 CRM screens, dashboards or field-service screens. No Demo 01 visual design.
-Those belong to each product specification, starting with Stage 09B.
+Those belong to each product specification. Stage 09B has since frozen Demo
+01's; Field and Learning are still unspecified.

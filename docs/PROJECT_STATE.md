@@ -11,14 +11,14 @@ Everything below was read from the repository, not recalled from conversation.
 ```
 Stages 01-08   COMPLETE and FROZEN
 Deployment     LIVE at https://intelligent-systems-lab.duckdns.org
-Stage 09       IN PROGRESS - 09A complete, 0 of 3 demos built
+Stage 09       IN PROGRESS - 09A + 09B complete, 0 of 3 demos built
 ```
 
-Stage 09 changed direction. `#work` becomes a launcher into three interactive
-frontend-only product demos, not conventional case studies. Stage 09A built and
-froze the shared demo runtime; no demo exists yet and nothing is wired into the
-page. `currentStage` stays 8. See `docs/DEMO_PLATFORM.md` and
-`docs/NEXT_STAGE.md`. The case-study framework and its one verified internal
+Stage 09 changed direction: `#work` becomes a launcher into three interactive
+frontend-only product demos, not case studies. 09A froze the shared runtime;
+09B froze Demo 01's contract in `docs/DEMO_OPERATIONS_SPEC.md`. No demo exists
+and nothing is wired into the page. `currentStage` stays 8. See
+`docs/DEMO_PLATFORM.md` and `docs/NEXT_STAGE.md`. The case-study framework and its one verified internal
 case are preserved, unpublished; see `docs/CASE_STUDY_SOURCE_AUDIT.md`.
 
 ## Toolchain

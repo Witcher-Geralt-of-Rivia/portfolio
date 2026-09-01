@@ -47,6 +47,7 @@ const REQUIRED_DOCS = [
   "docs/CHANGELOG.md",
   "docs/NEXT_STAGE.md",
   "docs/DEMO_PLATFORM.md",
+  "docs/DEMO_OPERATIONS_SPEC.md",
   "docs/CASE_STUDY_SOURCE_AUDIT.md",
   "docs/project-state.json",
   "CLAUDE.md",

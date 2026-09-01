@@ -1201,3 +1201,78 @@ Stage 09 completes only when all three demos are verified and `#work` has been
 integrated and QA'd. Until that point no demo route is created at all — an
 unfinished product must not be reachable, so a demo becomes a route only when
 it is finished.
+
+---
+
+## D-051 — Demo 01 is a rental operations product, specified before it is built
+
+Status: Accepted
+Stage: 9B
+
+### Decision
+Demo 01's domain is motorcycle and light-vehicle rental operations, published
+as "Rental Operations Platform" with the in-app identity "Operations Console".
+Its complete product contract — eleven modules, four roles and their permission
+matrix, thirteen domain entities, five automation rules, six acceptance
+workflows, every seed count and distribution — is frozen in
+`docs/DEMO_OPERATIONS_SPEC.md` before any of it is implemented.
+
+### Reason
+Rental operations is the one scenario that exercises every capability the demo
+has to prove — CRM, fleet, contracts, payments, maintenance, conversations,
+automation and reporting — while staying a coherent business rather than a
+tour of unrelated screens. A generic "admin dashboard" would demonstrate
+layout; this demonstrates a domain.
+
+Specifying first is what makes the derived-state rules possible to honour. The
+counts are not decoration: seven Active contracts must be the seven Rented
+vehicles, four Confirmed reservations the four Reserved ones, three open work
+orders the three in Maintenance. Those identities are cheap to hold if they are
+written down before the seed exists and nearly impossible to retrofit once
+screens are reading the data.
+
+No brand is invented. "Operations Console" is descriptive rather than a coined
+company name, which keeps the demo clear of anyone's trademark, and every
+vehicle model is fictional for the same reason.
+
+### Consequence
+`qa/stage09b-operations-spec.mjs` asserts the contract in 93 checks, so a
+compressed session cannot quietly change a seed count or grow a Settings
+module. Stage 09C builds against the document; a genuine blocker is reported
+rather than absorbed by editing the specification to match the code.
+
+---
+
+## D-052 — The seed carries audit history, which the runtime must be extended to allow
+
+Status: Accepted
+Stage: 9B
+
+### Decision
+Demo 01 seeds 63 audit entries, one per state transition its seeded history
+implies. Stage 09A's `ResetPayload` carries only `records` and `meta`, so
+Stage 09C must extend it with an optional `audit` array and write those rows in
+the same transaction as the purge and reseed, in both adapters.
+
+### Reason
+Auditability is one of the capabilities Demo 01 exists to demonstrate, and a
+Customer or Contract whose Activity panel is empty on first launch demonstrates
+the opposite. Every other seeded collection — including automation runs and
+notifications — is ordinary records and needs nothing; audit is the one store
+the reset payload cannot currently reach.
+
+The alternative was to let audit accumulate only from the visitor's own
+actions. That was judged worse: a visitor who has not yet changed anything sees
+a product that appears not to record anything.
+
+Recording it here rather than making the change quietly matters because Stage
+09A is frozen and tagged `portfolio-demo-runtime-v1`. The extension is small
+and preserves every existing guarantee — one transaction, demo isolation, and
+identical semantics between the IndexedDB and memory adapters — but it is still
+a change to frozen code and should arrive as a decision, not a surprise.
+
+### Consequence
+`meta.auditSequence` after seeding is 63 and `revision` stays 0, because
+seeding is not a mutation. Both adapters must be changed together, and the
+existing parity assertions in `qa/stage09a-runtime.mjs` must be extended to
+cover seeded audit before the change is considered done.

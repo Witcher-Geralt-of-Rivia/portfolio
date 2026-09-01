@@ -3,8 +3,8 @@
   "purpose": "Demonstrate engineering capability to freelance clients. Technical portfolio, not a personal site.",
   "currentStage": 8,
   "stage05Started": true,
-  "nextStage": "stage-09b",
-  "nextStageTitle": "Stage 09B - Operations / CRM / ERP SaaS Product Specification",
+  "nextStage": "stage-09c",
+  "nextStageTitle": "Stage 09C - Build Operations / CRM / ERP SaaS Demo",
   "frozenStages": [
     1,
     2,
@@ -154,6 +154,7 @@
     "docs/CHANGELOG.md",
     "docs/NEXT_STAGE.md",
     "docs/DEMO_PLATFORM.md",
+    "docs/DEMO_OPERATIONS_SPEC.md",
     "docs/CASE_STUDY_SOURCE_AUDIT.md"
   ],
   "git": {
@@ -195,6 +196,8 @@
       "learning": "planned"
     },
     "requiredVerifiedDemos": 3,
-    "disclosure": "INTERACTIVE ENGINEERING DEMO / SYNTHETIC DATA - FRONTEND ONLY"
-  }
+    "disclosure": "INTERACTIVE ENGINEERING DEMO / SYNTHETIC DATA - FRONTEND ONLY",
+    "operationsSpec": "frozen; docs/DEMO_OPERATIONS_SPEC.md"
+  },
+  "stage09bComplete": true
 }

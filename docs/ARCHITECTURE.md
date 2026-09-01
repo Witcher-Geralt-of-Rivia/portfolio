@@ -102,7 +102,9 @@ Portfolio application
 ```
 
 The three domain modules do not exist. Stage 09A built only the shared
-foundation and froze it.
+foundation and froze it; Stage 09B froze the Operations domain's contract —
+entities, relationships, derived-state rules, events, automation and seed — in
+`docs/DEMO_OPERATIONS_SPEC.md`, without writing any of it.
 
 The rule that keeps one runtime serving three unrelated products: the runtime
 knows records, collections, events, jobs, audit, roles, a clock and
@@ -116,7 +118,8 @@ route under it is a 404. That is deliberate: an unfinished demonstration must
 not be reachable, and a demo becomes a route only when it is finished.
 
 Full detail, including the persistence schema and the QA contracts, is in
-`docs/DEMO_PLATFORM.md`. Decisions D-046 to D-050.
+`docs/DEMO_PLATFORM.md`; Demo 01's frozen product contract is in
+`docs/DEMO_OPERATIONS_SPEC.md`. Decisions D-046 to D-052.
 
 ## Composition
 

@@ -673,3 +673,76 @@ API requests, 0 external requests.
 `#work` is untouched and still renders its Stage 03 placeholder. Nothing is
 wired into `page.tsx` or `globals.css`, `currentStage` stays 8, and production
 was not deployed — Stage 09A changes no user-visible route.
+
+---
+
+## Stage 09B - Operations Product Specification
+
+Status: **Complete** (Stage 09 remains in progress)
+
+Planning only. No product code, no routes, no seed data, no deployment.
+
+### What was frozen
+
+Demo 01's complete product contract, in `docs/DEMO_OPERATIONS_SPEC.md`: the
+rental-operations domain, the public label "Rental Operations Platform" with
+the in-app identity "Operations Console", eleven modules and their URL
+strategy, four simulated roles and a full permission matrix, thirteen domain
+entities with every field, the relationship map, five automation rules, six
+acceptance workflows, the responsive shell, error mapping, accessibility
+requirements, QA contracts, and every seed count and distribution.
+
+Three values are specified as derived rather than stored, because that is what
+stops the demo contradicting itself: vehicle status follows a precedence rule
+over work orders, contracts and reservations; a payment's overdue state comes
+from `dueAt` against the logical clock; and a contract total is rate times
+duration. The seed distributions are tied together by identity — seven Active
+contracts *are* the seven Rented vehicles, four Confirmed reservations the four
+Reserved, three open work orders the three in Maintenance, six Won leads the
+six customers carrying `sourceLeadId`.
+
+The Overview KPI "payments requiring attention" reads 8 on seeded data, and the
+specification forbids writing 8 as a literal anywhere.
+
+### Findings resolved during the bootstrap
+
+Two, both recorded rather than absorbed:
+
+- The project has no icon package and every mark in it is authored locally as
+  SVG, so §159's "existing icon strategy" resolves to inline SVG and no
+  library. Recorded in the specification.
+- The Stage 09A runtime cannot express a seeded audit trail: `ResetPayload`
+  carries only `records` and `meta`, and both adapters purge audit on reset.
+  The specification asks for 63 seeded audit entries, so Stage 09C must extend
+  the payload with an optional `audit` array in both adapters. Because 09A is
+  frozen and tagged, this is written up as D-052 rather than done silently.
+
+### Guard
+
+`qa/stage09b-operations-spec.mjs`, 93 checks, asserting that the document still
+contains the frozen contract: eleven modules and no Settings, thirteen
+entities, four roles, five rules, six workflows, every seed count, every
+distribution and that the distributions sum to their totals, the relationship
+identities, the anti-hardcoding rules, the scope exclusions, and that no email
+address, telephone number or messaging link has appeared anywhere in it.
+
+Two of its first assertions were harness bugs rather than specification
+problems, and both were the same mistake: the guard flagged the document's own
+prohibition list, where `mailto:` is named precisely because it is forbidden.
+The patterns now require the part that would make a string a usable address,
+and phrase assertions run against a whitespace-collapsed view so re-wrapping a
+paragraph cannot break a check.
+
+### Deliberate exclusions
+
+No CSV or PDF export, no global command palette, no generic visual rule
+builder, no Settings module, no maps, no payment provider, no push
+notifications, no optimistic mutations, no virtualization, no icon library.
+Recorded in the specification so they are not reintroduced as scope creep.
+
+### Not done
+
+No source implementation. `docs/DEMO_OPERATIONS_SPEC.md` and the guard are the
+whole deliverable, plus canonical-document updates. The registry still reads
+`operations = planned`, `currentStage` stays 8, `#work` is untouched, and
+nothing was deployed.

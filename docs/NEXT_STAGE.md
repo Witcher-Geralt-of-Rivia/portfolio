@@ -10,12 +10,14 @@ Stages 01-08            COMPLETE and FROZEN
 Domain / HTTPS deploy   COMPLETE - live at https://intelligent-systems-lab.duckdns.org
 Stage 09                IN PROGRESS
   09A Demo platform     COMPLETE - shared runtime built and frozen
-  09B Operations spec   NEXT
+  09B Operations spec   COMPLETE - product contract frozen
+  09C Operations build  NEXT
 ```
 
-`currentStage` stays at **8**. Stage 09A completing does not complete Stage 09:
-the shared foundation exists, but no demo has been built, nothing is wired into
-the page, and `#work` still renders its Stage 03 placeholder.
+`currentStage` stays at **8**. Neither 09A nor 09B completes Stage 09: the
+shared foundation exists and Demo 01's contract is frozen, but no demo has been
+built, nothing is wired into the page, and `#work` still renders its Stage 03
+placeholder.
 
 ## Ordered plan
 
@@ -28,9 +30,10 @@ the page, and `#work` still renders its Stage 03 placeholder.
 6.  Stage 07 - AI Learning Systems              DONE
 7.  Stage 08 - Engineering Lab                  DONE
 8.  Stage 09A - Demo platform foundation        DONE
-9.  Stage 09B - Operations product spec         NEXT
-10. Stage 09C/D - Field and Learning specs      LATER
-11. Stage 09 - #work launcher integration       LATER
+9.  Stage 09B - Operations product spec         DONE
+10. Stage 09C - Build the Operations demo       NEXT
+11. Field and Learning specs, then builds       LATER
+12. Stage 09 - #work launcher integration       LATER
 ```
 
 ## What changed about Stage 09
@@ -80,27 +83,29 @@ production is untouched.
 
 ## NEXT TASK
 
-**Stage 09B - Operations / CRM / ERP SaaS Product Specification.**
+**Stage 09C - Build Operations / CRM / ERP SaaS Demo.**
 
-09B is product and domain planning, not implementation. It should freeze:
+Implementation against the frozen contract in `docs/DEMO_OPERATIONS_SPEC.md`,
+which fixes the product scenario, the eleven modules, four roles and their
+permission matrix, thirteen domain entities, five automation rules, six
+acceptance workflows, every seed count and distribution, and the derived-state
+rules that stop the demo contradicting itself.
 
-```
-product scenario        entities            relationships
-roles                   navigation          workflows
-screens                 CRUD contract       automation
-notifications           dashboard derivation    seed dataset
-```
+`qa/stage09b-operations-spec.mjs` (93 checks) guards that contract. If the
+build finds a genuine blocker, stop and report it rather than editing the
+specification to fit the code.
 
-before any screen is built. Stage 09A deliberately decided none of that: the
-runtime knows records and collections, and never what a customer or an order
-is.
+One known task for 09C before seeding: the runtime's `ResetPayload` carries
+only `records` and `meta`, so the 63 seeded audit entries cannot be written
+yet. The required extension is specified in the spec's "Required runtime
+extension" section.
 
-Do not begin 09B until the specification is supplied.
+Do not begin 09C until instructed.
 
 ## Finishing Stage 09
 
 ```
-1  09B/09C/09D  freeze each product spec, then build the demo
+1  freeze each product spec, then build that demo
 2  set that demo's status to "verified" in src/demo-runtime/demo-registry.ts
 3  only when all three are verified, build the #work launcher
 4  add a Stage 09 heading assertion to deploy/safe-deploy.ps1 (D-039)
