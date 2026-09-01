@@ -1,0 +1,687 @@
+/* =====================================================================
+   MILKY INTELLIGENCE — 05 / SELECTED WORK
+   Editorial and calm. This section follows the most interactive part of
+   the site and is meant to read as evidence rather than experiment:
+   long-form vertical rhythm, almost no motion, no cards.
+
+   NOT YET IMPORTED into globals.css. The section is not mounted until
+   verified case-study content exists - see the header comment in
+   SelectedWorkSection.tsx and docs/CASE_STUDY_SOURCE_AUDIT.md. These
+   rules are therefore structurally complete but visually unmeasured:
+   the geometry has never been checked against real copy, and it must be
+   QA'd at all eight viewports before this section is published.
+   ===================================================================== */
+
+.work {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(48px, 5vw, 80px);
+  padding-block: clamp(120px, 12vw, 168px);
+}
+
+/* Scoped list reset. The global reset zeroes margin but not padding or
+   list-style, and globals.css is never edited for a section. */
+.windex__list,
+.wcase__problem-list,
+.wcase__impl-list,
+.wdec__list,
+.wresult__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* --- Introduction ------------------------------------------------------ */
+
+.work__intro {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(22px, 2.8vw, 36px);
+}
+
+.work__intro-lead {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.work__title {
+  max-width: var(--measure-display-2);
+  color: var(--text-primary);
+  font-size: var(--type-display-2);
+  font-weight: var(--weight-heading);
+  line-height: var(--leading-display-2);
+  letter-spacing: var(--tracking-display-2);
+  text-wrap: balance;
+}
+
+.work__intro-support {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.work__lead {
+  max-width: 54ch;
+  color: var(--text-secondary);
+  font-size: var(--type-lead);
+  font-weight: var(--weight-lead);
+  line-height: var(--leading-lead);
+  letter-spacing: var(--tracking-lead);
+  text-wrap: pretty;
+}
+
+.work__capabilities {
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: var(--weight-ui);
+  line-height: 1.5;
+  letter-spacing: 0.075em;
+}
+
+@media (min-width: 1000px) {
+  .work__intro {
+    display: grid;
+    grid-template-columns: minmax(0, 1.24fr) minmax(0, 1fr);
+    gap: clamp(30px, 3.6vw, 68px);
+    align-items: end;
+  }
+}
+
+/* --- Index rail --------------------------------------------------------- */
+
+.windex {
+  padding: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: var(--radius-card);
+  background: rgba(255, 255, 255, 0.32);
+}
+
+.windex__list {
+  display: grid;
+  gap: 2px;
+}
+
+.windex__link {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 14px;
+  padding: 13px 15px;
+  border-radius: var(--radius-control);
+  color: inherit;
+  text-decoration: none;
+  transition: background-color 200ms var(--ease-standard);
+}
+
+.windex__link:hover {
+  background: rgba(255, 255, 255, 0.62);
+}
+
+.windex__number {
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+}
+
+.windex__label {
+  overflow: hidden;
+  color: var(--text-primary);
+  font-size: 13.5px;
+  font-weight: var(--weight-ui);
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.windex__category {
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+@media (min-width: 800px) {
+  .windex__list {
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+  }
+}
+
+/* --- Case studies ------------------------------------------------------- */
+
+.work__cases {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(64px, 7vw, 112px);
+}
+
+/* Separation comes from space and one thin rule, never a full-width band. */
+.wcase {
+  --accent: var(--aurora-sky);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(24px, 3vw, 40px);
+  padding-top: clamp(36px, 4vw, 56px);
+  border-top: 1px solid var(--line-subtle);
+  scroll-margin-top: var(--nav-scroll-margin);
+}
+
+.wcase:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.wcase--sky { --accent: var(--aurora-sky); }
+.wcase--mint { --accent: var(--aurora-mint); }
+.wcase--peach { --accent: var(--aurora-peach); }
+
+/* A soft local wash rather than a section background. */
+.wcase::before {
+  content: "";
+  position: absolute;
+  top: -6%;
+  left: -8%;
+  z-index: -1;
+  width: 46%;
+  height: 46%;
+  background: radial-gradient(60% 60% at 40% 40%, var(--accent), transparent 72%);
+  opacity: 0.24;
+  pointer-events: none;
+}
+
+.wcase__head {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 68ch;
+}
+
+.wcase__number {
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+}
+
+.wcase__title {
+  color: var(--text-primary);
+  font-size: clamp(2.25rem, 3.2vw, 3.25rem);
+  font-weight: var(--weight-heading);
+  line-height: 1.08;
+  letter-spacing: -0.032em;
+  text-wrap: balance;
+}
+
+.wcase__category {
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+}
+
+.wcase__summary {
+  max-width: 62ch;
+  color: var(--text-secondary);
+  font-size: var(--type-body);
+  line-height: var(--leading-body);
+  text-wrap: pretty;
+}
+
+.wcase__body {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(22px, 2.4vw, 34px);
+}
+
+.wcase__panel-title {
+  margin-bottom: 10px;
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: var(--weight-ui);
+  letter-spacing: 0.1em;
+}
+
+.wcase__label {
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+}
+
+/* --- Problem ------------------------------------------------------------ */
+
+.wcase__problem {
+  padding: 18px 20px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: var(--radius-card-sm);
+  background: rgba(255, 255, 255, 0.5);
+  box-shadow: var(--shadow-inner-light);
+}
+
+.wcase__problem-list {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  max-width: 64ch;
+}
+
+.wcase__problem-list li {
+  position: relative;
+  padding-left: 16px;
+  color: var(--text-primary);
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+
+.wcase__problem-list li::before {
+  content: "";
+  position: absolute;
+  top: 9px;
+  left: 0;
+  width: 6px;
+  height: 1.5px;
+  border-radius: var(--radius-pill);
+  background: rgba(61, 68, 88, 0.34);
+}
+
+.wcase__scope {
+  margin-top: 14px;
+  padding-top: 13px;
+  border-top: 1px solid var(--line-subtle);
+  color: var(--text-secondary);
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+
+/* --- Architecture -------------------------------------------------------- */
+
+.warch {
+  margin: 0;
+  padding: 18px 20px 22px;
+  border: 1px solid var(--line-subtle);
+  border-radius: var(--radius-card-sm);
+  background: rgba(255, 255, 255, 0.42);
+}
+
+.warch__title {
+  margin-bottom: 14px;
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: var(--weight-ui);
+  letter-spacing: 0.1em;
+}
+
+.warch__canvas {
+  position: relative;
+  width: 100%;
+  min-height: 260px;
+}
+
+.warch__links {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.warch__link {
+  stroke: rgba(61, 68, 88, 0.2);
+  stroke-width: 1.2;
+  stroke-linecap: round;
+}
+
+.warch__link.is-async {
+  stroke-dasharray: 4 5;
+  stroke: rgba(61, 68, 88, 0.15);
+}
+
+.warch__node {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 9px 12px;
+  transform: translate(-50%, -50%);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: var(--radius-control);
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: var(--shadow-inner-light);
+  white-space: nowrap;
+  transition: box-shadow 200ms var(--ease-standard);
+}
+
+.warch__node--data { background: rgba(221, 245, 232, 0.82); }
+.warch__node--external { background: rgba(233, 224, 255, 0.78); }
+.warch__node--worker { background: rgba(251, 228, 215, 0.78); }
+
+.warch__node-label {
+  color: var(--text-primary);
+  font-size: 11.5px;
+  font-weight: var(--weight-ui);
+  line-height: 1.3;
+}
+
+.warch__node-code {
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+}
+
+/* CSS-only detail. No JavaScript, and it is supplementary: the same content
+   is in the architecture summary read by assistive technology. */
+.warch__node-note {
+  position: absolute;
+  top: calc(100% + 7px);
+  left: 50%;
+  z-index: 2;
+  width: max-content;
+  max-width: 220px;
+  padding: 8px 10px;
+  transform: translateX(-50%);
+  border: 1px solid var(--line-subtle);
+  border-radius: var(--radius-control);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: var(--shadow-float);
+  color: var(--text-secondary);
+  font-size: 11px;
+  line-height: 1.45;
+  white-space: normal;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 180ms var(--ease-standard), visibility 0s linear 180ms;
+}
+
+.warch__node:hover,
+.warch__node:focus-within {
+  box-shadow: var(--shadow-inner-light), 0 0 0 3px rgba(220, 238, 255, 0.5);
+}
+
+.warch__node:hover .warch__node-note,
+.warch__node:focus-within .warch__node-note {
+  opacity: 1;
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+/* --- Engineering challenge ----------------------------------------------- */
+
+.wcase__challenge {
+  padding-left: 18px;
+  border-left: 2px solid var(--accent);
+}
+
+.wcase__challenge-title {
+  margin-bottom: 8px;
+  color: var(--text-primary);
+  font-size: 16px;
+  font-weight: var(--weight-subhead);
+  line-height: 1.35;
+  letter-spacing: -0.012em;
+}
+
+.wcase__challenge-body {
+  max-width: 64ch;
+  color: var(--text-secondary);
+  font-size: 13.5px;
+  line-height: 1.62;
+  text-wrap: pretty;
+}
+
+/* --- Decisions ------------------------------------------------------------ */
+
+.wdec__title {
+  margin-bottom: 14px;
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: var(--weight-ui);
+  letter-spacing: 0.1em;
+}
+
+.wdec__list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.wdec__item {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 14px;
+  align-items: baseline;
+}
+
+.wdec__index {
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+}
+
+.wdec__body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 64ch;
+}
+
+.wdec__heading {
+  color: var(--text-primary);
+  font-size: 14.5px;
+  font-weight: var(--weight-ui);
+  line-height: 1.4;
+}
+
+.wdec__reason,
+.wdec__tradeoff {
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+
+.wdec__tradeoff {
+  padding-top: 6px;
+  border-top: 1px solid var(--line-subtle);
+}
+
+/* --- Result and implementation ------------------------------------------- */
+
+.wresult__title,
+.wcase__impl .wcase__panel-title {
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: var(--weight-ui);
+  letter-spacing: 0.1em;
+}
+
+.wresult__title { margin-bottom: 12px; }
+
+.wresult__list {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  max-width: 64ch;
+}
+
+.wresult__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: var(--text-primary);
+  font-size: 13.5px;
+  line-height: 1.55;
+}
+
+.wresult__mark {
+  flex: 0 0 auto;
+  width: 8px;
+  height: 8px;
+  margin-top: 6px;
+  border: 1.5px solid rgba(122, 186, 160, 0.85);
+  border-radius: 50%;
+  background: rgba(221, 245, 232, 0.9);
+}
+
+.wresult__metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 32px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line-subtle);
+}
+
+.wresult__metric {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.wresult__metric dt {
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.08em;
+}
+
+.wresult__metric dd {
+  color: var(--text-primary);
+  font-size: 19px;
+  font-weight: var(--weight-heading);
+  letter-spacing: -0.015em;
+}
+
+.wcase__impl-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+}
+
+.wcase__impl-list li {
+  padding: 5px 11px;
+  border: 1px solid var(--line-subtle);
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.52);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  line-height: 1.5;
+}
+
+/* =====================================================================
+   RESPONSIVE
+   Wide screens alternate the composition subtly; a phone reads every
+   case in the same top-to-bottom order, which is the order the
+   questions get asked in.
+   ===================================================================== */
+
+@media (min-width: 1000px) {
+  .wcase__body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+    gap: clamp(24px, 2.6vw, 40px);
+    align-items: start;
+    grid-template-areas:
+      "problem architecture"
+      "challenge architecture"
+      "decisions result"
+      "decisions impl";
+  }
+
+  .wcase__problem { grid-area: problem; }
+  .wcase__architecture { grid-area: architecture; }
+  .wcase__challenge { grid-area: challenge; }
+  .wdec { grid-area: decisions; }
+  .wresult { grid-area: result; }
+  .wcase__impl { grid-area: impl; }
+
+  /* The alternate composition mirrors the two columns rather than
+     reordering the content, so the reading order never changes. */
+  .wcase--alt .wcase__body {
+    grid-template-areas:
+      "architecture problem"
+      "architecture challenge"
+      "result decisions"
+      "impl decisions";
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 799px) {
+  .windex__link {
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas:
+      "number label"
+      ".      category";
+    gap: 3px 12px;
+  }
+
+  .windex__number { grid-area: number; }
+  .windex__label { grid-area: label; white-space: normal; }
+  .windex__category { grid-area: category; }
+}
+
+@media (max-width: 699px) {
+  .wcase__title {
+    font-size: clamp(1.75rem, 7.4vw, 2.25rem);
+  }
+
+  /* Diagrams become vertical rather than shrinking to unreadable. */
+  .warch__canvas {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 0;
+  }
+
+  .warch__links { display: none; }
+
+  .warch__node {
+    position: static;
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    transform: none;
+    white-space: normal;
+  }
+
+  /* A hover note has no place on a touch screen; the architecture summary
+     carries the same content for every reader. */
+  .warch__node-note { display: none; }
+
+  .wdec__item {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 4px;
+  }
+
+  .wresult__metrics {
+    gap: 12px 20px;
+  }
+
+  .wresult__metric dd { font-size: 17px; }
+}
+
+/* =====================================================================
+   REDUCED MOTION
+   This section has almost none to begin with: one hover reveal and the
+   index hover tint. Both are removed.
+   ===================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .warch__node,
+  .warch__node-note,
+  .windex__link {
+    transition: none;
+  }
+}
