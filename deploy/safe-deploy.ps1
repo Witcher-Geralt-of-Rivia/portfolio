@@ -346,8 +346,19 @@ try {
         Write-Step "$k -> $code" $(if ($code -eq 200) { "OK" } else { "FAIL" })
         if ($code -ne 200) { $smokeFailed += "$k=$code" }
     }
+    # Section markers. Each built section is asserted here, so a release that
+    # compiles but renders a section-less page cannot reach production.
+    # id="products" alone is NOT sufficient: before Stage 06 the same id was
+    # emitted by the navigation placeholder, so the heading is what actually
+    # distinguishes the built section from the placeholder.
     if ($smokeHtml -notmatch 'id="systems"') { $smokeFailed += "#systems section missing from HTML" }
     else { Write-Step "#systems section present in rendered HTML" "OK" }
+
+    if ($smokeHtml -notmatch 'id="products"') { $smokeFailed += "#products section missing from HTML" }
+    else { Write-Step "#products section present in rendered HTML" "OK" }
+
+    if ($smokeHtml -notmatch 'One product\. Every surface\.') { $smokeFailed += "Stage 06 heading missing from HTML" }
+    else { Write-Step "Stage 06 heading present in rendered HTML" "OK" }
 
     if ($smokeFailed.Count -gt 0) { throw "Smoke test failed: $($smokeFailed -join '; ')" }
 

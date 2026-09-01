@@ -14,7 +14,8 @@ Deployment     LIVE at https://intelligent-systems-lab.duckdns.org
 Stage 07       NOT STARTED
 ```
 
-The next task is Stage 07, filling `#ai-learning`. See `docs/NEXT_STAGE.md`.
+The next task is Stage 07 - AI Learning Systems, filling `#ai-learning`.
+See `docs/NEXT_STAGE.md`.
 
 ## Toolchain
 

@@ -282,15 +282,27 @@
   }
 }
 
-/* The global reset zeroes margins only, so each stylesheet clears its own
-   list defaults. Without this the browser's 40px marker inset indents the
-   rows, timeline, step list, event rail and capability rail. */
+/* Stage 06 uses real <ul>/<ol> elements, so the semantics stay; the marker and
+   its indentation are removed here instead. All three properties are declared
+   locally rather than leaning on the global reset, which zeroes margin but not
+   padding or list-style -- without this the browser's ~40px marker inset
+   indents the rows, timeline, step list, checklist, event rail and capability
+   rail away from their panel edges.
+
+   These are component-local selectors on purpose: products.css must never
+   restyle every ul/ol in the application.
+
+   Keep this block where it is. `.pweb__timeline` below re-declares padding for
+   the timeline panel and wins on source order alone, at equal specificity --
+   moving this reset later, or raising its specificity, would silently collapse
+   that panel's inset. */
 .products__rail,
 .pweb__rows,
 .pweb__timeline,
 .pmob__steps,
 .pmob__checklist ul,
 .pflow__rail {
+  margin: 0;
   padding: 0;
   list-style: none;
 }

@@ -4,7 +4,7 @@
   "currentStage": 6,
   "stage05Started": true,
   "nextStage": "stage-07",
-  "nextStageTitle": "Stage 07",
+  "nextStageTitle": "Stage 07 - AI Learning Systems",
   "frozenStages": [
     1,
     2,
@@ -19,7 +19,8 @@
     "3": "Navigation and site shell",
     "4": "Hero and Intelligence Constellation",
     "5": "Intelligent Systems - architecture lab",
-    "6": "Product Engineering - cross-surface product studio"
+    "6": "Product Engineering - cross-surface product studio",
+    "7": "AI Learning Systems"
   },
   "constraints": {
     "contactInformation": false,

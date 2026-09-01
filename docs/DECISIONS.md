@@ -834,3 +834,65 @@ the overlay scrollbars headless Chromium uses, where `clientWidth` equals
 `centred=FAIL` for a bar centred to 0.00px. The reference is now the content
 frame, which is the criterion `QA_BASELINE.md` already documented. The
 navigation itself was not touched.
+
+---
+
+## D-039 — The smoke gate asserts every built section, not just the first
+
+Status: Accepted
+Stage: 6 (post-stage hardening)
+
+### Decision
+`deploy/safe-deploy.ps1` asserts three markers in the smoke server's rendered
+HTML before switching production: `id="systems"`, `id="products"`, and the
+Stage 06 heading `One product. Every surface.` Each stage that fills a
+placeholder adds its own marker to that list.
+
+### Reason
+The gate previously checked `#systems` alone, so a build that compiled but
+rendered any later section as an empty placeholder would have deployed clean.
+
+The heading is the load-bearing assertion, not decoration. `src/app/page.tsx`
+renders every navigation id that is not yet built as a placeholder section, so
+`id="products"` was already present in pre-Stage-06 output. Measured against
+real build directories: `.next-release-a` (Stage 06) passes all three;
+`.next-release-b` (pre-Stage-06) is rejected with "Stage 06 heading missing
+from HTML" while its `id="products"` assertion passes. An id-only check would
+have let that build through.
+
+### Consequence
+Changing the `#products` heading copy aborts deployment at phase 7 until the
+script is updated to match. That coupling is intentional. It is recorded here
+and in `QA_BASELINE.md` so a later session does not read the abort as a bug in
+the deployment script.
+
+---
+
+## D-040 — Stage 06 lists stay semantic; the marker is removed locally
+
+Status: Accepted
+Stage: 6 (post-stage hardening)
+
+### Decision
+The six Stage 06 lists remain real `<ul>`/`<ol>` elements. `products.css`
+declares `margin: 0; padding: 0; list-style: none` on six component-local
+selectors rather than swapping the elements for `<div>`s or resetting every
+`ul`/`ol` in the application from a section stylesheet.
+
+### Reason
+The global reset in `globals.css` zeroes margin but not padding or
+`list-style`, so the browser's marker box survived: measured at a 40px
+inline-start inset on all six lists, pushing rows, timeline, step list,
+checklist, event rail and capability rail away from their panel edges.
+
+Replacing the elements with `<div>`s would have removed the marker too, at the
+cost of the list semantics screen readers rely on. Resetting bare `ul`/`ol`
+from `products.css` would have reached outside the section.
+
+### Consequence
+Keep the reset block where it is. `.pweb__timeline` re-declares
+`padding: 13px 14px` later in the same file and wins on source order at equal
+specificity; that 14px is the timeline panel's design inset, not leftover
+marker indentation. Moving the reset later, or raising its specificity, would
+silently collapse that panel. `qa/stage06-listreset.mjs` measures all six lists
+with the reset neutralised and in force, and encodes the 14px expectation.

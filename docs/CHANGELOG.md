@@ -371,3 +371,51 @@ with 0 network requests. Eight viewports pass with no overflow and no surface
 collision. Flow measured at 2.18–2.21s over seven steps. Stage 06 contributes
 zero infinite animations at rest; under reduced motion it runs no keyframe
 animation at all while content still changes. Stages 01–05 regression all PASS.
+
+---
+
+## Post-Stage 06 Hardening
+
+Status: **Complete**
+
+### Summary
+Three narrow corrections to lint, CSS and the deployment gate. No visual section
+was redesigned and no frozen behaviour changed.
+
+### Files
+`eslint.config.mjs`, `src/styles/products.css`, `deploy/safe-deploy.ps1`,
+`qa/stage06-listreset.mjs`, canonical docs
+
+### What changed
+- **ESLint excludes generated A/B output.** `node_modules` is now listed
+  explicitly alongside `.next`, `.next-release-a` and `.next-release-b`, so
+  every skipped path is auditable in one place rather than half of it resting
+  on an ESLint built-in default. The release-slot entries themselves shipped
+  with Stage 06 (D-037); this completes and documents the set. Verified: the
+  same 83 source files are linted before and after, and no source rule was
+  relaxed — a deliberate `any` in `src/` is still reported as an error.
+- **Stage 06 semantic-list indentation corrected.** The component-local reset
+  now declares all three properties (`margin`, `padding`, `list-style`) instead
+  of leaning on the global reset for margin. Measured: 40px marker inset on all
+  six lists without the reset, 0px with it — except the timeline's 14px, which
+  is its own panel padding. Every list stays a real `<ul>`/`<ol>`.
+- **Deployment smoke coverage extended to `#products`.** The gate now asserts
+  `id="systems"`, `id="products"` and the Stage 06 heading. The heading is the
+  assertion that matters: the pre-Stage-06 placeholder emitted `id="products"`
+  too, so an id-only check would have passed a build that lost the section.
+
+### Notable during implementation
+- Both `.next-release-a/**` and directory-form `.next-release-a/` prune the
+  tree correctly; ESLint tests each path prefix with a trailing slash, so the
+  existing `/**` style was already skipping traversal rather than enumerating
+  and discarding. The style was left as it was.
+- `QA_BASELINE.md`'s Stage Status block still stopped at Stage 05 while the
+  same file recorded full Stage 06 results and `project-state.json` listed 6 as
+  passing. Corrected to Stage 06 PASS.
+
+### QA
+`npx eslint src` and `npx eslint .` both exit 0 with zero generated-output
+findings. Smoke assertions exercised against both real build directories: the
+Stage 06 build passes all three, the pre-Stage-06 build is correctly rejected.
+Stage 06 responsive, interaction, contrast, performance and list-reset harnesses
+all PASS; Stages 01–05 regression all PASS.

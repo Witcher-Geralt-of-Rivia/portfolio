@@ -8,31 +8,33 @@
 ```
 Stages 01-06            COMPLETE and FROZEN
 Domain / HTTPS deploy   COMPLETE - live at https://intelligent-systems-lab.duckdns.org
+Post-Stage 06 hardening COMPLETE - lint, list reset, smoke gate
 Stage 07                NOT STARTED
 ```
 
 ## Ordered plan
 
 ```
-1. Persistent context system            DONE
-2. Domain / HTTPS / production deploy   DONE
-3. Stage 05 - Intelligent Systems       DONE
-4. Stage 06 - Product Engineering       DONE
-5. Stage 07                             NEXT
+1. Persistent context system              DONE
+2. Domain / HTTPS / production deploy     DONE
+3. Stage 05 - Intelligent Systems         DONE
+4. Stage 06 - Product Engineering         DONE
+5. Post-Stage 06 hardening                DONE
+6. Stage 07 - AI Learning Systems         NEXT
 ```
 
 ## NEXT TASK
 
-**Stage 07.**
+**Stage 07 - AI Learning Systems.**
 
-The next unbuilt section is `#ai-learning`, still a Stage 03 navigation
-placeholder. The user will supply that specification separately. Do not begin
-it automatically and do not design it in advance.
+It fills `#ai-learning`, still a Stage 03 navigation placeholder. The user will
+supply that specification separately. Do not begin it automatically and do not
+design it in advance.
 
 ## Sections still to build
 
 ```
-#ai-learning   later stage
+#ai-learning   Stage 07 - AI Learning Systems
 #lab           later stage
 #work          later stage
 ```
@@ -57,3 +59,7 @@ URL and rolls back automatically if anything fails.
 
 Do **not** deploy by hand. Production no longer serves `.next`, so a plain
 `npm run build` is harmless — but it also deploys nothing.
+
+The smoke gate asserts the markup of every built section (`#systems`,
+`#products`, and the Stage 06 heading). When Stage 07 fills `#ai-learning`, add
+its marker to that list in `deploy/safe-deploy.ps1` — see D-039.

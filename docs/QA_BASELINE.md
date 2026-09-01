@@ -15,6 +15,7 @@ Stage 02   PASS
 Stage 03   PASS
 Stage 04   PASS
 Stage 05   PASS
+Stage 06   PASS
 ```
 
 ## Validated Viewports
@@ -271,6 +272,23 @@ Dev server, 1440x900 unless stated. Harness: `qa/stage06-*.mjs`.
 Worst contrast is the `LOCAL / DETERMINISTIC` micro label at 5.01:1 against the
 capability rail; every other role clears 5.3:1. No role uses `--text-muted`.
 
+Semantic list marker inset, measured by `qa/stage06-listreset.mjs` with the
+component-local reset neutralised and then in force:
+
+| List | Element | Marker inset without the reset | With the reset |
+|---|---|---|---|
+| capability rail | `ul` | 40px | 0px |
+| web rows | `ul` | 40px | 0px |
+| event rail | `ol` | 40px | 0px |
+| web timeline | `ol` | 40px | 14px, its own panel inset |
+| phone step list | `ol` | 40px | 0px |
+| phone checklist | `ul` | 40px | 0px |
+
+All six stay real `<ul>`/`<ol>` elements. The timeline's 14px is a deliberate
+panel padding re-declared later in `products.css`, not leftover marker
+indentation - it wins over the reset on source order at equal specificity, so
+the reset block must not be moved or given higher specificity.
+
 Keyboard: ArrowRight/ArrowLeft/Home/End all move selection and focus together
 across the scenario tablist. Abandoning a run mid-flight by switching scenario
 leaves no active stage, no passed stages, an empty live region and the button
@@ -322,6 +340,31 @@ exit code 1 (a successful rollback is still a failed deployment)
 **Production process environment** after migration: 2 variables
 (`NODE_ENV`, `PORTFOLIO_DIST_DIR`), down from 69. No tooling or credential
 variable names present.
+
+**Smoke gate coverage.** Before the switch, the loopback smoke server on
+127.0.0.1:3199 must serve the page, the CSS and JS chunks, both WOFF2 fonts and
+both SVG assets, and its HTML must contain `id="systems"`, `id="products"` and
+the Stage 06 heading `One product. Every surface.` A release that compiles but
+renders a section-less page cannot reach production.
+
+The heading assertion is the load-bearing one and must not be dropped as
+redundant: before Stage 06 the navigation placeholder emitted `id="products"`
+too, so the id alone does not distinguish a built section from a placeholder.
+Measured against real build output - `.next-release-a` (Stage 06) passes all
+three; `.next-release-b` (pre-Stage-06) is rejected with "Stage 06 heading
+missing from HTML".
+
+Consequence: changing the `#products` heading copy will abort a deployment at
+phase 7 until `deploy/safe-deploy.ps1` is updated to match. That is the gate
+working, not a script bug.
+
+**Public origin check.** `qa/public-browser-check.mjs` drives Chromium against
+`https://intelligent-systems-lab.duckdns.org` at 1440x900 and 390x844,
+exercising all three scenarios and a full flow. Console, failed requests and
+mixed content are origin-sensitive, so they are only meaningful measured over
+real HTTPS rather than a loopback dev server. Measured: 0 console errors, 0
+console warnings, 0 failed requests, 0 plaintext subresources, 13 requests per
+page load, no horizontal overflow.
 
 Scripts: `qa/deploy-continuity.mjs` (run with `MSYS_NO_PATHCONV=1` under Git
 Bash, or a leading-slash asset path is rewritten to a Windows path before Node
@@ -448,6 +491,9 @@ qa/stage06-interaction.mjs  30 scenario changes, 15 flow runs, keyboard, network
 qa/stage06-contrast.mjs     50 text roles across all three scenarios
 qa/stage06-perf.mjs         CLS, animation cost at rest, reduced-motion contract
 qa/stage06-timing.mjs       in-page flow timing (no screenshots during the run)
+qa/stage06-listreset.mjs    semantic list marker inset, reset on vs neutralised
+qa/public-browser-check.mjs console, failed requests and mixed content over
+                            real HTTPS against the public origin
 qa/stage06-shots.mjs        Stage 06 screenshot set
 qa/project-memory-check.mjs canonical documentation consistency
 ```
