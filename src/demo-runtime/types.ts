@@ -216,6 +216,15 @@ export type SeedCollection = {
 };
 
 /**
+ * One seeded audit entry (D-052).
+ *
+ * A seed supplies the business part; the runtime assigns `demoId` and the
+ * sequence number, so a seed cannot hand out a sequence that collides with the
+ * ones later mutations will allocate.
+ */
+export type SeedAuditEntry = Omit<AuditEntry, "demoId" | "sequence">;
+
+/**
  * Everything a demo needs to be restored to its canonical state.
  *
  * A seed is data, not code: it must contain no function, no generated value
@@ -236,6 +245,12 @@ export type DemoSeed = {
   initialRole: string;
   /** Roles the demo offers in its role switcher. */
   roles: readonly string[];
+  /**
+   * Historical audit entries implied by the seeded state, in order. Optional:
+   * a demo that seeds no history simply omits it and reset clears audit as
+   * before.
+   */
+  audit?: readonly SeedAuditEntry[];
 };
 
 /* =====================================================================

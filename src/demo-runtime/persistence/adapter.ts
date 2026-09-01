@@ -39,6 +39,18 @@ export type ResetPayload = {
   demoId: DemoId;
   records: DemoRecord[];
   meta: DemoMeta;
+  /**
+   * Optional seeded audit history (D-052).
+   *
+   * A demo whose canonical dataset implies past state transitions can restore
+   * that trail on reset, so an Activity panel is not empty on first visit.
+   * Omitted, reset clears audit as it always did — the demos that seed no
+   * history are unaffected.
+   *
+   * These are runtime `AuditEntry` rows. The runtime still does not learn what
+   * the entries describe; a demo's own domain composes them.
+   */
+  audit?: AuditEntry[];
 };
 
 export interface DemoPersistenceAdapter {

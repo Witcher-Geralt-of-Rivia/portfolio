@@ -96,15 +96,19 @@ Portfolio application
   └── Demo platform                 src/demo-runtime/, src/app/demos/
         ├── Shared runtime          persistence, clock, ids, events,
         │                           audit, jobs, session, connectivity
-        ├── Operations domain       PLANNED - not built
+        ├── Operations domain       BUILT (09C1) - domain only, no UI
         ├── Field domain            PLANNED - not built
         └── Learning domain         PLANNED - not built
 ```
 
-The three domain modules do not exist. Stage 09A built only the shared
-foundation and froze it; Stage 09B froze the Operations domain's contract —
-entities, relationships, derived-state rules, events, automation and seed — in
-`docs/DEMO_OPERATIONS_SPEC.md`, without writing any of it.
+Stage 09A built the shared foundation and froze it. Stage 09B froze the
+Operations domain's contract in `docs/DEMO_OPERATIONS_SPEC.md`, and Stage 09C1
+built that domain — `src/demos/operations/`, twenty-one modules of types, seed,
+selectors and services with no interface at all. Field and Learning remain
+unspecified and unbuilt.
+
+The dependency runs one way and is asserted by QA: no runtime module imports
+from `src/demos/`, and no Operations entity name appears in runtime code.
 
 The rule that keeps one runtime serving three unrelated products: the runtime
 knows records, collections, events, jobs, audit, roles, a clock and
@@ -119,7 +123,8 @@ not be reachable, and a demo becomes a route only when it is finished.
 
 Full detail, including the persistence schema and the QA contracts, is in
 `docs/DEMO_PLATFORM.md`; Demo 01's frozen product contract is in
-`docs/DEMO_OPERATIONS_SPEC.md`. Decisions D-046 to D-052.
+`docs/DEMO_OPERATIONS_SPEC.md`, and how it is built in
+`docs/DEMO_OPERATIONS_IMPLEMENTATION.md`. Decisions D-046 to D-053.
 
 ## Composition
 

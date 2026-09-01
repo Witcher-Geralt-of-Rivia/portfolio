@@ -3,8 +3,8 @@
   "purpose": "Demonstrate engineering capability to freelance clients. Technical portfolio, not a personal site.",
   "currentStage": 8,
   "stage05Started": true,
-  "nextStage": "stage-09c",
-  "nextStageTitle": "Stage 09C - Build Operations / CRM / ERP SaaS Demo",
+  "nextStage": "stage-09c2",
+  "nextStageTitle": "Stage 09C2 - Operations App Shell + Routing + Overview",
   "frozenStages": [
     1,
     2,
@@ -155,6 +155,7 @@
     "docs/NEXT_STAGE.md",
     "docs/DEMO_PLATFORM.md",
     "docs/DEMO_OPERATIONS_SPEC.md",
+    "docs/DEMO_OPERATIONS_IMPLEMENTATION.md",
     "docs/CASE_STUDY_SOURCE_AUDIT.md"
   ],
   "git": {
@@ -171,7 +172,7 @@
   "stage08Started": true,
   "stage09aComplete": true,
   "demoPlatform": {
-    "status": "09A foundation complete; no demo built",
+    "status": "09A foundation + Operations domain complete; no demo UI built",
     "routes": [
       "/demos/operations",
       "/demos/field",
@@ -191,13 +192,15 @@
       "memory"
     ],
     "demoStatuses": {
-      "operations": "planned",
+      "operations": "building",
       "field": "planned",
       "learning": "planned"
     },
     "requiredVerifiedDemos": 3,
     "disclosure": "INTERACTIVE ENGINEERING DEMO / SYNTHETIC DATA - FRONTEND ONLY",
-    "operationsSpec": "frozen; docs/DEMO_OPERATIONS_SPEC.md"
+    "operationsSpec": "frozen; docs/DEMO_OPERATIONS_SPEC.md",
+    "operationsDomain": "built; docs/DEMO_OPERATIONS_IMPLEMENTATION.md"
   },
-  "stage09bComplete": true
+  "stage09bComplete": true,
+  "stage09c1Complete": true
 }

@@ -1276,3 +1276,49 @@ a change to frozen code and should arrive as a decision, not a surprise.
 seeding is not a mutation. Both adapters must be changed together, and the
 existing parity assertions in `qa/stage09a-runtime.mjs` must be extended to
 cover seeded audit before the change is considered done.
+
+---
+
+## D-053 — Overdue is derived, money is integer cents, and the follow-up offset is two days
+
+Status: Accepted
+Stage: 9C1
+
+### Decision
+Three amendments to the Stage 09B Operations contract, made before any of it
+was implemented:
+
+1. A Payment's stored `status` is `Pending | Paid`. `Overdue` exists only as an
+   effective value derived from `dueAt` against the logical clock.
+2. Every monetary amount — `dailyRate`, `totalAmount`, `paidAmount` and a
+   payment's `amount` — is an integer number of cents.
+3. Rule 02 sets `nextFollowUpAt` to the qualifying instant plus exactly two
+   days.
+
+### Reason
+Each closes a gap the Stage 09C1 specification asked to be resolved rather than
+chosen silently in code.
+
+The first was a real contradiction. Stage 09B stored all three payment statuses
+"so the collection stays queryable" while also deriving the effective value —
+which is precisely the stale second source of truth the derived-state rules
+exist to prevent. The moment the logical clock passes a due date the stored
+value is wrong, and a payments list that disagrees with the demo's own clock
+undermines the one claim the section is making. Deriving it costs a comparison
+per row on a collection of twenty-six.
+
+The second prevents a class of bug rather than a specific one. A contract
+balance is a running subtraction across several payments, and floating-point
+dollars accumulate drift through exactly that pattern; integer cents cannot.
+The frozen USD 18–46 band is unchanged, expressed as 1800–4600 cents.
+
+The third was simply missing: Stage 09B wrote "a deterministic offset" and gave
+no figure. Two days puts the follow-up inside the demo's visible window rather
+than beyond every date filter, and it is written down so the next session
+cannot quietly make it one.
+
+### Consequence
+`qa/stage09b-operations-spec.mjs` asserts all three, so they cannot drift back.
+Formatting cents into "USD 24.00" is a presentation concern and belongs at the
+UI edge, not in the domain. No stored field anywhere in Operations may carry a
+value the clock can invalidate.

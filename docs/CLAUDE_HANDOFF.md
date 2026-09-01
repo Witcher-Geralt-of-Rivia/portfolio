@@ -213,6 +213,7 @@ The VPS already hosts other services. Read the safety rules in
 | Runtime and server state | `docs/DEPLOYMENT.md` |
 | Demo platform architecture | `docs/DEMO_PLATFORM.md` |
 | Demo 01 product contract | `docs/DEMO_OPERATIONS_SPEC.md` |
+| Demo 01 implementation | `docs/DEMO_OPERATIONS_IMPLEMENTATION.md` |
 | Stage history | `docs/CHANGELOG.md` |
 | What to do next | `docs/NEXT_STAGE.md` |
 | Machine-readable state | `docs/project-state.json` |
@@ -223,14 +224,14 @@ tokens. Documentation must not duplicate it.
 ## Current Task Status
 
 Stages 01-08 complete and frozen; the site is live over HTTPS. Stage 09 is **in
-progress**: 09A built and froze the shared demo runtime, 09B froze Demo 01's
-product contract. No demo exists, and `#work` still renders its placeholder.
+progress**: 09A froze the shared runtime, 09B froze Demo 01's product
+contract, 09C1 built its domain and seed. No demo UI exists, and `#work` still
+renders its placeholder.
 
 ## Next Allowed Task
 
-**Stage 09C - Build Operations / CRM / ERP SaaS Demo.** Implementation against
-the frozen contract in `docs/DEMO_OPERATIONS_SPEC.md`. See
-`docs/NEXT_STAGE.md`.
+**Stage 09C2 - Operations App Shell + Routing + Overview.** The first visible
+substage; the domain beneath it is built. See `docs/NEXT_STAGE.md`.
 
 Do not begin it automatically.
 

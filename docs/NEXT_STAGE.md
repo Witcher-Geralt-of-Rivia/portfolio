@@ -11,7 +11,9 @@ Domain / HTTPS deploy   COMPLETE - live at https://intelligent-systems-lab.duckd
 Stage 09                IN PROGRESS
   09A Demo platform     COMPLETE - shared runtime built and frozen
   09B Operations spec   COMPLETE - product contract frozen
-  09C Operations build  NEXT
+  09C Operations build  IN PROGRESS
+    09C1 domain + seed  COMPLETE
+    09C2 shell + routes NEXT
 ```
 
 `currentStage` stays at **8**. Neither 09A nor 09B completes Stage 09: the
@@ -31,9 +33,11 @@ placeholder.
 7.  Stage 08 - Engineering Lab                  DONE
 8.  Stage 09A - Demo platform foundation        DONE
 9.  Stage 09B - Operations product spec         DONE
-10. Stage 09C - Build the Operations demo       NEXT
-11. Field and Learning specs, then builds       LATER
-12. Stage 09 - #work launcher integration       LATER
+10. Stage 09C1 - Operations domain + seed       DONE
+11. Stage 09C2 - Shell + routes + Overview      NEXT
+12. Stage 09C3-C6 - modules, then QA/deploy     LATER
+13. Field and Learning specs, then builds       LATER
+14. Stage 09 - #work launcher integration       LATER
 ```
 
 ## What changed about Stage 09
@@ -83,24 +87,19 @@ production is untouched.
 
 ## NEXT TASK
 
-**Stage 09C - Build Operations / CRM / ERP SaaS Demo.**
+**Stage 09C2 - Operations App Shell + Routing + Overview.**
 
-Implementation against the frozen contract in `docs/DEMO_OPERATIONS_SPEC.md`,
-which fixes the product scenario, the eleven modules, four roles and their
-permission matrix, thirteen domain entities, five automation rules, six
-acceptance workflows, every seed count and distribution, and the derived-state
-rules that stop the demo contradicting itself.
+The first visible substage. 09C1 built the whole domain beneath it: the
+canonical seed, the derived-state selectors, the nine services, permissions and
+the automation engine, all documented in
+`docs/DEMO_OPERATIONS_IMPLEMENTATION.md` and covered by
+`qa/stage09c1-operations.mjs` (211 checks).
 
-`qa/stage09b-operations-spec.mjs` (93 checks) guards that contract. If the
-build finds a genuine blocker, stop and report it rather than editing the
-specification to fit the code.
+09C2 builds the product shell, the eleven routes and the Overview screen. Every
+figure on Overview comes from `selectors/overview.ts`; nothing may be
+hard-coded, and the four KPIs read 38 / 4 / 10 / 8 on seeded data.
 
-One known task for 09C before seeding: the runtime's `ResetPayload` carries
-only `records` and `meta`, so the 63 seeded audit entries cannot be written
-yet. The required extension is specified in the spec's "Required runtime
-extension" section.
-
-Do not begin 09C until instructed.
+Do not begin it until instructed.
 
 ## Finishing Stage 09
 

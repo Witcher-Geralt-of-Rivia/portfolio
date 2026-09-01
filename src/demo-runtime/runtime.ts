@@ -157,6 +157,21 @@ function seedRecords(seed: DemoSeed, clock: DemoClock): DemoRecord[] {
   return records;
 }
 
+/**
+ * Seeded audit rows, numbered from 1 in the order the seed lists them.
+ *
+ * The sequence is assigned here rather than by the seed so that
+ * `meta.auditSequence` and the stored rows cannot disagree, and so the first
+ * entry a visitor's own action writes continues the same run of numbers.
+ */
+function seedAudit(seed: DemoSeed): AuditEntry[] {
+  return (seed.audit ?? []).map((entry, i) => ({
+    ...entry,
+    demoId: seed.demoId,
+    sequence: i + 1,
+  }));
+}
+
 function seedMeta(seed: DemoSeed): DemoMeta {
   const seeded: Record<CollectionName, string[]> = {};
   for (const [collection, definition] of Object.entries(seed.collections)) {
@@ -170,7 +185,9 @@ function seedMeta(seed: DemoSeed): DemoMeta {
     clockTicks: 0,
     counters: { ...countersFromSeed(seeded), ...(seed.counters ?? {}) },
     revision: CANONICAL_REVISION,
-    auditSequence: 0,
+    /* Continue past the seeded history, so the visitor's first audited action
+       is entry 64 rather than a collision with entry 1. */
+    auditSequence: seed.audit?.length ?? 0,
     jobCounter: 0,
   };
 }
@@ -225,7 +242,12 @@ export function createDemoRuntime(options: DemoRuntimeOptions): DemoRuntime {
   const applySeed = async (reason: InvalidationReason) => {
     clock = createClock(seed.baseClock, seed.clockTickMs, 0);
     const fresh = seedMeta(seed);
-    await adapter.resetDemo({ demoId, records: seedRecords(seed, clock), meta: fresh });
+    await adapter.resetDemo({
+      demoId,
+      records: seedRecords(seed, clock),
+      meta: fresh,
+      audit: seedAudit(seed),
+    });
     meta = fresh;
     announce(reason);
     notify();

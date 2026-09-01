@@ -48,7 +48,9 @@ export const DEMOS: readonly DemoDefinition[] = [
   {
     id: "operations",
     route: "/demos/operations",
-    status: "planned",
+    /* Stage 09C1 built the domain, seed and services. The product has no
+       route yet, so it is under construction rather than publishable. */
+    status: "building",
     capabilityArea: "Operations / CRM / ERP SaaS",
     disclosure: DEMO_DISCLOSURE_PRIMARY,
   },

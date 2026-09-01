@@ -342,6 +342,24 @@ export function createIndexedDbAdapter(
         }
         records.put(r);
       }
+
+      /* Seeded audit history (D-052), issued after the purge and before the
+         await, so it lands inside the same transaction and after the range
+         delete that cleared the store. */
+      if (payload.audit?.length) {
+        const audit = tx.objectStore(STORE.audit);
+        for (const a of payload.audit) {
+          if (a.demoId !== demoId) {
+            tx.abort();
+            throw new DemoError(
+              "FORBIDDEN",
+              `Reset of "${demoId}" was given an audit entry belonging to "${a.demoId}".`
+            );
+          }
+          audit.put(a);
+        }
+      }
+
       tx.objectStore(STORE.meta).put(payload.meta);
 
       await transactionAsPromise(tx);

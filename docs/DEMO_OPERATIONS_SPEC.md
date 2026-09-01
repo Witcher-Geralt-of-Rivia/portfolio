@@ -12,10 +12,10 @@ Platform-level architecture lives in `docs/DEMO_PLATFORM.md`. This document
 covers only what the Operations domain adds on top.
 
 ```
-STATUS          SPEC FROZEN / NOT BUILT
-STAGE           09B complete; 09C is the build
-REGISTRY        operations = planned
-ROUTE           /demos/operations
+STATUS          SPEC FROZEN / DOMAIN BUILT / UI NOT BUILT
+STAGE           09B froze this contract; 09C1 built the domain beneath it
+REGISTRY        operations = building
+ROUTE           /demos/operations   not a public route yet
 ```
 
 ## 1. Product identity
@@ -275,7 +275,7 @@ dailyRate  totalAmount  paidAmount  createdAt  updatedAt  version
 status   Pending | Active | Completed | Cancelled
 ```
 
-All amounts are synthetic and USD-denominated.
+All amounts are synthetic, USD-denominated and stored as integer cents.
 
 ### Payment
 
@@ -283,9 +283,13 @@ All amounts are synthetic and USD-denominated.
 id  contractId  customerId  amount  status  dueAt  paidAt?  category
 createdAt  updatedAt  version
 
-status     Pending | Paid | Overdue
+status     Pending | Paid          stored
 category   Rental | Deposit | Adjustment
 ```
+
+`Overdue` is never stored. It is an effective value derived from `dueAt`
+against the logical clock, so the record cannot drift out of agreement with the
+demo's own time — see §6. Amounts are integer cents; see Money below.
 
 No card numbers, no bank information, no provider identifiers, no real
 processing.
@@ -406,15 +410,31 @@ Vehicle status is never set directly by a form. The Fleet edit form may change
 ### Payment overdue
 
 ```
-effective status = Paid                       when status is Paid
-                 = Overdue                    when dueAt < clock.now()
-                 = Pending                    otherwise
+stored status     Pending | Paid
+
+effective status  = Paid       when stored status is Paid
+                  = Overdue    when stored status is Pending and dueAt < clock.now()
+                  = Pending    otherwise
 ```
 
-The stored field carries all three values so the collection stays queryable,
-but the derivation wins wherever they disagree. A `Pending` payment whose
-`dueAt` has passed reads as Overdue and raises `payment.overdue` the first time
-the derivation flips.
+`Overdue` is a derivation, never a stored flag. Persisting it would create a
+second source of truth that goes stale the moment the logical clock moves past
+a due date, and a demo whose payment list disagrees with its own clock is
+exactly the incoherence the derived-state rules exist to prevent.
+
+Every list, filter, count and report reads the effective value.
+`payment.overdue` is raised by an explicit reconciliation pass over
+time-derived state, not by a polling loop.
+
+### Money
+
+All monetary amounts — `dailyRate`, `totalAmount`, `paidAmount` and a payment's
+`amount` — are **integer cents**. Nothing in the domain performs floating-point
+arithmetic on money, so a balance cannot accumulate rounding drift across a
+sequence of payments.
+
+The frozen USD 18–46 daily-rate band is therefore 1800–4600 cents. Formatting
+to "USD 24.00" is a presentation concern and happens at the edge.
 
 ### Contract total
 
@@ -423,12 +443,13 @@ days         = max(1, ceil((endAt - startAt) / 86_400_000))
 totalAmount  = dailyRate × days
 ```
 
-Daily rates are deterministic by class, within the frozen USD 18–46 band:
+Daily rates are deterministic by class, within the frozen USD 18–46 band,
+stored as integer cents:
 
 ```
-Urban      18 – 26
-Utility    27 – 34
-Touring    35 – 46
+Urban      18 – 26     1800 – 2600 cents
+Utility    27 – 34     2700 – 3400 cents
+Touring    35 – 46     3500 – 4600 cents
 ```
 
 No contract may carry a total that contradicts this calculation.
@@ -469,7 +490,7 @@ Five canonical rules, seeded and frozen.
 | Id | Name | Trigger | Action |
 |---|---|---|---|
 | `automation_rule_0001` | New website lead assignment | `lead.created` where `source = Website` | assign the next Sales Agent by deterministic rotation; create a CRM notification |
-| `automation_rule_0002` | Qualified lead follow-up | `lead.stage_changed` → `Qualified` | set `nextFollowUpAt` to a deterministic offset; create a CRM notification |
+| `automation_rule_0002` | Qualified lead follow-up | `lead.stage_changed` → `Qualified` | set `nextFollowUpAt` to the qualifying instant **+ 2 days**; create a CRM notification |
 | `automation_rule_0003` | Reservation confirmation message | `reservation.confirmed` | create or update the customer's conversation and append a System message |
 | `automation_rule_0004` | Overdue payment alert | `payment.overdue` | create a Finance notification |
 | `automation_rule_0005` | Maintenance completion notice | `maintenance.completed` | create a Maintenance notification |
@@ -480,6 +501,11 @@ local conversation; there is no recipient and no address.
 Rule 05 raises a notification only. Vehicle status after a completed work order
 is recomputed by the domain rules in §6, never by an automation action —
 automation must not be a second source of truth for domain state.
+
+Rule 02's offset is exactly two days from the instant the lead reached
+Qualified, measured on the logical clock. Stage 09B left it as "a deterministic
+offset" with no value; two days is the frozen figure, chosen so a follow-up
+lands inside the demo's visible window rather than beyond every date filter.
 
 The seeded Sales Agent roster contains one actor, so Rule 01's rotation always
 resolves to `actor_0002`. That is deterministic and correct rather than a
@@ -1174,5 +1200,10 @@ band is the Operations domain, and it is the only layer that knows.
 Stage 09C — Build Operations / CRM / ERP SaaS Demo
 ```
 
-Implementation against this frozen contract. Registry status stays `planned`
-until 09C begins.
+Implementation against this frozen contract, in substages. 09C1 built the
+domain, the deterministic seed and the services; 09C2 onward build the
+interface.
+
+Registry status is `planned` before 09C, `building` while it is under
+construction, and `verified` only once the demo is finished and QA'd. It reads
+`building` now.

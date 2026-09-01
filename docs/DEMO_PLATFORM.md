@@ -19,14 +19,15 @@ Work section becomes a launcher into three substantial interactive product
 demonstrations that a visitor can use:
 
 ```
-Demo 01   Operations / CRM / ERP SaaS        /demos/operations   SPEC FROZEN
+Demo 01   Operations / CRM / ERP SaaS        /demos/operations   DOMAIN BUILT
 Demo 02   Field Operations Web + Mobile      /demos/field        PLANNED
 Demo 03   Adaptive Learning Platform         /demos/learning     PLANNED
 ```
 
 Demo 01's complete product contract is frozen in
 `docs/DEMO_OPERATIONS_SPEC.md` and guarded by
-`qa/stage09b-operations-spec.mjs`.
+`qa/stage09b-operations-spec.mjs`. Its domain layer is built and documented in
+`docs/DEMO_OPERATIONS_IMPLEMENTATION.md`; it has no interface yet.
 
 Each behaves like real software while being entirely synthetic, entirely
 client-side, and honest about both. Those route identities are frozen; the
@@ -96,6 +97,7 @@ records the distinction so the wording cannot be misread later.
 | Database | `portfolio-demo-runtime` |
 | Runtime schema version | 1 (frozen) |
 | Stores | `records`, `meta`, `audit`, `jobs` |
+| Seeded audit | optional `audit` on `ResetPayload` and `DemoSeed` (D-052) |
 | Adapters | `indexeddb` (primary), `memory` (fallback) |
 
 Keys and indexes:

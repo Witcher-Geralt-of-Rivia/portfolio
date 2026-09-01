@@ -1,0 +1,221 @@
+<!-- PROJECT_STAGE: 8 -->
+<!-- DOCUMENT_STATUS: CURRENT -->
+
+# Demo 01 — Operations Implementation
+
+How the Operations domain is built. The product contract it implements is
+`docs/DEMO_OPERATIONS_SPEC.md`, which stays canonical; this document records
+the code beneath it.
+
+```
+STATUS      domain complete / UI not built
+STAGE       09C1 complete
+REGISTRY    operations = building
+ROUTE       /demos/operations is not a route yet
+```
+
+## Stage 09C programme
+
+```
+09C1  domain + seed + runtime audit extension        COMPLETE
+09C2  shell + routes + Overview                      NEXT
+09C3  Leads + Customers + Inbox
+09C4  Reservations + Contracts + Fleet + Maintenance + Payments
+09C5  Automations + Reports + notifications + integrated workflows
+09C6  full QA + Work integration eligibility + deployment
+```
+
+## Layout
+
+```
+src/demos/operations/
+  types.ts              13 entities, every canonical value a literal union
+  constants.ts          collections, id prefixes, clock, counts, distributions
+  permissions.ts        the four-role matrix and its guards
+  operations-runtime.ts composition root; binds the seed to a DemoRuntime
+  seed/
+    names.ts            synthetic name and text pools
+    entities.ts         the canonical dataset, built deterministically
+    audit.ts            the 63 seeded audit entries
+    index.ts            assembly + assertOperationsSeedIntegrity
+  selectors/
+    derive.ts           vehicle status, payment status, contract money, intervals
+    overview.ts         Overview KPIs and the four report groups
+    queries.ts          search, filter, sort, pagination
+  services/
+    context.ts          service context, typed reads, vehicle refresh
+    leads.ts customers.ts reservations.ts contracts.ts
+    payments.ts maintenance.ts inbox.ts notifications.ts automations.ts
+```
+
+Twenty-one modules. Validation lives with the service that enforces it rather
+than in a parallel `validation/` tree: a rule and its only caller drifting
+apart is the failure that arrangement invites.
+
+## The boundary
+
+`src/demo-runtime/` never learns what a lead is. The dependency runs one way,
+and `qa/stage09c1-operations.mjs` asserts it by reading the source: no runtime
+module imports from `src/demos/`, and no Operations entity name appears in
+runtime code once comments are stripped — the runtime's own prose explains what
+it must not know, and that explanation is not a leak.
+
+```
+Operations UI          (09C2 onward — does not exist yet)
+      ↓
+Operations services    leads · customers · reservations · contracts
+                       payments · maintenance · inbox · notifications
+                       automations
+      ↓  ├── domain events → automation jobs → AutomationRun
+      ↓  ├── audit entries
+      ↓  └── notifications
+Demo Runtime           records · collections · clock · ids · repository
+                       async boundary · events · audit · jobs · session
+      ↓
+Persistence adapter →  IndexedDB   (memory fallback)
+```
+
+## Derived state
+
+Three values are computed, never trusted as stored flags. This is what stops
+the demo contradicting itself.
+
+**Vehicle status.** `deriveVehicleStatus` applies the frozen precedence — an
+active work order, then an Active contract, then a Confirmed reservation, then
+Available. Every service that touches a contract, reservation or work order
+ends by calling `refreshedVehicle`, which rewrites the status *and* clears the
+relationship pointers; a stale `currentContractId` on an Available vehicle is
+the same class of lie as a stale status. No form writes the status.
+
+Eligibility and status answer different questions, and both are right: a
+vehicle whose current rental ends next week is eligible for a booking the week
+after, and still reads as Rented today. The QA harness asserts both.
+
+**Payment status.** Stored as `Pending | Paid`. `Overdue` is derived from
+`dueAt` against the logical clock (D-053), so a payment cannot disagree with
+the demo's own time. `reconcileTimeDerivedState` raises `payment.overdue`
+explicitly rather than a loop polling for it.
+
+**Contract money.** `totalAmount = dailyRate × billableDays`, with partial days
+rounded up and a floor of one. Everything is integer cents, so a balance built
+from several payments cannot drift.
+
+## Determinism
+
+No `Math.random`, no `crypto.randomUUID`, no `Date.now()` — asserted by the
+harness across the whole domain. Ids come from the runtime's per-collection
+counters; timestamps come from the logical clock, based at
+`2026-09-01T09:00:00Z`.
+
+The seed is built by functions rather than hand-authored: 301 literal records
+would be unreadable and impossible to keep consistent. Distributions are
+expanded from the frozen counts and then walked with a stride coprime to their
+length, which visits every element exactly once — the counts are untouched and
+the order is still completely determined, but a list does not open with twelve
+consecutive "New" leads.
+
+The four relationship identities hold **by construction**, not by assertion
+afterwards. The vehicle indices are carved into four pools that never overlap:
+
+```
+0-6    seven Rented        an Active contract
+7-10   four Reserved       a Confirmed reservation
+11-13  three Maintenance   an Open or In Progress work order
+14-23  ten Available       only inactive history touches these
+```
+
+## Seeded audit (D-052)
+
+63 entries, one per state transition the dataset implies. Creation is not
+audited; transitions are, which is the rule the live services follow too.
+
+The Stage 09A runtime could not express this: `ResetPayload` carried only
+`records` and `meta`. The extension is minimal — an optional `audit` array on
+`ResetPayload`, written inside the same transaction as the purge and reseed in
+both adapters. `DemoSeed` gained an optional `audit`, and the runtime assigns
+`demoId` and the sequence numbers so a seed cannot hand out a sequence that
+collides with later mutations. `meta.auditSequence` starts at 63, so a
+visitor's first audited action is entry 64.
+
+Optional means optional: a demo that seeds no history still resets audit to
+zero, which the harness checks against a generic Field fixture.
+
+## Permissions
+
+One table in `permissions.ts`, consulted by services and later by the UI. Every
+mutating service calls `requireWrite` itself, so a write cannot reach
+persistence because a screen forgot to hide a button — `FORBIDDEN` is raised in
+the domain. The harness runs each service under all four roles.
+
+This is an interaction simulation, not a security boundary. Nothing is
+authenticated, every record stays readable in browser storage whatever role is
+selected, and it is never described as RBAC or access control. What it
+demonstrates is that an application enforces its rules in one place.
+
+## Automation
+
+Five typed rules, one function each. No generic expression evaluator: five
+known rules written plainly are easier to read and honest about what the demo
+does.
+
+```
+domain event → job → rule evaluation → action → AutomationRun → notification
+```
+
+Explicit processing. The job is enqueued and drained in the same breath — it
+exists so the deferred path is real rather than implied, not so work can sit
+around. A disabled rule still records a `Skipped` run, because silently doing
+nothing leaves a visitor who just switched a rule off with no evidence the
+system noticed.
+
+Rule 01's rotation is deterministic and resolves to `actor_0002`, the only
+seeded Sales Agent. Rule 02 sets the follow-up two days out (D-053). Rule 03
+appends a local System message with no recipient. Rules 04 and 05 raise
+notifications; vehicle state after a completed work order is recomputed by the
+domain rules, never by an automation action — automation must not become a
+second source of truth.
+
+## QA
+
+`qa/stage09c1-operations.mjs`, 211 checks. The whole business suite runs twice,
+once per persistence adapter, because the two must be indistinguishable.
+
+```
+dependency boundary   runtime imports nothing from src/demos; no entity name
+                      in runtime code; no any/ts-ignore/random/Date.now
+seed integrity        counts, distributions, the four identities, referential
+                      integrity, message ordering, audit validity
+business suite x2     counts, distributions, Overview KPIs, W1-W6, role matrix,
+                      conflict contracts, reset determinism
+demo isolation        Field and Learning untouched by Operations mutation and
+                      reset; a seed with no audit still resets to zero audit
+content safety        2184 seeded strings scanned for emails, telephones, URLs,
+                      messaging links, social handles and real brands
+refresh persistence   lead, payment and notification survive a reload
+memory fallback       forced IndexedDB failure still seeds, runs a workflow,
+                      serves selectors and resets
+performance sanity    a regression tripwire, never published as a benchmark
+```
+
+### Running it
+
+The domain is browser code and cannot be exercised in Node. The fixture lives
+under `qa/` so creating the route is a deliberate act:
+
+```
+cp qa/fixtures/demos-operations-probe.page.tsx src/app/demos/qa-operations/page.tsx
+npm run dev
+node qa/stage09c1-operations.mjs
+rm -r src/app/demos/qa-operations
+```
+
+No QA route exists in the committed tree or in production.
+
+## Remaining UI work
+
+Everything visible. 09C1 built no screen, no route and no component: the eleven
+modules, the shell, the tables, forms, drawers and charts all belong to 09C2
+onward, and every one of them consumes the selectors and services above rather
+than reaching for the runtime directly.
+
+`/demos/operations` is still not a route. `#work` still renders its placeholder.

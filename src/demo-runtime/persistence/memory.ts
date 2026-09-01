@@ -224,6 +224,18 @@ export function createMemoryAdapter(): DemoPersistenceAdapter {
         }
         staged.records.set(key(r.demoId, r.collection, r.id), clone(r));
       }
+
+      /* Seeded audit history, written into the same staged commit as the
+         records so a reset is still all-or-nothing. */
+      for (const a of payload.audit ?? []) {
+        if (a.demoId !== demoId) {
+          throw new DemoError(
+            "FORBIDDEN",
+            `Reset of "${demoId}" was given an audit entry belonging to "${a.demoId}".`
+          );
+        }
+        staged.audit.set(key(a.demoId, a.sequence), clone(a));
+      }
       staged.meta.set(key(demoId), clone(payload.meta));
 
       tables = staged;

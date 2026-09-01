@@ -734,3 +734,93 @@ idle         0 intervals, 0 requestAnimationFrame, 0 timer churn over three
 No demo exists, so nothing was measured about product behaviour, derived
 dashboard values, or the offline queue. Those become QA contracts for 09B
 onward and are listed in `docs/DEMO_PLATFORM.md`.
+
+---
+
+## Stage 09C1 - Operations Domain
+
+PASS. Harness: `qa/stage09c1-operations.mjs` (211 checks). Honours `QA_BASE`.
+
+Browser integration uses `qa/fixtures/demos-operations-probe.page.tsx`, copied
+to `src/app/demos/qa-operations/page.tsx` for the run and removed afterwards.
+No QA route exists in the committed tree or in production.
+
+### Coverage
+
+```
+dependency boundary  the runtime imports nothing from src/demos; no Operations
+                     entity name appears in runtime code once comments are
+                     stripped; no any, ts-ignore, Math.random, randomUUID or
+                     Date.now anywhere in the domain's 21 modules
+seed integrity       every count and distribution; the four relationship
+                     identities; referential integrity across nine collections;
+                     message ordering within each thread; audit entities and
+                     actors resolve and no audit entry is in the future
+business suite       run twice, once per adapter, results identical
+demo isolation       Field and Learning records, audit and revisions untouched
+                     by an Operations mutation and reset; a seed carrying no
+                     audit still resets to zero audit
+content safety       2184 seeded strings, 363 of them timestamps, scanned for
+                     emails, telephones, URLs, mailto/tel, messaging links,
+                     social handles and real manufacturer names - all zero
+refresh persistence  a lead, a payment and a read notification survive reload
+memory fallback      forced IndexedDB failure seeds 48 leads and 63 audit
+                     entries, completes a conversion, serves the Overview
+                     selector and resets
+network              0 external requests, 0 /api/ calls, 0 console errors
+```
+
+### Measured values
+
+```
+counts        actors 4, leads 48, customers 32, vehicles 24, reservations 18,
+              contracts 14, payments 26, maintenance 10, conversations 20,
+              messages 64, rules 5, runs 18, notifications 22, audit 63
+lead stage    New 12  Contacted 10  Qualified 9  Proposal 7  Won 6  Lost 4
+vehicle       Available 10  Reserved 4  Rented 7  Maintenance 3
+reservation   Draft 4  Confirmed 4  Converted 7  Cancelled 3
+contract      Pending 3  Active 7  Completed 3  Cancelled 1
+payment       Paid 18  Pending 5  Overdue 3     (effective, from the clock)
+maintenance   Open 2  In Progress 1  Completed 6  Cancelled 1
+Overview      open leads 38, confirmed reservations 4, vehicles available 10,
+              payments requiring attention 8, unread notifications 8
+clock         2026-09-01T09:00:00.000Z, revision 0 when freshly seeded
+```
+
+### Workflow results
+
+```
+W1  lead to customer     website lead assigned to actor_0002, follow-up set
+                         two days out, converted with both pointers set, and a
+                         second conversion refused as CONFLICT
+W2  reservation to rental  eligible vehicles offered, confirming a free vehicle
+                         reserves it, activating rents it, total equals rate x
+                         billable days. A currently-rented vehicle is still
+                         bookable for a later window and still reads Rented
+W3  payment              paidAmount rises, balance falls, overpayment CONFLICT,
+                         zero amount VALIDATION
+W4  maintenance          starting takes the vehicle off the fleet, completing
+                         returns it, notification raised, and starting work on
+                         a rented vehicle is a CONFLICT
+W5  inbox and assist     brief composed deterministically, staff reply marks
+                         the thread read, recommended action from the fixed set
+W6  automation control   disabled rule records Skipped, re-enabled rule runs
+                         Success and the run is persisted
+```
+
+### Performance sanity
+
+Not a benchmark, and never published as one. Two runs:
+
+```
+seed initialization    210 / 185 ms
+Overview selector       31 /  26 ms
+lead list query          6 /   7 ms
+reset                  207 / 203 ms
+```
+
+### Stage 09A regression
+
+`qa/stage09a-runtime.mjs` 76/76 and `qa/stage09a-shell.mjs` 85/85 after the
+audit extension. The optional field changed nothing for the demos that do not
+use it.

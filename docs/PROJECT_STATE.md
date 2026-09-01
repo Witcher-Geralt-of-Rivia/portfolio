@@ -11,14 +11,14 @@ Everything below was read from the repository, not recalled from conversation.
 ```
 Stages 01-08   COMPLETE and FROZEN
 Deployment     LIVE at https://intelligent-systems-lab.duckdns.org
-Stage 09       IN PROGRESS - 09A + 09B complete, 0 of 3 demos built
+Stage 09       IN PROGRESS - 09A/09B/09C1 done, 0 of 3 demos built
 ```
 
 Stage 09 changed direction: `#work` becomes a launcher into three interactive
 frontend-only product demos, not case studies. 09A froze the shared runtime;
-09B froze Demo 01's contract in `docs/DEMO_OPERATIONS_SPEC.md`. No demo exists
-and nothing is wired into the page. `currentStage` stays 8. See
-`docs/DEMO_PLATFORM.md` and `docs/NEXT_STAGE.md`. The case-study framework and its one verified internal
+09B froze Demo 01's contract; 09C1 built its domain, seed and services with no
+UI. Nothing is wired into the page and `currentStage` stays 8. See
+`docs/DEMO_OPERATIONS_IMPLEMENTATION.md` and `docs/NEXT_STAGE.md`. The case-study framework and its one verified internal
 case are preserved, unpublished; see `docs/CASE_STUDY_SOURCE_AUDIT.md`.
 
 ## Toolchain
@@ -118,6 +118,8 @@ src/
     work/       Stage 09 - case-study renderers; built, never wired in
     demos/      Stage 09A - DemoShell, DemoDisclosure, DemoResetControl
   content/case-studies.ts   typed case-study model + render-safety filter
+  demos/operations/         Stage 09C1 - Demo 01 domain (21 modules): types,
+                constants, permissions, seed/, selectors/, services/. No UI.
   demo-runtime/             Stage 09A - shared demo platform (18 modules):
                 types, config, demo-registry, clock, ids, repository,
                 async-service, events, audit, jobs, session, connectivity,
@@ -365,13 +367,11 @@ frame carries the complete state the UI needs, so the render is a pure function
 of (experiment, variant, frame) and Run always produces the same sequence.
 There is no `Math.random` and no generated timing anywhere in the section.
 
-Runs last 1.2-1.8s and every end state is fixed. Frame counts, intervals and
-end states per experiment are in `docs/QA_BASELINE.md`.
-
-Failure is always attributable to a stage: a validation error stops the flow at
-Validate, an unauthorized call at Authenticate. Failure states are soft peach or
-rose, success mint, waiting lavender, in-progress sky - never a saturated
-traffic light. Each experiment contributes one accent hue on small marks only.
+Runs last 1.2-1.8s and every end state is fixed; per-experiment frame counts
+are in `docs/QA_BASELINE.md`. Failure is attributable to a stage: a validation
+error stops the flow at Validate, an unauthorized call at Authenticate. Failure
+is soft peach or rose, success mint, waiting lavender, in-progress sky - never
+a saturated traffic light.
 
 Nothing here reaches the network, and the illustrative labels ("T+2", "retry
 delay", "simulated step 6 of 6") are sequence positions, not latency.

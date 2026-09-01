@@ -746,3 +746,94 @@ No source implementation. `docs/DEMO_OPERATIONS_SPEC.md` and the guard are the
 whole deliverable, plus canonical-document updates. The registry still reads
 `operations = planned`, `currentStage` stays 8, `#work` is untouched, and
 nothing was deployed.
+
+---
+
+## Stage 09C1 - Operations Domain, Seed and Runtime Audit Extension
+
+Status: **Complete** (Stage 09 remains in progress)
+
+The first implementation substage of 09C. Builds the whole non-visual
+Operations foundation; no screen, no route, no component.
+
+### Runtime extension (D-052)
+
+`ResetPayload` and `DemoSeed` gained an optional `audit` array, written inside
+the same transaction as the purge and reseed in both adapters. The runtime
+assigns `demoId` and the sequence numbers, so a seed cannot hand out a sequence
+that collides with the ones later mutations allocate, and `meta.auditSequence`
+starts past the seeded history.
+
+Optional means optional: a demo that seeds no history still resets audit to
+zero. Stage 09A's own harnesses pass unchanged, 76 and 85 checks.
+
+### Domain
+
+`src/demos/operations/`, twenty-one modules. Thirteen entities with every
+canonical value a literal union, the four-role permission matrix, nine
+services, the derived-state selectors, the query helpers and the five-rule
+automation engine.
+
+Permission is enforced in the services themselves rather than by a screen
+choosing not to draw a button, so a Sales Agent cannot record a payment through
+the domain even with no UI in the way.
+
+### Seed
+
+301 records and 63 audit entries, built by deterministic functions. The four
+relationship identities hold by construction rather than by assertion: the
+vehicle indices are carved into four non-overlapping pools, so seven Active
+contracts *are* the seven Rented vehicles and three active work orders *are*
+the three in Maintenance.
+
+Distributions are expanded from the frozen counts and walked with a stride
+coprime to their length — every element visited once, counts untouched, order
+still completely determined, and no list opening with twelve consecutive "New"
+leads.
+
+### Two specification gaps closed first (D-053)
+
+Stage 09C1 asked that ambiguities be reconciled rather than chosen silently in
+code, and three were:
+
+- Stage 09B stored all three payment statuses while also deriving the effective
+  one, which is precisely the stale second source of truth the derived-state
+  rules exist to prevent. Stored status is now `Pending | Paid`; `Overdue` is
+  derived from `dueAt` against the logical clock.
+- Money had no unit. It is integer cents throughout, so a balance built from
+  several payments cannot drift.
+- Rule 02's follow-up offset was written as "a deterministic offset" with no
+  figure. It is two days.
+
+The spec was amended before any code was written, and the 09B guard now asserts
+all three so they cannot drift back.
+
+### Bugs and false failures found
+
+- The QA harness compared distributions with `JSON.stringify`, which is
+  key-order sensitive; the tally is built in first-encounter order, so correct
+  counts failed. Compared per key now.
+- A W2 assertion picked `eligible[0]` and expected Reserved. That vehicle was
+  currently rented and legitimately eligible for a *future* window —
+  eligibility is interval-based, status is now-based, and both are right. The
+  test now confirms onto a currently-free vehicle and separately asserts that
+  an active contract outranks a future reservation.
+- The content scan's telephone pattern matched ISO timestamps. Timestamps are
+  excluded before the digit patterns run; flagging one would train the next
+  reader to ignore the check.
+
+### QA
+
+`qa/stage09c1-operations.mjs`, 211 checks, the whole business suite run twice —
+once per persistence adapter, because the two must be indistinguishable.
+Covers the dependency boundary by reading the source, seed integrity, the six
+workflows, the role matrix, seven conflict contracts, reset determinism, demo
+isolation, 2184 seeded strings scanned for contact data and real brands,
+reload persistence, forced IndexedDB failure into the memory fallback, and a
+performance tripwire.
+
+### Not done
+
+No UI. `/demos/operations` is still not a route, `#work` still renders its
+placeholder, `currentStage` stays 8, and nothing was deployed. The registry now
+reads `operations = building`.

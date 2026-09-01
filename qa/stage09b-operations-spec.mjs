@@ -299,6 +299,20 @@ check("notification unread badge is derived", /8 is never written as a literal/.
 check("vehicle status has a precedence rule", spec.includes("an active work order (Open or In Progress)"));
 check("vehicle status is never set by a form", /never set directly by a form/.test(spec));
 check("overdue derives from the logical clock", spec.includes("dueAt < clock.now()"));
+check(
+  "overdue is never a stored flag",
+  /`Overdue` is a derivation, never a stored flag/.test(prose) &&
+    spec.includes("status     Pending | Paid          stored")
+);
+check(
+  "money is integer cents",
+  /All monetary amounts .* are \*\*integer cents\*\*/.test(prose) &&
+    spec.includes("1800 – 2600 cents")
+);
+check(
+  "the follow-up offset is a frozen value",
+  /\+ 2 days\*\*/.test(prose) && /two days is the frozen figure/.test(prose)
+);
 check("contract total derives from rate and duration", spec.includes("totalAmount  = dailyRate × days"));
 check("daily rates stay inside the frozen band", spec.includes("Urban      18 – 26") && spec.includes("Touring    35 – 46"));
 
@@ -343,12 +357,15 @@ check(
    ===================================================================== */
 
 section("STAGE STATE");
-check("spec is marked frozen and not built", spec.includes("SPEC FROZEN / NOT BUILT"));
+check("the spec records what is built", spec.includes("SPEC FROZEN / DOMAIN BUILT / UI NOT BUILT"));
 check("Stage 09C is named as next", spec.includes("Stage 09C — Build Operations / CRM / ERP SaaS Demo"));
-check("registry stays planned during 09B", /Registry status stays `planned`/.test(spec));
 check(
-  "project-state.json still has operations planned",
-  state.demoPlatform?.demoStatuses?.operations === "planned",
+  "the registry lifecycle is documented",
+  /`planned` before 09C, `building` while it is under construction, and `verified`/.test(prose)
+);
+check(
+  "operations is not yet verified",
+  state.demoPlatform?.demoStatuses?.operations !== "verified",
   String(state.demoPlatform?.demoStatuses?.operations)
 );
 check("currentStage is still 8", state.currentStage === 8, String(state.currentStage));
