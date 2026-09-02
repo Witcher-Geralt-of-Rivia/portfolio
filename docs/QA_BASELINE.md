@@ -1538,3 +1538,76 @@ does not hit-test. The detail is a modal `<dialog>`, so the chrome behind it is
 genuinely inert and a visitor cannot reach the role control at all. The suite
 now asserts that inertness, then closes the detail and checks the leak
 protection as before.
+
+---
+
+## Stage 09C3.2 - Operations Customers
+
+PASS. Harness: `qa/stage09c32-customers.mjs`, **174 checks** with the domain
+probe in place and 130 without it, which is what runs against production: the
+domain section skips itself, and so do the three checks that drive the archive
+refusal, because they need the probe to name a customer the rule blocks.
+
+### What it covers
+
+```
+domain        the seeded 32 customers and their 6 conversions, create with a
+              trimmed name and a defaulted status, the blank-name refusal,
+              the write matrix for all four roles, the audit diff over all
+              four fields, the unchanged-resubmit silence, both archive
+              guards and their exact wording, the double-archive conflict
+list          search over name and notes, both filters, eight sorts, the
+              page clamp, page sizes, the archived exclusion
+product       the count, the columns, the ten rows, the pager range and page
+              label, Next and Previous, the disabled edge, 20 rows
+drawer        selection, the URL contract, deep links valid and invalid,
+              focus return to the row that opened it, the five fact rows,
+              the relationship groups, the activity feed
+mutations     create through the form and the record it opens on, edit into
+              an open drawer and the activity entry it writes, cancel, the
+              archive that succeeds, the archive that is refused in the
+              service's own words with the dialog left open to be read
+roles         Admin 7 columns / 5 groups, Sales 7 / 4, Finance 6 / 2 and no
+              write action, Fleet the closed-module panel and no data at all
+mobile        390 wide: cards replace the table, the filter sheet, the drawer
+              width, no overflow at 360 / 414 / 768 / 1024 / 1440
+presentation  composited contrast on every tone, focus rings, no native
+              select, the keyboard path through the custom listbox, and the
+              standing content rules read off the rendered page
+```
+
+### What it found
+
+The audit gap §64 asked about was real: `updateCustomer` recorded status and
+segment only, so a rename or a notes rewrite wrote nothing and the Activity
+panel stayed silent about a change the visitor had just made. Fixed to diff all
+four fields, with the unchanged-resubmit silence kept.
+
+Two harness corrections, both mine rather than the product's: the domain error
+code is `VALIDATION` rather than `INVALID`, and the page-size options are 10
+and 20 rather than 10 and 25.
+
+### Regression
+
+```
+stage09a-runtime                76/76
+stage09a-shell                  85/85
+stage09b-operations-spec        96/96
+stage09c1-operations          211/211
+stage09c2-operations-ui       141/141
+stage09c21-hardening          111/111
+stage09c31-leads              407/407
+stage09c32-customers          174/174
+public-repo-safety              19/19  (with --history)
+copy-style                        1/1
+qa:memory                       18/18
+tsc --noEmit                    clean
+eslint                          0 errors (1 pre-existing warning in qa/texture.mjs)
+                              ------
+                             1339 checks
+```
+
+One 09C2 assertion changed value rather than meaning. It lists the modules
+whose sidebar entries are interactive, which moves each time a module is built:
+`["Overview","Leads"]` became `["Overview","Leads","Customers"]`. That check and
+the `implemented` flag behind it are deleted once all eleven modules exist.

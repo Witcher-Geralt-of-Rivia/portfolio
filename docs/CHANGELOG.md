@@ -1248,3 +1248,60 @@ that now, then closes the detail and checks the leak protection as before.
 Nine module screens. `#work` is untouched, the registry still reads
 `operations = building`, and `currentStage` stays 8. Stage 09C3.2 is blocked
 until the deployed screen has been reviewed live.
+
+---
+
+## Stage 09C3.2 - Operations Customers
+
+Status: **Complete**
+
+### Summary
+The second module that writes, and the first assembled entirely from the
+patterns Leads established: the same table, mobile records, drawer, overlay,
+forms and URL contract. 32 customers, 6 of them converted from the seed's Won
+leads, with search, two filters, eight sorts, pagination, create, edit, archive
+and a relationship view onto five other modules.
+
+### Role decides what exists, not what is visible
+
+This is the stage's substantial idea. A Finance Analyst cannot open
+Reservations, so they do not get a Reservations column showing dashes: the
+column is not defined for them, and the reservations collection is never read.
+Both the table's columns and the drawer's sections are derived from
+`permissions.ts` through one policy table, `customers-view.ts` (D-074).
+
+Finance also gets a different order. Its drawer opens with Contracts and
+Payments, so it reads as a finance view of a customer rather than as Admin's
+view with three groups blanked out.
+
+### The audit gap
+
+`updateCustomer` recorded status and segment alone. Renaming a customer or
+rewriting their notes changed the record and wrote no audit entry, so the
+detail's Activity panel stayed silent about a change the visitor had just made
+and could see in the fields above it. It now diffs all four fields and writes
+only what moved, which is what D-064 settled for leads.
+
+### Archiving says why it will not
+
+A customer holding an Active contract or a Confirmed reservation cannot be
+archived. The confirmation states the rule before the attempt, and a refusal
+leaves the dialog open carrying the service's own sentence rather than closing
+over a generic conflict.
+
+### Shared footer
+
+`OpsPagination` was lifted out of `LeadsScreen` unchanged, classes included, so
+the two modules cannot drift into two footers. Leads renders identically after
+the move: same range, page label, steps, size control and geometry.
+
+### QA
+
+`qa/stage09c32-customers.mjs`, 174 checks, and one Leads assertion updated
+because Customers is now interactive. Full regression is green.
+
+### Not done
+
+Eight module screens. `#work` is untouched, the registry still reads
+`operations = building`, and `currentStage` stays 8. Stage 09C3.3 is blocked
+until the deployed screen has been reviewed live.

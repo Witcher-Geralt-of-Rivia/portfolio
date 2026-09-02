@@ -83,6 +83,8 @@ export * as derive from "./selectors/derive";
 export * as overview from "./selectors/overview";
 export * as queries from "./selectors/queries";
 export * as leadsList from "./selectors/leads-list";
+export * as customersList from "./selectors/customers-list";
+export * as customerRelations from "./selectors/customer-relations";
 
 export * as permissions from "./permissions";
 export * from "./constants";

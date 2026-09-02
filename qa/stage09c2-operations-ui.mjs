@@ -251,11 +251,12 @@ const readOverview = async (p = page) =>
     `${o.actor} / ${o.role}`);
   check("all eleven modules are listed for Admin", o.modules.length === 11, String(o.modules.length));
   /* This asserts temporary build state, and it moves each time a module is
-     built: 09C2 shipped Overview alone, 09C3.1 added Leads. By 09C5 every
+     built: 09C2 shipped Overview alone, 09C3.1 added Leads, 09C3.2 added
+     Customers. By 09C5 every
      module is interactive and the `implemented` flag that drives this, and
      this check with it, is deleted. */
   check("only the built modules are interactive",
-    JSON.stringify(o.interactive) === '["Overview","Leads"]',
+    JSON.stringify(o.interactive) === '["Overview","Leads","Customers"]',
     JSON.stringify(o.interactive));
 }
 

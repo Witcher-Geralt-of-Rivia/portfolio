@@ -75,23 +75,45 @@ export async function updateCustomer(
     throw invalid("A customer needs a name.", "displayName");
   }
 
-  const changes: { field: string; from: string | null; to: string | null }[] = [];
-  if (input.status && input.status !== customer.data.status) {
-    changes.push({ field: "status", from: customer.data.status, to: input.status });
-  }
-  if (input.segment && input.segment !== customer.data.segment) {
-    changes.push({ field: "segment", from: customer.data.segment, to: input.segment });
-  }
+  /**
+   * Every field that actually moved, not only the two that carry business
+   * state.
+   *
+   * This used to record status and segment alone, so renaming a customer or
+   * rewriting their notes changed the record and wrote nothing: the detail's
+   * Activity panel stayed silent about a change the visitor had just made and
+   * could see in the fields above it. D-064 settled the same question for
+   * leads; a customer edit is the same action and now behaves the same way.
+   *
+   * Only what moved. A form resubmitted unchanged adds no entry, so the feed
+   * does not fill with edits that edited nothing.
+   */
+  const next = {
+    displayName:
+      input.displayName !== undefined ? input.displayName.trim() : customer.data.displayName,
+    status: input.status ?? customer.data.status,
+    segment: input.segment ?? customer.data.segment,
+    notes: input.notes ?? customer.data.notes,
+  };
+
+  const changes = (
+    [
+      ["displayName", customer.data.displayName, next.displayName],
+      ["status", customer.data.status, next.status],
+      ["segment", customer.data.segment, next.segment],
+      ["notes", customer.data.notes, next.notes],
+    ] as const
+  )
+    .filter(([, from, to]) => from !== to)
+    .map(([field, from, to]) => ({ field, from, to }));
 
   const result = await ctx.runtime.commit<DemoRecord<Customer>>((m) => {
-    const next: Customer = {
-      ...customer.data,
-      ...(input.displayName !== undefined ? { displayName: input.displayName.trim() } : {}),
-      ...(input.status !== undefined ? { status: input.status } : {}),
-      ...(input.segment !== undefined ? { segment: input.segment } : {}),
-      ...(input.notes !== undefined ? { notes: input.notes } : {}),
-    };
-    const record = m.record<Customer>(C.customers, customerId, next, customer);
+    const record = m.record<Customer>(
+      C.customers,
+      customerId,
+      { ...customer.data, ...next },
+      customer
+    );
     return {
       ops: [
         { kind: "put", record },

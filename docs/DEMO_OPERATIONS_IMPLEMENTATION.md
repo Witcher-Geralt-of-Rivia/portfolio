@@ -8,12 +8,13 @@ How the Operations domain is built. The product contract it implements is
 the code beneath it.
 
 ```
-STATUS      domain complete / shell, Overview and Leads complete /
-            nine modules unbuilt
-STAGE       09C1, 09C2, 09C2.1 and 09C3.1 complete
+STATUS      domain complete / shell, Overview, Leads and Customers
+            complete / eight modules unbuilt
+STAGE       09C1, 09C2, 09C2.1, 09C3.1 and 09C3.2 complete
 REGISTRY    operations = building
-ROUTE       /demos/operations and /demos/operations/leads DEPLOYED,
-            noindex, for external live review
+ROUTE       /demos/operations, /demos/operations/leads and
+            /demos/operations/customers DEPLOYED, noindex, for external
+            live review
 ```
 
 ## Stage 09C programme
@@ -466,10 +467,94 @@ horizontally to the viewport.
 Stacking is stated rather than raced: 70 for menus, above the notification
 panel and mobile drawer at 60 and the chrome at 40.
 
+## Customers (09C3.2)
+
+The second module that writes, and the first built entirely out of Leads: the
+same table grammar, the same drawer, the same overlay, the same forms, the same
+URL contract. What Customers adds is that **composition depends on the role**.
+
+```
+src/demos/operations/
+  selectors/customers-list.ts       matching, ordering, paging, activity
+  selectors/customer-relations.ts   the record's links to five other modules
+  ui/OpsPagination.tsx              the footer, extracted from LeadsScreen
+  ui/customers/
+    CustomersScreen.tsx             state, selection, composition
+    CustomersToolbar.tsx            search, two filters, eight sorts
+    CustomersTable.tsx              desktop table, role-decided columns
+    CustomersMobileList.tsx         the same records as cards below 768px
+    CustomerDetail.tsx              overview, relationships, activity
+    CustomerForm.tsx                create and edit, one form
+    CustomerConfirm.tsx             archive
+    customers-view.ts               the role policy, tones, sort labels
+```
+
+### The role decides the columns, not a conditional
+
+A Finance Analyst cannot open Reservations, so a customer's reservation count
+is not theirs to read. `customerColumnsFor(role)` filters the column list
+through `canViewModule`, and `relationSectionsFor(role)` does the same for the
+drawer's groups, both deriving from `permissions.ts` rather than restating it.
+
+A withheld column is **not defined**, not rendered empty. A column of dashes
+still tells the reader that something exists and is being kept from them, which
+is worse than not offering the column at all.
+
+Finance is not Admin with sections blanked out. Its drawer opens with Contracts
+and Payments, in that order, so it reads as a finance view of a customer rather
+than a CRM view with holes cut in it.
+
+The query obeys the same rule one layer down: the screen never reads a
+collection the role cannot open, so a count cannot leak through a column that
+forgot to check.
+
+### An edit audits every field that moved
+
+`updateCustomer` recorded status and segment alone, so renaming a customer or
+rewriting their notes changed the record and wrote nothing: the Activity panel
+stayed silent about a change the visitor had just made and could see in the
+fields above it. It now diffs all four fields and writes only what moved, so a
+form resubmitted unchanged still adds no entry. D-064 settled the same question
+for leads; a customer edit is the same action and now behaves the same way.
+
+### Archiving is refused in the service's own words
+
+A customer holding an Active contract or a Confirmed reservation cannot be
+archived, because archiving them would leave a live rental attached to a record
+the application has filed away. The confirmation states the rule before the
+attempt, and a refusal leaves the dialog open with the service's own sentence
+on it rather than closing over a generic "Conflict".
+
+### There is no contact information on a customer
+
+The entity has a name, a status, a segment, notes, and links to its own
+records. No email, telephone, address or tax id exists in the type, the seed,
+the form or the detail. That is the portfolio's standing rule holding inside a
+CRM, which is the one product category where its absence is most conspicuous
+and most deliberate.
+
+### The pagination footer is now shared
+
+`OpsPagination` was lifted out of `LeadsScreen` unchanged, classes included, so
+the two modules cannot drift into two footers. Leads renders byte-identically
+after the move: the same range, page label, steps, size control and geometry.
+
+### QA
+
+`qa/stage09c32-customers.mjs`, 174 checks with the domain probe in place and
+130 without it. It covers the seeded 32 customers and their six conversions,
+create, edit and archive through both the services and the product, the audit
+diff, the archive guards and their wording, the list selectors, search, both
+filters, eight sorts, pagination, URL selection, deep links valid and invalid,
+all four roles' columns and drawer sections, the mobile cards and filter sheet,
+five viewports, contrast, focus, the keyboard path through the custom select,
+and the standing content rules on the rendered page.
+
 ## Remaining UI work
 
-Nine module screens: Customers, Reservations, Contracts, Fleet, Maintenance,
-Payments, Automations, Inbox and Reports. Every service and selector they need
-already exists, and Leads has established the interaction patterns they reuse.
+Eight module screens: Reservations, Contracts, Fleet, Maintenance, Payments,
+Automations, Inbox and Reports. Every service and selector they need already
+exists, and Leads and Customers have established the interaction patterns they
+reuse.
 `#work` still renders its placeholder, and the demo is deployed but
 unadvertised: `noindex, nofollow`, linked from nowhere.

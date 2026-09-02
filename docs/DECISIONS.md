@@ -2088,3 +2088,48 @@ The guard catches it; the fix is to correct the file again before committing.
 
 The en dash (U+2013) is a different character and is not covered by this rule.
 A few remain in numeric ranges such as `40-42px` and in the pagination range.
+
+## D-074 - A withheld surface is not defined, not blanked
+
+Status: Accepted
+Stage: 9C3.2
+
+### Decision
+When a role may not see something, the surface that would show it is not
+composed at all. Customers derives both its table columns and its detail
+sections from `permissions.ts`: `customerColumnsFor(role)` and
+`relationSectionsFor(role)` filter through `canViewModule`, and the screen does
+not read a collection the role cannot open.
+
+A Finance Analyst therefore gets six columns rather than seven with the
+Reservations column dashed out, and a drawer that opens with Contracts and
+Payments rather than five groups with three of them empty.
+
+### Reason
+A column of dashes is not neutral. It tells the reader that a fact exists,
+that it belongs to this record, and that the application is keeping it from
+them, which is a worse answer than not offering the column.
+
+Ordering carries the same information. Blanking sections in Admin's order
+leaves a finance view shaped like a sales view with holes in it; putting
+Contracts and Payments first makes it a finance view of the customer.
+
+Deriving both from the matrix rather than restating it is what stops the two
+from drifting. The alternative, a conditional at each render site, is the bug
+D-058 guards against in a different costume: enforcement in one place, decided
+once, is the property worth demonstrating.
+
+### Consequence
+`customers-view.ts` is the module's policy table and the only place that knows
+which module owns which column or section. The screen and both list
+presentations read from it, so the table and the mobile cards cannot disagree
+about what a role may see.
+
+The role-keyed query is the other half. `CustomersScreen` fetches contracts
+only when the role can open Contracts, and `CustomerDetail` keys its relations
+query on the role as well as the record, so a role change drops the previous
+answer rather than showing it for a frame.
+
+Origin stays for every role. That a customer was converted from a lead is the
+customer's own fact; only the link through to the lead record depends on being
+able to open Leads.

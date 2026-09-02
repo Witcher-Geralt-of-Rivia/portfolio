@@ -26,6 +26,7 @@ src/
                             the runtime survives navigation between modules
         page.tsx            "/demos/operations"  Overview
         leads/page.tsx      "/demos/operations/leads"  CRM pipeline
+        customers/page.tsx  "/demos/operations/customers"  customer records
     specimen/
       page.tsx              "/specimen"  Stage 02 typography specimen
       page.css

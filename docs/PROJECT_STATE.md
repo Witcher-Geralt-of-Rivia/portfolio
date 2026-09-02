@@ -11,15 +11,16 @@ Everything below was read from the repository, not recalled from conversation.
 ```
 Stages 01-08   COMPLETE and FROZEN
 Deployment     LIVE at https://intelligent-systems-lab.duckdns.org
-Stage 09       IN PROGRESS - through 09C3.1.2, 0 of 3 demos built
-Demo 01        Overview + Leads DEPLOYED; 09C3.2 blocked on live review
+Stage 09       IN PROGRESS - through 09C3.2, 0 of 3 demos built
+Demo 01        Overview + Leads + Customers DEPLOYED; 09C3.3 blocked on live review
 ```
 
 Stage 09 changed direction: `#work` becomes a launcher into three interactive
 frontend-only product demos, not case studies. 09A froze the shared runtime;
 09B froze Demo 01's contract; 09C1 built its domain; 09C2 built the shell and
-Overview; 09C2.1 hardened both; 09C3.1 built Leads, and 09C3.1.1/09C3.1.2
-hardened its controls. Nine modules remain, `#work` is a placeholder,
+Overview; 09C2.1 hardened both; 09C3.1 built Leads, 09C3.1.1/09C3.1.2
+hardened its controls, and 09C3.2 built Customers. Eight modules remain,
+`#work` is a placeholder,
 and `currentStage` stays 8. See `docs/DEMO_OPERATIONS_IMPLEMENTATION.md` and
 `docs/NEXT_STAGE.md`. The case-study framework and its one verified internal
 case are preserved, unpublished; see `docs/CASE_STUDY_SOURCE_AUDIT.md`.
@@ -60,8 +61,8 @@ and never the default `.next`, so `npm run build` cannot disturb the live site.
 ## Rendering Architecture
 
 Server-first. The hero, the background system and both navigation presentations
-are server components. Twenty-nine `"use client"` modules exist: nine on the
-site, four in the demo platform and sixteen in the Operations interface.
+are server components. Thirty-nine `"use client"` modules exist: nine on the
+site, five in the demo platform and twenty-five in the Operations interface.
 `project-state.json` holds the authoritative list.
 
 No `requestAnimationFrame` loop and no pointer tracking runs anywhere. Timers
@@ -78,6 +79,7 @@ runs on a timer at rest.
 | `/specimen` | Stage 02 typography specimen, unlinked | Static (prerendered) |
 | `/demos/operations` | Demo 01 shell + Overview, `noindex`, unlinked | Static page, client subtree |
 | `/demos/operations/leads` | Demo 01 CRM pipeline, `noindex`, unlinked | Static page, client subtree |
+| `/demos/operations/customers` | Demo 01 customer records, `noindex`, unlinked | Static page, client subtree |
 
 Section ids on `/`: `hero`, `systems`, `products`, `ai-learning`, `lab`, `work`.
 `#systems` (05), `#products` (06), `#ai-learning` (07) and `#lab` (08) are real
@@ -95,38 +97,37 @@ src/
     demos/layout.tsx      Stage 09A - demo frame, robots noindex
     demos/operations/     Stage 09C2 - the Operations demo route
     icon.png, apple-icon.png   derived from the approved logo.png
-    specimen/page.tsx     typography specimen
-    specimen/page.css
+    specimen/page.tsx, page.css   typography specimen
   components/
     layout/SiteShell.tsx
     visual/{AuroraBackground,PrismLight,GrainOverlay}.tsx
     navigation/SiteNavigation.tsx      "use client"
     navigation/{DesktopNavigation,MobileNavigation,SystemMarkImage}.tsx
     navigation/nav-items.ts
-    hero/{Hero,IntelligenceConstellation,CapabilityRail}.tsx
-    hero/constellation-geometry.ts
+    hero/{Hero,IntelligenceConstellation,CapabilityRail}.tsx, geometry
     (each capability section below has the same shape: a server section
      shell, one "use client" lab holding the state, one "use client" ARIA
      tablist holding none, presentational renderers, and a data module)
     systems/    Stage 05 - ArchitectureLab; canvas, trace, principles;
-                architecture-{data,geometry}.ts (four modes)
+                architecture-{data,geometry}.ts (4 modes)
     products/   Stage 06 - ProductStudio; web/mobile/assist surfaces, event
                 rail, capability rail; product-scenarios.ts (three scenarios)
     learning/   Stage 07 - LearningLab; knowledge map, learner and tutor
                 panels, journey; learning-{scenarios,geometry}.ts
     lab/        Stage 08 - LabWorkspace; flow, experiment views, observation,
-                controls, pattern rail; lab-experiments.ts (five experiments)
+                controls, pattern rail; lab-experiments.ts (5 experiments)
     work/       Stage 09 - case-study renderers; built, never wired in
-    demos/      Stage 09A - DemoShell, DemoDisclosure, DemoResetControl
+    demos/      Stage 09A - DemoShell, DemoDisclosure, DemoResetControl,
+                DemoSelect (the product's own listbox, 09C3.1.2)
   content/case-studies.ts   typed case-study model + render-safety filter
-  demos/operations/         Stage 09C1 domain (21 modules) + Stage 09C2 ui/
-                (shell, sidebar, top bar, Overview panels, notifications,
-                icons, module routes). Overview only; ten modules unbuilt.
+  demos/operations/         Stage 09C1 domain (21 modules) + ui/ (shell,
+                sidebar, top bar, Overview panels, notifications, icons,
+                module routes, leads/, customers/). Overview, Leads and
+                Customers are built; eight modules unbuilt.
   demo-runtime/             Stage 09A - shared demo platform (18 modules):
                 types, config, demo-registry, clock, ids, repository,
                 async-service, events, audit, jobs, session, connectivity,
-                broadcast, runtime, persistence/{adapter,indexed-db,memory},
-                react/{DemoRuntimeProvider,hooks}
+                broadcast, runtime, persistence/*, react/*
   styles/
     tokens.css            all design tokens - the source of truth for values
     typography.css, motion.css, layers.css, surfaces.css   foundations
@@ -136,7 +137,6 @@ src/
 public/
   textures/micro-grain.svg    locally generated SVG turbulence tile
   brand/logo-*.png            approved portfolio mark, derived from logo.png
-
 qa/                            Playwright QA harness (see QA_BASELINE.md)
 docs/                          canonical project memory (this directory)
 ```
@@ -396,4 +396,4 @@ serves `.next-release-a` / `-b`; `.next` is development only. Update with
 - LCP timing: UNVERIFIED in the headless QA environment (see QA_BASELINE.md)
 - Reboot survival relies on PM2 logon-time resurrection, which fires at
   Administrator logon rather than at boot. Not reboot-tested: another
-  production domain shares the machine.
+  production domain shares this machine.

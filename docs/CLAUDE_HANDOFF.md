@@ -126,7 +126,7 @@ Two routes:
   `#work` is a **QA placeholder only**: an eyebrow label and the words
   "Navigation specimen section". Stage 09 replaces it.
 - **`/specimen`**: Stage 02 typography specimen, unlinked, kept verifiable.
-`/demos/operations` and `/demos/operations/leads` are the Operations demo, deployed for review; `noindex, nofollow`, linked from nowhere. `/demos` is a 404.
+`/demos/operations`, `/demos/operations/leads` and `/demos/operations/customers` are the Operations demo, deployed for review; `noindex, nofollow`, linked from nowhere. `/demos` is a 404.
 
 Source is public at `github.com/Witcher-Geralt-of-Rivia/portfolio`, branch `main`. Push every verified commit and tag after its stage's QA and verify the remote SHA; run `node qa/public-repo-safety.mjs --history` first. Never let a secret enter history, and do not rewrite it.
 
@@ -225,16 +225,16 @@ Raw design values live in `src/styles/tokens.css`. Docs must not duplicate it.
 
 Stages 01-08 complete and frozen; the site is live over HTTPS. Stage 09 is **in
 progress**: 09A froze the shared runtime, 09B froze Demo 01's contract, 09C1
-built its domain, 09C2 built the shell and Overview, 09C2.1 hardened them, and
-09C3.1 built Leads, the first module that writes. Nine module screens remain;
-`#work` still renders its placeholder.
+built its domain, 09C2 built the shell and Overview, 09C2.1 hardened them,
+09C3.1 built Leads and 09C3.2 built Customers, whose composition depends on the
+role. Eight module screens remain; `#work` is still a placeholder.
 
 ## Next Allowed Task
 
-**Stage 09C3.2 - Operations CRM: Customers.** Leads established the patterns it
-reuses. See `docs/NEXT_STAGE.md`. **BLOCKED UNTIL EXTERNAL LIVE REVIEW OF
-LEADS**. The deployed screen has to be looked at first: 09C3.1's own review
-found two defects the suite had no opinion about (D-062, D-067).
+**Stage 09C3.3 - Operations CRM: Inbox + integrated CRM workflow.** Leads and
+Customers established the patterns it reuses. See `docs/NEXT_STAGE.md`.
+**BLOCKED UNTIL EXTERNAL LIVE REVIEW OF CUSTOMERS**: every review so far found
+defects the suite had no opinion about (D-062, D-067).
 
 Do not begin it automatically.
 
