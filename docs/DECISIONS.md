@@ -2634,3 +2634,63 @@ The wider lesson is worth stating: a visually hidden element is still a laid-out
 box. The technique this project uses parks it one pixel wide at an absolute
 position, and an absolute position is only harmless while something nearby is
 its containing block.
+
+---
+
+## D-087 - A message keeps its own send time, and the specification says so
+
+Status: Accepted
+Stage: 9C3.3.2
+
+### Decision
+`Message` keeps `sentAt` in its data payload. The frozen specification, which
+gave the payload a `createdAt` instead, is corrected to match the domain 09C1
+built.
+
+```
+DemoRecord.createdAt   when the runtime wrote the record
+DemoRecord.updatedAt   when the runtime last rewrote it
+Message.sentAt         when the message belongs in the conversation
+```
+
+No code changed. No seed changed. No runtime changed. No migration is required
+or possible: nothing was ever stored the other way.
+
+### Reason
+The drift was found while building the Inbox and reported rather than fixed,
+because a stage that discovers a contract conflict should not also decide it.
+This is that decision, taken separately.
+
+The code is right and the specification was wrong. The two timestamps answer
+different questions, and the Inbox is the surface where the difference shows:
+
+The seeded transcript is written in one pass, so all sixty-four messages share
+a `createdAt` within milliseconds of each other, while their `sentAt` values
+spread across two weeks. Ordering a thread by `createdAt` would produce
+insertion order, which is meaningless to a reader; ordering by `sentAt`
+produces the conversation.
+
+A rule that appends messages inside a single commit gives them one `createdAt`
+between them, because that is one write. Each still needs its own position in
+the timeline.
+
+And a record can be rewritten. Marking a conversation read rewrites it and
+moves `updatedAt`; nothing about that should be able to move when a message was
+sent.
+
+Every other entity in the contract takes its times from the wrapper alone,
+which is why `Message` is the one that has to say otherwise explicitly.
+
+### Consequence
+The specification's Message block now lists the full record wrapper alongside
+the payload, and states that `sentAt` is domain data rather than a copy of
+runtime bookkeeping.
+
+`groupMessages` in `selectors/inbox-list.ts` already sorts by `sentAt` with an
+id tie-break, and the Inbox suite already asserts that a thread's times never
+go backwards. Both were written against the built model, so both continue to
+hold; this decision records why they are correct rather than incidental.
+
+The wider rule this settles for later modules: a domain timestamp that a person
+would recognise belongs in the payload, and the wrapper's times stay what they
+are, a record of when the store was touched.

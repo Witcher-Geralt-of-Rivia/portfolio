@@ -22,34 +22,26 @@ Stage 09                IN PROGRESS
       09C3.2 Customers COMPLETE and deployed
       09C3.3 Inbox + integrated CRM workflow  COMPLETE and deployed
       09C3.3.1 Inbox viewport containment     COMPLETE and deployed
-    09C4 Reservations/Contracts/Fleet/Maintenance/Payments  BLOCKED -
-         awaiting external live review of 09C3.3
+      09C3.3.2 Message timestamp reconciliation  COMPLETE
+    09C4 Reservations/Contracts/Fleet/Maintenance/Payments  UNBLOCKED,
+         not started
 ```
 
 ## The block
 
-Next task: Stage 09C4 - Rental Operations: Reservations + Contracts + Fleet + Maintenance + Payments (BLOCKED UNTIL EXTERNAL LIVE REVIEW OF INBOX / CRM INTEGRATION)
+Next task: Stage 09C4 - Rental Operations Core: Reservations + Contracts + Fleet + Maintenance + Payments
 
-Stage 09C4 does not start until a human has looked at
-`https://intelligent-systems-lab.duckdns.org/demos/operations/inbox` on a real
-screen and said what they think of it: opening a thread, replying, switching
-the demo role, and walking the links out to Leads and Customers and back.
+Inbox and the whole CRM group passed external live review, and 09C3.3.1
+corrected the one defect that review found. 09C3.3.2 closed the last
+documentation debt behind it, so **09C4 is unblocked**.
 
-This is deliberate, and five reviews have now earned it. The fifth rejected
-the Inbox outright: it rendered above 1951 pixels of portfolio background, and
-every one of the suite's checks passed while it did, because none of them
-measured the height of the document and none captured a full page. Every defect 09C2.1
-fixed was found by looking at rendered pixels, three of four while the QA suite
-passed. 09C3.1's review found two more. 09C3.1.1's found four presentation
-faults. 09C3.1.2 exists because a reviewer opened a dropdown, which no harness
-had thought to photograph.
+It has not been started, and it does not start without an explicit
+instruction. That rule has not changed and is worth keeping: five reviews of
+this product have each found something the suite had no opinion about, most
+recently an application rendering above 1951 pixels of portfolio background
+while 367 checks passed.
 
-Inbox is also the first module whose layout is not a table, and the first that
-links the others together. A problem in either, found after five more modules
-exist, is a problem fixed six times.
-
-Nothing about the block is technical. The build is deployed, the regression is
-green, and the work is ready to continue the moment the review comes back.
+Stage 09C3 is complete and approved: Leads, Customers and Inbox.
 
 ## Ordered plan
 
@@ -72,10 +64,11 @@ green, and the work is ready to continue the moment the review comes back.
 16. Stage 09C3.2 - Customers                    DONE
 17. Stage 09C3.3 - Inbox + CRM workflow         DONE
 18. Stage 09C3.3.1 - Inbox viewport containment DONE
-19. Stage 09C4 - Rental Operations modules      BLOCKED on live review
-18. Stage 09C4-C6 - modules, then QA/deploy     LATER
-13. Field and Learning specs, then builds       LATER
-14. Stage 09 - #work launcher integration       LATER
+19. Stage 09C3.3.2 - Message timestamp contract DONE
+20. Stage 09C4 - Rental Operations Core         UNBLOCKED, not started
+21. Stage 09C5-C6 - remaining modules, QA       LATER
+22. Field and Learning specs, then builds       LATER
+23. Stage 09 - #work launcher integration       LATER
 ```
 
 ## What changed about Stage 09

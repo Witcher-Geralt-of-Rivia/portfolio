@@ -20,7 +20,7 @@ ROUTE           /demos/operations, /leads, /customers and /inbox are deployed
                 for review; noindex, linked from nowhere
 ```
 
-Three clauses have been amended since freezing, each on an explicit
+Four clauses have been amended since freezing, each on an explicit
 instruction and each recorded in `docs/DECISIONS.md`. They are marked
 **AMENDED** where they appear.
 
@@ -328,11 +328,27 @@ portfolio forbids outright.
 
 ### Message
 
+**AMENDED (09C3.3.2, D-087).** The original block gave the data payload a
+`createdAt` and omitted the rest of the record wrapper. The built model, frozen
+by 09C1, carries a domain timestamp of its own:
+
 ```
-id  conversationId  authorType  actorId?  body  createdAt
+id  conversationId  authorType  actorId?  body  sentAt
+createdAt  updatedAt  version
 
 authorType   Customer | Staff | System
 ```
+
+`sentAt` is when the message belongs in the conversation, and it is what the
+transcript orders by. `createdAt` is when the runtime wrote the record. They
+usually agree and are not required to: a seeded transcript is written in one
+pass but reads across two weeks, and a rule that appends several messages in a
+single commit shares one `createdAt` between them while each keeps its own place
+in the timeline.
+
+`sentAt` is therefore domain data and not a copy of runtime bookkeeping. Every
+other entity here takes its times from the wrapper alone, which is why this one
+says so explicitly.
 
 ### AutomationRule
 

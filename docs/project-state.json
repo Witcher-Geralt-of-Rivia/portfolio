@@ -4,7 +4,7 @@
   "currentStage": 8,
   "stage05Started": true,
   "nextStage": "stage-09c4",
-  "nextStageTitle": "Stage 09C4 - Rental Operations: Reservations + Contracts + Fleet + Maintenance + Payments (BLOCKED UNTIL EXTERNAL LIVE REVIEW OF INBOX / CRM INTEGRATION)",
+  "nextStageTitle": "Stage 09C4 - Rental Operations Core: Reservations + Contracts + Fleet + Maintenance + Payments",
   "frozenStages": [
     1,
     2,
@@ -245,7 +245,7 @@
     "disclosure": "INTERACTIVE ENGINEERING DEMO / SYNTHETIC DATA - FRONTEND ONLY",
     "operationsSpec": "frozen; docs/DEMO_OPERATIONS_SPEC.md",
     "operationsDomain": "built; docs/DEMO_OPERATIONS_IMPLEMENTATION.md",
-    "operationsReview": "Inbox viewport containment corrected after external review; 09C4 blocked until Inbox is reviewed again"
+    "operationsReview": "Leads, Customers and Inbox externally approved; 09C4 unblocked and not started"
   },
   "stage09bComplete": true,
   "stage09c1Complete": true,
@@ -270,5 +270,9 @@
   "stage09c32Complete": true,
   "stage09c33Complete": true,
   "stage09c3Complete": true,
-  "stage09c331Complete": true
+  "stage09c331Complete": true,
+  "stage09c332Complete": true,
+  "environmentNotes": {
+    "staleDevServer": "A `next dev` tree for this repository is running and serving the documented preview on port 3000 (supervisor PID 13232, listening child PID 14568). It rewrites AGENTS.md with prohibited punctuation on each restart, which qa:style catches. Not terminated: it is not stale, and termination needs explicit approval."
+  }
 }

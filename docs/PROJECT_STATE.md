@@ -15,7 +15,7 @@ Stage 09       IN PROGRESS - through 09C3, 0 of 3 demos built
 Demo 01        Overview + the three CRM modules DEPLOYED; 09C4 blocked on review
 ```
 
-Stage 09 changed direction: `#work` becomes a launcher into three interactive
+Stage 09 changed direction: `#work` becomes a launcher into three
 frontend-only product demos, not case studies. 09A froze the shared runtime;
 09B froze Demo 01's contract; 09C1 built its domain; 09C2 built the shell and
 Overview; 09C2.1 hardened both; 09C3 built the three CRM modules, Leads,
@@ -118,7 +118,7 @@ src/
                 controls, pattern rail; lab-experiments.ts (5 experiments)
     work/       Stage 09 - case-study renderers; built, never wired in
     demos/      Stage 09A - DemoShell, DemoDisclosure, DemoResetControl,
-                DemoSelect (the product's own listbox, 09C3.1.2)
+                DemoSelect
   content/case-studies.ts   typed case-study model + render-safety filter
   demos/operations/         Stage 09C1 domain (21 modules) + ui/ (shell,
                 sidebar, top bar, Overview panels, notifications, icons,
@@ -394,6 +394,6 @@ serves `.next-release-a` / `-b`; `.next` is development only. Update with
 ## Known Gaps
 
 - LCP timing: UNVERIFIED in the headless QA environment (see QA_BASELINE.md)
-- Reboot survival relies on PM2 logon-time resurrection, which fires at
-  Administrator logon rather than at boot. Not reboot-tested: another
-  production domain shares this machine.
+- Reboot survival relies on PM2 logon-time resurrection, firing at Administrator
+  logon rather than at boot. Not reboot-tested: another domain shares this box.
+- A `next dev` tree on port 3000 rewrites `AGENTS.md` on restart; qa:style catches it.
