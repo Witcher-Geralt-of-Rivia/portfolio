@@ -23,17 +23,26 @@ Stage 09                IN PROGRESS
       09C3.3 Inbox + integrated CRM workflow  COMPLETE and deployed
       09C3.3.1 Inbox viewport containment     COMPLETE and deployed
       09C3.3.2 Message timestamp reconciliation  COMPLETE
-    09C4 Reservations/Contracts/Fleet/Maintenance/Payments  UNBLOCKED,
-         not started
+    09C4 Rental Operations Core  IN PROGRESS (D-090)
+      09C4.0 core domain readiness  COMPLETE
+      09C4.1 Reservations           NOT STARTED
+      09C4.2 Contracts              NOT STARTED
+      09C4.3 Fleet + Maintenance    BLOCKED on the Fleet create contract
+      09C4.4 Payments + workflow    NOT STARTED
 ```
 
 ## The block
 
-Next task: Stage 09C4 - Rental Operations Core: Reservations + Contracts + Fleet + Maintenance + Payments
+Next task: Stage 09C4.1 - Reservations
 
-Inbox and the whole CRM group passed external live review, and 09C3.3.1
-corrected the one defect that review found. 09C3.3.2 closed the last
-documentation debt behind it, so **09C4 is unblocked**.
+09C4.0 found and fixed three unenforced clauses in the frozen contract before
+any of the five screens could depend on them: reservations never woke Rule 03
+in production, and two services left a vehicle disagreeing with its own
+derivation. Reservations can now be built against a contract that holds.
+
+One thing is genuinely open. There is no Fleet write service, and the frozen
+document does not say where a new vehicle's asset code comes from, so 09C4.3
+is blocked until that contract is decided (D-090).
 
 It has not been started, and it does not start without an explicit
 instruction. That rule has not changed and is worth keeping: five reviews of
@@ -65,10 +74,12 @@ Stage 09C3 is complete and approved: Leads, Customers and Inbox.
 17. Stage 09C3.3 - Inbox + CRM workflow         DONE
 18. Stage 09C3.3.1 - Inbox viewport containment DONE
 19. Stage 09C3.3.2 - Message timestamp contract DONE
-20. Stage 09C4 - Rental Operations Core         UNBLOCKED, not started
-21. Stage 09C5-C6 - remaining modules, QA       LATER
-22. Field and Learning specs, then builds       LATER
-23. Stage 09 - #work launcher integration       LATER
+20. Stage 09C4.0 - Core domain readiness        DONE
+21. Stage 09C4.1 - Reservations                 NEXT
+22. Stage 09C4.2-C4.4 - the rest of the group   LATER
+23. Stage 09C5-C6 - remaining modules, QA       LATER
+24. Field and Learning specs, then builds       LATER
+25. Stage 09 - #work launcher integration       LATER
 ```
 
 ## What changed about Stage 09
@@ -118,11 +129,21 @@ production is untouched.
 
 ## NEXT TASK
 
-**Stage 09C3 - Operations CRM: Leads + Customers + Inbox.**
+**Stage 09C4.1 - Reservations.**
 
-The first three module screens. The shell, routing, role policy, notification
-centre and Overview are built and measured; every service and selector these
-screens need already exists and is covered by `qa/stage09c1-operations.mjs`.
+The first of five, in the sequence D-090 froze:
+
+```
+09C4.0  core domain readiness
+09C4.1  Reservations
+09C4.2  Contracts
+09C4.3  Fleet + Maintenance
+09C4.4  Payments + the integrated rental workflow
+```
+
+The CRM group is done and approved, and it established everything these
+reuse: the table and drawer grammar, the approved select, the URL contract
+for selection, the role gate and the single polite announcement.
 
 Each module that lands must flip its `implemented` flag in
 `src/demos/operations/ui/modules.ts` from false to true, which turns its

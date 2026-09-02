@@ -70,6 +70,8 @@ export const DEFAULT_OPERATIONS_ROLE = DEFAULT_ROLE;
 
 export * as leads from "./services/leads";
 export * as leadWorkflows from "./services/lead-workflows";
+export * as workflows from "./services/workflows";
+export * as reservationWorkflows from "./services/reservation-workflows";
 export * as customers from "./services/customers";
 export * as reservations from "./services/reservations";
 export * as contracts from "./services/contracts";

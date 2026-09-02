@@ -11,8 +11,8 @@ Everything below was read from the repository, not recalled from conversation.
 ```
 Stages 01-08   COMPLETE and FROZEN
 Deployment     LIVE at https://intelligent-systems-lab.duckdns.org
-Stage 09       IN PROGRESS - through 09C3, 0 of 3 demos built
-Demo 01        Overview + the three CRM modules DEPLOYED; 09C4 blocked on review
+Stage 09       IN PROGRESS - through 09C4.0, 0 of 3 demos built
+Demo 01        Overview + the three CRM modules DEPLOYED; rental core ready
 ```
 
 Stage 09 changed direction: `#work` becomes a launcher into three

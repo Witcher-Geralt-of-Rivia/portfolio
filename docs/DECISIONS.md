@@ -2694,3 +2694,191 @@ hold; this decision records why they are correct rather than incidental.
 The wider rule this settles for later modules: a domain timestamp that a person
 would recognise belongs in the payload, and the wrapper's times stay what they
 are, a record of when the store was touched.
+
+---
+
+## D-088 - The workflow layer is neutral, because two modules now need it
+
+Status: Accepted
+Stage: 9C4.0
+
+### Decision
+`withAutomations` moves from `services/lead-workflows.ts` to
+`services/workflows.ts`. `lead-workflows.ts` keeps the two lead wrappers and
+re-exports the mechanism so no approved caller has to move. A new
+`services/reservation-workflows.ts` wraps confirm, convert and cancel.
+
+A Reservations screen calls `confirmReservationWorkflow`. It asks for one
+business action.
+
+### Reason
+D-063 built the workflow layer for Leads because the runtime's event bus is
+fire-and-forget: a service publishes, and an event published while nobody is
+subscribed reaches nobody. Nothing subscribed, so the rules never ran.
+
+Reservations sit on the "before" side of that same gap. `confirmReservation`
+emits `reservation.confirmed`, `runtime.commit` publishes it, `triggerFor`
+maps it to Rule 03, and `ACTIONS` holds the action that appends the System
+message. Every piece is present and correct. Nothing listens.
+
+Proven rather than assumed, before anything was changed: the only production
+subscriber in the repository is the one `withAutomations` opens, and only
+`createLeadWorkflow` and `changeLeadStageWorkflow` reach it. The only other
+`processEvents` caller is `reconcileTimeDerivedState`, which has no call sites
+at all. Both QA suites that appear to prove Rule 03 works do the join by hand,
+one of them subscribing to the bus itself and saying so in a comment. So a
+Reservations screen calling the bare service would have reproduced D-063's
+defect exactly, and the suite would have gone on passing.
+
+The mechanism was already neutral in body: generic in `T`, taking a context and
+a thunk, knowing nothing about leads. Only its filename was lead-specific.
+Leaving it there would have forced a reservation workflow to import from
+`lead-workflows`, which is false, or to keep a second copy, which is worse.
+
+### Consequence
+D-063's Decision text names `lead-workflows.ts` as the home of the mechanism.
+That sentence is superseded; everything else in D-063 stands unchanged, and the
+two caveats it records still govern: the collector is unsubscribed before the
+rules run so their own commits are not fed back in, and the bus is per-runtime
+rather than per-caller, so every caller must disable its control while its own
+mutation is pending.
+
+The convert and cancel wrappers exist even though no rule listens for their
+events today. A screen then calls one kind of thing for every reservation
+mutation, and a rule added later needs no change at the call site.
+
+Nothing about the extraction changes lead behaviour. Rules 01 and 02 are
+re-proved through the moved mechanism rather than assumed.
+
+---
+
+## D-089 - A vehicle is recomputed after every mutation that touches it
+
+Status: Accepted
+Stage: 9C4.0
+
+### Decision
+Two services that changed a vehicle's world without recomputing the vehicle now
+do so, in the same commit:
+
+```
+convertReservationToContract   the reservation stops being Confirmed and a
+                               Pending contract appears
+createMaintenance              an Open work order appears
+```
+
+And `createReservation` now validates the vehicle a draft names: it must exist,
+and its class must match the reservation's.
+
+### Reason
+The frozen contract is explicit. Vehicle status is "recomputed after every
+mutation touching that vehicle's contracts, reservations or work orders", and
+the precedence puts an active work order, which it defines as Open **or** In
+Progress, above everything else. Neither of these fixes invents a rule; both
+enforce one that was already written down and not obeyed.
+
+What the two omissions produced:
+
+A converted reservation left the vehicle reading `Reserved` with a
+`currentReservationId` pointing at a reservation that is no longer Confirmed. A
+Pending contract claims nothing under the precedence, so the honest answer is
+`Available` with no pointer. The stale one is the same class of lie as a stale
+status.
+
+An Open work order left the vehicle reading `Available` while the derivation
+said `Maintenance`. Every other service in that module already refreshed;
+`createMaintenance` was the one that did not.
+
+The draft validation is the same principle one layer out. The field was
+accepted unvalidated, so a draft could name a vehicle that does not exist, or a
+Utility van against a Touring booking, and the mismatch would surface only at
+confirmation. A screen that filters the list it offers is a convenience, not an
+enforcement point. This is reference validity and not a capacity hold: a Draft
+does not take a vehicle off the fleet, so nothing here asks whether it is free
+for those dates. Confirming is what holds it, and confirmation already runs the
+eligibility check.
+
+### Consequence
+The readiness suite asserts a world invariant rather than expected strings.
+After every mutation it walks the whole fleet and compares each stored vehicle
+against `deriveVehicleStatus` and `deriveVehicleLinks` computed over the world
+that mutation left behind. That is worth more than any single expected status,
+because it catches the vehicle nobody thought to look at, and it is what proved
+both omissions in the first place.
+
+One interaction is recorded rather than changed. Creating an Open work order on
+a vehicle that is out on an Active contract now moves the stored status to
+`Maintenance`, because the precedence says an active work order outranks a
+rental. Starting that work order is still refused, because the frozen contract
+puts that conflict at start. So the vehicle reads Maintenance while a rental is
+running and the work cannot begin.
+
+That is what the precedence prescribes, and the tension existed before this
+change: the derivation always said Maintenance, and the stored record simply
+disagreed in silence. Making the record honest made the tension visible.
+Resolving it would mean either blocking creation, which the contract places at
+start rather than at create, or distinguishing scheduled work from work in
+progress, which is a new precedence rule. Both are specification changes and
+neither is taken here.
+
+---
+
+## D-090 - Stage 09C4 is built in five steps, and the Fleet write service is not one of them yet
+
+Status: Accepted
+Stage: 9C4.0
+
+### Decision
+```
+09C4.0  core domain readiness
+09C4.1  Reservations
+09C4.2  Contracts
+09C4.3  Fleet + Maintenance
+09C4.4  Payments + the integrated rental workflow
+```
+
+Fleet and Maintenance share a step because they share a subject: a work order
+is about a vehicle, and the vehicle's status is the work order's visible
+effect.
+
+### Reason
+The same argument D-062 made for the CRM group. One module per step keeps each
+external review small enough to be useful, and every review so far has found
+something the suite had no opinion about.
+
+09C4.0 exists because five screens were about to depend on a contract that had
+three unenforced clauses in it. Finding them after two of the screens were
+written would have meant fixing them twice.
+
+### Consequence
+**The Fleet write service is not built, and 09C4.3 cannot start until its
+contract is decided.** No service in the repository can create or edit a
+Vehicle: eleven service files, none of them a fleet service, and every existing
+write to a vehicle record is a derived-state refresh.
+
+The edit half is fully specified. The frozen contract says the Fleet edit form
+may change `modelLabel`, `vehicleClass` and `odometerKm` only, and that status
+is never set by a form.
+
+The create half is not. The specification describes the seeded twenty-four
+(`MTR-001` to `MTR-024`) and says nothing about who supplies the twenty-fifth.
+It does not say whether `assetCode` is entered or generated, and if generated
+it gives no rule; it does not give a format or a uniqueness constraint; and it
+does not name the create form's fields. `formatId` covers ids like
+`vehicle_0025` and is explicitly not this, because `assetCode` is a separate
+human-facing field.
+
+That is a genuine gap in a frozen document rather than something to decide in
+passing, so it is reported and left open. The recommendation on the record, for
+whoever authorises it: generate `assetCode` as `MTR-` plus the vehicle's own
+sequence number zero-padded to three digits, derived from the same counter that
+produces the record id, so it is deterministic, unique by construction, matches
+the twenty-four already seeded, and needs no field on the form. The create form
+would then ask for `modelLabel`, `vehicleClass` and `odometerKm`, which is
+exactly the set the edit form is already allowed to change.
+
+Two validation rules would come with it either way, and both are already
+implied by frozen data rather than invented: `modelLabel` must belong to the
+chosen `vehicleClass` under `MODELS_BY_CLASS`, which nothing currently
+enforces because the two are independent string unions, and `odometerKm` must
+be a non-negative integer.

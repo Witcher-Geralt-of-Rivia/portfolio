@@ -20,6 +20,7 @@ import {
   must,
   read,
   refreshedVehicle,
+  withAdded,
   withReplaced,
   type OperationsContext,
 } from "./context";
@@ -104,6 +105,29 @@ export async function createReservation(
 
   if (Date.parse(input.endAt) <= Date.parse(input.startAt)) {
     throw invalid("A reservation must end after it starts.", "endAt");
+  }
+
+  /**
+   * A draft that names a vehicle must name a real one of the right class.
+   *
+   * This is reference validity, not a capacity hold: a Draft does not take the
+   * vehicle off the fleet, which is why nothing here asks whether it is free
+   * for those dates. Confirming is what holds it, and `confirmReservation`
+   * runs the eligibility check.
+   *
+   * The field was accepted unvalidated, so a draft could carry an id belonging
+   * to no vehicle, or a Utility van against a Touring booking, and the
+   * mismatch would only surface at confirmation. A screen filtering the list
+   * it offers is not enforcement (D-089).
+   */
+  if (input.vehicleId) {
+    const vehicle = await must.vehicle(ctx, input.vehicleId);
+    if (vehicle.data.vehicleClass !== input.vehicleClass) {
+      throw conflict(
+        `${vehicle.data.assetCode} is a ${vehicle.data.vehicleClass} vehicle and this reservation is for ${input.vehicleClass}.`,
+        input.vehicleId
+      );
+    }
   }
 
   const result = await ctx.runtime.commit<DemoRecord<Reservation>>((m) => {
@@ -356,6 +380,15 @@ export async function convertReservationToContract(
   const vehicleIndex = Number(vehicle.id.split("_")[1]) - 1;
   const dailyRate = dailyRateForVehicle(vehicle.data.vehicleClass, vehicleIndex);
 
+  /* Read for the recomputation below. The frozen contract says the vehicle is
+     recomputed after every mutation touching its contracts, reservations or
+     work orders, and this mutation touches two of the three. */
+  const [contracts, reservations, workOrders] = await Promise.all([
+    read.contracts(ctx),
+    read.reservations(ctx),
+    read.maintenance(ctx),
+  ]);
+
   const result = await ctx.runtime.commit<ConversionResult>((m) => {
     const contractId = m.nextId(C.contracts, P.contract);
     const contract = m.record<Contract>(C.contracts, contractId, {
@@ -376,10 +409,28 @@ export async function convertReservationToContract(
       reservation
     );
 
+    /**
+     * The world the conversion leaves behind, so the vehicle can be recomputed
+     * against it rather than against the world before it.
+     *
+     * The reservation stops being Confirmed and a Pending contract appears.
+     * Neither of those claims the vehicle under the frozen precedence, so a
+     * vehicle whose only tie was this reservation becomes Available and drops
+     * its `currentReservationId`. Leaving the Reserved status and the pointer
+     * in place would have been the stale second source of truth the derived
+     * rules exist to prevent (D-089).
+     */
+    const world = {
+      contracts: withAdded(contracts, contract),
+      reservations: withReplaced(reservations, reservationId, converted.data),
+      workOrders,
+    };
+
     return {
       ops: [
         { kind: "put", record: contract },
         { kind: "put", record: converted },
+        { kind: "put", record: refreshedVehicle(m, vehicle, world) },
         {
           kind: "audit",
           entry: {

@@ -1792,3 +1792,67 @@ full-page capture    1430x2751    1430x800
 backdrop pixels below     1951px         0px
 list height / content   414 / 2500   414 / 2500
 ```
+
+---
+
+## Stage 09C4.0 - Rental Operations core readiness
+
+PASS. Harness: `qa/stage09c40-core-readiness.mjs`, **62 checks**, domain only.
+
+### The assertion that matters
+
+A world invariant, not an expected string. After every mutation the suite walks
+every vehicle in the store and compares its persisted `status`,
+`currentContractId`, `currentReservationId` and `activeMaintenanceId` against
+`deriveVehicleStatus` and `deriveVehicleLinks` computed over the world that
+mutation left behind. A failure names the vehicle and both sides.
+
+That is what found the two omissions this stage fixed. An expected-string check
+would only have caught the vehicle someone thought to look at.
+
+### What it covers
+
+```
+seed            every seeded vehicle already matches its derivation
+Rule 03         confirming through the workflow appends a System message,
+                marks the conversation unread and records one run, with no
+                manual processEvents anywhere; and the bare service still
+                wakes nothing, which is what proves the workflow closed it
+Rules 01/02     unchanged by moving the mechanism to a neutral module
+sequence        draft, confirm, convert, activate, complete, with the fleet
+                invariant asserted at each of the five steps
+maintenance     create, start, complete, invariant at each step
+payments        integer cents, balance arithmetic, one audit entry,
+                overpayment, zero, fractional cent and cancelled contract
+                all refused
+drafts          a named vehicle must exist and match the class; naming none
+                stays legal
+reset           24 vehicles at 10/4/7/3, ten work orders, invariant intact
+```
+
+### Regression
+
+```
+stage09a-runtime                76/76
+stage09a-shell                  85/85
+stage09b-operations-spec        96/96
+stage09c1-operations          211/211
+stage09c2-operations-ui       141/141
+stage09c21-hardening          111/111
+stage09c31-leads              407/407
+stage09c32-customers          174/174
+stage09c33-inbox              422/422
+stage09c40-readiness            62/62
+render safety                   pass
+public-repo-safety              19/19  (with --history)
+copy-style, qa:memory           pass
+tsc, eslint                     clean
+```
+
+**No existing assertion was changed or weakened.** The behaviour changes are
+additive in the sense that matters: they make stored state agree with a
+derivation the suites already trusted, so nothing that passed before stopped
+passing. In particular `stage09c1-operations` passes 211/211 untouched,
+including its W2 and W4 vehicle-status assertions and its "maintenance on a
+rented vehicle is a CONFLICT" case, which still holds because the conflict
+lives at start.

@@ -39,8 +39,16 @@ export async function createMaintenance(
   input: CreateMaintenanceInput
 ): Promise<DemoRecord<MaintenanceWorkOrder>> {
   requireWrite(ctx.session, "Maintenance");
-  await must.vehicle(ctx, input.vehicleId);
+  const vehicle = await must.vehicle(ctx, input.vehicleId);
   if (!input.summary.trim()) throw invalid("A work order needs a summary.", "summary");
+
+  /* Read for the recomputation below. An Open work order is an active one
+     under the frozen precedence, so opening it changes what the vehicle is. */
+  const [contracts, reservations, workOrders] = await Promise.all([
+    read.contracts(ctx),
+    read.reservations(ctx),
+    read.maintenance(ctx),
+  ]);
 
   const result = await ctx.runtime.commit<DemoRecord<MaintenanceWorkOrder>>((m) => {
     const id = m.nextId(C.maintenance, P.maintenance);
@@ -52,8 +60,28 @@ export async function createMaintenance(
       openedAt: m.now(),
       summary: input.summary.trim(),
     });
+    /**
+     * Recomputed here, not at start.
+     *
+     * `isActiveWorkOrder` counts Open as well as In Progress, and the frozen
+     * precedence puts an active work order above everything else, so the
+     * moment this record exists the vehicle reads Maintenance. The contract
+     * says the vehicle is recomputed after every mutation touching its
+     * contracts, reservations or work orders; creating a work order is one of
+     * those, and this service was the only one of the four in this module
+     * that did not do it (D-089).
+     */
+    const world = {
+      contracts,
+      reservations,
+      workOrders: withAdded(workOrders, record),
+    };
+
     return {
-      ops: [{ kind: "put", record }],
+      ops: [
+        { kind: "put", record },
+        { kind: "put", record: refreshedVehicle(m, vehicle, world) },
+      ],
       events: [
         {
           type: "maintenance.opened",

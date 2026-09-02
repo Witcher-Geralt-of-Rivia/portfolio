@@ -10,7 +10,7 @@ the code beneath it.
 ```
 STATUS      domain complete / shell, Overview and the three CRM modules
             complete / seven modules unbuilt
-STAGE       09C1, 09C2, 09C2.1 and all of 09C3 complete
+STAGE       09C1, 09C2, 09C2.1, all of 09C3 and 09C4.0 complete
 REGISTRY    operations = building
 ROUTE       /demos/operations, /leads, /customers and /inbox DEPLOYED,
             noindex, for external live review
@@ -687,6 +687,72 @@ measurement, the audit policy, every assignment refusal, and Rule 03 end to end:
 confirming a reservation through the real service appends a System message to
 the customer's conversation and marks it unread, which proves the automation
 path without building Reservations early.
+
+## Rental core readiness (09C4.0)
+
+Five screens were about to depend on the frozen domain contract. Three clauses
+in it were not being enforced, and finding that after two of the screens
+existed would have meant fixing it twice.
+
+No UI. No new product scope. Four domain corrections, each of them a rule the
+contract already stated.
+
+### The automation gap, again
+
+`confirmReservation` emits `reservation.confirmed`, `runtime.commit` publishes
+it, `triggerFor` maps it to Rule 03, and the action that appends the System
+message is written and correct. Nothing listened.
+
+The runtime's bus is fire-and-forget with no buffer and no replay, so an event
+published while nobody is subscribed reaches nobody. Proven before anything
+changed: the only production subscriber in the repository is the one
+`withAutomations` opens, and only the two lead workflows reach it. The only
+other `processEvents` caller, `reconcileTimeDerivedState`, has no call sites at
+all. Both QA suites that appear to prove Rule 03 works do the join by hand.
+
+So a Reservations screen calling the bare service would have reproduced D-063's
+defect exactly, and the suite would have gone on passing. The mechanism moved
+to a neutral `services/workflows.ts` and `reservation-workflows.ts` wraps
+confirm, convert and cancel (D-088). A screen asks for one business action.
+
+### Two vehicles that disagreed with their own derivation
+
+The contract says a vehicle is recomputed after every mutation touching its
+contracts, reservations or work orders. Two services did not.
+
+```
+convertReservationToContract   left Reserved, with a pointer to a reservation
+                               that is no longer Confirmed
+createMaintenance              left Available, while an Open work order made
+                               the derivation say Maintenance
+```
+
+Both now refresh in the same commit as the change that caused them (D-089).
+
+### Draft references
+
+`createReservation` accepted a `vehicleId` it never checked, so a draft could
+name a vehicle that does not exist or a Utility van against a Touring booking.
+It now validates existence and class. That is reference validity and not a
+capacity hold: a Draft does not take a vehicle off the fleet, and confirmation
+is what holds it.
+
+### The invariant, as QA
+
+`qa/stage09c40-core-readiness.mjs` asserts a world invariant rather than
+expected strings. After every mutation it walks the whole fleet and compares
+each stored vehicle against `deriveVehicleStatus` and `deriveVehicleLinks`
+computed over the world that mutation left behind. That is what found both
+omissions, and it is worth more than any single expected status because it
+catches the vehicle nobody thought to look at.
+
+### Not built, and why
+
+There is no Fleet write service, and 09C4.3 cannot start without one. The edit
+contract is fully specified; the create contract is not, because the frozen
+document describes the seeded twenty-four asset codes and never says who
+supplies the twenty-fifth. Reported with a recommendation rather than decided
+in passing (D-090).
 
 ## Remaining UI work
 

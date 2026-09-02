@@ -1447,3 +1447,65 @@ fresh profile against production returns the canonical 20 conversations, 64
 messages, 6 unread, 13 Open and 7 Closed with none of that text, a test reply
 reproduces it, and Reset demo data clears it exactly. Browser-local mutations
 from the review session, not a persistence defect. No product logic changed.
+
+---
+
+## Stage 09C4.0 - Rental Operations Core Readiness
+
+Status: **Complete**
+
+### Summary
+The readiness stage for Reservations, Contracts, Fleet, Maintenance and
+Payments. No screens. Five of them were about to depend on the frozen domain
+contract, and three clauses in it were not being enforced.
+
+### The automation gap, again
+
+`confirmReservation` emits `reservation.confirmed`, the runtime publishes it,
+and Rule 03 is written and correct. Nothing listened. The bus is
+fire-and-forget with no replay, and the only production subscriber in the
+repository was the one the Leads workflow opens.
+
+So a Reservations screen calling the bare service would have reproduced the
+defect D-063 fixed for leads, and the QA would have gone on passing, because
+both suites that appear to prove Rule 03 works do the join by hand. The
+mechanism moved to a neutral `services/workflows.ts`, and
+`reservation-workflows.ts` wraps confirm, convert and cancel (D-088). The
+screen asks for one business action.
+
+### Two vehicles that disagreed with their own derivation
+
+The contract says a vehicle is recomputed after every mutation touching its
+contracts, reservations or work orders. `convertReservationToContract` left it
+`Reserved` with a pointer to a reservation that was no longer Confirmed;
+`createMaintenance` left it `Available` while an Open work order made the
+derivation say `Maintenance`. Both now refresh in the same commit (D-089).
+
+`createReservation` also accepted a `vehicleId` it never validated, so a draft
+could name a vehicle that does not exist or the wrong class.
+
+### The invariant, as QA
+
+`qa/stage09c40-core-readiness.mjs` walks the whole fleet after every mutation
+and compares each stored vehicle against `deriveVehicleStatus` and
+`deriveVehicleLinks` over the resulting world. That is what found both
+omissions. 62 checks, and no existing assertion was weakened: the older suites
+pass unchanged because the fixes make stored state agree with a derivation they
+already trusted.
+
+### Not built
+
+There is no Fleet write service and 09C4.3 cannot start without one. The edit
+contract is specified; the create contract is not, because the frozen document
+describes the seeded twenty-four asset codes and never says who supplies the
+twenty-fifth. Reported with a recommendation rather than decided in passing
+(D-090).
+
+### One interaction recorded, not changed
+
+Creating an Open work order on a vehicle out on an Active contract now moves
+the stored status to `Maintenance`, because the precedence puts an active work
+order above a rental, while starting that work order is still refused because
+the contract puts that conflict at start. The tension predates this stage: the
+derivation always said Maintenance and the stored record disagreed in silence.
+Resolving it would be a specification change and is not taken here.

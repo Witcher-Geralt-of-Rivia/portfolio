@@ -3,8 +3,8 @@
   "purpose": "Demonstrate engineering capability to freelance clients. Technical portfolio, not a personal site.",
   "currentStage": 8,
   "stage05Started": true,
-  "nextStage": "stage-09c4",
-  "nextStageTitle": "Stage 09C4 - Rental Operations Core: Reservations + Contracts + Fleet + Maintenance + Payments",
+  "nextStage": "stage-09c4-1",
+  "nextStageTitle": "Stage 09C4.1 - Reservations",
   "frozenStages": [
     1,
     2,
@@ -217,7 +217,7 @@
   "stage08Started": true,
   "stage09aComplete": true,
   "demoPlatform": {
-    "status": "09A foundation + Operations domain, shell, Overview and the three CRM modules; seven modules unbuilt",
+    "status": "09A foundation + Operations domain, shell, Overview and the three CRM modules; rental core domain ready, seven modules unbuilt",
     "routes": [
       "/demos/operations",
       "/demos/field",
@@ -245,7 +245,7 @@
     "disclosure": "INTERACTIVE ENGINEERING DEMO / SYNTHETIC DATA - FRONTEND ONLY",
     "operationsSpec": "frozen; docs/DEMO_OPERATIONS_SPEC.md",
     "operationsDomain": "built; docs/DEMO_OPERATIONS_IMPLEMENTATION.md",
-    "operationsReview": "Leads, Customers and Inbox externally approved; 09C4 unblocked and not started"
+    "operationsReview": "CRM group externally approved; 09C4.0 domain readiness complete; 09C4.1 Reservations next"
   },
   "stage09bComplete": true,
   "stage09c1Complete": true,
@@ -274,5 +274,6 @@
   "stage09c332Complete": true,
   "environmentNotes": {
     "staleDevServer": "A `next dev` tree for this repository is running and serving the documented preview on port 3000 (supervisor PID 13232, listening child PID 14568). It rewrites AGENTS.md with prohibited punctuation on each restart, which qa:style catches. Not terminated: it is not stale, and termination needs explicit approval."
-  }
+  },
+  "stage09c40Complete": true
 }
