@@ -1617,8 +1617,8 @@ the `implemented` flag behind it are deleted once all eleven modules exist.
 ## Stage 09C3.3 - Operations Inbox and CRM Workflow
 
 PASS. Harness: `qa/stage09c33-inbox.mjs`, **367 checks** with the domain probe
-in place and 289 without it, which is what runs against production: the two
-domain sections skip themselves when the fixture route is absent.
+in place and 274 against production, where the two domain sections skip
+themselves because the fixture route is not deployed.
 
 ### What it covers
 
