@@ -1303,3 +1303,112 @@ eslint                          0 errors (1 pre-existing warning in qa/texture.m
 
 One 09C2 assertion moved rather than being removed: it asserted that Overview
 alone was interactive, which was temporary build state this stage changes.
+
+---
+
+## Stage 09C3.1.1 - Leads Control Presentation
+
+PASS. Harness: `qa/stage09c31-leads.mjs`, grown from 281 to **398 checks**
+(369 without the domain probe, which is what runs against production).
+
+Three sections were added for this stage: control geometry and semantics, the
+pagination composition, and the provenance band measured at six widths.
+
+### What the external review found
+
+Four presentation faults, none of which the suite had an opinion about.
+
+```
+filters      a detached uppercase label beside a browser select, four times
+sort         a field select plus an unlabelled square carrying an arrow
+page size    a bare "10" behind the words PER PAGE, pinned to the far right
+pagination   three clusters spread across 1305px with no shared structure
+provenance   a 469px capsule with 608px of empty bar beside it
+```
+
+### Controls, as measured
+
+```
+filters        40px tall, 11px radius, 13.5px value text, 12px padding
+page size      38px tall, 99px wide, 11px radius, 14px padding
+appearance     none - the platform arrow is replaced by a drawn chevron,
+               which is aria-hidden; the element is still a <select>
+accessible     Stage / Source / Owner / "Sort leads" / "Rows per page"
+active state   border and ink, no fifth accent colour
+stability      163/230/171/256px at default, 166/238/176/256 with every
+               filter set - the control does not resize with its value
+longest value  "Returning customer" clips nothing and does not rewrap the row
+focus          2px ring on the wrapper via :focus-within
+```
+
+### Sort
+
+One control, twelve options, no direction button. Each option names its field
+and its direction: `Last activity — newest`, `Next follow-up — soonest`,
+`Lead name — A–Z`, `Stage — early first`, `Priority — high first`,
+`Created — oldest`. The semantics are the frozen ones — six fields, both
+directions — expressed as one choice instead of two.
+
+### Provenance band
+
+Measured against the space actually available, which is the bar minus the two
+intrinsic ends, their gaps and the bar's padding.
+
+```
+1920   1407px of 1406px available     1440   927px of 926px
+1024    511px of  510px available      768   full-width row of its own
+ 390   full-width row of its own       360   full-width row of its own
+```
+
+Content stays left-aligned inside the band at every width, and the words are
+unchanged.
+
+Below 861px the bar is wrapping flex rather than grid, and that is measured:
+at 360px the back link (120px), the role select (167px intrinsic - "Fleet
+Coordinator" needs it) and Reset (59px) are 363px of content in a 321px bar. A
+two-column grid grew to hold them and the band, spanning both columns,
+stretched to that overflowed width. Two rows at 430px and above, three below —
+which is what it was before this stage.
+
+### Pagination
+
+```
+desktop   one grid under a rule: range left, Previous/Page/Next centred,
+          "10 rows" right, all on one baseline
+mobile    stacked and centred - range, page indicator, the two steps
+          sharing the width, then the page size
+steps     real <button disabled> on the first and last page, so the state
+          is announced; they keep their size when disabled
+20 rows   Page 1 of 3, range 1-20 of 48; the page clamps on the way back
+```
+
+### Viewports
+
+No horizontal overflow and nothing clipped at 1920x1080, 1600x900, 1440x900,
+1366x768, 1180x820, 1024x768, 768x1024, 430x932, 390x844, 375x812 and 360x800.
+
+The `visually-hidden` labels report as clipped by any naive scrollWidth check —
+they are 1px-clipped by design. The suite excludes them, as it has since 09C2.
+
+### Regression
+
+```
+stage09a-runtime                76/76
+stage09a-shell                  85/85
+stage09b-operations-spec        96/96
+stage09c1-operations          211/211
+stage09c2-operations-ui       140/140
+stage09c21-hardening          111/111
+stage09c31-leads              398/398
+public-repo-safety              17/17  (19 with --history)
+qa:memory                       18/18
+tsc --noEmit                    clean
+eslint                          0 errors (1 pre-existing warning in qa/texture.mjs)
+                              ------
+                             1152 checks
+```
+
+One pre-existing harness weakness was fixed rather than worked around: the
+responsive section waited for the result-count element, which renders a blank
+placeholder before the query settles, so it could measure an empty table. It
+waits for a record now.

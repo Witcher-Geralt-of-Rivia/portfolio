@@ -4,7 +4,7 @@
   "currentStage": 8,
   "stage05Started": true,
   "nextStage": "stage-09c3-2",
-  "nextStageTitle": "Stage 09C3.2 - Operations CRM: Customers (BLOCKED UNTIL EXTERNAL LIVE REVIEW OF LEADS)",
+  "nextStageTitle": "Stage 09C3.2 - Operations CRM: Customers (BLOCKED UNTIL EXTERNAL LIVE REVIEW OF 09C3.1.1)",
   "frozenStages": [
     1,
     2,
@@ -97,7 +97,8 @@
       "src/demos/operations/ui/leads/LeadForm.tsx",
       "src/demos/operations/ui/leads/LeadConfirm.tsx",
       "src/demos/operations/ui/leads/OpsOverlay.tsx",
-      "src/demos/operations/ui/leads/use-lead-action.ts"
+      "src/demos/operations/ui/leads/use-lead-action.ts",
+      "src/demos/operations/ui/OpsSelect.tsx"
     ]
   },
   "routes": [
@@ -227,7 +228,7 @@
     "disclosure": "INTERACTIVE ENGINEERING DEMO / SYNTHETIC DATA - FRONTEND ONLY",
     "operationsSpec": "frozen; docs/DEMO_OPERATIONS_SPEC.md",
     "operationsDomain": "built; docs/DEMO_OPERATIONS_IMPLEMENTATION.md",
-    "operationsReview": "Leads deployed for external live review; 09C3.2 blocked until reviewed"
+    "operationsReview": "Leads visual hardening deployed for external live review; 09C3.2 blocked until reviewed"
   },
   "stage09bComplete": true,
   "stage09c1Complete": true,
@@ -242,5 +243,6 @@
     "initialPublication": "complete",
     "policy": "every verified commit and tag is pushed and SHA-verified after its stage's own QA, and after production deployment where the stage requires one",
     "historyRewrite": "prohibited. The one-time authorship rewrite before initial publication was explicitly authorised and is spent"
-  }
+  },
+  "stage09c311Complete": true
 }

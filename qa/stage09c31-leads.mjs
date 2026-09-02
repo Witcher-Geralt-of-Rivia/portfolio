@@ -477,16 +477,16 @@ section("SEARCH AND FILTERS");
   /* The seed's own distribution, asserted through the product. */
   const stages = { New: 12, Contacted: 10, Qualified: 9, Proposal: 7, Won: 6, Lost: 4 };
   for (const [stage, expected] of Object.entries(stages)) {
-    await page.selectOption(".ops-leads__filters select >> nth=0", stage);
+    await page.selectOption(".ops-leads__filters .ops-control__select >> nth=0", stage);
     const got = await settle(`${expected} leads`);
     check(`stage ${stage} matches the seeded distribution`, got === `${expected} leads`, got);
   }
-  await page.selectOption(".ops-leads__filters select >> nth=0", "all");
+  await page.selectOption(".ops-leads__filters .ops-control__select >> nth=0", "all");
   await settle("48 leads");
 
-  await page.selectOption(".ops-leads__filters select >> nth=1", "Website");
+  await page.selectOption(".ops-leads__filters .ops-control__select >> nth=1", "Website");
   const website = await countOf(page);
-  await page.selectOption(".ops-leads__filters select >> nth=2", "unassigned");
+  await page.selectOption(".ops-leads__filters .ops-control__select >> nth=2", "unassigned");
   const both = await settle("0 leads");
   check("filters combine", both === "0 leads", `${website} website, then unassigned -> ${both}`);
 
@@ -494,7 +494,7 @@ section("SEARCH AND FILTERS");
   check("Clear filters resets every control", (await settle("48 leads")) === "48 leads", await countOf(page));
   const controls = await page.evaluate(() => ({
     search: document.querySelector(".ops-leads__search-input")?.value,
-    selects: [...document.querySelectorAll(".ops-leads__filters select")].slice(0, 3).map((s) => s.value),
+    selects: [...document.querySelectorAll(".ops-leads__filters .ops-control__select")].slice(0, 3).map((s) => s.value),
   }));
   check("Clear filters empties the search box", controls.search === "", String(controls.search));
   check("Clear filters returns each filter to All",
@@ -508,15 +508,11 @@ section("SORT");
   const { ctx, page } = await freshLeads();
   const names = () => page.$$eval(".ops-leads__name", (es) => es.map((e) => e.textContent));
 
-  const sortBy = async (label, direction) => {
-    await page.selectOption(".ops-leads__filters select >> nth=3", label);
+  /* One control now: the field and its direction are a single option, so the
+     old "pick a field, then toggle a mystery square" dance is gone. */
+  const sortBy = async (key, direction) => {
+    await page.selectOption(".ops-leads__filters .ops-control__select >> nth=3", `${key}:${direction}`);
     await page.waitForTimeout(150);
-    const current = await page.$eval(".ops-sort-dir", (e) => e.getAttribute("aria-label"));
-    const isDesc = current.startsWith("Sorted descending");
-    if ((direction === "desc") !== isDesc) {
-      await page.click(".ops-sort-dir");
-      await page.waitForTimeout(150);
-    }
     return names();
   };
 
@@ -555,9 +551,9 @@ section("PAGINATION");
   check("the default page size is ten", p1.length === 10, String(p1.length));
   check("the range reads correctly", (await page.$eval(".ops-pager__range", (e) => e.textContent)) === "1–10 of 48");
   check("Previous is disabled on the first page",
-    await page.$eval(".ops-pager__controls button", (e) => e.disabled));
+    await page.$eval(".ops-pager__step", (e) => e.disabled));
 
-  await page.click(".ops-pager__controls button >> nth=1");
+  await page.click(".ops-pager__step >> nth=1");
   await page.waitForTimeout(200);
   const p2 = await ids();
   check("Next advances the page",
@@ -565,20 +561,20 @@ section("PAGINATION");
   check("no record appears on two pages", p1.every((n, i) => n !== p2[i] || p1.join() !== p2.join()));
   check("the second page is a different set", p1.join("|") !== p2.join("|"));
 
-  await page.click(".ops-pager__controls button >> nth=0");
+  await page.click(".ops-pager__step >> nth=0");
   await page.waitForTimeout(200);
   check("Previous returns to the first page", (await ids()).join("|") === p1.join("|"));
 
-  await page.selectOption(".ops-pager__size select", "20");
+  await page.selectOption(".ops-pager__size .ops-control__select", "20");
   await page.waitForTimeout(200);
   check("the page size can be raised to twenty",
     (await ids()).length === 20, String((await ids()).length));
   check("the page count follows the size",
     (await page.$eval(".ops-pager__page", (e) => e.textContent)) === "Page 1 of 3");
 
-  await page.click(".ops-pager__controls button >> nth=1");
+  await page.click(".ops-pager__step >> nth=1");
   await page.waitForTimeout(200);
-  await page.selectOption(".ops-leads__filters select >> nth=0", "Lost");
+  await page.selectOption(".ops-leads__filters .ops-control__select >> nth=0", "Lost");
   await page.waitForTimeout(250);
   check("changing a filter returns to page one",
     (await page.$eval(".ops-pager__page", (e) => e.textContent)).startsWith("Page 1"),
@@ -587,13 +583,13 @@ section("PAGINATION");
   /* Every record is reachable and none is duplicated across the whole set. */
   await page.click(".ops-link-button");
   await page.waitForTimeout(200);
-  await page.selectOption(".ops-pager__size select", "10");
+  await page.selectOption(".ops-pager__size .ops-control__select", "10");
   await page.waitForTimeout(200);
   const seen = [];
   for (let i = 0; i < 5; i += 1) {
     seen.push(...(await ids()));
     if (i < 4) {
-      await page.click(".ops-pager__controls button >> nth=1");
+      await page.click(".ops-pager__step >> nth=1");
       await page.waitForTimeout(180);
     }
   }
@@ -1195,8 +1191,16 @@ section("RESPONSIVE");
     const ctx = await browser.newContext({ viewport: { width, height } });
     const page = await ctx.newPage();
     await page.goto(LEADS, { waitUntil: "networkidle" });
-    await page.waitForSelector(".ops-leads__count", POLL);
-    await page.waitForTimeout(250);
+    /* The count element exists before the query settles - it renders a blank
+       placeholder - so waiting for it can outrun the data. Wait for a record. */
+    await page.waitForFunction(
+      () =>
+        document.querySelectorAll(".ops-leads__row").length > 0 ||
+        document.querySelectorAll(".ops-leadcard").length > 0,
+      null,
+      POLL
+    );
+    await page.waitForTimeout(200);
 
     const m = await page.evaluate(() => {
       const visible = (sel) => {
@@ -1355,8 +1359,8 @@ section("ACCESSIBILITY AND CONTRAST");
       );
     return {
       searchLabelled: labelled(document.querySelector(".ops-leads__search-input")),
-      filtersLabelled: [...document.querySelectorAll(".ops-leads__filters select")].every(labelled),
-      pageSizeLabelled: labelled(document.querySelector(".ops-pager__size select")),
+      filtersLabelled: [...document.querySelectorAll(".ops-leads__filters .ops-control__select")].every(labelled),
+      pageSizeLabelled: labelled(document.querySelector(".ops-pager__size .ops-control__select")),
       sortHeadersFocusable: [...document.querySelectorAll(".ops-th-sort")].length,
       liveRegions: document.querySelectorAll('[role="status"][aria-live="polite"]').length,
       caption: Boolean(document.querySelector(".ops-leads__table caption")),
@@ -1426,7 +1430,7 @@ section("ACCESSIBILITY AND CONTRAST");
     };
     const targets = [
       ".ops-leads__name", ".ops-leads__count", ".ops-table td", ".ops-th-sort",
-      ".ops-pager__range", ".ops-field__label", ".ops-leads__unassigned",
+      ".ops-pager__range", ".ops-control__label", ".ops-leads__unassigned",
     ];
     /* Every distinct stage and priority tone, not merely the first one that
        happens to sort to the top of the page. */
@@ -1482,7 +1486,7 @@ section("NETWORK, IDLE AND CONTENT");
   await page.fill(".ops-leads__search-input", "alina");
   await page.waitForTimeout(150);
   await page.fill(".ops-leads__search-input", "");
-  await page.selectOption(".ops-leads__filters select >> nth=0", "Qualified");
+  await page.selectOption(".ops-leads__filters .ops-control__select >> nth=0", "Qualified");
   await page.waitForTimeout(150);
   await page.click(".ops-link-button");
   await page.waitForTimeout(150);
@@ -1560,7 +1564,7 @@ section("PERFORMANCE SANITY");
     };
     const search = await time(async () => set(input, "alina"));
     const clear = await time(async () => set(input, ""));
-    const sel = document.querySelectorAll(".ops-leads__filters select")[0];
+    const sel = document.querySelectorAll(".ops-leads__filters .ops-control__select")[0];
     const filter = await time(async () => {
       sel.value = "Qualified";
       sel.dispatchEvent(new Event("change", { bubbles: true }));
@@ -1585,6 +1589,331 @@ section("PERFORMANCE SANITY");
   check("layout is stable after load", cls < 0.02, cls.toFixed(5));
 
   await ctx.close();
+}
+
+
+/* =====================================================================
+   12. CONTROL PRESENTATION (Stage 09C3.1.1)
+   ===================================================================== */
+
+section("FILTER AND SORT CONTROLS");
+{
+  const { ctx, page } = await freshLeads();
+
+  const controls = await page.evaluate(() => {
+    const out = [];
+    for (const el of document.querySelectorAll(".ops-leads__filters .ops-control")) {
+      const select = el.querySelector("select");
+      const label = el.querySelector(".ops-control__label");
+      const chevron = el.querySelector("svg.ops-control__chevron");
+      const r = el.getBoundingClientRect();
+      const cs = getComputedStyle(el);
+      const ss = getComputedStyle(select);
+      out.push({
+        label: label?.textContent ?? null,
+        labelInside: label ? el.contains(label) : false,
+        value: select.selectedOptions[0]?.textContent ?? "",
+        height: Math.round(r.height),
+        radius: parseFloat(cs.borderTopLeftRadius),
+        fontSize: parseFloat(ss.fontSize),
+        padding: parseFloat(cs.paddingLeft),
+        appearance: ss.appearance,
+        ariaLabel: select.getAttribute("aria-label"),
+        chevron: Boolean(chevron),
+        chevronHidden: chevron?.getAttribute("aria-hidden") === "true",
+        labelHidden: label?.getAttribute("aria-hidden") === "true",
+        optionCount: select.options.length,
+      });
+    }
+    return out;
+  });
+
+  check("the toolbar renders four controls", controls.length === 4, String(controls.length));
+
+  for (const c of controls) {
+    const name = (c.label ?? "sort").toLowerCase();
+    /* The label used to be a separate word sitting beside the select. Inside
+       the same border it reads as one control rather than two things that
+       happen to be adjacent. */
+    check(`${name}: the label sits inside the control`, c.labelInside);
+    check(`${name}: height is 40-42px`, c.height >= 40 && c.height <= 42, `${c.height}px`);
+    check(`${name}: radius is 11-12px`, c.radius >= 11 && c.radius <= 12, `${c.radius}px`);
+    check(`${name}: value text is 13-14px`, c.fontSize >= 13 && c.fontSize <= 14, `${c.fontSize}px`);
+    check(`${name}: horizontal padding is 12-14px`, c.padding >= 12 && c.padding <= 14, `${c.padding}px`);
+    /* The platform arrow is replaced rather than hidden behind another one. */
+    check(`${name}: the native arrow is removed`, c.appearance === "none", c.appearance);
+    check(`${name}: a locally drawn chevron replaces it`, c.chevron);
+    check(`${name}: the chevron is decorative`, c.chevronHidden);
+    check(`${name}: the visible label is not announced twice`, c.labelHidden !== false);
+    check(`${name}: the control has an accessible name`, Boolean(c.ariaLabel), String(c.ariaLabel));
+  }
+
+  /* Sort is one control now. The separate direction button is gone, and each
+     option states its field and its direction. */
+  const sort = controls[3];
+  check("sort has no separate direction button",
+    (await page.$(".ops-sort-dir")) === null);
+  check("sort is announced as Sort leads", sort.ariaLabel === "Sort leads", String(sort.ariaLabel));
+  check("sort offers each field in both directions", sort.optionCount === 12, String(sort.optionCount));
+
+  const sortOptions = await page.$$eval(
+    ".ops-leads__filters .ops-control__select >> nth=3 >> option",
+    (os) => os.map((o) => o.textContent)
+  );
+  for (const expected of [
+    "Last activity — newest",
+    "Last activity — oldest",
+    "Next follow-up — soonest",
+    "Lead name — A–Z",
+  ]) {
+    check(`sort offers "${expected}"`, sortOptions.includes(expected));
+  }
+  check("every sort option names a direction",
+    sortOptions.every((o) => o.includes("—")), sortOptions[0]);
+
+  /* Setting a filter is visible without shouting. */
+  const before = await page.$eval(".ops-leads__filters .ops-control", (e) => e.dataset.active ?? "-");
+  await page.selectOption(".ops-leads__filters .ops-control__select >> nth=0", "Qualified");
+  await page.waitForTimeout(250);
+  const after = await page.evaluate(() => {
+    const el = document.querySelector(".ops-leads__filters .ops-control");
+    const cs = getComputedStyle(el);
+    return {
+      active: el.dataset.active ?? "-",
+      value: el.querySelector("select").selectedOptions[0].textContent,
+      bg: cs.backgroundColor,
+      height: Math.round(el.getBoundingClientRect().height),
+    };
+  });
+  check("a default filter is not marked active", before === "-", before);
+  check("a set filter is marked active", after.active === "true", after.active);
+  check("the marked state keeps the value visible", after.value === "Qualified", after.value);
+  check("marking a filter does not resize it", after.height >= 40 && after.height <= 42, `${after.height}px`);
+
+  /* The longest value in the product must not break the row. */
+  await page.selectOption(".ops-leads__filters .ops-control__select >> nth=1", "Returning customer");
+  await page.waitForTimeout(250);
+  const longest = await page.evaluate(() => ({
+    clipped: [...document.querySelectorAll(".ops-leads__filters *")].filter(
+      (e) => e.scrollWidth - e.clientWidth > 1
+    ).length,
+    rowHeight: Math.round(document.querySelector(".ops-leads__filters").getBoundingClientRect().height),
+    overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+  }));
+  check("the longest source value does not clip", longest.clipped === 0, `${longest.clipped}`);
+  check("the longest source value does not rewrap the toolbar",
+    longest.rowHeight >= 40 && longest.rowHeight <= 44, `${longest.rowHeight}px`);
+  check("the longest source value causes no overflow", longest.overflow <= 0, `${longest.overflow}px`);
+
+  /* Keyboard reach and a visible ring. */
+  await page.focus(".ops-leads__filters .ops-control__select");
+  const focused = await page.evaluate(() => {
+    const el = document.querySelector(".ops-leads__filters .ops-control");
+    const cs = getComputedStyle(el);
+    return {
+      isSelect: document.activeElement?.tagName === "SELECT",
+      outlineWidth: parseFloat(cs.outlineWidth),
+      outlineStyle: cs.outlineStyle,
+    };
+  });
+  check("a filter is reachable by keyboard", focused.isSelect);
+  check("focus draws a visible ring on the control",
+    focused.outlineWidth >= 2 && focused.outlineStyle !== "none",
+    `${focused.outlineWidth}px ${focused.outlineStyle}`);
+
+  await ctx.close();
+}
+
+section("PAGE SIZE AND PAGINATION COMPOSITION");
+{
+  const { ctx, page } = await freshLeads();
+
+  const size = await page.evaluate(() => {
+    const el = document.querySelector(".ops-pager__size .ops-control");
+    const select = el.querySelector("select");
+    const r = el.getBoundingClientRect();
+    const cs = getComputedStyle(el);
+    return {
+      height: Math.round(r.height),
+      width: Math.round(r.width),
+      radius: parseFloat(cs.borderTopLeftRadius),
+      padding: parseFloat(cs.paddingLeft),
+      value: select.selectedOptions[0].textContent,
+      options: [...select.options].map((o) => o.textContent),
+      ariaLabel: select.getAttribute("aria-label"),
+      appearance: getComputedStyle(select).appearance,
+      chevron: Boolean(el.querySelector("svg.ops-control__chevron")),
+    };
+  });
+
+  /* "10" was a number with no question attached to it. */
+  check("the page size says what it counts", size.value === "10 rows", size.value);
+  check("both page sizes are offered as rows",
+    size.options.join("|") === "10 rows|20 rows", size.options.join("|"));
+  check("page size height is 38-40px", size.height >= 38 && size.height <= 40, `${size.height}px`);
+  check("page size width is 92-104px", size.width >= 92 && size.width <= 104, `${size.width}px`);
+  check("page size radius is 11-12px", size.radius >= 11 && size.radius <= 12, `${size.radius}px`);
+  check("page size padding is 14px", size.padding === 14, `${size.padding}px`);
+  check("page size has an accessible name", size.ariaLabel === "Rows per page", String(size.ariaLabel));
+  check("page size drops the native arrow", size.appearance === "none");
+  check("page size carries the drawn chevron", size.chevron);
+
+  /* One footer, not three fragments. */
+  const pager = await page.evaluate(() => {
+    const bar = document.querySelector(".ops-pager");
+    const cs = getComputedStyle(bar);
+    const box = (s) => {
+      const e = document.querySelector(s);
+      const r = e.getBoundingClientRect();
+      return { left: Math.round(r.left), right: Math.round(r.right), top: Math.round(r.top) };
+    };
+    return {
+      borderTop: parseFloat(cs.borderTopWidth),
+      range: box(".ops-pager__range"),
+      nav: box(".ops-pager__nav"),
+      size: box(".ops-pager__size"),
+      steps: [...document.querySelectorAll(".ops-pager__step")].map((b) => ({
+        text: b.textContent.trim(),
+        disabled: b.disabled,
+        height: Math.round(b.getBoundingClientRect().height),
+      })),
+      page: document.querySelector(".ops-pager__page")?.textContent.trim(),
+      live: document.querySelector(".ops-pager__page")?.getAttribute("aria-live"),
+    };
+  });
+
+  check("the footer is one bar with a rule above it", pager.borderTop >= 1, `${pager.borderTop}px`);
+  check("its three zones share one baseline",
+    Math.abs(pager.range.top - pager.nav.top) < 24 && Math.abs(pager.nav.top - pager.size.top) < 24,
+    `${pager.range.top}/${pager.nav.top}/${pager.size.top}`);
+  check("the controls sit between the range and the page size",
+    pager.range.right <= pager.nav.left && pager.nav.right <= pager.size.right);
+  check("Previous and Next are the two steps",
+    pager.steps.length === 2 &&
+      /Previous/.test(pager.steps[0].text) &&
+      /Next/.test(pager.steps[1].text),
+    pager.steps.map((s) => s.text).join(" | "));
+  /* A real disabled button, so it is announced as one rather than merely
+     looking inert. */
+  check("Previous is genuinely disabled on page one", pager.steps[0].disabled === true);
+  check("Next is available on page one", pager.steps[1].disabled === false);
+  check("the steps match the page-size height",
+    pager.steps.every((s) => s.height >= 38 && s.height <= 40),
+    pager.steps.map((s) => s.height).join("/"));
+  check("the page indicator is announced politely", pager.live === "polite", String(pager.live));
+
+  /* Both page sizes, and the page arithmetic that follows from them. */
+  await page.selectOption(".ops-pager__size .ops-control__select", "20");
+  await page.waitForTimeout(250);
+  const twenty = await page.evaluate(() => ({
+    rows: document.querySelectorAll(".ops-leads__row").length,
+    page: document.querySelector(".ops-pager__page").textContent.trim(),
+    range: document.querySelector(".ops-pager__range").textContent.trim(),
+  }));
+  check("20 rows lists twenty records", twenty.rows === 20, String(twenty.rows));
+  check("20 rows recomputes the page count", twenty.page === "Page 1 of 3", twenty.page);
+  check("20 rows recomputes the range", twenty.range === "1–20 of 48", twenty.range);
+
+  await page.click(".ops-pager__step >> nth=1");
+  await page.waitForTimeout(200);
+  await page.click(".ops-pager__step >> nth=1");
+  await page.waitForTimeout(200);
+  const last = await page.evaluate(() => ({
+    page: document.querySelector(".ops-pager__page").textContent.trim(),
+    nextDisabled: document.querySelectorAll(".ops-pager__step")[1].disabled,
+    prevDisabled: document.querySelectorAll(".ops-pager__step")[0].disabled,
+  }));
+  check("the last page disables Next", last.nextDisabled === true, last.page);
+  check("the last page keeps Previous available", last.prevDisabled === false);
+
+  await page.selectOption(".ops-pager__size .ops-control__select", "10");
+  await page.waitForTimeout(250);
+  const back = await page.evaluate(() => document.querySelector(".ops-pager__page").textContent.trim());
+  check("changing the page size returns to a valid page", /Page [1-5] of 5/.test(back), back);
+
+  await ctx.close();
+}
+
+section("PROVENANCE BAND");
+{
+  for (const [width, height] of [[1920, 1080], [1440, 900], [1024, 768], [768, 1024], [390, 844], [360, 800]]) {
+    const ctx = await browser.newContext({ viewport: { width, height } });
+    const page = await ctx.newPage();
+    await page.goto(LEADS, { waitUntil: "networkidle" });
+    await page.waitForFunction(
+      () =>
+        document.querySelectorAll(".ops-leads__row").length > 0 ||
+        document.querySelectorAll(".ops-leadcard").length > 0,
+      null,
+      POLL
+    );
+    await page.waitForTimeout(200);
+
+    const m = await page.evaluate(() => {
+      const band = document.querySelector(".demo-disclosure");
+      const back = document.querySelector(".demo-chrome__back");
+      const controls = document.querySelector(".demo-chrome__controls");
+      const inner = document.querySelector(".demo-chrome__inner");
+      const b = band.getBoundingClientRect();
+      const k = back.getBoundingClientRect();
+      const c = controls.getBoundingClientRect();
+      const i = inner.getBoundingClientRect();
+      const text = band.querySelector(".demo-disclosure__primary").getBoundingClientRect();
+      return {
+        bandWidth: Math.round(b.width),
+        innerWidth: Math.round(i.width),
+        share: b.width / i.width,
+        sameRowAsBack: Math.abs(b.top - k.top) < 6,
+        /* Content starts at the left edge of the band rather than floating in
+           the middle of it. */
+        textOffset: Math.round(text.left - b.left),
+        primary: band.querySelector(".demo-disclosure__primary").textContent,
+        secondary: band.querySelector(".demo-disclosure__secondary").textContent,
+        gapToControls: Math.round(c.left - b.right),
+        backWidth: Math.round(k.width),
+        controlsWidth: Math.round(c.width),
+        columnGap: parseFloat(getComputedStyle(inner).columnGap) || 0,
+        innerPadding:
+          parseFloat(getComputedStyle(inner).paddingLeft) +
+          parseFloat(getComputedStyle(inner).paddingRight),
+        overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        chromeHeight: Math.round(document.querySelector(".demo-chrome").getBoundingClientRect().height),
+      };
+    });
+
+    check(`${width}px: the disclosure keeps its exact words`,
+      m.primary === "INTERACTIVE ENGINEERING DEMO" &&
+        m.secondary === "SYNTHETIC DATA · FRONTEND ONLY",
+      `${m.primary} / ${m.secondary}`);
+    check(`${width}px: the band's content is left-aligned inside it`,
+      m.textOffset <= 16, `${m.textOffset}px from the left edge`);
+    check(`${width}px: no horizontal overflow`, m.overflow <= 0, `${m.overflow}px`);
+
+    if (width >= 861) {
+      /* The band takes the middle column rather than sitting at the width of
+         its own text with several hundred pixels of nothing beside it.
+         
+         Measured against what is actually available — the bar minus the two
+         intrinsic ends — rather than as a share of the whole. The ends are a
+         fixed ~430px, so at 1024 they are half the bar and at 1920 a fifth;
+         a percentage-of-total threshold would be asserting the viewport
+         width, not the behaviour. */
+      const available =
+        m.innerWidth - m.innerPadding - m.backWidth - m.controlsWidth - 2 * m.columnGap;
+      check(`${width}px: the band fills the space between the two ends`,
+        m.bandWidth >= available - 4,
+        `${m.bandWidth}px of ${Math.round(available)}px available`);
+      check(`${width}px: it reaches the controls`, m.gapToControls <= 24, `${m.gapToControls}px`);
+      check(`${width}px: it shares the row with the back link`, m.sameRowAsBack);
+      check(`${width}px: the bar stays within its height budget`,
+        m.chromeHeight >= 32 && m.chromeHeight <= 40, `${m.chromeHeight}px`);
+    } else {
+      check(`${width}px: the band takes a row of its own`, !m.sameRowAsBack);
+      check(`${width}px: it spans that row`, m.share > 0.9, `${(m.share * 100).toFixed(0)}%`);
+    }
+
+    await ctx.close();
+  }
 }
 
 await browser.close();

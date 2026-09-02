@@ -24,6 +24,7 @@ ROUTE       /demos/operations and /demos/operations/leads DEPLOYED,
 09C2.1 shell hardening + review deployment           COMPLETE
 09C3  built one module per stage (D-062)
   09C3.1 Leads                                       COMPLETE
+  09C3.1.1 Leads control presentation                COMPLETE
   09C3.2 Customers                                   BLOCKED on live review
   09C3.3 Inbox + integrated CRM workflow
 09C4  Reservations + Contracts + Fleet + Maintenance + Payments
@@ -335,6 +336,8 @@ src/demos/operations/
   services/lead-workflows.ts   the missing join between mutations and rules
   selectors/leads-list.ts      matching, ordering, owners, activity, dates
   ui/scroll-lock.ts            one counted page-scroll lock for every overlay
+  ui/OpsSelect.tsx             the product's select: label inside the border,
+                               drawn chevron, quiet active state (09C3.1.1)
   ui/leads/
     LeadsScreen.tsx            state, selection, composition
     LeadsToolbar.tsx           search, filters, sort, the one primary action
@@ -405,6 +408,37 @@ assign, convert, archive, the role matrix, the role-switch leak D-058 guards
 against, Overview regression, persistence, reset, nine viewports, the mobile
 sheets, accessibility, every stage and priority tone's contrast, network,
 idle cost and CLS.
+
+### Control presentation (09C3.1.1)
+
+The first external review found four presentation faults, three of which were
+the same fault: a control that did not say what it was.
+
+```
+filters      a detached uppercase label beside a browser select, four times
+             -> label inside the border, drawn chevron, quiet active
+                state; 40-42px, 11-12px radius            (D-069)
+sort         a field select plus an unlabelled square carrying an arrow
+             -> one control, twelve options, each naming a field and a
+                direction: "Last activity - newest"       (D-069)
+page size    a bare "10" behind the words PER PAGE at the far right
+             -> "10 rows", in the footer it belongs to    (D-069)
+pagination   three clusters spread across 1305px with no shared structure
+             -> one grid under a rule; stacked on a phone (D-071)
+provenance   a 469px capsule with 608px of nothing beside it
+             -> the middle column of a three-zone bar     (D-070)
+```
+
+The controls are a real `<select>` with `appearance: none`. That removes the
+platform's arrow and nothing else — keyboard behaviour, screen-reader
+semantics and the native option list on a phone all remain, and none of them
+would have been free in a hand-built menu. Width is left to the browser, which
+sizes a select to its widest option, so a control does not resize when its
+value changes.
+
+`qa/stage09c31-leads.mjs` grew three sections for this: control geometry and
+semantics, the pagination composition and both page sizes, and the band's
+width against the space actually available at six widths.
 
 ## Remaining UI work
 

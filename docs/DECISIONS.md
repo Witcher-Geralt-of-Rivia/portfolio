@@ -1865,3 +1865,130 @@ Publishing and deploying are now explicitly separate operations, recorded in
 `docs/DEPLOYMENT.md`: a push changes nothing on the server, a deployment
 publishes nothing, and a failed push never justifies rolling back a good
 deployment.
+
+---
+
+## D-069 — A control states what it is, and a sort states which way
+
+Status: Accepted
+Stage: 9C3.1.1
+
+### Decision
+`ui/OpsSelect.tsx` is the Operations product's select: the contextual label
+lives inside the control's border, the platform arrow is replaced by a locally
+drawn chevron, and a non-default value is marked in ink rather than colour.
+The Leads filters, the sort and the page size all use it, and later modules
+reuse it rather than restyling their own.
+
+Sort is one control. Each of the six fields appears with both of its
+directions, worded for the field — "Last activity — newest", "Lead name —
+A–Z" — and the separate direction button is gone.
+
+### Reason
+The first external review of Leads found four presentation faults, and three
+of them were the same fault: a control that did not say what it was.
+
+The filters were a small uppercase word beside a browser select. Two elements,
+read as two things, repeated four times across a toolbar — the label was
+detached from the value it labelled, and the select still wore the platform's
+own arrow, so the row looked like a form someone had not finished styling.
+Inside one border, `Stage · Qualified` is a single object whose current value
+is part of its name.
+
+Sort was worse, because it was two controls for one decision: a field in a
+select, and beside it an unlabelled square carrying an arrow. That asked the
+visitor to work out that the square belonged to the select, and then which way
+the arrow meant. Twelve options that each name a field and a direction ask
+nothing.
+
+The page size was the same fault at its smallest: `10` behind the words "PER
+PAGE", pinned to the far right of a bar whose other contents were a thousand
+pixels away. `10 rows`, in the footer with the controls it belongs to.
+
+A real `<select>` underneath all of it. `appearance: none` takes the platform's
+arrow and nothing else: the keyboard behaviour, the screen-reader semantics and
+the native option list on a phone all remain, and none of them would have been
+free in a hand-built menu.
+
+### Consequence
+Width is left to the browser, which sizes a select to its widest option, so a
+control does not resize when its value changes — choosing "Returning customer"
+cannot reflow the toolbar under the pointer. The QA suite asserts that, along
+with the geometry (40–42px filters, 38–40px page size, 11–12px radii), the
+active marking, the accessible names and the absence of the old direction
+button.
+
+The marked state is border and ink, not a fifth accent colour: the stage pills
+already carry four hues, and a saturated "this filter is set" would compete
+with the data it is filtering.
+
+Focus is drawn on the wrapper with `:focus-within` rather than
+`:has(:focus-visible)`. The select's own outline is suppressed, so a browser
+that did not understand the selector would leave the control with no visible
+focus at all; a ring that also appears on click is the native behaviour of a
+select anyway, and is the safe direction to be wrong in.
+
+---
+
+## D-070 — The provenance band takes the width, and gives it back on a phone
+
+Status: Accepted
+Stage: 9C3.1.1
+
+### Decision
+The demo chrome is three zones — identity, provenance, controls — with the
+middle one `minmax(0, 1fr)`, so the disclosure band grows into whatever the two
+ends leave. Below 861px the bar returns to wrapping flex and the band takes a
+full-width row of its own.
+
+The words are unchanged: `INTERACTIVE ENGINEERING DEMO` and
+`SYNTHETIC DATA · FRONTEND ONLY`.
+
+### Reason
+The disclosure was a 469px capsule with 608px of nothing between it and the
+role control. It read as a badge stuck onto the bar rather than the frame's own
+statement about what is inside it, which is the one thing that bar exists to
+say. Given the middle column it spans 1407px of the 1406px available at 1920,
+and its text stays left-aligned so the words start where the eye already is.
+
+The narrow layout is flex rather than grid, and that is measured rather than
+preferred. A two-column grid puts the back link and the controls in one row
+whether or not they fit, and at 360px they do not: the back link is 120px, the
+role select's intrinsic width is 167px because "Fleet Coordinator" needs it,
+and Reset is 59px — 363px of content in 321px of bar. The grid grew to hold
+them and the band, spanning both columns, stretched to that overflowed width.
+Wrapping flex lets the row break on its own terms, and `flex-basis: 100%` on
+the band still forces it onto a row of its own.
+
+### Consequence
+At 430px and above the bar is two rows; below that it is three, which is what
+it was before this stage. Nothing is clipped and nothing overflows at any
+tested width. Making it two rows on a phone would mean either clipping a role
+name or dropping the word "Portfolio" from the back link, and neither is worth
+28 pixels.
+
+---
+
+## D-071 — The pagination footer is one bar
+
+Status: Accepted
+Stage: 9C3.1.1
+
+### Decision
+The range, the Previous/Next controls and the page size sit in one grid under a
+rule: range left, controls centred, page size right. On a phone they stack —
+range, page indicator, the two steps side by side, then the page size — and
+nothing is pinned to an edge alone.
+
+### Reason
+They were three clusters spread across 1305px with no shared structure, so they
+read as three unrelated fragments rather than one footer. Previous and Next
+were quiet buttons indistinguishable from every other quiet button on the
+screen, and the page size was a bare number under a label at the far right.
+
+### Consequence
+The steps are real `<button disabled>` on the first and last page, so the state
+is announced rather than merely drawn, and they keep their size when disabled so
+the row does not resize as the visitor pages through. The page indicator is a
+polite live region — the number changing is the result of the visitor's own
+click, not news to interrupt them with.

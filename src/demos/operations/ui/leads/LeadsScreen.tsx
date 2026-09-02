@@ -29,6 +29,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { DemoRecord } from "@/demo-runtime/types";
 import { useDemoQuery } from "@/demo-runtime/react/hooks";
 
+import { PAGE_SIZE_OPTIONS } from "../../constants";
 import { canViewModule, canWriteModule } from "../../permissions";
 import { read } from "../../services/context";
 import {
@@ -46,6 +47,7 @@ import LeadForm from "./LeadForm";
 import LeadsMobileList from "./LeadsMobileList";
 import LeadsTable from "./LeadsTable";
 import LeadsToolbar from "./LeadsToolbar";
+import OpsSelect from "../OpsSelect";
 
 type Overlay =
   | { kind: "none" }
@@ -342,6 +344,17 @@ function EmptyLeads({ filtered, onClear }: { filtered: boolean; onClear: () => v
   );
 }
 
+/**
+ * The pagination footer.
+ *
+ * One bar rather than three things that happen to sit on the same line. It had
+ * a range on the left, the controls floating in the middle and a bare `10`
+ * behind the words "PER PAGE" pinned to the right edge — a thousand pixels
+ * apart on a wide screen, reading as three unrelated fragments.
+ *
+ * The page size says what it is now. `10` is a number; `10 rows` is an answer
+ * to a question the visitor did not have to be asked.
+ */
 function Pagination({
   result,
   pageSize,
@@ -364,39 +377,39 @@ function Pagination({
         {first}–{last} of {result.total}
       </p>
 
-      <div className="ops-pager__controls">
+      <div className="ops-pager__nav">
         <button
           type="button"
-          className="ops-button ops-button--quiet"
+          className="ops-pager__step"
           onClick={() => onPage(result.page - 1)}
           disabled={result.page <= 1}
         >
-          Previous
+          <span aria-hidden="true">←</span> Previous
         </button>
+        {/* Polite rather than assertive: the page number changing is the
+            result of the visitor's own click, not news to interrupt them. */}
         <p className="ops-pager__page" aria-live="polite">
           Page {result.page} of {result.pageCount}
         </p>
         <button
           type="button"
-          className="ops-button ops-button--quiet"
+          className="ops-pager__step"
           onClick={() => onPage(result.page + 1)}
           disabled={result.page >= result.pageCount}
         >
-          Next
+          Next <span aria-hidden="true">→</span>
         </button>
       </div>
 
-      <label className="ops-pager__size">
-        <span className="ops-pager__size-label">Per page</span>
-        <select
-          className="ops-select"
-          value={pageSize}
-          onChange={(e) => onPageSize(Number(e.target.value))}
-        >
-          <option value={10}>10</option>
-          <option value={20}>20</option>
-        </select>
-      </label>
+      <div className="ops-pager__size">
+        <OpsSelect
+          srLabel="Rows per page"
+          value={String(pageSize)}
+          compact
+          onChange={(v) => onPageSize(Number(v))}
+          options={PAGE_SIZE_OPTIONS.map((n) => ({ value: String(n), label: `${n} rows` }))}
+        />
+      </div>
     </div>
   );
 }

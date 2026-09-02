@@ -1367,10 +1367,6 @@
   line-height: 1.5;
 }
 
-.ops-sort-dir {
-  padding: 8px 10px;
-}
-
 .ops-leads__result {
   display: flex;
   align-items: baseline;
@@ -2199,5 +2195,267 @@
   .ops-pager__range {
     width: 100%;
     text-align: center;
+  }
+}
+
+/* =====================================================================
+   THE SELECT CONTROL (Stage 09C3.1.1)
+   ===================================================================== */
+
+/**
+ * Label and value inside one border.
+ *
+ * The toolbar used to be four small uppercase words sitting beside four
+ * browser selects, which read as eight things rather than four controls. Here
+ * the wrapper carries the border and the select sits inside it with no chrome
+ * of its own, so `Stage · Qualified` is one object.
+ */
+.ops-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--ops-line);
+  border-radius: 11px;
+  background: var(--ops-surface);
+  color: var(--ops-ink);
+  cursor: pointer;
+  transition: border-color 120ms ease, background-color 120ms ease;
+}
+
+.ops-control--compact {
+  height: 38px;
+  min-width: 96px;
+  padding: 0 14px;
+}
+
+.ops-control:hover {
+  border-color: rgba(70, 80, 110, 0.26);
+  background: var(--ops-surface-quiet);
+}
+
+/* The ring goes on the wrapper because the select inside it has no border of
+   its own to draw one around.
+
+   `:focus-within` rather than `:has(:focus-visible)`: the select's own outline
+   is suppressed, so if the browser did not understand the selector the control
+   would have no visible focus at all. A ring that also appears on click is the
+   native behaviour of a select anyway, and is the safe direction to be wrong
+   in. */
+.ops-control:focus-within {
+  outline: 2px solid var(--ops-sky);
+  outline-offset: 1px;
+}
+
+.ops-control__label {
+  flex: none;
+  color: var(--ops-ink-3);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  /* The separator between label and value, drawn rather than typed so the
+     label and the value stay two selectable words. */
+  padding-right: 7px;
+  border-right: 1px solid var(--ops-line-soft);
+}
+
+/**
+ * The select itself: no border, no background, no platform arrow.
+ *
+ * Width is left to the browser, which sizes a select to its widest option.
+ * That keeps the control still when the value changes — picking "Returning
+ * customer" cannot widen the box and reflow the toolbar under the pointer.
+ */
+.ops-control__select {
+  appearance: none;
+  -webkit-appearance: none;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  font-family: var(--font-sans);
+  font-size: 13.5px;
+  line-height: 1.2;
+  cursor: inherit;
+  /* The native ring would trace the invisible select rather than the visible
+     control; the wrapper draws it instead. */
+  outline: none;
+}
+
+.ops-control__chevron {
+  flex: none;
+  color: var(--ops-ink-3);
+  /* Clicks belong to the select underneath. */
+  pointer-events: none;
+}
+
+/**
+ * A filter that is doing something.
+ *
+ * Stated with ink and a slightly firmer edge rather than colour: on a screen
+ * whose stage pills are already carrying four hues, a fifth saturated accent
+ * for "this filter is set" would compete with the data.
+ */
+.ops-control[data-active="true"] {
+  border-color: rgba(70, 80, 110, 0.3);
+  background: var(--ops-surface-quiet);
+}
+
+.ops-control[data-active="true"] .ops-control__select {
+  color: var(--ops-ink);
+  font-weight: var(--weight-ui, 500);
+}
+
+.ops-control[data-active="true"] .ops-control__label {
+  color: var(--ops-ink-2);
+}
+
+.ops-control[data-disabled="true"] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* In the phone sheet the label sits above its control instead of inside it,
+   because a stacked row has the width for a full-length name. */
+.ops-control-row {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.ops-control-row__label {
+  color: var(--ops-ink-3);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ops-control-row .ops-control {
+  width: 100%;
+}
+
+.ops-control-row .ops-control__select {
+  width: 100%;
+}
+
+/* =====================================================================
+   PAGINATION (Stage 09C3.1.1)
+   ===================================================================== */
+
+/**
+ * One bar, three zones.
+ *
+ * The range, the controls and the page size were a thousand pixels apart on a
+ * wide screen and read as three unrelated fragments. A rule along the top and
+ * a single grid make them one footer.
+ */
+.ops-pager {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: var(--space-xs);
+  margin-top: 2px;
+  padding-top: 14px;
+  border-top: 1px solid var(--ops-line-soft);
+}
+
+.ops-pager__range {
+  color: var(--ops-ink-3);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.03em;
+}
+
+.ops-pager__nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-self: center;
+}
+
+.ops-pager__step {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 14px;
+  border: 1px solid var(--ops-line);
+  border-radius: 11px;
+  background: var(--ops-surface);
+  color: var(--ops-ink);
+  font-family: var(--font-sans);
+  font-size: 13.5px;
+  cursor: pointer;
+  transition: border-color 120ms ease, background-color 120ms ease;
+}
+
+.ops-pager__step:hover:not(:disabled) {
+  border-color: rgba(70, 80, 110, 0.26);
+  background: var(--ops-surface-quiet);
+}
+
+.ops-pager__step:focus-visible {
+  outline: 2px solid var(--ops-sky);
+  outline-offset: 1px;
+}
+
+/* A disabled step keeps its shape and loses its affordance, so the row does
+   not resize on the first and last page. The button element carries the
+   disabled state, which is what a screen reader announces. */
+.ops-pager__step:disabled {
+  color: var(--ops-ink-3);
+  background: var(--ops-surface-quiet);
+  border-color: var(--ops-line-soft);
+  cursor: not-allowed;
+}
+
+.ops-pager__page {
+  min-width: 108px;
+  color: var(--ops-ink-2);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  text-align: center;
+}
+
+.ops-pager__size {
+  display: flex;
+  justify-content: flex-end;
+}
+
+@media (max-width: 767px) {
+  /* Stacked, and centred: the range on top, the two steps side by side under
+     it, the page size last. Nothing floats alone against an edge. */
+  .ops-pager {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: 10px;
+  }
+
+  /* The indicator leaves the button row and sits above it, so the two steps
+     get the full width to share. `order` moves it without moving it in the
+     DOM, which keeps the reading order sensible. */
+  .ops-pager__nav {
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    row-gap: 10px;
+  }
+
+  .ops-pager__page {
+    order: -1;
+    width: 100%;
+  }
+
+  .ops-pager__step {
+    flex: 1 1 0;
+    justify-content: center;
+  }
+
+  .ops-pager__size {
+    width: 100%;
+    justify-content: center;
   }
 }

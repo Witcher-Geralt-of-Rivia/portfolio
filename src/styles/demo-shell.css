@@ -61,12 +61,25 @@ body:has(.demo-shell) .site-nav {
   -webkit-backdrop-filter: blur(var(--surface-frost-blur));
 }
 
+/* Three zones: identity, provenance, controls. The middle one is
+   `minmax(0, 1fr)` so the band grows into whatever the other two leave, rather
+   than sitting at the width of its own text with several hundred pixels of
+   nothing beside it. The `0` minimum is what lets it shrink instead of forcing
+   the bar wider than the viewport. */
 .demo-chrome__inner {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   min-height: 34px;
   align-items: center;
   gap: var(--space-sm);
   padding: 0 var(--space-sm);
+}
+
+.demo-chrome__provenance {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: var(--space-xs);
 }
 
 .demo-chrome__back {
@@ -100,10 +113,6 @@ body:has(.demo-shell) .site-nav {
 
 /* Holds the row open where a demo supplies no title, so the controls stay
    right-aligned without the disclosure stretching to meet them. */
-.demo-chrome__gap {
-  flex: 1 1 auto;
-}
-
 .demo-chrome__title {
   flex: 1 1 auto;
   min-width: 0;
@@ -171,14 +180,19 @@ body:has(.demo-shell) .site-nav {
    3. Disclosure
    --------------------------------------------------------------------- */
 
+/* A band, not a badge: it takes the column it is given and aligns its text to
+   the left edge, so the words start where the eye already is rather than
+   floating in the middle of an empty region. The radius comes off the pill so
+   a full-width surface does not read as an oversized capsule. */
 .demo-disclosure {
   display: flex;
-  flex: none;
+  flex: 1 1 auto;
+  min-width: 0;
   align-items: center;
   gap: var(--space-2xs);
-  padding: 3px 10px;
+  padding: 3px 12px;
   border: 1px solid rgba(74, 80, 104, 0.14);
-  border-radius: var(--radius-pill);
+  border-radius: 9px;
   background: rgba(255, 255, 255, 0.52);
 }
 
@@ -365,21 +379,25 @@ body:has(.demo-shell) .site-nav {
     display: inline;
   }
 
+  /* Back to flex here, deliberately.
+     
+     A two-column grid puts the back link and the controls in the same row
+     whether or not they fit, and at 360px they do not: together they are
+     wider than the viewport, the grid grows to hold them, and the band —
+     which spans both columns — stretches to that overflowed width. Wrapping
+     flex lets the row break on its own terms.
+     
+     The band still gets a row of its own, because `flex-basis: 100%` forces
+     the wrap before it rather than leaving it to share. That is the part
+     worth keeping from the wide layout: full width is what stops it reading
+     as a badge. */
   .demo-chrome__inner {
+    display: flex;
     flex-wrap: wrap;
     gap: 6px var(--space-2xs);
     padding: 6px var(--space-xs);
   }
 
-  /* The filler holds a single-line row open. Once the bar wraps it has no
-     order of its own, so it would claim row one and push the back link across
-     the screen; `margin-left: auto` on the controls does the job instead. */
-  .demo-chrome__gap {
-    display: none;
-  }
-
-  /* Row one: the two controls that must never become unreachable.
-     Row two: the disclosure, with the title beside it. */
   .demo-chrome__back {
     order: 1;
   }
@@ -389,14 +407,15 @@ body:has(.demo-shell) .site-nav {
     margin-left: auto;
   }
 
-  .demo-disclosure {
+  .demo-chrome__provenance {
     order: 3;
-    flex-basis: auto;
+    flex: 1 1 100%;
+    min-width: 0;
   }
 
   .demo-chrome__title {
-    order: 4;
-    flex: 1 1 60px;
+    flex: 0 1 auto;
+    min-width: 0;
   }
 }
 

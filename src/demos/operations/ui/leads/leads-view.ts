@@ -9,6 +9,8 @@
 
 import { isDemoError } from "@/demo-runtime/types";
 
+import type { SortDirection } from "@/demo-runtime/types";
+
 import type { LeadSortKey } from "../../selectors/leads-list";
 import type { LeadStage, Priority } from "../../types";
 
@@ -42,14 +44,56 @@ export const PRIORITY_TONE: Record<Priority, string> = {
   High: "high",
 };
 
-export const SORT_OPTIONS: readonly { key: LeadSortKey; label: string }[] = [
-  { key: "lastActivity", label: "Last activity" },
-  { key: "nextFollowUp", label: "Next follow-up" },
-  { key: "name", label: "Lead name" },
-  { key: "stage", label: "Stage" },
-  { key: "priority", label: "Priority" },
-  { key: "created", label: "Created" },
+/**
+ * Sort, as one choice rather than two.
+ *
+ * The screen used to offer a field in a select and a direction in a small
+ * square button beside it. The button showed an arrow and nothing else, so it
+ * asked the visitor to work out that it belonged to the select, and then which
+ * way the arrow meant — two guesses to answer one question.
+ *
+ * Each field is listed with both of its directions, worded for the field
+ * rather than as "ascending" and "descending": dates have a newest and an
+ * oldest end, a name has A-Z, and a pipeline has an early and a late end.
+ * Twelve options, which is a menu a person can read.
+ *
+ * The direction words carry the meaning; there is no arrow to interpret, and a
+ * screen reader announces the whole choice rather than a symbol.
+ */
+export type SortChoice = { value: string; label: string; key: LeadSortKey; direction: SortDirection };
+
+const choice = (
+  key: LeadSortKey,
+  direction: SortDirection,
+  label: string
+): SortChoice => ({ value: `${key}:${direction}`, label, key, direction });
+
+export const SORT_CHOICES: readonly SortChoice[] = [
+  choice("lastActivity", "desc", "Last activity — newest"),
+  choice("lastActivity", "asc", "Last activity — oldest"),
+  choice("nextFollowUp", "asc", "Next follow-up — soonest"),
+  choice("nextFollowUp", "desc", "Next follow-up — latest"),
+  choice("name", "asc", "Lead name — A–Z"),
+  choice("name", "desc", "Lead name — Z–A"),
+  choice("stage", "asc", "Stage — early first"),
+  choice("stage", "desc", "Stage — late first"),
+  choice("priority", "desc", "Priority — high first"),
+  choice("priority", "asc", "Priority — low first"),
+  choice("created", "desc", "Created — newest"),
+  choice("created", "asc", "Created — oldest"),
 ];
+
+export function sortValue(key: LeadSortKey, direction: SortDirection): string {
+  return `${key}:${direction}`;
+}
+
+export function parseSortValue(value: string): { key: LeadSortKey; direction: SortDirection } {
+  const hit = SORT_CHOICES.find((c) => c.value === value);
+  /* The default is the frozen one, not the first entry by accident. */
+  return hit
+    ? { key: hit.key, direction: hit.direction }
+    : { key: "lastActivity", direction: "desc" };
+}
 
 /** The column a sortable table heading sorts by, in table order. */
 export const COLUMN_SORT: Record<string, LeadSortKey | null> = {

@@ -11,15 +11,15 @@ Everything below was read from the repository, not recalled from conversation.
 ```
 Stages 01-08   COMPLETE and FROZEN
 Deployment     LIVE at https://intelligent-systems-lab.duckdns.org
-Stage 09       IN PROGRESS - through 09C3.1, 0 of 3 demos built
+Stage 09       IN PROGRESS - through 09C3.1.1, 0 of 3 demos built
 Demo 01        Overview + Leads DEPLOYED; 09C3.2 blocked on live review
 ```
 
 Stage 09 changed direction: `#work` becomes a launcher into three interactive
 frontend-only product demos, not case studies. 09A froze the shared runtime;
 09B froze Demo 01's contract; 09C1 built its domain; 09C2 built the shell and
-Overview; 09C2.1 hardened both; 09C3.1 built Leads, the first module that
-writes. Nine modules remain, `#work` still renders its Stage 03 placeholder,
+Overview; 09C2.1 hardened both; 09C3.1 built Leads and 09C3.1.1 hardened its
+controls. Nine modules remain, `#work` renders its Stage 03 placeholder,
 and `currentStage` stays 8. See `docs/DEMO_OPERATIONS_IMPLEMENTATION.md` and
 `docs/NEXT_STAGE.md`. The case-study framework and its one verified internal
 case are preserved, unpublished; see `docs/CASE_STUDY_SOURCE_AUDIT.md`.

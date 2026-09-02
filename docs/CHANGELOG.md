@@ -1111,3 +1111,71 @@ regression is 1000 checks across eight suites; see `docs/QA_BASELINE.md`.
 Nine module screens. `#work` is untouched, the registry still reads
 `operations = building`, and `currentStage` stays 8. Stage 09C3.2 is blocked
 until the deployed Leads screen has been reviewed live.
+
+---
+
+## Stage 09C3.1.1 - Leads Control Presentation
+
+Status: **Complete**
+
+### Summary
+The first external review of Leads found four presentation faults. This stage
+fixed those four and nothing else: no business logic, no domain, no seed, no
+roles, no automation rules.
+
+### The same fault, three times
+
+A control that did not say what it was.
+
+The **filters** were a small uppercase word beside a browser select — two
+elements read as two things, repeated four times across a toolbar, with the
+platform's own arrow still on each select. The label moved inside the border,
+so `Stage · Qualified` is one object whose current value is part of its name
+(D-069).
+
+**Sort** was two controls for one decision: a field in a select and, beside it,
+an unlabelled square carrying an arrow. That asked the visitor to work out that
+the square belonged to the select, and then which way the arrow meant. It is
+one control now, with twelve options that each name a field and a direction —
+"Last activity — newest", "Lead name — A–Z". The sort semantics are unchanged.
+
+The **page size** was the same fault at its smallest: `10` behind the words
+"PER PAGE", pinned to the far right of a bar whose other contents were a
+thousand pixels away. It reads `10 rows` and sits in the footer with the
+controls it belongs to.
+
+### The other two
+
+The **pagination footer** was three clusters spread across 1305px with no
+shared structure. One grid under a rule now, stacked and centred on a phone,
+with real disabled buttons so the first and last page are announced rather than
+merely drawn (D-071).
+
+The **provenance band** was a 469px capsule with 608px of empty bar beside it,
+reading as a badge stuck on rather than the frame's own statement. Given the
+middle column of a three-zone bar it spans 1407px of the 1406px available at
+1920, with its text still left-aligned and its words unchanged (D-070).
+
+### Measured, not preferred
+
+The narrow layout is wrapping flex rather than grid because a two-column grid
+puts the back link and the controls in one row whether or not they fit — and at
+360px they do not. The back link is 120px, the role select's intrinsic width is
+167px because "Fleet Coordinator" needs it, and Reset is 59px: 363px of content
+in a 321px bar. The grid grew to hold them and the band, spanning both columns,
+stretched to that overflowed width. Two rows at 430px and above, three below,
+which is what it was before this stage.
+
+### QA
+
+`qa/stage09c31-leads.mjs` grew from 281 to 398 checks across three new
+sections. Full regression is 1152 checks. A pre-existing harness weakness was
+fixed rather than worked around: the responsive section waited for the
+result-count element, which renders a blank placeholder before the query
+settles.
+
+### Not done
+
+Nine module screens. `#work` is untouched, the registry still reads
+`operations = building`, and `currentStage` stays 8. Stage 09C3.2 is blocked
+until the deployed screen has been reviewed live.

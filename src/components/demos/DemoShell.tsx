@@ -67,9 +67,15 @@ export default function DemoShell({ title, roleControl, children }: DemoShellPro
             <span aria-hidden="true">←</span> Portfolio
           </Link>
 
-          <DemoDisclosure />
-
-          {title ? <p className="demo-chrome__title">{title}</p> : <span className="demo-chrome__gap" />}
+          {/* The provenance band. It is given the whole middle column rather
+              than the width of its own text: a short capsule marooned between
+              a back link and a role control reads as a badge someone stuck on,
+              while a band that spans the bar reads as the frame's own
+              statement about what is inside it. The words are unchanged. */}
+          <div className="demo-chrome__provenance">
+            <DemoDisclosure />
+            {title ? <p className="demo-chrome__title">{title}</p> : null}
+          </div>
 
           <div className="demo-chrome__controls">
             {sessionOnly && (

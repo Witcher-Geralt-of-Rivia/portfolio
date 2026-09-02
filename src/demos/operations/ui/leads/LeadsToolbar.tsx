@@ -24,7 +24,8 @@ import {
   type OwnerOption,
 } from "../../selectors/leads-list";
 import { LEAD_SOURCES, LEAD_STAGES } from "../../types";
-import { SORT_OPTIONS } from "./leads-view";
+import { SORT_CHOICES, parseSortValue, sortValue } from "./leads-view";
+import OpsSelect from "../OpsSelect";
 import OpsOverlay from "./OpsOverlay";
 import type { SortDirection } from "@/demo-runtime/types";
 
@@ -173,62 +174,77 @@ function FilterControls({
   onPatch: (next: Partial<LeadListQuery>) => void;
   stacked?: boolean;
 }) {
-  const cls = stacked ? "ops-field ops-field--stacked" : "ops-field";
+  /* Stacked in the phone sheet, where each control gets a line of its own and
+     the label sits above rather than inside. */
+  const wrap = (node: React.ReactNode, label: string) =>
+    stacked ? (
+      <span className="ops-control-row">
+        <span className="ops-control-row__label">{label}</span>
+        {node}
+      </span>
+    ) : (
+      node
+    );
 
   return (
     <>
-      <label className={cls}>
-        <span className="ops-field__label">Stage</span>
-        <select
-          className="ops-select"
+      {wrap(
+        <OpsSelect
+          label={stacked ? undefined : "Stage"}
+          srLabel="Stage"
           value={query.stage}
-          onChange={(e) => onPatch({ stage: e.target.value as LeadListQuery["stage"] })}
-        >
-          <option value="all">All stages</option>
-          {LEAD_STAGES.map((stage) => (
-            <option key={stage} value={stage}>
-              {stage}
-            </option>
-          ))}
-        </select>
-      </label>
+          active={query.stage !== "all"}
+          onChange={(v) => onPatch({ stage: v as LeadListQuery["stage"] })}
+          options={[
+            { value: "all", label: "All stages" },
+            ...LEAD_STAGES.map((stage) => ({ value: stage, label: stage })),
+          ]}
+        />,
+        "Stage"
+      )}
 
-      <label className={cls}>
-        <span className="ops-field__label">Source</span>
-        <select
-          className="ops-select"
+      {wrap(
+        <OpsSelect
+          label={stacked ? undefined : "Source"}
+          srLabel="Source"
           value={query.source}
-          onChange={(e) => onPatch({ source: e.target.value as LeadListQuery["source"] })}
-        >
-          <option value="all">All sources</option>
-          {LEAD_SOURCES.map((source) => (
-            <option key={source} value={source}>
-              {source}
-            </option>
-          ))}
-        </select>
-      </label>
+          active={query.source !== "all"}
+          onChange={(v) => onPatch({ source: v as LeadListQuery["source"] })}
+          options={[
+            { value: "all", label: "All sources" },
+            ...LEAD_SOURCES.map((source) => ({ value: source, label: source })),
+          ]}
+        />,
+        "Source"
+      )}
 
-      <label className={cls}>
-        <span className="ops-field__label">Owner</span>
-        <select
-          className="ops-select"
+      {wrap(
+        <OpsSelect
+          label={stacked ? undefined : "Owner"}
+          srLabel="Owner"
           value={query.owner}
-          onChange={(e) => onPatch({ owner: e.target.value })}
-        >
-          <option value="all">All owners</option>
-          <option value="unassigned">Unassigned</option>
-          {owners.map((owner) => (
-            <option key={owner.id} value={owner.id}>
-              {owner.name}
-            </option>
-          ))}
-        </select>
-      </label>
+          active={query.owner !== "all"}
+          onChange={(v) => onPatch({ owner: v })}
+          options={[
+            { value: "all", label: "All owners" },
+            { value: "unassigned", label: "Unassigned" },
+            ...owners.map((owner) => ({ value: owner.id, label: owner.name })),
+          ]}
+        />,
+        "Owner"
+      )}
     </>
   );
 }
 
+/**
+ * Sort: one control, one choice.
+ *
+ * Field and direction were two controls, the second of which was an unlabelled
+ * square carrying an arrow. They are one select now, and each option says what
+ * it does — "Last activity — newest" rather than a field plus a symbol the
+ * reader has to resolve.
+ */
 function SortControls({
   sort,
   direction,
@@ -240,34 +256,25 @@ function SortControls({
   onSort: (sort: LeadSortKey, direction: SortDirection) => void;
   stacked?: boolean;
 }) {
-  const cls = stacked ? "ops-field ops-field--stacked" : "ops-field";
+  const control = (
+    <OpsSelect
+      label={stacked ? undefined : "Sort"}
+      srLabel="Sort leads"
+      value={sortValue(sort, direction)}
+      onChange={(v) => {
+        const next = parseSortValue(v);
+        onSort(next.key, next.direction);
+      }}
+      options={SORT_CHOICES.map((c) => ({ value: c.value, label: c.label }))}
+    />
+  );
 
-  return (
-    <label className={cls}>
-      <span className="ops-field__label">Sort</span>
-      <span className="ops-field__pair">
-        <select
-          className="ops-select"
-          value={sort}
-          onChange={(e) => onSort(e.target.value as LeadSortKey, direction)}
-        >
-          {SORT_OPTIONS.map((option) => (
-            <option key={option.key} value={option.key}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-        <button
-          type="button"
-          className="ops-button ops-button--quiet ops-sort-dir"
-          onClick={() => onSort(sort, direction === "desc" ? "asc" : "desc")}
-          aria-label={
-            direction === "desc" ? "Sorted descending, switch to ascending" : "Sorted ascending, switch to descending"
-          }
-        >
-          <span aria-hidden="true">{direction === "desc" ? "▾" : "▴"}</span>
-        </button>
-      </span>
-    </label>
+  return stacked ? (
+    <span className="ops-control-row">
+      <span className="ops-control-row__label">Sort</span>
+      {control}
+    </span>
+  ) : (
+    control
   );
 }
