@@ -126,8 +126,9 @@ Two routes:
   `#work` is a **QA placeholder only** — an eyebrow label and the words
   "Navigation specimen section". Stage 09 replaces it.
 - **`/specimen`** — Stage 02 typography specimen, unlinked, kept verifiable.
-
 `/demos/operations` and `/demos/operations/leads` are the Operations demo, deployed for review; `noindex, nofollow`, linked from nowhere. `/demos` is a 404.
+
+Source is public at `github.com/Witcher-Geralt-of-Rivia/portfolio`, branch `main`. Push every verified commit and tag after its stage's QA and verify the remote SHA; run `node qa/public-repo-safety.mjs --history` first. Never let a secret enter history, and do not rewrite it.
 
 Navigation destinations are exactly: Systems, Products, AI Learning, Lab, Work.
 There is deliberately no Contact, Hire Me, About, Blog or social link.

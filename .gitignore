@@ -22,7 +22,22 @@
 
 # misc
 .DS_Store
+
+# credential material - this repository is public, and a secret committed once
+# stays reachable from the commit that introduced it even after it is deleted
 *.pem
+*.key
+*.pfx
+*.p12
+*.jks
+id_rsa
+id_dsa
+id_ecdsa
+id_ed25519
+*.ppk
+.git-credentials
+.npmrc
+.netrc
 
 # debug
 npm-debug.log*
@@ -49,3 +64,8 @@ tsconfig.tsbuildinfo
 
 # safe-deploy logs
 /deploy/logs/
+
+# playwright output (the harnesses write screenshots into qa/shots, which IS
+# tracked on purpose; these two directories are transient run artefacts)
+/test-results/
+/playwright-report/

@@ -191,7 +191,8 @@
     "stage05Tag": "portfolio-stage-05-verified",
     "stage06Tag": "portfolio-stage-06-verified",
     "stage07Tag": "portfolio-stage-07-verified",
-    "stage08Tag": "portfolio-stage-08-verified"
+    "stage08Tag": "portfolio-stage-08-verified",
+    "remote": "origin https://github.com/Witcher-Geralt-of-Rivia/portfolio.git"
   },
   "stage06Started": true,
   "stage07Started": true,
@@ -232,5 +233,14 @@
   "stage09c1Complete": true,
   "stage09c2Complete": true,
   "stage09c21Complete": true,
-  "stage09c31Complete": true
+  "stage09c31Complete": true,
+  "repository": {
+    "url": "https://github.com/Witcher-Geralt-of-Rivia/portfolio",
+    "visibility": "public",
+    "canonicalBranch": "main",
+    "githubSynchronisation": "enabled",
+    "initialPublication": "complete",
+    "policy": "every verified commit and tag is pushed and SHA-verified after its stage's own QA, and after production deployment where the stage requires one",
+    "historyRewrite": "prohibited. The one-time authorship rewrite before initial publication was explicitly authorised and is spent"
+  }
 }

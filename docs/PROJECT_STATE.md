@@ -386,14 +386,14 @@ delay", "simulated step 6 of 6") are sequence positions, not latency.
 ## Deployment
 
 Live at `https://intelligent-systems-lab.duckdns.org`. PM2 app "portfolio" on
-127.0.0.1:3100, behind a Caddy instance shared with another project that runs
-its own app on 3200. Production serves `.next-release-a` / `-b`; `.next` is
-development only. Update with `npm run deploy:safe` and nothing else; host
-safety rules in `docs/DEPLOYMENT.md`.
+127.0.0.1:3100, behind a Caddy shared with another project on 3200. Production
+serves `.next-release-a` / `-b`; `.next` is development only. Update with
+`npm run deploy:safe`; host rules in `docs/DEPLOYMENT.md`. Source is public at
+`github.com/Witcher-Geralt-of-Rivia/portfolio` (`main`) — a separate operation.
 
 ## Known Gaps
 
 - LCP timing: UNVERIFIED in the headless QA environment (see QA_BASELINE.md)
-- Reboot survival relies on the host's PM2 logon-time resurrection, which fires
-  at Administrator logon rather than at boot. Not reboot-tested: another
+- Reboot survival relies on PM2 logon-time resurrection, which fires at
+  Administrator logon rather than at boot. Not reboot-tested: another
   production domain shares the machine.

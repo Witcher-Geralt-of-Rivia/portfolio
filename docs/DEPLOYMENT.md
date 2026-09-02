@@ -11,6 +11,31 @@ https://intelligent-systems-lab.duckdns.org
 Only verified state is recorded here. No secret, token, password or private key
 belongs in this file.
 
+## Publishing Is Not Deploying
+
+Two separate operations, and neither implies the other.
+
+```
+GitHub synchronisation   git push origin main + tags
+                         publishes SOURCE to a public repository.
+                         Changes nothing on this server.
+
+Production deployment    npm run deploy:safe
+                         builds into the inactive release slot, smoke-tests it
+                         and repoints PM2. Touches no repository.
+```
+
+A successful push does not deploy, and a successful deployment does not
+publish. A stage that requires deployment runs `npm run deploy:safe`; a stage
+that only changes source or documentation is pushed and not deployed.
+
+If a push fails after a deployment has succeeded, the deployment stands: report
+the synchronisation as pending and do not roll anything back to make Git
+happy.
+
+Repository: `https://github.com/Witcher-Geralt-of-Rivia/portfolio`, branch
+`main`, public.
+
 ## Production
 
 | Item | Value |

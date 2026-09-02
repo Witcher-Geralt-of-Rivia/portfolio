@@ -69,6 +69,30 @@ Current state: verified clean. Runtime dependencies are `geist`, `next`, `react`
 and `react-dom`. No `.env` file exists anywhere in the project, and no AI
 provider variable is referenced.
 
+## The Repository Is Public
+
+The source lives at `https://github.com/Witcher-Geralt-of-Rivia/portfolio`, and
+its **entire history is public with it**. That changes what a mistake costs: a
+credential committed once stays reachable from the commit that introduced it,
+so deleting it in a later commit does not unpublish it. Removing it afterwards
+means rewriting history, which invalidates every commit SHA and every tag.
+
+Consequently:
+
+- Only synthetic demo data may enter this repository. Nothing real, nothing
+  belonging to a client, nothing belonging to another project on this host.
+- No credential or secret may enter Git history, not even in a commit that is
+  about to be amended away.
+- `node qa/public-repo-safety.mjs --history` runs before a publication push.
+  It is a guard against the known mistakes — a tracked `.env`, a private key, a
+  recognisable credential prefix, a build directory — and it is **not** proof
+  that no secret exists. Read what you are about to publish.
+
+Authorship carries the account's GitHub noreply address rather than a personal
+one, so publishing a commit does not publish an email address. That was settled
+by a one-time authorised history rewrite before the first push; history rewriting
+is prohibited again unless the user explicitly authorises it.
+
 ## Secrets
 
 - No credential, token, password or private key belongs in this repository.

@@ -652,7 +652,7 @@ describing three empty drafts and "nothing truthful to publish" after case-01
 was approved. `ARCHITECTURE.md`'s source tree was missing four component
 directories and `src/content/`. `QA_BASELINE.md` declared every number measured
 against production while its Stage 06 section said dev server — that section
-was re-measured in 840381b and only the header was left behind.
+was re-measured in 39bca9c and only the header was left behind.
 `CASE_STUDY_SOURCE_AUDIT.md` denied, in the present tense, directories it later
 listed. The audit itself was cited as canonical by two documents but was in
 neither `canonicalDocs` nor the memory harness, so nothing checked it.

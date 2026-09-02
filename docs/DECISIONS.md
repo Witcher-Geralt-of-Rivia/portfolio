@@ -1815,3 +1815,53 @@ times.
 ### Consequence
 The demo routes remain `noindex, nofollow` and nothing links to them. The next
 task is blocked, deliberately, on a person looking at the live URL.
+
+---
+
+## D-068 — The source is published, and authorship was anonymised once to allow it
+
+Status: Accepted
+Stage: 9C3.1
+
+### Decision
+The repository is public at `https://github.com/Witcher-Geralt-of-Rivia/portfolio`
+on branch `main`. Every verified commit and tag is pushed after its own stage's
+QA — and after production deployment, where the stage requires one — and the
+remote SHA is verified against the local one.
+
+Before the first push, and only then, the author and committer email on all 25
+commits and the tagger on all 13 tags were rewritten from a personal address to
+the account's GitHub noreply address. History rewriting is prohibited again.
+
+### Reason
+Publishing the history publishes its metadata. Every commit carried a personal
+Gmail address, and the GitHub account is pseudonymous — so pushing as-is would
+have permanently linked the pseudonym to that address and put it in every
+clone. The project already forbids an email address on every surface of the
+product; git authorship is the one surface that rule had not reached.
+
+The rewrite had to happen before the first push or not at all. Once a commit is
+public it is cloned, forked and cached, and rewriting afterwards changes every
+SHA without unpublishing anything.
+
+Nothing else changed. The tree hash of the final commit is identical before and
+after (`74c791f8`), and messages, timestamps, order, tag names and tag messages
+were all preserved. Only the identity fields moved.
+
+The prohibition is restored deliberately: a public history is a shared artefact,
+and rewriting one after publication breaks every clone that has it.
+
+### Consequence
+Commit SHAs from before publication are obsolete; the one reference to an old
+SHA in `docs/CHANGELOG.md` was updated with the rewrite.
+
+`qa/public-repo-safety.mjs` runs before a publication push. It refuses tracked
+`.env` files, private-key material, build output committed by accident and
+recognisable credential prefixes, at HEAD and across the whole history. It is a
+guard against known mistakes and not a proof of absence, and it says so when it
+passes.
+
+Publishing and deploying are now explicitly separate operations, recorded in
+`docs/DEPLOYMENT.md`: a push changes nothing on the server, a deployment
+publishes nothing, and a failed push never justifies rolling back a good
+deployment.
