@@ -23,7 +23,7 @@ import {
  * showing, and the position of the adapt sequence.
  *
  * `Adapt` walks a five-stage local state machine and then swaps the variant.
- * It performs no request of any kind — no API, no backend, no model. Both
+ * It performs no request of any kind: no API, no backend, no model. Both
  * timers are torn down whenever the scenario changes, the sequence restarts or
  * the component unmounts, so a stale scenario can never receive a late update.
  */
@@ -215,7 +215,7 @@ export default function LearningLab() {
         </button>
 
         <p className="llab__stage" aria-hidden="true">
-          {stage ? stage.label : "Idle — adapting runs entirely in the browser."}
+          {stage ? stage.label : "Idle. Adapting runs entirely in the browser."}
         </p>
 
         {/* Announced once, on completion. Never on every intermediate stage. */}

@@ -1,14 +1,14 @@
 "use client";
 
 /**
- * Operations demo — the Leads toolbar.
+ * Operations demo: the Leads toolbar.
  *
  * Search, three filters, sort, the result count and the one primary action.
  *
  * Two compositions, not one squeezed. On a wide screen the filters sit inline,
  * because there is room and a visitor should see what is currently narrowing
  * the list without opening anything. On a phone they move into a sheet behind
- * a single Filter button that says how many are active — three selects stacked
+ * a single Filter button that says how many are active: three selects stacked
  * above the table would push the records themselves below the fold.
  *
  * Search is not debounced. There are 48 records in memory and no request to
@@ -242,7 +242,7 @@ function FilterControls({
  *
  * Field and direction were two controls, the second of which was an unlabelled
  * square carrying an arrow. They are one select now, and each option says what
- * it does — "Last activity — newest" rather than a field plus a symbol the
+ * it does: "Last activity: newest" rather than a field plus a symbol the
  * reader has to resolve.
  */
 function SortControls({

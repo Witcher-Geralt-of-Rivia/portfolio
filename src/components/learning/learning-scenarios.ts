@@ -1,9 +1,9 @@
 /**
- * Stage 07 — AI Learning Systems.
+ * Stage 07 - AI Learning Systems.
  *
  * Every scenario is declared here as data. The panels, the map and the journey
  * are renderers over these structures, so adding a scenario means writing data
- * rather than markup — the same rule as `architecture-data.ts` (Stage 05) and
+ * rather than markup, the same rule as `architecture-data.ts` (Stage 05) and
  * `product-scenarios.ts` (Stage 06).
  *
  * Everything in this file is SYNTHETIC. "Maya" is not a person, the mastery
@@ -14,7 +14,7 @@
 
 export type ScenarioId = "tutor" | "assessment" | "path";
 
-/** Four knowledge states. Never encoded by colour alone — see learning.css. */
+/** Four knowledge states. Never encoded by colour alone. See learning.css. */
 export type NodeState = "mastered" | "learning" | "gap" | "locked";
 
 export type MapNode = {
@@ -109,7 +109,7 @@ export const PRINCIPLES = [
 ];
 
 /* =====================================================================
-   01 — ADAPTIVE TUTOR
+   01 - ADAPTIVE TUTOR
    A knowledge map of the concepts behind the learner's stated goal, with
    prerequisite edges. The adaptive route is the chain that has to be
    cleared before the goal concept becomes reachable.
@@ -220,10 +220,10 @@ const TUTOR: LearningScenario = {
 };
 
 /* =====================================================================
-   02 — ASSESSMENT ENGINE
+   02 - ASSESSMENT ENGINE
    The graph is the evaluation pipeline itself: a response fans out across
    rubric criteria, converges on an evaluation, and produces feedback and a
-   difficulty decision. Nothing here scores anything — it shows the shape an
+   difficulty decision. Nothing here scores anything: it shows the shape an
    assessment architecture takes.
    ===================================================================== */
 
@@ -331,10 +331,10 @@ const ASSESSMENT: LearningScenario = {
 };
 
 /* =====================================================================
-   03 — LEARNING PATH BUILDER
+   03 - LEARNING PATH BUILDER
    A controlled roadmap rather than a network: milestones on a route from
    the stated goal's prerequisites to deployment, with two optional
-   branches. Adapting promotes Testing ahead of Persistence — a real,
+   branches. Adapting promotes Testing ahead of Persistence: a real,
    deterministic reorder, visible in the milestone numbering.
    ===================================================================== */
 

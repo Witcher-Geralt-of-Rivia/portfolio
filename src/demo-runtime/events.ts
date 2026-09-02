@@ -1,9 +1,9 @@
 /**
- * Demo runtime — domain event bus.
+ * Demo runtime: domain event bus.
  *
  * A synchronous in-browser publish/subscribe, scoped to one demo. It carries
- * facts about what happened in the domain — a job was reassigned, an
- * assessment was submitted — so that panels which care about a change can be
+ * facts about what happened in the domain (a job was reassigned, an
+ * assessment was submitted) so that panels which care about a change can be
  * told rather than having to poll for it.
  *
  * There is no timer, no queue drain and no network. Publishing calls the

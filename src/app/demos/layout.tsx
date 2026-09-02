@@ -10,7 +10,7 @@ import "@/styles/demo-shell.css";
  * not emit `<html>` or `<body>`.
  *
  * No `page.tsx` exists beneath this yet, so `/demos` and every route under it
- * is a 404. That is deliberate — an unfinished product demonstration must not
+ * is a 404. That is deliberate: an unfinished product demonstration must not
  * be reachable. The layout and the shared runtime are built and frozen first;
  * each demo becomes a route only when it is finished.
  *

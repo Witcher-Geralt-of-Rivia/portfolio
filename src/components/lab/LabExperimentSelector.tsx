@@ -8,7 +8,7 @@ import type { Experiment, ExperimentId } from "./lab-experiments";
  * The five experiments, as a real ARIA tablist styled like an instrument
  * index: a mono number beside each name.
  *
- * Same rule as every selector in this project — full tab semantics (roving
+ * Same rule as every selector in this project: full tab semantics (roving
  * tabindex, arrow keys, Home, End) or plain buttons. This component owns no
  * state; the selection lives in the workspace above it.
  */

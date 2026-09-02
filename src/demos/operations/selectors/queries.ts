@@ -1,5 +1,5 @@
 /**
- * Operations demo — list query helpers.
+ * Operations demo: list query helpers.
  *
  * Thin, typed wrappers over the runtime's query primitive, adding the two
  * things every module list needs and the runtime deliberately does not know

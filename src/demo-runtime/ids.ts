@@ -1,5 +1,5 @@
 /**
- * Demo runtime — deterministic identifiers.
+ * Demo runtime: deterministic identifiers.
  *
  * Entity ids are a monotonic counter per demo and collection, formatted as
  * `customer_0001`, `job_0002` and so on.
@@ -85,7 +85,7 @@ export function countersFromSeed(
 
 /**
  * Deterministic id for a runtime-generated artefact that is not a domain
- * entity — a domain event, for instance, where the sequence number is already
+ * entity: a domain event, for instance, where the sequence number is already
  * unique within the demo and the id only has to be stable and readable.
  */
 export function sequenceId(prefix: string, demoId: string, sequence: number): string {

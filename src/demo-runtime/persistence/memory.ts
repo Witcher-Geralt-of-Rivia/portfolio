@@ -1,5 +1,5 @@
 /**
- * Demo runtime — in-memory persistence.
+ * Demo runtime: in-memory persistence.
  *
  * Used when IndexedDB cannot be opened: a private window with storage
  * disabled, a browser that refuses the database, a quota failure. The demo
@@ -42,7 +42,7 @@ type Tables = {
 /* Composite key for the Map that stands in for an IndexedDB keyPath.
    The separator must be a character that cannot appear in a demo id,
    collection name or entity id, or two different key tuples could
-   collapse onto one entry — the memory adapter would then lose a record
+   collapse onto one entry: the memory adapter would then lose a record
    that IndexedDB keeps, and the two would no longer behave identically. */
 const KEY_SEPARATOR = "\u001f";
 

@@ -1,5 +1,5 @@
 /**
- * Stage 08 — Engineering Lab.
+ * Stage 08 - Engineering Lab.
  *
  * Five experiments, each a deterministic frame sequence. Running an experiment
  * walks its frames on a timer; every frame carries the complete state the UI
@@ -119,7 +119,7 @@ export const PATTERN_RAIL = [
 ];
 
 /* =====================================================================
-   01 — API REQUEST INSPECTOR
+   01 - API REQUEST INSPECTOR
    Separating validation, authentication and application handling so a
    failure is attributable to a stage rather than to "the API".
    ===================================================================== */
@@ -236,7 +236,7 @@ const API: Experiment = {
 };
 
 /* =====================================================================
-   02 — RATE LIMIT SIMULATOR
+   02 - RATE LIMIT SIMULATOR
    A fixed window with a burst allowance. Seven requests arrive; the
    window admits five plus a burst of two, and the rest are refused.
    ===================================================================== */
@@ -326,7 +326,7 @@ const RATE: Experiment = {
 };
 
 /* =====================================================================
-   03 — WEBHOOK RELIABILITY
+   03 - WEBHOOK RELIABILITY
    Verify, deduplicate, process, acknowledge - and survive a delivery
    that fails once.
    ===================================================================== */
@@ -419,14 +419,14 @@ const WEBHOOK: Experiment = {
   action: { run: "Deliver event", running: "Delivering…", done: "Deliver again" },
   annotations: ["SIG / CHECKED", "STATE / RETRY"],
   explanation:
-    "A webhook receiver verifies the signature before it trusts a payload, and checks the delivery id before it acts on one. Because the sender retries on any non-2xx reply, the handler has to be safe to run twice — the deduplication step is what makes that true.",
+    "A webhook receiver verifies the signature before it trusts a payload, and checks the delivery id before it acts on one. Because the sender retries on any non-2xx reply, the handler has to be safe to run twice: the deduplication step is what makes that true.",
   frameMs: 240,
   initial: webhookView(),
   frames: { success: WEBHOOK_OK, retry: WEBHOOK_RETRY },
 };
 
 /* =====================================================================
-   04 — QUEUE & RETRY SIMULATOR
+   04 - QUEUE & RETRY SIMULATOR
    A worker draining a queue, one job that succeeds on its third attempt
    with widening backoff, and one that exhausts its retries and is set
    aside rather than retried forever.
@@ -539,7 +539,7 @@ const QUEUE: Experiment = {
 };
 
 /* =====================================================================
-   05 — IDEMPOTENCY GUARD
+   05 - IDEMPOTENCY GUARD
    Two identical requests, one business action.
    ===================================================================== */
 
@@ -601,7 +601,7 @@ const IDEMPOTENCY: Experiment = {
   action: { run: "Send twice", running: "Sending…", done: "Send again" },
   annotations: ["KEY / CHECKED", "STATE / CACHED"],
   explanation:
-    "A retry that reaches the server twice must not charge twice. The key is checked before the action runs, the result is cached against it, and the duplicate is answered from that cache — so two incoming requests produce exactly one business effect.",
+    "A retry that reaches the server twice must not charge twice. The key is checked before the action runs, the result is cached against it, and the duplicate is answered from that cache, so two incoming requests produce exactly one business effect.",
   frameMs: 240,
   initial: {
     kind: "idem",

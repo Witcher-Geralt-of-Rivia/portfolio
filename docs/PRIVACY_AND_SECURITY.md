@@ -84,8 +84,8 @@ Consequently:
 - No credential or secret may enter Git history, not even in a commit that is
   about to be amended away.
 - `node qa/public-repo-safety.mjs --history` runs before a publication push.
-  It is a guard against the known mistakes — a tracked `.env`, a private key, a
-  recognisable credential prefix, a build directory — and it is **not** proof
+  It is a guard against the known mistakes (a tracked `.env`, a private key, a
+  recognisable credential prefix, a build directory), and it is **not** proof
   that no secret exists. Read what you are about to publish.
 
 Authorship carries the account's GitHub noreply address rather than a personal

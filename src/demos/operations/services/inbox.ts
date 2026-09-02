@@ -1,12 +1,12 @@
 /**
- * Operations demo — inbox services and the deterministic Lead Brief.
+ * Operations demo: inbox services and the deterministic Lead Brief.
  *
  * A reply appends a local message and nothing else. There is no recipient, no
  * address and no network call: the conversation is a record in the browser,
  * which is why the only two channels are Web chat and In-app.
  *
  * The Lead Brief is composed by rule from the lead's own state. It is not a
- * model, has no input, and makes no claim to intelligence — it is a summary a
+ * model, has no input, and makes no claim to intelligence: it is a summary a
  * competent application could compose from what it already knows.
  */
 

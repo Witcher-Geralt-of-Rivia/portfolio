@@ -1,5 +1,5 @@
 /* =====================================================================
-   MILKY INTELLIGENCE — 01 / INTELLIGENT SYSTEMS
+   MILKY INTELLIGENCE - 01 / INTELLIGENT SYSTEMS
    A system architecture laboratory, not a card grid. The panel reuses the
    Milk surface with a faint Prism edge; nothing here introduces a new
    material, a dark console, or a colour outside the Stage 01 palette.
@@ -90,7 +90,7 @@
   overflow: hidden;
 }
 
-/* A faint local atmosphere — never a visible gradient blob, and entirely
+/* A faint local atmosphere, never a visible gradient blob, and entirely
    inside the panel. The Stage 01 aurora is untouched. */
 .arch-lab::before {
   content: "";

@@ -1,19 +1,19 @@
 /**
- * Operations demo — the Leads list.
+ * Operations demo: the Leads list.
  *
  * Everything the Leads screen needs to turn 48 records into one page of rows:
  * which leads match, in what order, and how their dates read. It lives here
- * rather than in the screen because all of it is domain knowledge — that Won
+ * rather than in the screen because all of it is domain knowledge (that Won
  * follows Proposal, that High outranks Normal, that an archived lead is out of
- * the working list — and a component that decided any of it would be a second
+ * the working list), and a component that decided any of it would be a second
  * place to change when the product changes.
  *
  * Filtering and search go through `queryList`, so there is one matcher. Sorting
  * and paging are done here, for a reason the type system makes plain:
  * `QuerySpec.sort` takes `keyof T`, and three of the six sorts this screen owes
- * the visitor are not fields on a lead. Stage and Priority are ranks — sorting
+ * the visitor are not fields on a lead. Stage and Priority are ranks (sorting
  * their strings would order the pipeline Contacted, Lost, New, Proposal,
- * Qualified, Won, which is alphabetical and meaningless — and Created lives on
+ * Qualified, Won, which is alphabetical and meaningless), and Created lives on
  * the record envelope rather than in the lead itself.
  */
 
@@ -55,7 +55,7 @@ export type LeadListQuery = {
  *
  * Last activity descending puts the leads someone has actually touched most
  * recently at the top, which is the only column in the seed with a genuine
- * spread — every record shares a `createdAt`, so "newest first" would be an
+ * spread: every record shares a `createdAt`, so "newest first" would be an
  * arbitrary order wearing a meaningful label.
  */
 export const DEFAULT_LEAD_QUERY: LeadListQuery = {
@@ -89,7 +89,7 @@ const rank = <T extends string>(values: readonly T[], value: T): number => {
 /**
  * Compare two leads on the requested key.
  *
- * A null follow-up is not "the earliest" — a lead with nothing scheduled sorts
+ * A null follow-up is not "the earliest": a lead with nothing scheduled sorts
  * after every lead that has something scheduled, in both directions, so
  * reversing the order never floats emptiness to the top.
  */
@@ -155,7 +155,7 @@ export function selectLeadList(
   const sign = query.direction === "desc" ? -1 : 1;
   /* The tie-break is written out rather than inherited. Both persistence
      adapters return rows in id order and the sort is stable, so ties already
-     held their order — but that is a guarantee three layers down from the
+     held their order, but that is a guarantee three layers down from the
      screen that depends on it, and a list which reshuffles between renders
      cannot be paged through. */
   const sorted = [...matched.items].sort((a, b) => {
@@ -184,8 +184,8 @@ export type OwnerOption = { id: string; name: string };
 /**
  * The people a lead can belong to.
  *
- * Derived, not listed. An actor qualifies by being an active Sales Agent —
- * the same test Rule 01 applies when it assigns automatically — or by already
+ * Derived, not listed. An actor qualifies by being an active Sales Agent
+ * (the same test Rule 01 applies when it assigns automatically) or by already
  * owning a lead, so an existing owner is always representable even if their
  * role changes later. A Fleet Coordinator does not become a CRM owner by
  * existing in the actor seed.
@@ -219,8 +219,8 @@ export function ownerNameOf(
 /**
  * One lead's audit trail, newest first.
  *
- * `runtime.listAudit()` returns every entry in the demo — 63 seeded plus
- * everything the visitor has done — so the narrowing has to happen somewhere.
+ * `runtime.listAudit()` returns every entry in the demo (63 seeded plus
+ * everything the visitor has done), so the narrowing has to happen somewhere.
  * It happens here so a drawer can render a list rather than compute one.
  *
  * Sequence is monotonic within a demo, so it orders the feed exactly and needs
@@ -260,7 +260,7 @@ export function absoluteDate(iso: string): string {
  * language, so anything beyond a week falls back to a plain calendar date.
  */
 export function relativeDate(iso: string | null, now: string): string {
-  if (!iso) return "—";
+  if (!iso) return "-";
   const days = dayNumber(iso) - dayNumber(now);
 
   if (days === 0) return "Today";

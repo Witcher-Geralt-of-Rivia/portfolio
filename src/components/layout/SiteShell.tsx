@@ -23,7 +23,7 @@ export default function SiteShell({ children }: { children: ReactNode }) {
       <SiteNavigation />
 
       {/* Top padding is shell clearance for the fixed navigation, not
-          hero spacing — pages add their own rhythm on top of it. */}
+          hero spacing. Pages add their own rhythm on top of it. */}
       <main className="site-main" id="main-content">
         {children}
       </main>

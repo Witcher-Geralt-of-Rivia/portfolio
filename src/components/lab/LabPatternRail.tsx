@@ -2,7 +2,7 @@ import { PATTERN_RAIL } from "./lab-experiments";
 
 /**
  * The six engineering patterns the lab is about, as a compact rail. Number
- * and title only — the same strip language as the Stage 05 and Stage 07
+ * and title only, the same strip language as the Stage 05 and Stage 07
  * principles. Server-rendered.
  */
 export default function LabPatternRail() {

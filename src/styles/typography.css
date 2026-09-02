@@ -1,5 +1,5 @@
 /* =====================================================================
-   MILKY INTELLIGENCE — TYPOGRAPHY
+   MILKY INTELLIGENCE - TYPOGRAPHY
    Two families, one narrow weight range, and a scale that carries the
    hierarchy so weight does not have to.
 
@@ -207,7 +207,7 @@ small {
 }
 
 /* ---------------------------------------------------------------------
-   TECHNICAL — GEIST MONO
+   TECHNICAL - GEIST MONO
    Mono is a signal, not a texture. It marks machine-facing text:
    identifiers, statuses, routes, measurements and code. It is never used
    for a paragraph.
@@ -224,7 +224,7 @@ small {
   text-transform: uppercase;
 }
 
-/* Primary technical label — 13px, the floor for meaningful interface text. */
+/* Primary technical label: 13px, the floor for meaningful interface text. */
 .type-technical {
   color: var(--text-annotation);
   font-family: var(--font-mono);
@@ -240,7 +240,7 @@ small {
   text-transform: uppercase;
 }
 
-/* Micro label — 12px, non-primary metadata only. Never a control label,
+/* Micro label: 12px, non-primary metadata only. Never a control label,
    never a caption that carries meaning on its own. */
 .type-technical-micro {
   color: var(--text-annotation);
@@ -323,7 +323,7 @@ pre code {
   color: var(--text-annotation);
 }
 
-/* Decorative only. Never body copy, captions, or control labels — it does
+/* Decorative only. Never body copy, captions, or control labels: it does
    not reach AA at meaningful text sizes over this background. */
 .text-muted {
   color: var(--text-muted);

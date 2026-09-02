@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * QA FIXTURE — not part of the product, and not a route while it lives here.
+ * QA FIXTURE: not part of the product, and not a route while it lives here.
  *
  * Publishes the demo runtime's factories on `window` so `qa/stage09a-runtime.mjs`
  * can exercise the real bundled modules against a real browser IndexedDB. The
@@ -17,7 +17,7 @@
  *
  * It lives under `qa/` rather than `src/app/` precisely so that copying it is a
  * deliberate act: a QA route must never exist in production. Note that naming
- * the folder `_probe` would not work — a leading underscore marks a Next.js
+ * the folder `_probe` would not work: a leading underscore marks a Next.js
  * private folder, which produces no route at all.
  */
 

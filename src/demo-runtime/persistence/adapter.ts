@@ -1,5 +1,5 @@
 /**
- * Demo runtime — the persistence contract.
+ * Demo runtime: the persistence contract.
  *
  * Everything above this line in the dependency order talks to this interface
  * and never to IndexedDB. That is a hard architectural rule, and it is what
@@ -8,7 +8,7 @@
  * by a QA harness with no browser at all.
  *
  * Both implementations must behave identically. The memory adapter is not a
- * simplified stand-in — a fallback that quietly relaxes atomicity or key
+ * simplified stand-in: a fallback that quietly relaxes atomicity or key
  * uniqueness would hide exactly the bugs it is meant to survive.
  */
 
@@ -44,7 +44,7 @@ export type ResetPayload = {
    *
    * A demo whose canonical dataset implies past state transitions can restore
    * that trail on reset, so an Activity panel is not empty on first visit.
-   * Omitted, reset clears audit as it always did — the demos that seed no
+   * Omitted, reset clears audit as it always did. The demos that seed no
    * history are unaffected.
    *
    * These are runtime `AuditEntry` rows. The runtime still does not learn what

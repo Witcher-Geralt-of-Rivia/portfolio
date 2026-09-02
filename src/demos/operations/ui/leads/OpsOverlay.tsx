@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Operations demo — one overlay, three presentations.
+ * Operations demo: one overlay, three presentations.
  *
  * The detail drawer, the filter sheet, the forms and the confirmations are the
  * same thing wearing different geometry, so they are one component. Five

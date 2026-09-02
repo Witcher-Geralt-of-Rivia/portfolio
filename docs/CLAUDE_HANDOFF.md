@@ -106,7 +106,7 @@ Details in `docs/PROJECT_STATE.md`. History in `docs/CHANGELOG.md`.
 The approved logo at `logo.png` is canonical source artwork, never modified or
 served; sizes are derived by `qa/brand-derive.mjs` (D-054).
 
-**Intelligent Systems Lab** — premium, bright, soft, technical, calm, futuristic,
+**Intelligent Systems Lab**: premium, bright, soft, technical, calm, futuristic,
 precise, advanced engineering.
 
 Colours are soft, bright, milky, multi-hue and continuously transitioning. The
@@ -120,12 +120,12 @@ generic glassmorphism, gaming UI, crypto UI. Full anti-pattern list in
 
 Two routes:
 
-- **`/`** — hero (`#hero`), then the four built capability sections
+- **`/`**: hero (`#hero`), then the four built capability sections
   `#systems` (05), `#products` (06), `#ai-learning` (07) and `#lab` (08),
   then `#work`, the last anchor section.
-  `#work` is a **QA placeholder only** — an eyebrow label and the words
+  `#work` is a **QA placeholder only**: an eyebrow label and the words
   "Navigation specimen section". Stage 09 replaces it.
-- **`/specimen`** — Stage 02 typography specimen, unlinked, kept verifiable.
+- **`/specimen`**: Stage 02 typography specimen, unlinked, kept verifiable.
 `/demos/operations` and `/demos/operations/leads` are the Operations demo, deployed for review; `noindex, nofollow`, linked from nowhere. `/demos` is a 404.
 
 Source is public at `github.com/Witcher-Geralt-of-Rivia/portfolio`, branch `main`. Push every verified commit and tag after its stage's QA and verify the remote SHA; run `node qa/public-repo-safety.mjs --history` first. Never let a secret enter history, and do not rewrite it.
@@ -226,14 +226,14 @@ Raw design values live in `src/styles/tokens.css`. Docs must not duplicate it.
 Stages 01-08 complete and frozen; the site is live over HTTPS. Stage 09 is **in
 progress**: 09A froze the shared runtime, 09B froze Demo 01's contract, 09C1
 built its domain, 09C2 built the shell and Overview, 09C2.1 hardened them, and
-09C3.1 built Leads — the first module that writes. Nine module screens remain;
+09C3.1 built Leads, the first module that writes. Nine module screens remain;
 `#work` still renders its placeholder.
 
 ## Next Allowed Task
 
 **Stage 09C3.2 - Operations CRM: Customers.** Leads established the patterns it
 reuses. See `docs/NEXT_STAGE.md`. **BLOCKED UNTIL EXTERNAL LIVE REVIEW OF
-LEADS** — the deployed screen has to be looked at first: 09C3.1's own review
+LEADS**. The deployed screen has to be looked at first: 09C3.1's own review
 found two defects the suite had no opinion about (D-062, D-067).
 
 Do not begin it automatically.

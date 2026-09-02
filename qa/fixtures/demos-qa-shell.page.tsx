@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * QA FIXTURE — not part of the product, and not a route while it lives here.
+ * QA FIXTURE: not part of the product, and not a route while it lives here.
  *
  * Renders the shared demo chrome around a live runtime so `qa/stage09a-shell.mjs`
  * can measure it: height at every viewport, behaviour at narrow widths,

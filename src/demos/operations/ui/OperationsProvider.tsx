@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Operations demo — the product's own context.
+ * Operations demo: the product's own context.
  *
  * A thin layer over the shared `DemoRuntimeProvider`: it resolves the current
  * simulated role into an `OperationsContext` and exposes the actor behind it.

@@ -10,8 +10,8 @@ import { ARCHITECTURE_MODES, DEFAULT_MODE_ID } from "./architecture-data";
 /**
  * The System Architecture Lab.
  *
- * The only client component in this section. It holds two pieces of state —
- * the selected mode and the node currently hovered or focused — and nothing
+ * The only client component in this section. It holds two pieces of state
+ * (the selected mode and the node currently hovered or focused) and nothing
  * else. Every visual behaviour below it is CSS: packet motion, connection
  * highlighting, the mode transition and the trace stagger.
  *

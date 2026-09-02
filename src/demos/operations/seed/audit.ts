@@ -1,5 +1,5 @@
 /**
- * Operations demo — seeded audit history (D-052).
+ * Operations demo: seeded audit history (D-052).
  *
  * Sixty-three entries, one per state transition the canonical dataset implies.
  * Creation is not audited; transitions are, which is the same rule the live
@@ -38,7 +38,7 @@ import { ACTOR_IDS } from "./entities";
 /**
  * Audit timestamps run backwards from the base instant, one hour apart, in the
  * order the entries are composed. They are all at or before the demo's current
- * logical time — an audit trail cannot record the future.
+ * logical time: an audit trail cannot record the future.
  */
 function historyClock(total: number, baseClock: string) {
   const base = Date.parse(baseClock);

@@ -1,9 +1,9 @@
 /**
- * Operations demo — lead services.
+ * Operations demo: lead services.
  *
  * Conversion is the one that matters. It creates a customer, moves the lead to
  * Won and links the two in both directions, and it does all of that in a single
- * runtime commit — so there is no window in which a customer exists but the
+ * runtime commit, so there is no window in which a customer exists but the
  * lead still says Qualified.
  */
 
@@ -81,7 +81,7 @@ export type UpdateLeadInput = {
    * Leads screen offers it.
    *
    * It does **not** re-run the website assignment rule. That rule is triggered
-   * by `lead.created.website`, and an edit emits no domain event at all — so
+   * by `lead.created.website`, and an edit emits no domain event at all, so
    * re-describing an existing lead cannot make the system treat it as newly
    * arrived. The guarantee is structural rather than a condition someone has
    * to remember to write.
@@ -170,7 +170,7 @@ export async function changeLeadStage(
   if (lead.data.stage === stage) {
     throw conflict(`This lead is already at ${stage}.`, leadId);
   }
-  /* Won is reached by converting, not by picking it from a menu — otherwise a
+  /* Won is reached by converting, not by picking it from a menu. Otherwise a
      lead could be Won with no customer behind it. */
   if (stage === "Won") {
     throw conflict("A lead reaches Won by being converted to a customer.", leadId);
@@ -180,7 +180,7 @@ export async function changeLeadStage(
   }
   /* The mirror of the rule above. Won is only ever reached by conversion, so
      moving a converted lead back down the pipeline would leave a customer
-     whose originating lead claims it never closed — the same contradiction,
+     whose originating lead claims it never closed: the same contradiction,
      approached from the other side. */
   if (lead.data.convertedCustomerId) {
     throw conflict("A converted lead cannot change stage.", leadId);

@@ -1,8 +1,8 @@
 /**
  * Architecture data for the Intelligent Systems lab.
  *
- * Four modes, each a complete system topology. Everything the lab renders —
- * nodes, routing, execution trace, accessible summary — is declared here, so
+ * Four modes, each a complete system topology. Everything the lab renders
+ * (nodes, routing, execution trace, accessible summary) is declared here, so
  * the components stay presentational and no mode is a hand-built JSX tree.
  *
  * Positions are percentages of the canvas box, fixed and deterministic. No

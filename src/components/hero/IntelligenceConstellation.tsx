@@ -9,7 +9,7 @@ import {
 } from "./constellation-geometry";
 
 /**
- * The Intelligence Constellation — the hero's signature artwork.
+ * The Intelligence Constellation: the hero's signature artwork.
  *
  * Two co-registered layers:
  *   - an SVG at viewBox 0 0 640 640 carrying the backplate, local grid,
@@ -22,7 +22,7 @@ import {
  * breakpoint, which is what the responsive spec asks for.
  *
  * Connections stop at chip edges, so a line is always either outside a chip
- * or hidden behind it — never crossing a label.
+ * or hidden behind it, never crossing a label.
  *
  * Server-rendered. Hover is CSS, motion is CSS. No client JavaScript.
  */
@@ -191,7 +191,7 @@ function ConstellationOverlay() {
         <span className="ccore__halo ccore__halo--inner" />
         <span className="ccore__halo ccore__halo--outer" />
 
-        {/* A simplified four-node topology — deliberately not the navbar
+        {/* A simplified four-node topology, deliberately not the navbar
             mark scaled up. */}
         <svg className="ccore__glyph" viewBox="0 0 30 30" aria-hidden="true">
           <g

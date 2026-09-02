@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Operations demo — the Overview screen.
+ * Operations demo: the Overview screen.
  *
  * Reads every collection once, hands them to the canonical selectors, and
  * renders whatever `overview-policy.ts` says this role may see. The component
@@ -127,7 +127,7 @@ export default function OperationsOverview() {
   const queue = data.overview.actionQueue.filter((item) => {
     if (!allowed.has(item.kind)) return false;
     /* A notification names the area it came from, so it is filtered by that
-       area too — otherwise the queue leaks through the door the panel filter
+       area too. Otherwise the queue leaks through the door the panel filter
        just closed. */
     if (item.kind === "notification") {
       const category = notificationById.get(item.id)?.category;

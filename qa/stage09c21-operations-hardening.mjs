@@ -1,5 +1,5 @@
 /**
- * Stage 09C2.1 — Operations shell hardening QA.
+ * Stage 09C2.1 - Operations shell hardening QA.
  *
  * Stage 09C2 asked whether the shell rendered. This asks whether what it
  * renders is honest: that every number on the Overview means something a
@@ -32,6 +32,24 @@ const check = (label, ok, detail = "") => {
   console.log(`  ${ok ? "PASS" : "FAIL"}  ${label.padEnd(56)}${detail ? "  " + detail : ""}`);
 };
 const section = (t) => console.log(`\n########## ${t} ##########`);
+
+/**
+ * Choose a demo role.
+ *
+ * The role control is the product's custom listbox now, not a native select,
+ * so it is opened and an option is clicked rather than driven with
+ * `selectOption`.
+ */
+async function chooseRole(page, role) {
+  await page.click('.ops-role__select [role="combobox"]');
+  await page.waitForSelector('[role="listbox"]', { polling: 100, timeout: 15000 });
+  await page.click(`[role="listbox"] [role="option"][data-value="${role}"]`);
+  await page.waitForFunction(() => !document.querySelector('[role="listbox"]'), null, {
+    polling: 100,
+    timeout: 15000,
+  });
+}
+
 
 /* Every waitForFunction passes an explicit polling interval. Playwright polls
    on requestAnimationFrame by default, and this application schedules no
@@ -114,7 +132,7 @@ await page.goto(ROUTE, { waitUntil: "networkidle" });
 await page.waitForSelector(".ops-kpi__value");
 
 const setRole = async (role) => {
-  await page.selectOption(".ops-role__select", role);
+  await chooseRole(page, role);
   await page.waitForFunction(
     (r) => document.querySelector(".ops-actor__role")?.textContent === r,
     role,
@@ -200,8 +218,8 @@ section("PRODUCT IDENTITY IS STATED ONCE");
 section("KPI CARDS CARRY MEANING, NOT DECORATION");
 {
   const m = await page.evaluate(() => ({
-    /* A progress bar needs a denominator. These KPIs have none — "38 open
-       leads" is not 38% of anything — so a bar drawn under them was a
+    /* A progress bar needs a denominator. These KPIs have none ("38 open
+       leads" is not 38% of anything), so a bar drawn under them was a
        decoration that read as a measurement. */
     bars: document.querySelectorAll(".ops-kpi progress, .ops-kpi__bar, .ops-kpi__track, .ops-kpi__fill").length,
     cards: [...document.querySelectorAll(".ops-kpi")].map((card) => ({
@@ -303,7 +321,7 @@ const ALL_PANELS = [
 const ALL_KPIS = EXPECTED.Admin.kpis.concat(["PAYMENTS REQUIRING ATTENTION"]);
 
 for (const [role, want] of Object.entries(EXPECTED)) {
-  section(`ROLE — ${role.toUpperCase()}`);
+  section(`ROLE - ${role.toUpperCase()}`);
   await setRole(role);
 
   const seen = await page.evaluate(() => ({
@@ -395,7 +413,7 @@ await setRole("Admin");
    ===================================================================== */
 
 for (const width of [390, 360]) {
-  section(`MOBILE NOTIFICATIONS — ${width}px`);
+  section(`MOBILE NOTIFICATIONS - ${width}px`);
   const mctx = await browser.newContext({ viewport: { width, height: 844 } });
   const mp = await mctx.newPage();
   await mp.goto(ROUTE, { waitUntil: "networkidle" });
@@ -512,7 +530,7 @@ section("RESET");
   await page.waitForTimeout(200);
   await page.waitForFunction(() => !document.querySelector("[aria-busy='true']"), null, POLL);
   const m = await page.evaluate(() => ({
-    role: document.querySelector(".ops-role__select")?.value,
+    role: document.querySelector(".ops-role__select .demo-select__value")?.textContent,
     kpis: document.querySelectorAll(".ops-kpi").length,
     badge: Number(document.querySelector(".ops-notify__badge")?.textContent ?? "0"),
     values: [...document.querySelectorAll(".ops-kpi__value")].map((e) => e.textContent.trim()),

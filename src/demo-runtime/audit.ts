@@ -1,5 +1,5 @@
 /**
- * Demo runtime — audit history.
+ * Demo runtime: audit history.
  *
  * A record of meaningful business mutations: what changed, who changed it,
  * when, and what it was before.
@@ -8,7 +8,7 @@
  * trail full of "tab clicked" and "sidebar opened", and a visitor scrolling
  * it would learn nothing about the system. Audit entries are written
  * deliberately by domain workflows, at the points where a business fact
- * actually changed — a lead converted, a job reassigned, an assessment
+ * actually changed: a lead converted, a job reassigned, an assessment
  * submitted.
  *
  * Every entry is synthetic, and its timestamp comes from the demo clock.

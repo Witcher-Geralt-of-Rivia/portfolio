@@ -1,11 +1,11 @@
 <!-- PROJECT_STAGE: 8 -->
 <!-- DOCUMENT_STATUS: CURRENT -->
 
-# Demo 01 — Operations Product Specification
+# Demo 01 - Operations Product Specification
 
 Canonical and **frozen** for Demo 01. Stage 09B froze this contract; Stage 09C
 builds against it. Nothing here may be changed during implementation without an
-explicit user instruction — if the build discovers a genuine blocker, stop and
+explicit user instruction. If the build discovers a genuine blocker, stop and
 report it rather than adjusting the contract to fit the code.
 
 Platform-level architecture lives in `docs/DEMO_PLATFORM.md`. This document
@@ -48,7 +48,7 @@ This demo is never described as client work.
 
 ## 2. Modules
 
-Exactly eleven. There is no Settings module — role, reset and the return to the
+Exactly eleven. There is no Settings module: role, reset and the return to the
 portfolio all belong to the shared demo chrome.
 
 ```
@@ -109,7 +109,7 @@ Finance Analyst
 Role switching is an interaction simulation and not a security boundary.
 Nothing is authenticated or authorised, and every record stays readable in
 browser storage whatever role is selected. It is stated once, in the demo's own
-disclosure surface — not repeated on every screen — and never called RBAC or
+disclosure surface, not repeated on every screen, and never called RBAC or
 access control.
 
 The role control itself lives in the shared chrome's `roleControl` slot, which
@@ -215,7 +215,7 @@ priority   Low | Normal | High
 ```
 
 `archived` is a separate flag, not a stage. Priority uses no emergency or red
-visual language — High is an attention weight, not an alarm.
+visual language. High is an attention weight, not an alarm.
 
 ### Customer
 
@@ -289,7 +289,7 @@ category   Rental | Deposit | Adjustment
 
 `Overdue` is never stored. It is an effective value derived from `dueAt`
 against the logical clock, so the record cannot drift out of agreement with the
-demo's own time — see §6. Amounts are integer cents; see Money below.
+demo's own time; see §6. Amounts are integer cents; see Money below.
 
 No card numbers, no bank information, no provider identifiers, no real
 processing.
@@ -388,7 +388,7 @@ Audit is cross-cutting and belongs to the runtime.
 ## 6. Derived state
 
 Three values are computed from relationships rather than trusted as stored
-flags. This is what stops the demo contradicting itself — the failure mode
+flags. This is what stops the demo contradicting itself: the failure mode
 where a vehicle reads Available while an active contract points at it.
 
 ### Vehicle status
@@ -428,8 +428,8 @@ time-derived state, not by a polling loop.
 
 ### Money
 
-All monetary amounts — `dailyRate`, `totalAmount`, `paidAmount` and a payment's
-`amount` — are **integer cents**. Nothing in the domain performs floating-point
+All monetary amounts (`dailyRate`, `totalAmount`, `paidAmount` and a payment's
+`amount`) are **integer cents**. Nothing in the domain performs floating-point
 arithmetic on money, so a balance cannot accumulate rounding drift across a
 sequence of payments.
 
@@ -471,7 +471,7 @@ automation.rule_enabled     automation.rule_disabled
 automation.run_completed
 ```
 
-UI-only occurrences — a search term changing, a drawer opening, a chart hover —
+UI-only occurrences (a search term changing, a drawer opening, a chart hover)
 are never emitted as domain events.
 
 ### Event to audit
@@ -499,8 +499,8 @@ Rule 03 sends nothing anywhere. It appends a synthetic in-app message to a
 local conversation; there is no recipient and no address.
 
 Rule 05 raises a notification only. Vehicle status after a completed work order
-is recomputed by the domain rules in §6, never by an automation action —
-automation must not be a second source of truth for domain state.
+is recomputed by the domain rules in §6, never by an automation action.
+Automation must not be a second source of truth for domain state.
 
 Rule 02's offset is exactly two days from the instant the lead reached
 Qualified, measured on the logical clock. Stage 09B left it as "a deterministic
@@ -597,7 +597,7 @@ Action queue
 
 The action queue is derived from overdue payments, open high-priority
 maintenance, high-priority leads whose follow-up is due, and unread
-notifications — in that order, most urgent first. Within a category the oldest
+notifications, in that order, most urgent first. Within a category the oldest
 relevant timestamp comes first, then the entity id, so the list never
 reshuffles between renders.
 
@@ -619,7 +619,7 @@ open detail
 Columns: Lead, Source, Interest, Stage, Owner, Priority, Last activity, Next
 follow-up. No contact details, because there are none to display.
 
-Pagination defaults to 10 rows, with 10 and 20 as the only options — a dataset
+Pagination defaults to 10 rows, with 10 and 20 as the only options: a dataset
 of 48 has no use for a 100-row page.
 
 ### Customers
@@ -727,8 +727,8 @@ Exactly four groups:
 CRM Funnel        Fleet Utilization        Contract Status        Payment Status
 ```
 
-Filter: 30 days, 90 days, All demo data — applied where a report is genuinely
-time-based. A snapshot report states that it reflects current records.
+Filter: 30 days, 90 days, All demo data. The filter applies where a report is
+genuinely time-based. A snapshot report states that it reflects current records.
 
 Charts are CSS and SVG. Values derive from records. There is no export in v1.
 
@@ -873,8 +873,8 @@ indexed-db.resetDemo   writes them in the same transaction as the purge and rese
 memory.resetDemo       writes them into the same staged commit
 ```
 
-This preserves every existing guarantee — one transaction, demo isolation,
-identical semantics between adapters — and is the smallest change that makes
+This preserves every existing guarantee (one transaction, demo isolation,
+identical semantics between adapters) and is the smallest change that makes
 "reset restores the demo exactly" true of audit as well as records. It is
 recorded here rather than made silently, because Stage 09A is frozen and
 tagged.
@@ -887,7 +887,7 @@ includes auditability.
 
 Six acceptance paths, frozen now and asserted by Stage 09C's QA.
 
-### W1 — Lead to customer
+### W1 - Lead to customer
 
 ```
 create lead
@@ -903,7 +903,7 @@ Conversion writes audit, emits `lead.converted`, and increments revision once
 the transaction commits. Converting an already-converted lead raises
 `CONFLICT`.
 
-### W2 — Reservation to rental
+### W2 - Reservation to rental
 
 ```
 select customer
@@ -919,7 +919,7 @@ select customer
 Conversion creates a Pending contract, sets the reservation to Converted and
 records `convertedContractId`.
 
-### W3 — Payment
+### W3 - Payment
 
 ```
 open contract
@@ -930,7 +930,7 @@ open contract
 → audit entry exists
 ```
 
-### W4 — Maintenance
+### W4 - Maintenance
 
 ```
 open vehicle
@@ -946,7 +946,7 @@ Starting a work order on a vehicle with an Active contract raises `CONFLICT`
 with a clear explanation. Completing a contract returns the vehicle to
 Available unless an active work order or a confirmed reservation says otherwise.
 
-### W5 — Inbox and assist
+### W5 - Inbox and assist
 
 ```
 open conversation
@@ -957,7 +957,7 @@ open conversation
 → recommended next action reflects the new state
 ```
 
-### W6 — Automation control
+### W6 - Automation control
 
 ```
 open Automations
@@ -1009,7 +1009,7 @@ role cannot access is never listed.
 
 ### Tables and forms on small screens
 
-Desktop tables become stacked record rows or compact cards — never a desktop
+Desktop tables become stacked record rows or compact cards, never a desktop
 table scaled down until it is unreadable. Search, filters, sort, pagination and
 row actions all survive the transformation, and no important field is dropped
 merely because the layout changed.
@@ -1032,7 +1032,7 @@ entities and requires separate justification.
 
 Mutations are not optimistic in v1. They go through the shared deterministic
 async boundary, show a short processing state, and update after the domain
-commit — which is easier to reason about and to test.
+commit, which is easier to reason about and to test.
 
 ### Error mapping
 
@@ -1062,7 +1062,7 @@ read does not flash a skeleton.
 
 ### First launch
 
-Overview, as Admin, with the seeded dataset. No onboarding wizard — the visitor
+Overview, as Admin, with the seeded dataset. No onboarding wizard: the visitor
 meets the product immediately.
 
 ## 15. Visual direction
@@ -1081,7 +1081,7 @@ lavender secondary
 ```
 
 Bright throughout. The homepage aurora is not reused as the background of every
-application screen — the demo lives in the portfolio palette without
+application screen: the demo lives in the portfolio palette without
 wearing the portfolio's atmosphere.
 
 Originality is required. The Fuse React reference is an **interaction
@@ -1206,7 +1206,7 @@ band is the Operations domain, and it is the only layer that knows.
 ## 21. Next stage
 
 ```
-Stage 09C — Build Operations / CRM / ERP SaaS Demo
+Stage 09C - Build Operations / CRM / ERP SaaS Demo
 ```
 
 Implementation against this frozen contract, in substages. 09C1 built the

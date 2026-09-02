@@ -1,5 +1,5 @@
 /* =====================================================================
-   MILKY INTELLIGENCE — DESIGN TOKENS
+   MILKY INTELLIGENCE - DESIGN TOKENS
    Single source of truth for every principal visual value.
    Nothing in this system should hard-code a raw value that lives here.
    ===================================================================== */
@@ -198,7 +198,7 @@
   --space-4xl: 128px;
 
   /* -------------------------------------------------------------
-     14. TYPOGRAPHY — FAMILIES
+     14. TYPOGRAPHY - FAMILIES
      Geist resolves first. The fallbacks exist only for font failure,
      never as a design intent. Both families are bundled locally.
      ------------------------------------------------------------- */
@@ -312,7 +312,7 @@
   /* -------------------------------------------------------------
      21. NAVIGATION
      Geometry and stacking only. The navigation's surface is the
-     existing Frost recipe, so no new glass tokens are introduced —
+     existing Frost recipe, so no new glass tokens are introduced,
      just the alpha the floating bar needs to hold text steady over
      the moving aurora.
      ------------------------------------------------------------- */

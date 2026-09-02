@@ -10,7 +10,7 @@
     A deployment always builds into the INACTIVE slot, smoke-tests it on a
     temporary loopback port, and only then points PM2 at it. The running
     production process reads a directory the build never touches, so a build
-    can no longer corrupt the live site — the failure that took the portfolio
+    can no longer corrupt the live site. That failure took the portfolio
     down twice during Stage 05.
 
     If the post-switch health check fails, the previous slot is restored

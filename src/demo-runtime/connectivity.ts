@@ -1,5 +1,5 @@
 /**
- * Demo runtime — simulated connectivity.
+ * Demo runtime: simulated connectivity.
  *
  * A visitor-controlled online/offline flag, so a demo can show what an
  * application does when the network disappears and what it does when the
@@ -10,9 +10,9 @@
  * impossible to demonstrate on purpose. This is a switch the visitor throws.
  *
  * The state is session-scoped and not persisted: a reload returns to online,
- * which is the honest default — nothing about the browser is actually
- * offline, and a demo that remembered a simulated outage across reloads would
- * look broken rather than instructive.
+ * which is the honest default. Nothing about the browser is actually offline,
+ * and a demo that remembered a simulated outage across reloads would look
+ * broken rather than instructive.
  */
 
 import type { ConnectivityState } from "./types";

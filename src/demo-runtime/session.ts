@@ -1,5 +1,5 @@
 /**
- * Demo runtime — simulated role session.
+ * Demo runtime: simulated role session.
  *
  * Which role the visitor is currently viewing the product as.
  *
@@ -7,7 +7,7 @@
  * authentication, no authorisation and no security boundary: every record
  * stays in browser storage and stays readable whatever role is selected.
  * Switching role changes what the interface offers, which is the thing worth
- * demonstrating — what an operator sees versus what an administrator sees.
+ * demonstrating: what an operator sees versus what an administrator sees.
  * It must never be described as RBAC or as access control.
  *
  * The role is lightweight view state, so it lives in `localStorage` rather
@@ -23,7 +23,7 @@ import { DemoError } from "./types";
 /**
  * Storage access that cannot throw.
  *
- * `localStorage` is not merely absent during server rendering — reading it
+ * `localStorage` is not merely absent during server rendering: reading it
  * throws outright in a browser configured to block site data, and that throw
  * would take down a demo over a preference the visitor is entitled to have.
  */
@@ -88,8 +88,8 @@ export function createSession(
   const key = roleStorageKey(demoId);
   const listeners = new Set<(state: SessionState) => void>();
 
-  /* A stored role that is no longer offered — because the demo's role list
-     changed between releases — falls back to the initial role rather than
+  /* A stored role that is no longer offered (because the demo's role list
+     changed between releases) falls back to the initial role rather than
      leaving the session pointing at something that does not exist. */
   const stored = readStored(key);
   let activeRole = stored && roles.includes(stored) ? stored : initialRole;

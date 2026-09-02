@@ -339,7 +339,7 @@ body:has(.demo-shell) .site-nav {
    So it stacks instead of shrinking: below 1120px the pill puts its two
    halves on two lines, which more than halves its width and keeps the whole
    bar on a single row down to tablet sizes. Below 640px the bar wraps, and
-   the row that survives intact is the one carrying Back and Reset — a visitor
+   the row that survives intact is the one carrying Back and Reset: a visitor
    must always be able to leave and to restore the data.
    --------------------------------------------------------------------- */
 
@@ -365,7 +365,7 @@ body:has(.demo-shell) .site-nav {
 
 /* Wrapping starts at 860px rather than 640px. Stage 09C2 added the portfolio
    mark beside the back link, which costs the row 26px; at 768px that left the
-   title 57px — four characters and an ellipsis. Giving the title its own row
+   title 57px: four characters and an ellipsis. Giving the title its own row
    is better than shrinking it past legibility. */
 @media (max-width: 860px) {
   /* "Reset demo data" is 135px of a 350px bar. The short form keeps Back and
@@ -383,8 +383,8 @@ body:has(.demo-shell) .site-nav {
      
      A two-column grid puts the back link and the controls in the same row
      whether or not they fit, and at 360px they do not: together they are
-     wider than the viewport, the grid grows to hold them, and the band —
-     which spans both columns — stretches to that overflowed width. Wrapping
+     wider than the viewport, the grid grows to hold them, and the band,
+     which spans both columns, stretches to that overflowed width. Wrapping
      flex lets the row break on its own terms.
      
      The band still gets a row of its own, because `flex-basis: 100%` forces
@@ -441,4 +441,182 @@ body:has(.demo-shell) .site-nav {
   .demo-dialog__button {
     transition: none;
   }
+}
+
+/* =====================================================================
+   THE DEMO PLATFORM'S SELECT (Stage 09C3.1.2)
+   ===================================================================== */
+
+/**
+ * A native select can be styled shut but not open: the popup belongs to the
+ * operating system. This is the project's own menu, so the open state looks
+ * like the rest of the product rather than like Windows.
+ *
+ * Stacking, stated once so it does not become a race:
+ *
+ *   top layer   modal <dialog> overlays, above every z-index by definition
+ *   70          these menus
+ *   60          notification panel, mobile navigation drawer
+ *   40          demo chrome
+ *
+ * A menu opened from inside a dialog is portalled into that dialog, so it
+ * shares the dialog's layer instead of being painted under it.
+ */
+
+.demo-select {
+  position: relative;
+  display: inline-flex;
+}
+
+.demo-select__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--line-subtle, rgba(70, 80, 110, 0.14));
+  border-radius: 11px;
+  background: #fff;
+  color: var(--text-primary, #171a24);
+  font-family: var(--font-sans);
+  font-size: 13.5px;
+  line-height: 1.2;
+  cursor: pointer;
+  transition: border-color 120ms ease, background-color 120ms ease;
+}
+
+.demo-select[data-compact="true"] .demo-select__trigger {
+  height: 38px;
+  min-width: 96px;
+  padding: 0 14px;
+}
+
+.demo-select__trigger:hover {
+  border-color: rgba(70, 80, 110, 0.26);
+  background: rgba(250, 251, 254, 1);
+}
+
+.demo-select__trigger:focus-visible {
+  outline: 2px solid var(--ops-sky, #3f7fd4);
+  outline-offset: 1px;
+}
+
+/* Open is a state worth seeing: the trigger holds the emphasis while the menu
+   below it is being read. */
+.demo-select[data-open="true"] .demo-select__trigger {
+  border-color: rgba(70, 80, 110, 0.3);
+  background: rgba(250, 251, 254, 1);
+}
+
+.demo-select__trigger:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.demo-select__label {
+  flex: none;
+  padding-right: 7px;
+  border-right: 1px solid var(--line-hairline, rgba(70, 80, 110, 0.08));
+  color: var(--text-annotation, #6a7085);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.demo-select__value {
+  white-space: nowrap;
+}
+
+.demo-select__chevron {
+  flex: none;
+  margin-left: auto;
+  color: var(--text-annotation, #6a7085);
+}
+
+/* --- the menu ---------------------------------------------------------- */
+
+.demo-select__menu {
+  position: fixed;
+  z-index: 70;
+  margin: 0;
+  padding: 6px;
+  border: 1px solid var(--line-subtle, rgba(70, 80, 110, 0.14));
+  border-radius: 12px;
+  background: #fff;
+  /* Restrained: enough to lift the menu off the table beneath it, not a drop
+     shadow that announces itself. */
+  box-shadow:
+    0 1px 2px rgba(23, 26, 36, 0.04),
+    0 12px 28px rgba(23, 26, 36, 0.12);
+  list-style: none;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.demo-select__option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  color: var(--text-primary, #171a24);
+  font-family: var(--font-sans);
+  font-size: 13.5px;
+  line-height: 1.3;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.demo-select__option + .demo-select__option {
+  margin-top: 2px;
+}
+
+.demo-select__option-label {
+  flex: 1 1 auto;
+}
+
+/* The keyboard-active option. Distinct from selected, because they are
+   different facts: one is where the arrow keys are, the other is what the
+   control currently holds. */
+.demo-select__option[data-active="true"] {
+  background: rgba(70, 80, 110, 0.07);
+}
+
+/**
+ * Selected.
+ *
+ * The product's own sky, softened, rather than the operating system's
+ * saturated blue rectangle. Text stays near-black on it, so the state is
+ * carried by the surface and the tick rather than by inverting the text.
+ */
+.demo-select__option[aria-selected="true"] {
+  background: var(--ops-sky-soft, rgba(115, 168, 235, 0.16));
+  color: var(--text-primary, #171a24);
+}
+
+.demo-select__option[aria-selected="true"][data-active="true"] {
+  background: rgba(115, 168, 235, 0.28);
+}
+
+.demo-select__tick {
+  display: inline-flex;
+  flex: none;
+  width: 10px;
+  color: var(--ops-sky-strong, #3a72c0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .demo-select__trigger {
+    transition: none;
+  }
+}
+
+/* The role control in the shared chrome is smaller than a product filter, and
+   sits on the frost bar rather than on a white panel. */
+.ops-role .demo-select__trigger {
+  height: 32px;
+  padding: 0 10px;
+  border-radius: 9px;
+  font-size: 12px;
 }

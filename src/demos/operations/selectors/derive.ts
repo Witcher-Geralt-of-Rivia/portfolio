@@ -1,5 +1,5 @@
 /**
- * Operations demo — derived state.
+ * Operations demo: derived state.
  *
  * The three values the specification refuses to let a form write directly:
  * a vehicle's status, a payment's overdue state, and a contract's total.
@@ -8,7 +8,7 @@
  * at it.
  *
  * Everything here is pure. No clock is read, no id is allocated, nothing is
- * persisted — callers pass the instant they are reasoning about, which is what
+ * persisted: callers pass the instant they are reasoning about, which is what
  * makes these functions testable and makes the results reproducible.
  */
 
@@ -36,7 +36,7 @@ import type {
 /**
  * Do two half-open intervals overlap?
  *
- * Half-open — `[start, end)` — so a booking ending at 10:00 and one starting
+ * Half-open: `[start, end)`, so a booking ending at 10:00 and one starting
  * at 10:00 do not collide. Back-to-back rentals are the normal case in this
  * domain, and treating them as a conflict would make the seed impossible to
  * build.
@@ -123,7 +123,7 @@ export function deriveVehicleLinks(ctx: VehicleContext): {
  * A payment's effective status (D-053).
  *
  * `Overdue` is never stored. Deriving it here means a payment cannot disagree
- * with the demo's own clock — the failure a persisted flag guarantees the
+ * with the demo's own clock: the failure a persisted flag guarantees the
  * moment logical time moves past a due date.
  */
 export function derivePaymentStatus(payment: Payment, now: string): PaymentEffectiveStatus {
@@ -172,7 +172,7 @@ export function contractBalance(contract: Contract): ContractBalance {
 export function dailyRateForVehicle(vehicleClass: VehicleClass, index: number): number {
   const band = DAILY_RATE_CENTS[vehicleClass];
   const span = band.max - band.min;
-  /* Steps of 100 cents keep the rates readable — 18.00, 19.00 — rather than
+  /* Steps of 100 cents keep the rates readable (18.00, 19.00) rather than
      landing on values no rental company would print. */
   const steps = Math.floor(span / 100) + 1;
   return band.min + (index % steps) * 100;

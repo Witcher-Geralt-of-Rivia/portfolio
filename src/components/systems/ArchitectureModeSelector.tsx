@@ -9,7 +9,7 @@ import type { ArchitectureMode } from "./architecture-data";
  *
  * Full tab semantics are implemented rather than approximated: roving
  * tabindex, arrow-key movement, Home and End. If that behaviour were not
- * present these would be plain buttons instead — an incomplete tablist is
+ * present these would be plain buttons instead: an incomplete tablist is
  * worse than none.
  */
 export default function ArchitectureModeSelector({

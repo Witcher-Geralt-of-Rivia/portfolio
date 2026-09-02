@@ -1,5 +1,5 @@
 /**
- * Demo runtime — deterministic logical clock.
+ * Demo runtime: deterministic logical clock.
  *
  * Every timestamp a demo displays comes from here. None comes from
  * `Date.now()`.
@@ -71,8 +71,8 @@ export function resetClock(clock: DemoClock): void {
 /**
  * A time offset from the clock's current position, without moving it.
  *
- * Seed data uses this to lay out a plausible history — "this record was
- * created two days before the demo's base instant" — while staying entirely
+ * Seed data uses this to lay out a plausible history ("this record was
+ * created two days before the demo's base instant") while staying entirely
  * deterministic.
  */
 export function offsetFrom(instant: string, ms: number): string {

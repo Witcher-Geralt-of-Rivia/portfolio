@@ -1,5 +1,5 @@
 /**
- * Operations demo — domain types.
+ * Operations demo: domain types.
  *
  * The thirteen entities frozen in `docs/DEMO_OPERATIONS_SPEC.md`. Every
  * canonical value is a literal union, so a service cannot be handed an
@@ -9,7 +9,7 @@
  * runtime knows records and collections; it must never learn what a lead is.
  *
  * No field carries contact information. There is no email, telephone or postal
- * address on any entity here, and none may be added — the portfolio forbids a
+ * address on any entity here, and none may be added: the portfolio forbids a
  * contact route on every surface, including example data.
  */
 
@@ -137,8 +137,8 @@ export type NotificationCategory = (typeof NOTIFICATION_CATEGORIES)[number];
 /* =====================================================================
    2. ENTITIES
 
-   Each is the `data` payload of a runtime DemoRecord. Runtime bookkeeping —
-   id, createdAt, updatedAt, version — lives on the record wrapper, except
+   Each is the `data` payload of a runtime DemoRecord. Runtime bookkeeping
+   (id, createdAt, updatedAt, version) lives on the record wrapper, except
    where the spec puts a domain-meaningful timestamp on the entity itself.
    ===================================================================== */
 

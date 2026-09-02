@@ -1,13 +1,13 @@
 /**
- * Operations demo — the shell's icon set.
+ * Operations demo: the shell's icon set.
  *
  * Authored here rather than installed. The project has no icon package and
  * every mark in it is drawn locally; a dependency for eleven glyphs would be
  * the largest thing in the repository by file count.
  *
  * One visual language throughout: a 24-unit viewBox drawn at 18px, 1.7 stroke,
- * round caps and joins, no fills. They are decorative — every navigation item
- * carries its own text label — so each is `aria-hidden`.
+ * round caps and joins, no fills. They are decorative (every navigation item
+ * carries its own text label), so each is `aria-hidden`.
  */
 
 type IconProps = { size?: number };
@@ -32,7 +32,7 @@ function Glyph({ size = 18, children }: IconProps & { children: React.ReactNode 
   );
 }
 
-/** Overview — four panels, the shape of a dashboard. */
+/** Overview: four panels, the shape of a dashboard. */
 export const IconOverview = (p: IconProps) => (
   <Glyph {...p}>
     <rect x="3" y="3" width="7.5" height="7.5" rx="1.5" />
@@ -42,7 +42,7 @@ export const IconOverview = (p: IconProps) => (
   </Glyph>
 );
 
-/** Leads — a rising track with a marked point. */
+/** Leads: a rising track with a marked point. */
 export const IconLeads = (p: IconProps) => (
   <Glyph {...p}>
     <path d="M3 17.5 8.5 12l3.5 3.5L21 6.5" />
@@ -50,7 +50,7 @@ export const IconLeads = (p: IconProps) => (
   </Glyph>
 );
 
-/** Customers — two figures. */
+/** Customers: two figures. */
 export const IconCustomers = (p: IconProps) => (
   <Glyph {...p}>
     <circle cx="9" cy="8" r="3.2" />
@@ -60,7 +60,7 @@ export const IconCustomers = (p: IconProps) => (
   </Glyph>
 );
 
-/** Reservations — a calendar with a held day. */
+/** Reservations: a calendar with a held day. */
 export const IconReservations = (p: IconProps) => (
   <Glyph {...p}>
     <rect x="3.2" y="4.8" width="17.6" height="16" rx="2.2" />
@@ -69,7 +69,7 @@ export const IconReservations = (p: IconProps) => (
   </Glyph>
 );
 
-/** Contracts — a document with signed lines. */
+/** Contracts: a document with signed lines. */
 export const IconContracts = (p: IconProps) => (
   <Glyph {...p}>
     <path d="M6 2.8h7.5L19 8.4v12.8H6z" />
@@ -78,7 +78,7 @@ export const IconContracts = (p: IconProps) => (
   </Glyph>
 );
 
-/** Fleet — a wheeled vehicle silhouette. */
+/** Fleet: a wheeled vehicle silhouette. */
 export const IconFleet = (p: IconProps) => (
   <Glyph {...p}>
     <circle cx="6" cy="16.5" r="3.2" />
@@ -88,14 +88,14 @@ export const IconFleet = (p: IconProps) => (
   </Glyph>
 );
 
-/** Maintenance — a spanner. */
+/** Maintenance: a spanner. */
 export const IconMaintenance = (p: IconProps) => (
   <Glyph {...p}>
     <path d="M15.4 4.2a4.8 4.8 0 0 0-5.9 6.2L4 15.9v3.4h3.4l5.5-5.5a4.8 4.8 0 0 0 6.2-5.9l-2.8 2.8-2.6-.7-.7-2.6z" />
   </Glyph>
 );
 
-/** Payments — a card with a stripe. */
+/** Payments: a card with a stripe. */
 export const IconPayments = (p: IconProps) => (
   <Glyph {...p}>
     <rect x="2.6" y="5.4" width="18.8" height="13.2" rx="2.2" />
@@ -104,7 +104,7 @@ export const IconPayments = (p: IconProps) => (
   </Glyph>
 );
 
-/** Automations — a rule branching into two outcomes. */
+/** Automations: a rule branching into two outcomes. */
 export const IconAutomations = (p: IconProps) => (
   <Glyph {...p}>
     <circle cx="5.4" cy="12" r="2.4" />
@@ -114,7 +114,7 @@ export const IconAutomations = (p: IconProps) => (
   </Glyph>
 );
 
-/** Inbox — a tray with an arriving item. */
+/** Inbox: a tray with an arriving item. */
 export const IconInbox = (p: IconProps) => (
   <Glyph {...p}>
     <path d="M3 13.4 5.8 5.2h12.4L21 13.4v5.4H3z" />
@@ -122,7 +122,7 @@ export const IconInbox = (p: IconProps) => (
   </Glyph>
 );
 
-/** Reports — proportional bars. */
+/** Reports: proportional bars. */
 export const IconReports = (p: IconProps) => (
   <Glyph {...p}>
     <path d="M3.4 20.4h17.2" />
@@ -130,7 +130,7 @@ export const IconReports = (p: IconProps) => (
   </Glyph>
 );
 
-/** Notifications — a bell. */
+/** Notifications: a bell. */
 export const IconBell = (p: IconProps) => (
   <Glyph {...p}>
     <path d="M6.4 10.2a5.6 5.6 0 0 1 11.2 0c0 4 1.4 5.6 1.4 5.6H5s1.4-1.6 1.4-5.6z" />
@@ -138,7 +138,7 @@ export const IconBell = (p: IconProps) => (
   </Glyph>
 );
 
-/** Menu — three rules, for the compact navigation trigger. */
+/** Menu: three rules, for the compact navigation trigger. */
 export const IconMenu = (p: IconProps) => (
   <Glyph {...p}>
     <path d="M4 7h16M4 12h16M4 17h16" />

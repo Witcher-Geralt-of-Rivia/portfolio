@@ -1,12 +1,12 @@
 /**
- * Operations demo — the canonical dataset.
+ * Operations demo: the canonical dataset.
  *
  * Built by deterministic functions rather than hand-authored objects: 301
  * literal records would be unreadable and impossible to keep consistent, and
  * the relationships between them are the part that actually matters.
  *
  * Everything here is derived from a fixed base instant and fixed index
- * arithmetic. There is no `Math.random`, no `Date.now()` and no generated id —
+ * arithmetic. There is no `Math.random`, no `Date.now()` and no generated id:
  * two resets produce byte-identical state, which is what makes reset mean
  * reset and screenshots reproducible.
  *
@@ -19,8 +19,8 @@
  * 6 Won leads               are the 6 customers carrying sourceLeadId
  * ```
  *
- * They are produced here by construction — the vehicle pools below are carved
- * up once and never overlap — rather than asserted afterwards and hoped for.
+ * They are produced here by construction (the vehicle pools below are carved
+ * up once and never overlap) rather than asserted afterwards and hoped for.
  */
 
 import { formatId } from "@/demo-runtime/ids";
@@ -385,19 +385,19 @@ function buildContracts(): SeedRecord<Contract>[] {
     });
   };
 
-  // Active — contract_0001..0007 on the rented pool, from reservations 1..7.
+  // Active: contract_0001..0007 on the rented pool, from reservations 1..7.
   for (let i = 0; i < 7; i++) {
     push(POOL.rented[i], i + 1, "Active", -(10 - i), 4 + i, id(P.reservation, i + 1));
   }
-  // Completed — contract_0008..0010.
+  // Completed: contract_0008..0010.
   for (let i = 0; i < 3; i++) {
     push(POOL.available[3 + i], 20 + i, "Completed", -(40 + i), -(33 + i));
   }
-  // Pending — contract_0011..0013.
+  // Pending: contract_0011..0013.
   for (let i = 0; i < 3; i++) {
     push(POOL.available[6 + i], 24 + i, "Pending", 12 + i, 17 + i);
   }
-  // Cancelled — contract_0014.
+  // Cancelled: contract_0014.
   push(POOL.available[9], 28, "Cancelled", -(8), -(3));
 
   return rows;
@@ -436,7 +436,7 @@ function buildPayments(contracts: SeedRecord<Contract>[]): SeedRecord<Payment>[]
 
   /* Paid where the category is a Deposit, or the contract has already
      finished. Of the Active contracts' rentals, the first nine are settled and
-     the rest are outstanding — three of them past their due date. */
+     the rest are outstanding, three of them past their due date. */
   let activeRentalSeen = 0;
   let overdueRemaining = 3;
 

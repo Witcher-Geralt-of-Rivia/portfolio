@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Operations demo — one lead, in full.
+ * Operations demo: one lead, in full.
  *
  * A drawer beside the table on a wide screen so the list stays visible and the
  * record keeps its context; a full surface on a phone, where a 440px drawer
@@ -13,7 +13,7 @@
  * invented to fill space.
  *
  * The lead's id is shown, quietly, under the name. Ordinarily an id has no
- * place on a user-facing screen — but the synthetic name pool repeats every
+ * place on a user-facing screen, but the synthetic name pool repeats every
  * twenty leads, so three of the forty-eight are called "Alina Danforth", and a
  * drawer headed by the name alone cannot tell a visitor which one they opened.
  */
@@ -37,6 +37,7 @@ import { LEAD_STAGES, type Actor, type Lead, type LeadStage } from "../../types"
 import { useOperations } from "../OperationsProvider";
 import type { ConfirmKind } from "./LeadConfirm";
 import { PRIORITY_TONE, STAGE_TONE } from "./leads-view";
+import OpsSelect from "../OpsSelect";
 import OpsOverlay from "./OpsOverlay";
 import { useLeadAction } from "./use-lead-action";
 
@@ -128,7 +129,7 @@ export default function LeadDetail({
   }
 
   /* Selected, but the list has not been re-read yet. The drawer opens now and
-     fills in — waiting for the data would make the record appear to open a
+     fills in: waiting for the data would make the record appear to open a
      beat after it was asked for, and rendering nothing would look like the
      click was ignored. */
   if (!lead) {
@@ -226,12 +227,12 @@ export default function LeadDetail({
             <Fact label="Stage" value={lead.data.stage} />
             <Fact
               label="Created"
-              value={now ? relativeDate(lead.createdAt, now) : "—"}
+              value={now ? relativeDate(lead.createdAt, now) : "-"}
               title={absoluteDate(lead.createdAt)}
             />
             <Fact
               label="Last activity"
-              value={now ? relativeDate(lead.data.lastActivityAt, now) : "—"}
+              value={now ? relativeDate(lead.data.lastActivityAt, now) : "-"}
               title={absoluteDate(lead.data.lastActivityAt)}
             />
             <Fact
@@ -313,38 +314,30 @@ export default function LeadDetail({
             </p>
           ) : (
             <>
-              <label className="ops-field ops-field--stacked">
+              <div className="ops-field ops-field--stacked">
                 <span className="ops-field__label">Stage</span>
-                <select
-                  className="ops-select"
+                <OpsSelect
+                  srLabel="Stage"
                   value={lead.data.stage}
                   disabled={action.pending}
-                  onChange={(e) => setStage(e.target.value as LeadStage)}
-                >
-                  {SELECTABLE_STAGES.map((stage) => (
-                    <option key={stage} value={stage}>
-                      {stage}
-                    </option>
-                  ))}
-                </select>
-              </label>
+                  onChange={(v) => setStage(v as LeadStage)}
+                  options={SELECTABLE_STAGES.map((stage) => ({ value: stage, label: stage }))}
+                />
+              </div>
 
-              <label className="ops-field ops-field--stacked">
+              <div className="ops-field ops-field--stacked">
                 <span className="ops-field__label">Owner</span>
-                <select
-                  className="ops-select"
+                <OpsSelect
+                  srLabel="Owner"
                   value={lead.data.assignedActorId ?? "unassigned"}
                   disabled={action.pending}
-                  onChange={(e) => setOwner(e.target.value)}
-                >
-                  <option value="unassigned">Unassigned</option>
-                  {owners.map((owner) => (
-                    <option key={owner.id} value={owner.id}>
-                      {owner.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
+                  onChange={setOwner}
+                  options={[
+                    { value: "unassigned", label: "Unassigned" },
+                    ...owners.map((owner) => ({ value: owner.id, label: owner.name })),
+                  ]}
+                />
+              </div>
             </>
           )}
 

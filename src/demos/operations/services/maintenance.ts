@@ -1,5 +1,5 @@
 /**
- * Operations demo — maintenance services.
+ * Operations demo: maintenance services.
  *
  * The rule worth stating: a work order cannot start on a vehicle that is out
  * on an active rental. The vehicle is not there to work on, and allowing it

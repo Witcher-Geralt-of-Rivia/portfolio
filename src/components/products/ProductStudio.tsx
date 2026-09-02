@@ -20,7 +20,7 @@ import {
  * selected scenario, and the position of the deterministic product flow.
  *
  * The flow is a local state machine stepping through the scenario's seven
- * stages. It performs no network request of any kind — no API, no backend, no
+ * stages. It performs no network request of any kind: no API, no backend, no
  * AI provider. The interval is cleared whenever the scenario changes, the flow
  * restarts, or the component unmounts, so a stale scenario can never receive a
  * late state update.
@@ -143,7 +143,7 @@ export default function ProductStudio() {
         </button>
 
         <p className="pstudio__stage" aria-hidden="true">
-          {step ? step.label : "Idle — no request is made when the flow runs."}
+          {step ? step.label : "Idle. No request is made when the flow runs."}
         </p>
 
         {/* Announced once, on completion. Never on every animation step. */}

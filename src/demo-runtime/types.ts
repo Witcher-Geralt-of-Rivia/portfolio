@@ -1,5 +1,5 @@
 /**
- * Demo runtime — shared type contracts.
+ * Demo runtime: shared type contracts.
  *
  * This module is the base of the demo platform's dependency order. It imports
  * nothing and is safe to load on the server; every other runtime module builds
@@ -8,7 +8,7 @@
  * The runtime deliberately knows nothing about any product domain. It knows
  * records, collections, events, audit entries, jobs, roles, a clock and a
  * persistence adapter. It does not know what a lead, a vehicle, a technician
- * or a lesson is — those belong to each demo's own domain layer, which is
+ * or a lesson is. Those belong to each demo's own domain layer, which is
  * built on top of this. Keeping that boundary is what allows three unrelated
  * products to share one runtime.
  */
@@ -30,7 +30,7 @@ export function isDemoId(value: unknown): value is DemoId {
 }
 
 /**
- * A collection is a named bucket of records within one demo — the runtime's
+ * A collection is a named bucket of records within one demo, the runtime's
  * equivalent of a table. It is a plain string because the runtime must not
  * enumerate domain entities; each demo declares its own collection names.
  */

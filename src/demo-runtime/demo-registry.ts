@@ -1,5 +1,5 @@
 /**
- * Demo runtime — the demo registry.
+ * Demo runtime: the demo registry.
  *
  * One place that knows which demonstrations exist, where they live and how
  * finished they are. The eventual Work launcher reads this rather than
@@ -18,7 +18,7 @@ import type { DemoId } from "./types";
  *
  * Only `verified` may be shown in the Work section. `building` exists so a
  * demo under construction can be reachable during development without
- * becoming publishable by accident — the same guard the case-study framework
+ * becoming publishable by accident: the same guard the case-study framework
  * uses, for the same reason.
  */
 export type DemoStatus = "planned" | "building" | "verified";
@@ -39,7 +39,7 @@ export type DemoDefinition = {
  * Every demo carries this, visibly. The demos are synthetic engineering
  * demonstrations running entirely in the browser; presenting one as client
  * work, a live customer system or real operational data would be false. The
- * exact casing may be refined later — the meaning may not.
+ * exact casing may be refined later. The meaning may not.
  */
 export const DEMO_DISCLOSURE_PRIMARY = "INTERACTIVE ENGINEERING DEMO";
 export const DEMO_DISCLOSURE_SECONDARY = "SYNTHETIC DATA · FRONTEND ONLY";

@@ -1,15 +1,15 @@
 "use client";
 
 /**
- * Operations demo — confirming the two changes that cannot be undone here.
+ * Operations demo: confirming the two changes that cannot be undone here.
  *
  * Converting creates a customer and closes the lead at Won; archiving takes it
  * out of the working list. Neither has an undo in this product, so both are
  * asked before they are done.
  *
  * The copy says what will actually happen, in the product's own terms. It does
- * not say "deleted" — nothing is deleted, and the demo's reset restores the
- * canonical dataset — and it names the record, with its id, because the
+ * not say "deleted" (nothing is deleted, and the demo's reset restores the
+ * canonical dataset), and it names the record, with its id, because the
  * synthetic name pool repeats and "Archive Alina Danforth?" would otherwise be
  * ambiguous across three different leads.
  */

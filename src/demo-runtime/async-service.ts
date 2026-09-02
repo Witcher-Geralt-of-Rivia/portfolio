@@ -1,5 +1,5 @@
 /**
- * Demo runtime — the mock asynchronous service boundary.
+ * Demo runtime: the mock asynchronous service boundary.
  *
  * Product UI calls domain services as though they crossed an application
  * boundary, because that is what shapes real interface work: pending states,
@@ -8,7 +8,7 @@
  * those questions, and the result looks like a prototype.
  *
  * The delay is deterministic. Each operation's latency is derived from its own
- * name, so a given call always takes the same time — different operations feel
+ * name, so a given call always takes the same time. Different operations feel
  * different, but nothing varies between runs. `Math.random()` would make every
  * screenshot and every timing assertion irreproducible for no gain.
  *

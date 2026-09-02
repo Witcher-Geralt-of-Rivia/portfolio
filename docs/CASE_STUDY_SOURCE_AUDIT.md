@@ -62,7 +62,7 @@ None of them may be promoted into a case study.
 
 ## Candidate inventory
 
-### Candidates 01-03 — client engagements
+### Candidates 01-03: client engagements
 
 ```
 candidate:            none identified
@@ -78,7 +78,7 @@ No client project is described anywhere in the repository, so there is nothing
 to verify, anonymise or redact. This is an absence of source material, not a
 privacy problem.
 
-### Candidate 04 — this portfolio's own delivery infrastructure
+### Candidate 04: this portfolio's own delivery infrastructure
 
 ```
 candidate:            the portfolio's A/B release-slot deployment system
@@ -142,9 +142,9 @@ study without numbers is acceptable and preferred over an invented one.
 Optional per case: up to three metrics, each with a source note recorded here
 and never rendered publicly.
 
-Also needed, per case: confirmation of what may be published — whether the
-client may be named, whether any screenshot is safe, and whether any figure may
-be quoted.
+Also needed, per case: confirmation of what may be published, meaning whether
+the client may be named, whether any screenshot is safe, and whether any figure
+may be quoted.
 
 ## Framework status
 

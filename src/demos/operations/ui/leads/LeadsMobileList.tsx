@@ -1,14 +1,14 @@
 "use client";
 
 /**
- * Operations demo — Leads on a phone.
+ * Operations demo: Leads on a phone.
  *
  * Eight columns do not survive 360px. Squeezing them produces a table nobody
  * can read and horizontal scrolling nobody expects, so below 768px the same
  * records are rendered as a list instead.
  *
- * Each card carries what a person needs to choose between two leads — name,
- * stage, interest, owner, priority, next follow-up — and leaves source and
+ * Each card carries what a person needs to choose between two leads (name,
+ * stage, interest, owner, priority, next follow-up) and leaves source and
  * last activity to the detail, because those are the two that least often
  * decide which record to open.
  *

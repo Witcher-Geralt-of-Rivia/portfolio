@@ -22,5 +22,5 @@ for (const [w, h] of [[1920,1080],[1440,900],[1366,768],[768,1024],[390,844],[36
   await ctx.close();
 }
 await browser.close();
-console.log("=== PRODUCTION BUILD — CLS / OVERFLOW / CONSOLE ===");
+console.log("=== PRODUCTION BUILD - CLS / OVERFLOW / CONSOLE ===");
 rows.forEach(r => console.log(r));

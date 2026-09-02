@@ -1,5 +1,5 @@
 /**
- * Demo runtime — fixed configuration.
+ * Demo runtime: fixed configuration.
  *
  * Every database name, version number and store name lives here. Scattering
  * them through the persistence code is how an upgrade path quietly diverges
@@ -15,7 +15,7 @@
 export const DEMO_DB_NAME = "portfolio-demo-runtime";
 
 /**
- * Runtime schema version 1 — frozen.
+ * Runtime schema version 1: frozen.
  *
  * This is the IndexedDB database version and governs stores and indexes only.
  * It is deliberately separate from a demo's `seedVersion`, which governs the

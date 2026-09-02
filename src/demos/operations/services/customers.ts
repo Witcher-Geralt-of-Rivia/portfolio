@@ -1,5 +1,5 @@
 /**
- * Operations demo — customer services.
+ * Operations demo: customer services.
  */
 
 import type { DemoRecord } from "@/demo-runtime/types";

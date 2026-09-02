@@ -1,5 +1,5 @@
 /**
- * Demo runtime — cross-tab invalidation.
+ * Demo runtime: cross-tab invalidation.
  *
  * When a demo changes in one tab, other tabs of the same origin showing the
  * same demo are told to re-read. This is what allows a future Field
@@ -10,7 +10,7 @@
  * Broadcasting the records themselves would mean two copies of the truth in
  * flight, a message size that grows with the dataset, and a receiver that has
  * to merge rather than simply re-read. Re-reading from persistence is both
- * smaller and correct by construction — the database is already the single
+ * smaller and correct by construction: the database is already the single
  * source of truth, and both tabs share it.
  *
  * Multi-tab sync is an enhancement, never a requirement. Where

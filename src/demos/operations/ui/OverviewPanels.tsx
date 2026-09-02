@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Operations demo — the Overview panels.
+ * Operations demo: the Overview panels.
  *
  * Every number here comes from `selectors/overview.ts`. Nothing is stored and
  * nothing is written as a literal: a dashboard figure that disagrees with the
@@ -32,8 +32,8 @@ export type KpiKey =
  * What each KPI is, and the breakdown printed beneath it.
  *
  * The breakdown replaced a progress bar. That bar drew each value as a share
- * of a denominator the card never named — open leads against all leads,
- * available vehicles against the fleet — so it implied a ratio the reader
+ * of a denominator the card never named (open leads against all leads,
+ * available vehicles against the fleet), so it implied a ratio the reader
  * could not check and that nothing in the product had defined. A count that
  * sums to the headline is checkable on sight, and it is more useful: knowing
  * the 38 open leads are 12 New and 10 Contacted says something a bar cannot.
@@ -180,14 +180,14 @@ export function ContractStatus({ rows }: { rows: { status: string; count: number
 /**
  * A progression of proportional rails, not a triangle.
  *
- * A literal funnel shape encodes the count twice — once in the width, once in
- * the taper — and reads as decoration. Rails compare honestly: each bar's
+ * A literal funnel shape encodes the count twice (once in the width, once in
+ * the taper) and reads as decoration. Rails compare honestly: each bar's
  * length is its share of the largest stage, and the count is written out.
  */
 export function LeadFunnel({ data }: { data: OverviewData }) {
   const total = data.leadFunnel.reduce((sum, s) => sum + s.count, 0);
   const peak = Math.max(1, ...data.leadFunnel.map((s) => s.count));
-  /* Won is a stage in the progression but not "in pipeline" — it is closed.
+  /* Won is a stage in the progression but not "in pipeline": it is closed.
      The note counts the leads still moving, which is the same figure the
      Open leads KPI shows. */
   const open = data.leadFunnel
@@ -334,7 +334,7 @@ export function UpcomingReservations({
   const nameOf = (id: string) =>
     customers.find((c) => c.id === id)?.data.displayName ?? "Unknown customer";
   const assetOf = (id?: string) =>
-    id ? (vehicles.find((v) => v.id === id)?.data.assetCode ?? "—") : "—";
+    id ? (vehicles.find((v) => v.id === id)?.data.assetCode ?? "-") : "-";
 
   const rows = reservations.slice(0, 5);
 
@@ -414,8 +414,8 @@ export function ActionQueue({ items }: { items: OverviewData["actionQueue"] }) {
           {shown.map((item) => {
             const meta = QUEUE_META[item.kind] ?? { label: item.kind, tone: "sky" };
             return (
-              /* The entity id stays in the data — a later stage links these
-                 rows to their records — but it is internal plumbing and does
+              /* The entity id stays in the data (a later stage links these
+                 rows to their records), but it is internal plumbing and does
                  not belong on the visitor's screen. */
               <li className="ops-queue__row" key={`${item.kind}-${item.id}`}>
                 <span className={`ops-pill ops-pill--${meta.tone}`}>{meta.label}</span>

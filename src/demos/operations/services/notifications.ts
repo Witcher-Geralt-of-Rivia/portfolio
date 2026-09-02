@@ -1,5 +1,5 @@
 /**
- * Operations demo — notification services.
+ * Operations demo: notification services.
  *
  * Notifications are created by domain workflows and automation rules, never by
  * a screen. Reading them is the only thing a visitor does directly.
@@ -24,7 +24,7 @@ export type CreateNotificationInput = {
  * Build the record and the audit-free op for a notification.
  *
  * Returned rather than committed, so a workflow can raise its notification
- * inside the same transaction as the change that caused it — a notification
+ * inside the same transaction as the change that caused it: a notification
  * that survived a rolled-back mutation would be announcing something that
  * never happened.
  */
@@ -90,8 +90,8 @@ export async function listNotifications(
 ): Promise<DemoRecord<Notification>[]> {
   const all = await ctx.runtime.repository.all<Notification>(C.notifications);
   /* Unread first, then newest. Sorting by recency alone would bury the unread
-     items whenever they are not the most recent — which is exactly the seeded
-     case — and a panel showing only read rows beside a badge reading "8
+     items whenever they are not the most recent (which is exactly the seeded
+     case), and a panel showing only read rows beside a badge reading "8
      unread" is worse than no panel. Id descending is newest first, because
      ids are a monotonic counter. */
   return [...all].sort((a, b) => {

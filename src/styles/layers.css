@@ -1,5 +1,5 @@
 /* =====================================================================
-   MILKY INTELLIGENCE — BACKGROUND ARCHITECTURE
+   MILKY INTELLIGENCE - BACKGROUND ARCHITECTURE
    Four independent, separately mounted layers:
 
      A  base surface   z-index -4   stationary gradient foundation
@@ -12,7 +12,7 @@
    ===================================================================== */
 
 /* ---------------------------------------------------------------------
-   LAYER A — BASE SURFACE
+   LAYER A - BASE SURFACE
    Stationary. Establishes the warm/cool tilt the aurora sits on top of.
    --------------------------------------------------------------------- */
 
@@ -26,7 +26,7 @@
 }
 
 /* ---------------------------------------------------------------------
-   LAYER B — AURORA COLOUR FIELDS
+   LAYER B - AURORA COLOUR FIELDS
    Six diffused pools. Not circles: each carries its own irregular radius
    and a radial falloff, then a large static blur dissolves the silhouette.
    --------------------------------------------------------------------- */
@@ -69,7 +69,7 @@
   animation-fill-mode: both;
 }
 
-/* --- Field 1 — Lavender --------------------------------------------- */
+/* --- Field 1 - Lavender --------------------------------------------- */
 .aurora__field--1 {
   --field-color: var(--aurora-lavender);
   --field-w: clamp(520px, 84vw, 1400px);
@@ -84,7 +84,7 @@
   --field-delay: -4s;
 }
 
-/* --- Field 2 — Sky --------------------------------------------------- */
+/* --- Field 2 - Sky --------------------------------------------------- */
 .aurora__field--2 {
   --field-color: var(--aurora-sky);
   --field-w: clamp(440px, 58vw, 1080px);
@@ -99,7 +99,7 @@
   --field-delay: -11s;
 }
 
-/* --- Field 3 — Mint -------------------------------------------------- */
+/* --- Field 3 - Mint -------------------------------------------------- */
 .aurora__field--3 {
   --field-color: var(--aurora-mint);
   --field-w: clamp(500px, 72vw, 1260px);
@@ -114,7 +114,7 @@
   --field-delay: -19s;
 }
 
-/* --- Field 4 — Rose -------------------------------------------------- */
+/* --- Field 4 - Rose -------------------------------------------------- */
 .aurora__field--4 {
   --field-color: var(--aurora-rose);
   --field-w: clamp(500px, 104vw, 1560px);
@@ -129,7 +129,7 @@
   --field-delay: -7s;
 }
 
-/* --- Field 5 — Peach ------------------------------------------------- */
+/* --- Field 5 - Peach ------------------------------------------------- */
 .aurora__field--5 {
   --field-color: var(--aurora-peach);
   --field-w: clamp(440px, 76vw, 1180px);
@@ -144,7 +144,7 @@
   --field-delay: -26s;
 }
 
-/* --- Field 6 — Lemon over Aqua --------------------------------------- */
+/* --- Field 6 - Lemon over Aqua --------------------------------------- */
 .aurora__field--6 {
   --field-color: var(--aurora-lemon);
   --field-w: clamp(420px, 58vw, 1020px);
@@ -175,7 +175,7 @@
 }
 
 /* ---------------------------------------------------------------------
-   LAYER C — PRISM LIGHT
+   LAYER C - PRISM LIGHT
    Two broad diagonal sweeps drifting across the composition. The intent
    is that surfaces read as illuminated, not merely tinted. Look straight
    at it and it should all but disappear.
@@ -220,7 +220,7 @@
 }
 
 /* ---------------------------------------------------------------------
-   LAYER D — MICRO GRAIN
+   LAYER D - MICRO GRAIN
    A 256px monochrome tile, generated locally as SVG turbulence. It sits
    above the gradients and below page content, so it dithers the colour
    fields without ever touching the crispness of type.
@@ -242,11 +242,11 @@
 /* =====================================================================
    RESPONSIVE BEHAVIOUR
    The page stays colourful at every width. What shrinks is blur cost,
-   travel distance, and the number of fields competing for attention —
-   never the palette itself.
+   travel distance, and the number of fields competing for attention.
+   Never the palette itself.
    ===================================================================== */
 
-/* Large desktop — a little more travel reads well at 1920 and above. */
+/* Large desktop: a little more travel reads well at 1920 and above. */
 @media (min-width: 1600px) {
   :root {
     --aurora-amplitude: 1.08;
@@ -260,7 +260,7 @@
   }
 }
 
-/* Tablet — shorter travel, cheaper blur, gentler supporting fields. */
+/* Tablet: shorter travel, cheaper blur, gentler supporting fields. */
 @media (max-width: 900px) {
   :root {
     --aurora-amplitude: 0.62;
@@ -284,7 +284,7 @@
   }
 }
 
-/* Mobile — the six pools restack into a single vertical column. Their
+/* Mobile: the six pools restack into a single vertical column. Their
    order follows the hue wheel (lavender, sky, mint, aqua/lemon, peach,
    rose) so neighbouring fields are neighbours in hue too. Stacking
    complementary hues here would cancel them into grey, which is what a
@@ -353,7 +353,7 @@
   }
 }
 
-/* Small mobile — a touch less travel again, everything else holds. */
+/* Small mobile: a touch less travel again, everything else holds. */
 @media (max-width: 400px) {
   :root {
     --aurora-amplitude: 0.36;

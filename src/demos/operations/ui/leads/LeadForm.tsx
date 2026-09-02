@@ -1,13 +1,13 @@
 "use client";
 
 /**
- * Operations demo — creating and editing a lead.
+ * Operations demo: creating and editing a lead.
  *
  * One form for both, because they take the same four fields and a second
  * component would be the same markup with a different verb.
  *
  * Stage is not among them. A new lead begins at New and moves by the stage
- * control in the detail, and Won is only ever reached by converting — putting
+ * control in the detail, and Won is only ever reached by converting: putting
  * a stage picker in a create form would let someone invent a Won lead with no
  * customer behind it before the record even exists.
  *
@@ -32,6 +32,7 @@ import {
   type VehicleClass,
 } from "../../types";
 import { useOperations } from "../OperationsProvider";
+import OpsSelect from "../OpsSelect";
 import OpsOverlay from "./OpsOverlay";
 import { useLeadAction } from "./use-lead-action";
 
@@ -158,58 +159,40 @@ export default function LeadForm({
             />
           </label>
 
-          <label className="ops-field ops-field--stacked" htmlFor={`${ids}-source`}>
+          <div className="ops-field ops-field--stacked">
             <span className="ops-field__label">Source</span>
-            <select
-              id={`${ids}-source`}
-              className="ops-select"
+            <OpsSelect
+              srLabel="Source"
               value={source}
-              onChange={(e) => setSource(e.target.value as LeadSource)}
-            >
-              {LEAD_SOURCES.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
+              onChange={(v) => setSource(v as LeadSource)}
+              options={LEAD_SOURCES.map((option) => ({ value: option, label: option }))}
+            />
             {mode === "create" && source === "Website" && (
               <span className="ops-field__hint">
                 Website leads are assigned to a sales agent automatically.
               </span>
             )}
-          </label>
+          </div>
 
-          <label className="ops-field ops-field--stacked" htmlFor={`${ids}-interest`}>
+          <div className="ops-field ops-field--stacked">
             <span className="ops-field__label">Vehicle interest</span>
-            <select
-              id={`${ids}-interest`}
-              className="ops-select"
+            <OpsSelect
+              srLabel="Vehicle interest"
               value={vehicleInterest}
-              onChange={(e) => setInterest(e.target.value as VehicleClass)}
-            >
-              {VEHICLE_CLASSES.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
-          </label>
+              onChange={(v) => setInterest(v as VehicleClass)}
+              options={VEHICLE_CLASSES.map((option) => ({ value: option, label: option }))}
+            />
+          </div>
 
-          <label className="ops-field ops-field--stacked" htmlFor={`${ids}-priority`}>
+          <div className="ops-field ops-field--stacked">
             <span className="ops-field__label">Priority</span>
-            <select
-              id={`${ids}-priority`}
-              className="ops-select"
+            <OpsSelect
+              srLabel="Priority"
               value={priority}
-              onChange={(e) => setPriority(e.target.value as Priority)}
-            >
-              {PRIORITIES.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
-          </label>
+              onChange={(v) => setPriority(v as Priority)}
+              options={PRIORITIES.map((option) => ({ value: option, label: option }))}
+            />
+          </div>
 
           {mode === "create" && (
             <p className="ops-field__hint ops-form__note">

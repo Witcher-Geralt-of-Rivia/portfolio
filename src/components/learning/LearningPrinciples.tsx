@@ -1,7 +1,7 @@
 import { PRINCIPLES } from "./learning-scenarios";
 
 /**
- * Four principles as a compact strip — number and title only, the same visual
+ * Four principles as a compact strip: number and title only, the same visual
  * language as the Stage 05 engineering principles. Server-rendered.
  */
 export default function LearningPrinciples() {

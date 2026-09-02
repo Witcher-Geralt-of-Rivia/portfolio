@@ -1,5 +1,5 @@
 /* =====================================================================
-   MILKY INTELLIGENCE — HERO
+   MILKY INTELLIGENCE - HERO
    The first viewport: a text column and the Intelligence Constellation,
    embedded in the Stage 01 atmosphere rather than sitting on a panel of
    its own. Nothing here introduces a hero background.
@@ -479,7 +479,7 @@
   animation-fill-mode: both;
 }
 
-/* Eight nodes, four paths, eight different durations and offsets — the
+/* Eight nodes, four paths, eight different durations and offsets: the
    cycles share no common factor, so they never fall into step. */
 .cnode--agents { animation-name: cnode-drift-a; animation-duration: 11s; animation-delay: -2s; }
 .cnode--automation { animation-name: cnode-drift-b; animation-duration: 13s; animation-delay: -5s; }
@@ -538,7 +538,7 @@
 /* =====================================================================
    HOVER
    Pointer devices only. Raising one node lifts its spoke to the core and
-   eases everything else back — never below 0.72, so nothing vanishes.
+   eases everything else back, never below 0.72, so nothing vanishes.
    Implemented with :has(), which keeps the whole hero server-rendered.
    ===================================================================== */
 
@@ -630,7 +630,7 @@
   /* Chips step down a size, staying inside the spec's mobile range. */
   /* The chips grow relative to the artboard as it shrinks, so a spoke that
      clears a chip on desktop can end just inside one here. A slightly denser
-     fill keeps the line fully occluded — measured bleed drops to the same
+     fill keeps the line fully occluded: measured bleed drops to the same
      level as the grain dither, i.e. nothing a viewer can see. */
   .cnode {
     min-width: 72px;
@@ -703,7 +703,7 @@
   }
 }
 
-/* Narrow phones: the rail goes two-up, then one column — never scrolling,
+/* Narrow phones: the rail goes two-up, then one column, never scrolling,
    never truncated. The vertical rules are dropped here: once items wrap, a
    left border lands at the start of a row, where it reads as a stray mark
    rather than a separator, and it pushes every item but the first out of

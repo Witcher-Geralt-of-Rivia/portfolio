@@ -6,7 +6,7 @@ import type { LearningScenario, Variant } from "./learning-scenarios";
  * Deliberately not a chat window: context, a brief, a focus and one next
  * action. There is no input, no transcript, no model and no request. The
  * content is a fixed pair of strings per scenario, swapped by the adapt
- * sequence — which is why it can be labelled a local simulation honestly.
+ * sequence, which is why it can be labelled a local simulation honestly.
  */
 export default function TutorPanel({
   scenario,

@@ -1,7 +1,7 @@
 /**
  * Geometry for the Intelligence Constellation.
  *
- * Everything here is computed once, at module scope, in a server component —
+ * Everything here is computed once, at module scope, in a server component,
  * so the browser receives finished path strings and runs no layout maths.
  *
  * Two rules drive the routing:

@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Demo runtime — React provider.
+ * Demo runtime: React provider.
  *
  * Owns one demo's runtime for the lifetime of a demo route: creates it,
  * initializes it, exposes it through context, and disposes of it on unmount.
@@ -45,7 +45,7 @@ export type DemoRuntimeProviderProps = {
  *
  * Tagging is what lets `status` be derived rather than assigned. Setting
  * "initializing" at the top of the effect would be a synchronous state write
- * inside an effect — a cascading render, and the thing React's rules
+ * inside an effect: a cascading render, and the thing React's rules
  * explicitly warn against. Instead, an attempt with no matching outcome yet
  * simply *is* initializing.
  */
@@ -66,8 +66,8 @@ export default function DemoRuntimeProvider({ seed, children }: DemoRuntimeProvi
   const error = settled?.error ?? null;
 
   useEffect(() => {
-    /* A run that has been superseded — by a seed change, a retry or an
-       unmount — must not write into state belonging to the current one. */
+    /* A run that has been superseded (by a seed change, a retry or an
+       unmount) must not write into state belonging to the current one. */
     let live = true;
     const instance = createDemoRuntime({ seed });
 

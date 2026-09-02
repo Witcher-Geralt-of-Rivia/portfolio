@@ -308,7 +308,7 @@ Status: **Frozen**
 Built `#products`, heading "One product. Every surface." A Product Engineering
 Studio shows one product across four surfaces simultaneously: a web application
 frame, a phone, an AI-assist panel and the backend event pipeline beneath them.
-Three scenarios — Operations SaaS, Commerce Platform, Field Workflow — switch
+Three scenarios (Operations SaaS, Commerce Platform, Field Workflow) switch
 through a real ARIA tablist. `Run product flow` walks a seven-step local state
 machine along the six-stage event rail and propagates into every surface.
 
@@ -348,7 +348,7 @@ headless behaviour already recorded in `QA_BASELINE.md`:
   painting starves rAF, delaying detection and letting throttled interval
   callbacks fire in a burst afterwards. Switched to interval polling.
 - The fixed site navigation and the `<nextjs-portal>` dev-tools indicator both
-  painted over the section in full-page captures — the nav's dark text was
+  painted over the section in full-page captures: the nav's dark text was
   being sampled as the assist panel's background, reading 1.00:1. Both are
   removed for capture only; neither exists in the production build.
 - Counting `document.getAnimations()` counted 180–260ms colour transitions at
@@ -393,11 +393,11 @@ was redesigned and no frozen behaviour changed.
   on an ESLint built-in default. The release-slot entries themselves shipped
   with Stage 06 (D-037); this completes and documents the set. Verified: the
   same 83 source files are linted before and after, and no source rule was
-  relaxed — a deliberate `any` in `src/` is still reported as an error.
+  relaxed: a deliberate `any` in `src/` is still reported as an error.
 - **Stage 06 semantic-list indentation corrected.** The component-local reset
   now declares all three properties (`margin`, `padding`, `list-style`) instead
   of leaning on the global reset for margin. Measured: 40px marker inset on all
-  six lists without the reset, 0px with it — except the timeline's 14px, which
+  six lists without the reset, 0px with it, except the timeline's 14px, which
   is its own panel padding. Every list stays a real `<ul>`/`<ol>`.
 - **Deployment smoke coverage extended to `#products`.** The gate now asserts
   `id="systems"`, `id="products"` and the Stage 06 heading. The heading is the
@@ -430,7 +430,7 @@ Status: **Frozen**
 Built `#ai-learning`, heading "Learning paths that adapt." An Adaptive Learning
 Laboratory shows a system changing its own next move: learner state, a
 knowledge model, a tutor surface and the learning journey beneath them. Three
-scenarios — Adaptive Tutor, Assessment Engine, Learning Path Builder — switch
+scenarios (Adaptive Tutor, Assessment Engine, Learning Path Builder) switch
 through a real ARIA tablist. `Adapt` walks a five-stage reducer and swaps the
 scenario to its second deterministic variant, moving all four surfaces together.
 
@@ -444,7 +444,7 @@ KnowledgeMap,LearnerStatePanel,TutorPanel,LearningJourney,LearningPrinciples}.ts
 ### Notable during implementation
 - Primary map nodes rendered a code inside the circle *and* a label below,
   giving "REST" under "REST". The code is now drawn only where it says
-  something the label does not — "DB" inside "Persistence" survives, "HTTP"
+  something the label does not: "DB" inside "Persistence" survives, "HTTP"
   inside "HTTP" does not.
 - The phone map was illegible on the first pass. SVG text inside a fixed
   viewBox scales with the container, so 10px labels rendered at 5.2px at 360px;
@@ -452,7 +452,7 @@ KnowledgeMap,LearnerStatePanel,TutorPanel,LearningJourney,LearningPrinciples}.ts
   the size and sheds the prerequisite labels and in-node codes. Measured
   throughout rather than eyeballed.
 - Left unconstrained, the tablet layout drew the 520-unit viewBox into an 864px
-  column, rendering 9px technical labels at 15px — larger than any other label
+  column, rendering 9px technical labels at 15px, larger than any other label
   on the site. The drawing width is capped at 640px there.
 - The path builder's adapted route named `validation -> testing -> persistence`,
   an edge that does not exist, so the map drew one signal instead of two. The
@@ -460,7 +460,7 @@ KnowledgeMap,LearnerStatePanel,TutorPanel,LearningJourney,LearningPrinciples}.ts
 - Panels were stretching to the map's height and opening a large void under the
   tutor's next action; they are sized to content instead.
 - Three contrast roles first measured below AA because the element box included
-  a decorative marker — a dashed gap ring, a legend swatch, a context dot —
+  a decorative marker (a dashed gap ring, a legend swatch, a context dot)
   whose colour was sampled as the text's background. The text nodes are now
   wrapped so the measurement lands on the real background. Same class of
   artifact as Stage 06's assist-context row.
@@ -505,8 +505,8 @@ Status: **Frozen**
 
 ### Summary
 Built `#lab`, heading "Small systems. Serious engineering." Five interactive
-experiments in one workspace — API Request Inspector, Rate Limit Simulator,
-Webhook Reliability, Queue & Retry Simulator, Idempotency Guard — covering
+experiments in one workspace (API Request Inspector, Rate Limit Simulator,
+Webhook Reliability, Queue & Retry Simulator, Idempotency Guard) covering
 validation, traffic control, signature verification and deduplication, retry
 with backoff and dead-lettering, and safe retries under an idempotency key.
 
@@ -520,7 +520,7 @@ LabFlow,LabExperimentView,LabObservation,LabControls,LabPatternRail}.tsx`,
 ### Notable during implementation
 - The rate limiter was wrong on the first pass. Limit 5 plus burst 2 was read
   as 7 units of capacity, so a sequence of exactly 7 requests admitted all of
-  them and nothing was ever refused — the opposite of what a rate-limit demo
+  them and nothing was ever refused, the opposite of what a rate-limit demo
   should show. The window now admits five, two of which may arrive back to
   back on the burst allowance, and refuses the rest with a 429.
 - Three columns sized to their content left roughly 200px of empty surface
@@ -539,8 +539,8 @@ LabFlow,LabExperimentView,LabObservation,LabControls,LabPatternRail}.tsx`,
 
 ### Documentation corrections
 Six inconsistencies, four of them left behind by Stage 07's own update, were
-found during the bootstrap and fixed here. `CLAUDE.md` — the file loaded first
-in every session — still said "Stages 01-04 are frozen", three stages behind.
+found during the bootstrap and fixed here. `CLAUDE.md`, the file loaded first
+in every session, still said "Stages 01-04 are frozen", three stages behind.
 `CLAUDE_HANDOFF.md` said stages 01-07 were frozen two lines above a table that
 stopped at 05. `ARCHITECTURE.md` had its stylesheet prose corrected in Stage 07
 but not its source-tree fence, which still listed eight of ten. `PROJECT_STATE.md`
@@ -551,8 +551,8 @@ same stale count.
 
 ### QA
 67 text roles pass contrast (worst 6.13:1). CLS 0.00000 at load, 0.00053 after
-five experiments and five runs. 50 experiment switches — 17 of them
-mid-execution — 100 executions and 100 run/reset cycles all clean, with 0
+five experiments and five runs. 50 experiment switches (17 of them
+mid-execution), 100 executions and 100 run/reset cycles all clean, with 0
 network requests. Every experiment ends in exactly one state across 20 runs.
 8 viewports x 5 experiments with no overflow, no overlap, no text under 8.4px
 and the phone order held at system, input, observation. Idle long-task time 0ms
@@ -574,14 +574,14 @@ reusable demo runtime, with `#work` becoming a launcher into them.
 The reason the original route stalled is preserved rather than rewritten.
 Case studies were blocked on content: the repository holds no verified client
 engagement, and `docs/CASE_STUDY_SOURCE_AUDIT.md` records the exhaustive search
-that established it — three parallel read-only sweeps plus direct searches over
+that established it: three parallel read-only sweeps plus direct searches over
 every tracked file and every commit, finding that every project-shaped artefact
 in the tree declares itself synthetic in its own source. Writing case studies
 from that material would have meant inventing clients, problems and outcomes on
 a live public site, which D-045 forbids at the scale of a single number and
 therefore forbids at the scale of an engagement.
 
-One verified case survives from that work — Internal Production Delivery
+One verified case survives from that work: Internal Production Delivery
 System, the portfolio's own A/B release system, approved by the user on
 2026-08-30. It is preserved, unpublished, and is not one of the three demos.
 Its provenance must never be mixed with them.
@@ -589,7 +589,7 @@ Its provenance must never be mixed with them.
 ### Scope
 
 Only the shared foundation. No CRM screens, no dashboards, no field-service or
-learning screens, no Demo 01 visual design, and no business seed data — those
+learning screens, no Demo 01 visual design, and no business seed data. Those
 belong to each product specification, starting with 09B.
 
 ### Runtime
@@ -597,7 +597,7 @@ belong to each product specification, starting with 09B.
 `src/demo-runtime/`, eighteen modules in one dependency direction: types, then
 persistence/clock/ids/events, then repository, then runtime, then React. It
 knows records, collections, events, jobs, audit, roles, a clock and
-persistence, and never what a lead, a vehicle or a lesson is — which is what
+persistence, and never what a lead, a vehicle or a lesson is, which is what
 lets three unrelated products share it (D-049).
 
 Persistence is native IndexedDB with a memory fallback and no library (D-047).
@@ -624,7 +624,7 @@ phones.
 
 - `resetDemo` purged with a cursor. A cursor's `continue()` queues a fresh
   request, so its deletes landed *after* the synchronous seed writes and wiped
-  the data being restored — IndexedDB reset left the collection empty while the
+  the data being restored. IndexedDB reset left the collection empty while the
   memory adapter passed. Replaced with a keyed range delete issued before the
   first put; reset also went from 1444ms to ~400ms.
 - The global `* { margin: 0 }` reset beats the user agent's
@@ -634,7 +634,7 @@ phones.
   viewport by 84px and squeezed the demo title to 3px at 1024px. It now stacks
   its two halves below 1120px, and the bar wraps below 640px.
 - The demo shell sat inside the site's reading gutter, leaving 335px of usable
-  width on a phone — not enough for Back and Reset to share a row. A demo is an
+  width on a phone, not enough for Back and Reset to share a row. A demo is an
   application surface and now runs full bleed.
 - A folder named `__probe` produced a 404: a leading underscore marks a Next.js
   private folder, which is excluded from routing.
@@ -651,7 +651,7 @@ four Stage 09 files existed. `NEXT_STAGE.md` was stale by one commit, still
 describing three empty drafts and "nothing truthful to publish" after case-01
 was approved. `ARCHITECTURE.md`'s source tree was missing four component
 directories and `src/content/`. `QA_BASELINE.md` declared every number measured
-against production while its Stage 06 section said dev server — that section
+against production while its Stage 06 section said dev server. That section
 was re-measured in 39bca9c and only the header was left behind.
 `CASE_STUDY_SOURCE_AUDIT.md` denied, in the present tense, directories it later
 listed. The audit itself was cited as canonical by two documents but was in
@@ -672,7 +672,7 @@ API requests, 0 external requests.
 
 `#work` is untouched and still renders its Stage 03 placeholder. Nothing is
 wired into `page.tsx` or `globals.css`, `currentStage` stays 8, and production
-was not deployed — Stage 09A changes no user-visible route.
+was not deployed: Stage 09A changes no user-visible route.
 
 ---
 
@@ -696,7 +696,7 @@ Three values are specified as derived rather than stored, because that is what
 stops the demo contradicting itself: vehicle status follows a precedence rule
 over work orders, contracts and reservations; a payment's overdue state comes
 from `dueAt` against the logical clock; and a contract total is rate times
-duration. The seed distributions are tied together by identity — seven Active
+duration. The seed distributions are tied together by identity: seven Active
 contracts *are* the seven Rented vehicles, four Confirmed reservations the four
 Reserved, three open work orders the three in Maintenance, six Won leads the
 six customers carrying `sourceLeadId`.
@@ -787,7 +787,7 @@ contracts *are* the seven Rented vehicles and three active work orders *are*
 the three in Maintenance.
 
 Distributions are expanded from the frozen counts and walked with a stride
-coprime to their length — every element visited once, counts untouched, order
+coprime to their length: every element visited once, counts untouched, order
 still completely determined, and no list opening with twelve consecutive "New"
 leads.
 
@@ -814,8 +814,8 @@ all three so they cannot drift back.
   key-order sensitive; the tally is built in first-encounter order, so correct
   counts failed. Compared per key now.
 - A W2 assertion picked `eligible[0]` and expected Reserved. That vehicle was
-  currently rented and legitimately eligible for a *future* window —
-  eligibility is interval-based, status is now-based, and both are right. The
+  currently rented and legitimately eligible for a *future* window.
+  Eligibility is interval-based, status is now-based, and both are right. The
   test now confirms onto a currently-free vehicle and separately asserts that
   an active contract outranks a future reservation.
 - The content scan's telephone pattern matched ISO timestamps. Timestamps are
@@ -824,7 +824,7 @@ all three so they cannot drift back.
 
 ### QA
 
-`qa/stage09c1-operations.mjs`, 211 checks, the whole business suite run twice —
+`qa/stage09c1-operations.mjs`, 211 checks, the whole business suite run twice,
 once per persistence adapter, because the two must be indistinguishable.
 Covers the dependency boundary by reading the source, seed integrity, the six
 workflows, the role matrix, seven conflict contracts, reset determinism, demo
@@ -861,7 +861,7 @@ because straight RGBA averaging would drag the colour of transparent pixels
 into every edge of a mark that is 35% partial alpha.
 
 `icon.png` is 256 rather than 512. The mark is a soft gradient that PNG
-compresses poorly — 512 costs 164 KB against 55 KB — and a 164 KB tab icon
+compresses poorly (512 costs 164 KB against 55 KB), and a 164 KB tab icon
 would be disproportionate in a project whose previous mark was 890 bytes. No
 `favicon.ico` exists to shadow it.
 
@@ -871,7 +871,7 @@ looked at, not assumed.
 
 The Stage 03 four-node SVG mark is retired: `SystemMarkImage` became
 `PortfolioMark`, the asset is deleted, and the deployment smoke gate now
-asserts `/brand/logo-96.png` — a smoke test should check what the site
+asserts `/brand/logo-96.png`: a smoke test should check what the site
 actually serves.
 
 The design language's previous name is retired across the working tree, and
@@ -896,7 +896,7 @@ Overview's four KPIs derive to 38 / 4 / 10 / 8 with nothing hard-coded. Which
 KPIs appear follows the role matrix: a KPI summarises a module's data, so
 showing one for a module the role cannot open would make the Overview a hole in
 its own policy. Sales Agent sees two, Fleet Coordinator two, Finance Analyst
-one — no filler cards are invented to keep the row at four, and there are no
+one. No filler cards are invented to keep the row at four, and there are no
 trend badges, because there is no previous period to compare against.
 
 Eleven navigation icons and the funnel and fleet visuals are authored SVG. No
@@ -931,7 +931,7 @@ Three, each worth recording because each would otherwise read as a failure:
 `visually-hidden` text is clipped to 1px by design and counted as clipped;
 the notification badge deliberately overhangs its trigger; and Playwright's
 `waitForFunction` defaults to rAF polling, which starves against an application
-that schedules no frames at rest — reporting 19 seconds for a 74ms operation.
+that schedules no frames at rest, reporting 19 seconds for a 74ms operation.
 Interactions are now measured inside the page.
 
 ### QA
@@ -949,7 +949,7 @@ memory fallback, CLS, idle cost and network.
 ### Not done
 
 Ten module screens. `#work` is untouched, the registry still reads
-`operations = building`, `currentStage` stays 8, and nothing was deployed —
+`operations = building`, `currentStage` stays 8, and nothing was deployed:
 production remains on the previous release with no Operations route.
 
 ---
@@ -967,7 +967,7 @@ comes back.
 ### Fixed
 
 - **KPI progress bars had no denominator.** "38 open leads" is not 38% of
-  anything, so the fill was chosen to look plausible — a decoration in the
+  anything, so the fill was chosen to look plausible, a decoration in the
   visual language of a measurement. Replaced by breakdowns that sum to the
   headline and can be checked against the panels below (D-057).
 - **The role rule was half applied.** 09C2 filtered KPI cards and left panels,
@@ -989,13 +989,13 @@ comes back.
 
 Fixing the badge exposed a shared-runtime defect worth more than the rest.
 `useDemoQuery` discarded its data on every revalidation, so marking eight
-notifications read — eight writes, eight revision bumps — cleared the badge and
+notifications read (eight writes, eight revision bumps) cleared the badge and
 emptied the list after the first write while seven were still outstanding. A
 reload restored them, so the demo appeared to lose data it had never saved.
 
 The QA harness caught it as an intermittent failure and reading IndexedDB at
 the moment the badge cleared confirmed it: six or seven still unread. The
-persistence layer was never at fault — the adapter awaits `tx.oncomplete`, so a
+persistence layer was never at fault: the adapter awaits `tx.oncomplete`, so a
 resolved commit is durable. The screen was reporting completion before the work
 was done.
 
@@ -1006,7 +1006,7 @@ for a frame, which is the failure D-056 closes (D-058).
 
 - **The KPI breakdown was clipped** between 1180px and 1440px. Each part is
   `nowrap` by design and nothing sat between two of them, so the line had no
-  break opportunity and "7 Proposal" was cut off — a list that reads as
+  break opportunity and "7 Proposal" was cut off, a list that reads as
   complete and is not. A wrapping flex gap replaced the middle dot. Found by
   reading a production screenshot after the first deployment, which is the
   review workflow of D-061 working on its first pass.
@@ -1017,7 +1017,7 @@ for a frame, which is the failure D-056 closes (D-058).
 the role composition matrix, role containment, the mobile sheet at 390 and 360,
 the master logo's bytes and the derived mark's geometry, and reset. Full
 regression is 719 checks across seven suites, all against a local production
-build on port 3001 — never 3200, which belongs to the other application here.
+build on port 3001, never 3200, which belongs to the other application here.
 
 Two 09C2 assertions were updated rather than removed: the demo bar mark is no
 longer square, and the queue's re-render is waited for as a condition instead
@@ -1047,8 +1047,8 @@ Built the Leads module: the first screen in this product that writes, and the
 pattern the remaining nine reuse. Deployed for external review before Customers
 begins (D-062, D-067).
 
-Stage 09C3 was split into three — Leads, Customers, then Inbox and the
-integrated workflow — because Leads establishes the table, the mobile records,
+Stage 09C3 was split into three (Leads, Customers, then Inbox and the
+integrated workflow) because Leads establishes the table, the mobile records,
 the detail drawer, the forms, the confirmations and the URL contract that the
 others inherit. A problem in the pattern found after three screens exist is a
 problem fixed three times.
@@ -1060,7 +1060,7 @@ The finding of the stage, and it was invisible from the outside.
 The lead services build the right domain events and hand them to
 `runtime.commit`, which publishes them on the runtime's event bus.
 `processEvents` in `automations.ts` describes itself as *"called by workflows
-after the mutation that produced the events"* — and no workflow existed. It had
+after the mutation that produced the events"*, and no workflow existed. It had
 no caller outside its own module, and the bus had no subscribers. So creating a
 website lead never assigned it, and qualifying a lead never scheduled its
 follow-up, both of which the frozen 09B contract requires.
@@ -1092,7 +1092,7 @@ shell now asks the URL which module it is showing rather than being told.
 Three, found by reading rendered pixels after the harness was green:
 
 - Lead names rendered in the column headers' monospace face and sat ten pixels
-  above their own row — `.ops-table th` out-specifies a row-header class, and a
+  above their own row: `.ops-table th` out-specifies a row-header class, and a
   row header is data, not a header.
 - The last row carried a stub of border under its name alone, because
   `tr:last-child td` does not reach a `th`.
@@ -1127,7 +1127,7 @@ roles, no automation rules.
 
 A control that did not say what it was.
 
-The **filters** were a small uppercase word beside a browser select — two
+The **filters** were a small uppercase word beside a browser select: two
 elements read as two things, repeated four times across a toolbar, with the
 platform's own arrow still on each select. The label moved inside the border,
 so `Stage · Qualified` is one object whose current value is part of its name
@@ -1136,8 +1136,8 @@ so `Stage · Qualified` is one object whose current value is part of its name
 **Sort** was two controls for one decision: a field in a select and, beside it,
 an unlabelled square carrying an arrow. That asked the visitor to work out that
 the square belonged to the select, and then which way the arrow meant. It is
-one control now, with twelve options that each name a field and a direction —
-"Last activity — newest", "Lead name — A–Z". The sort semantics are unchanged.
+one control now, with twelve options that each name a field and a direction:
+"Last activity: newest", "Lead name: A–Z". The sort semantics are unchanged.
 
 The **page size** was the same fault at its smallest: `10` behind the words
 "PER PAGE", pinned to the far right of a bar whose other contents were a
@@ -1159,7 +1159,7 @@ middle column of a three-zone bar it spans 1407px of the 1406px available at
 ### Measured, not preferred
 
 The narrow layout is wrapping flex rather than grid because a two-column grid
-puts the back link and the controls in one row whether or not they fit — and at
+puts the back link and the controls in one row whether or not they fit, and at
 360px they do not. The back link is 120px, the role select's intrinsic width is
 167px because "Fleet Coordinator" needs it, and Reset is 59px: 363px of content
 in a 321px bar. The grid grew to hold them and the band, spanning both columns,
@@ -1173,6 +1173,75 @@ sections. Full regression is 1152 checks. A pre-existing harness weakness was
 fixed rather than worked around: the responsive section waited for the
 result-count element, which renders a blank placeholder before the query
 settles.
+
+### Not done
+
+Nine module screens. `#work` is untouched, the registry still reads
+`operations = building`, and `currentStage` stays 8. Stage 09C3.2 is blocked
+until the deployed screen has been reviewed live.
+
+---
+
+## Stage 09C3.1.2 - Custom Select System and Em Dash Removal
+
+Status: **Complete**
+
+### Summary
+Two narrow corrections. The product now draws its own dropdown menus, and the
+em dash is gone from everything this project writes.
+
+### The menu was never ours to style
+
+A native `<select>` can be styled shut but not open. The external review found
+six controls whose closed design was right and whose open popup was the
+operating system's: square corners, almost no option padding, a saturated
+system-blue selection band, a Windows border. No CSS on `<option>` reaches any
+of that.
+
+`src/components/demos/DemoSelect.tsx` is the replacement: a `role="combobox"`
+button owning a `role="listbox"` the project draws. The trigger keeps the
+design approved in 09C3.1.1; only the open state changed (D-072).
+
+Focus never leaves the trigger. The active option is pointed at with
+`aria-activedescendant`, which is what keeps Escape, Tab and outside-click
+simple: there is only ever one focused element to return to. Enter, Space,
+arrows, Home, End and a 600ms typeahead all behave as the ARIA pattern
+specifies, and the menu opens onto the current value rather than the first
+item.
+
+The menu is portalled into the nearest `<dialog>` when there is one. A modal
+dialog sits in the browser's top layer, so a menu portalled to the body from
+inside the phone filter sheet would have been painted behind the sheet that
+opened it.
+
+Eleven controls use it: the six the review named, plus the create/edit form's
+three and the detail's two, which had the same defect and were converted so the
+product has one select rather than two kinds.
+
+### No em dash
+
+791 occurrences across 161 files, judged one at a time rather than substituted:
+a colon where the second half explains, a comma for an aside, a full stop
+between two sentences, parentheses around a bracketed clause with its own
+commas, a hyphen in a heading (D-073).
+
+The sort labels became `Last activity: newest`, which is also a better label:
+the colon says the direction belongs to the field. The tables' empty-value
+placeholder became a hyphen.
+
+`npm run qa:style` keeps it out. It builds the banned character from its
+codepoint so the guard does not fail its own rule, and it names file, line and
+column.
+
+### QA
+
+`qa/stage09c31-leads.mjs` grew to 407 checks. Full regression is 1165 checks.
+
+One assertion changed meaning. The role-leak test used to drive the role while
+a lead detail was open, which `selectOption` allowed because it does not
+hit-test. The detail is a modal dialog, so the chrome behind it is genuinely
+inert and a visitor cannot reach the role control at all. The suite asserts
+that now, then closes the detail and checks the leak protection as before.
 
 ### Not done
 

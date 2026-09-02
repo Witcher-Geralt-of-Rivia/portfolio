@@ -1,5 +1,5 @@
 /**
- * Operations demo — module route configuration.
+ * Operations demo: module route configuration.
  *
  * The eleven modules, their canonical paths, and which of them exist yet.
  *
@@ -7,7 +7,7 @@
  * It exists because 09C2 ships the shell and Overview while the other ten
  * screens arrive in 09C3 to 09C5, and a navigation item that leads to a 404 is
  * worse than one that plainly says it is not there yet. By 09C5 every module
- * is interactive and this flag — and the styling that reads it — is deleted.
+ * is interactive and this flag (and the styling that reads it) is deleted.
  *
  * Nothing outside the shell consults it. Role permission is a separate
  * question answered by `permissions.ts`: a module can be unimplemented and

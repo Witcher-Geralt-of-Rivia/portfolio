@@ -1,7 +1,7 @@
 /* =====================================================================
    OPERATIONS DEMO
    The product's own surface, loaded by src/app/demos/operations/page.tsx
-   through its client boundary — never by globals.css, so none of it ships
+   through its client boundary, never by globals.css, so none of it ships
    on the portfolio.
 
    It inherits the portfolio's tokens for type, radii and motion, and then
@@ -311,7 +311,7 @@
 /* Wide enough for "Fleet Coordinator", the longest role, plus the native
    select's own chevron. Clipping a role name to "Finance Analys" would be
    exactly the unclear abbreviation the specification rules out. */
-.ops-role__select {
+.ops-role__select .demo-select__trigger {
   min-width: 168px;
   max-width: 200px;
 }
@@ -835,7 +835,7 @@
   overflow: hidden;
 }
 
-/* Sticky so the count and the actions stay reachable while the list scrolls —
+/* Sticky so the count and the actions stay reachable while the list scrolls:
    on a phone the list is taller than the sheet. */
 .ops-notify__head {
   position: sticky;
@@ -1004,7 +1004,7 @@
 .ops-notify__action:focus-visible,
 .ops-notify__mark:focus-visible,
 .ops-button:focus-visible,
-.ops-role__select:focus-visible,
+.ops-role__select .demo-select__trigger:focus-visible,
 .ops-app__nav-close:focus-visible {
   outline: 2px solid rgba(81, 86, 102, 0.48);
   outline-offset: 2px;
@@ -1479,7 +1479,7 @@
 }
 
 /* The shared table drops the rule under its last row, but that rule only
-   reaches `td` — leaving a stub of border under the final lead's name. */
+   reaches `td`, leaving a stub of border under the final lead's name. */
 .ops-leads__table tr:last-child th.ops-leads__name-cell {
   border-bottom: 0;
 }
@@ -2199,122 +2199,28 @@
 }
 
 /* =====================================================================
-   THE SELECT CONTROL (Stage 09C3.1.1)
+   THE SELECT CONTROL (09C3.1.1 closed design, 09C3.1.2 custom menu)
    ===================================================================== */
 
 /**
- * Label and value inside one border.
+ * The box, the label and the menu all live in `DemoSelect` now; what remains
+ * here is what is specific to this product.
  *
- * The toolbar used to be four small uppercase words sitting beside four
- * browser selects, which read as eight things rather than four controls. Here
- * the wrapper carries the border and the select sits inside it with no chrome
- * of its own, so `Stage · Qualified` is one object.
+ * A filter that is doing something is marked in ink and edge rather than
+ * colour: the stage pills already carry four hues, and a fifth saturated
+ * accent for "this filter is set" would compete with the data it filters.
  */
-.ops-control {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  height: 40px;
-  padding: 0 12px;
-  border: 1px solid var(--ops-line);
-  border-radius: 11px;
-  background: var(--ops-surface);
-  color: var(--ops-ink);
-  cursor: pointer;
-  transition: border-color 120ms ease, background-color 120ms ease;
-}
-
-.ops-control--compact {
-  height: 38px;
-  min-width: 96px;
-  padding: 0 14px;
-}
-
-.ops-control:hover {
-  border-color: rgba(70, 80, 110, 0.26);
-  background: var(--ops-surface-quiet);
-}
-
-/* The ring goes on the wrapper because the select inside it has no border of
-   its own to draw one around.
-
-   `:focus-within` rather than `:has(:focus-visible)`: the select's own outline
-   is suppressed, so if the browser did not understand the selector the control
-   would have no visible focus at all. A ring that also appears on click is the
-   native behaviour of a select anyway, and is the safe direction to be wrong
-   in. */
-.ops-control:focus-within {
-  outline: 2px solid var(--ops-sky);
-  outline-offset: 1px;
-}
-
-.ops-control__label {
-  flex: none;
-  color: var(--ops-ink-3);
-  font-family: var(--font-mono);
-  font-size: 10.5px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  /* The separator between label and value, drawn rather than typed so the
-     label and the value stay two selectable words. */
-  padding-right: 7px;
-  border-right: 1px solid var(--ops-line-soft);
-}
-
-/**
- * The select itself: no border, no background, no platform arrow.
- *
- * Width is left to the browser, which sizes a select to its widest option.
- * That keeps the control still when the value changes — picking "Returning
- * customer" cannot widen the box and reflow the toolbar under the pointer.
- */
-.ops-control__select {
-  appearance: none;
-  -webkit-appearance: none;
-  border: 0;
-  padding: 0;
-  background: transparent;
-  color: inherit;
-  font-family: var(--font-sans);
-  font-size: 13.5px;
-  line-height: 1.2;
-  cursor: inherit;
-  /* The native ring would trace the invisible select rather than the visible
-     control; the wrapper draws it instead. */
-  outline: none;
-}
-
-.ops-control__chevron {
-  flex: none;
-  color: var(--ops-ink-3);
-  /* Clicks belong to the select underneath. */
-  pointer-events: none;
-}
-
-/**
- * A filter that is doing something.
- *
- * Stated with ink and a slightly firmer edge rather than colour: on a screen
- * whose stage pills are already carrying four hues, a fifth saturated accent
- * for "this filter is set" would compete with the data.
- */
-.ops-control[data-active="true"] {
+.ops-control[data-active="true"] .demo-select__trigger {
   border-color: rgba(70, 80, 110, 0.3);
   background: var(--ops-surface-quiet);
 }
 
-.ops-control[data-active="true"] .ops-control__select {
-  color: var(--ops-ink);
+.ops-control[data-active="true"] .demo-select__value {
   font-weight: var(--weight-ui, 500);
 }
 
-.ops-control[data-active="true"] .ops-control__label {
+.ops-control[data-active="true"] .demo-select__label {
   color: var(--ops-ink-2);
-}
-
-.ops-control[data-disabled="true"] {
-  opacity: 0.55;
-  cursor: not-allowed;
 }
 
 /* In the phone sheet the label sits above its control instead of inside it,
@@ -2333,11 +2239,8 @@
   text-transform: uppercase;
 }
 
-.ops-control-row .ops-control {
-  width: 100%;
-}
-
-.ops-control-row .ops-control__select {
+.ops-control-row .ops-control,
+.ops-control-row .demo-select__trigger {
   width: 100%;
 }
 

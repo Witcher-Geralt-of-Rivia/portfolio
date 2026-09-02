@@ -1,6 +1,6 @@
 /**
  * A compact proof rail beneath the hero actions. Quiet technical metadata,
- * not a card grid — the panel-free treatment is deliberate.
+ * not a card grid. The panel-free treatment is deliberate.
  */
 
 const CAPABILITIES = [

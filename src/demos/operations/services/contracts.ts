@@ -1,5 +1,5 @@
 /**
- * Operations demo — contract services.
+ * Operations demo: contract services.
  *
  * Activation and completion are where a vehicle changes hands, so both end by
  * recomputing the vehicle rather than writing a status directly. Completion in

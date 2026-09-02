@@ -3,7 +3,7 @@
  *
  * Server-rendered: it is fixed text with no behaviour, and it must be in the
  * initial HTML. A disclosure that appeared only after hydration would be
- * absent exactly when someone reads the page source or when scripting fails —
+ * absent exactly when someone reads the page source or when scripting fails,
  * the two cases where an honest label matters most.
  *
  * The wording is canonical. It may be restyled; it may not be softened,

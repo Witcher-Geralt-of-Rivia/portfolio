@@ -8,7 +8,7 @@
  *
  * Downsampling premultiplies alpha before averaging and un-premultiplies
  * afterwards. Averaging straight RGBA instead would pull the colour of fully
- * transparent pixels — usually black — into every edge, and the mark is 64%
+ * transparent pixels, usually black, into every edge, and the mark is 64%
  * transparent with a wide soft border, so the halo would be obvious at 32px.
  *
  * Run: node qa/brand-derive.mjs
@@ -211,7 +211,7 @@ artwork bounds  ${tight.bounds.width}x${tight.bounds.height} at ` +
     `x${tight.bounds.minX} y${tight.bounds.minY}, margin ${tight.margin}px ` +
     `-> ${tight.png.width}x${tight.png.height}`
 );
-/* One asset for both placements — 120px tall serves 30px at 4x and 22px at
+/* One asset for both placements: 120px tall serves 30px at 4x and 22px at
    5.5x, and a single file is one request rather than two. */
 for (const [path, height] of [["public/brand/mark-120.png", 120]]) {
   const scaled = scaleToHeight(tight.png, height);

@@ -8,7 +8,7 @@ import "@/styles/operations.css";
 /**
  * Layout for the Operations demo.
  *
- * Holds the product's client boundary — provider, shell, sidebar, top bar — so
+ * Holds the product's client boundary (provider, shell, sidebar, top bar) so
  * it persists while the visitor moves between modules. The runtime beneath it
  * is created once for the whole product rather than once per screen.
  *

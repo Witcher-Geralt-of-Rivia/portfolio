@@ -1,7 +1,7 @@
 /* =====================================================================
-   MILKY INTELLIGENCE — 02 / PRODUCT ENGINEERING
+   MILKY INTELLIGENCE - 02 / PRODUCT ENGINEERING
    Where Stage 05 showed architecture, this section shows the product
-   surfaces themselves. Every screen is authored here in HTML and CSS —
+   surfaces themselves. Every screen is authored here in HTML and CSS:
    no screenshot, no template, no device-mockup package.
    ===================================================================== */
 
@@ -91,7 +91,7 @@
   overflow: hidden;
 }
 
-/* Local atmosphere only — the Stage 01 aurora is untouched. */
+/* Local atmosphere only: the Stage 01 aurora is untouched. */
 .pstudio::before {
   content: "";
   position: absolute;
@@ -331,7 +331,7 @@
 }
 
 /* =====================================================================
-   WEB SURFACE — an original application frame, not a facsimile of any
+   WEB SURFACE: an original application frame, not a facsimile of any
    real browser: no vendor UI, no address bar, no back/forward controls.
    ===================================================================== */
 
@@ -722,7 +722,7 @@
 }
 
 /* =====================================================================
-   MOBILE SURFACE — a neutral product-rendering container. No camera,
+   MOBILE SURFACE: a neutral product-rendering container. No camera,
    no notch clone, no manufacturer detail, no branded hardware.
    ===================================================================== */
 
@@ -1010,7 +1010,7 @@
 }
 
 /* =====================================================================
-   AI ASSIST SURFACE — provider-neutral, deterministic, local.
+   AI ASSIST SURFACE: provider-neutral, deterministic, local.
    No chat transcript, no input field, no model, no network.
    ===================================================================== */
 
@@ -1129,7 +1129,7 @@
 }
 
 /* =====================================================================
-   PRODUCT EVENT FLOW — the engineering pipeline beneath the surfaces.
+   PRODUCT EVENT FLOW: the engineering pipeline beneath the surfaces.
    ===================================================================== */
 
 .pflow {
@@ -1227,7 +1227,7 @@
   background: rgba(168, 205, 238, 0.85);
 }
 
-/* Ambient packet while the flow is running — a single sweep across the rail,
+/* Ambient packet while the flow is running: a single sweep across the rail,
    not a per-node animation. */
 .pflow__rail.is-running {
   position: relative;
@@ -1408,7 +1408,7 @@
 }
 
 /* =====================================================================
-   RESPONSIVE — the composition reflows; no surface is ever dropped.
+   RESPONSIVE: the composition reflows; no surface is ever dropped.
    ===================================================================== */
 
 /* Below the composed desktop layout the phone and assist panel sit side by
@@ -1520,7 +1520,7 @@
 }
 
 /* =====================================================================
-   REDUCED MOTION — the studio stays fully usable and fully legible.
+   REDUCED MOTION: the studio stays fully usable and fully legible.
    Content still changes; only the movement is removed.
    ===================================================================== */
 

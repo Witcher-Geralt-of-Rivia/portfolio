@@ -1,5 +1,5 @@
 /**
- * Operations demo — payment services.
+ * Operations demo: payment services.
  *
  * Accounting-state simulation only. There is no provider, no card entry and no
  * processing: recording a payment moves a synthetic balance and writes an

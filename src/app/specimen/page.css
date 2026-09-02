@@ -41,7 +41,7 @@
 
 /* The role name sits at micro scale: it is metadata about the specimen,
    never part of the specimen itself. It still carries meaning, so it uses
-   the annotation colour — muted would drop it to ~3.2:1, below AA. */
+   the annotation colour: muted would drop it to ~3.2:1, below AA. */
 .specimen__role {
   color: var(--text-annotation);
 }
@@ -99,7 +99,7 @@
   background: rgba(255, 255, 255, 0.42);
 }
 
-/* Letterform proofing strip — mixed caps, punctuation and numerals. */
+/* Letterform proofing strip: mixed caps, punctuation and numerals. */
 .specimen__letterforms {
   display: flex;
   flex-wrap: wrap;

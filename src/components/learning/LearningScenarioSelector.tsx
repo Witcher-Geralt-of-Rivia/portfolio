@@ -7,8 +7,8 @@ import type { LearningScenario, ScenarioId } from "./learning-scenarios";
 /**
  * The three learning scenarios, as a real ARIA tablist.
  *
- * Same rule as the Stage 05 and Stage 06 selectors: full tab semantics —
- * roving tabindex, arrow keys, Home and End — or plain buttons. A
+ * Same rule as the Stage 05 and Stage 06 selectors: full tab semantics
+ * (roving tabindex, arrow keys, Home and End) or plain buttons. A
  * half-implemented tablist is worse than none. This component owns no state;
  * the selection lives in the lab above it.
  */

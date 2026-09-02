@@ -3,7 +3,7 @@ import type { LearningScenario, MapLink, MapNode } from "./learning-scenarios";
 /**
  * Link geometry for the knowledge map, resolved once at module scope so it is
  * evaluated during the build and the browser only ever receives finished path
- * strings — the same rule as `constellation-geometry.ts` (Stage 04) and
+ * strings, the same rule as `constellation-geometry.ts` (Stage 04) and
  * `architecture-geometry.ts` (Stage 05).
  */
 

@@ -1,5 +1,5 @@
 /**
- * Operations demo — the seed, assembled.
+ * Operations demo: the seed, assembled.
  *
  * Turns the built bundle into the runtime's `DemoSeed` shape and provides the
  * integrity checker the QA harness runs against it.
@@ -58,7 +58,7 @@ export function buildOperationsSeed(): DemoSeed {
    INTEGRITY
 
    The relationship contract, checked rather than assumed. Kept out of the
-   application path — nothing in the product imports this — so it costs the
+   application path (nothing in the product imports this), so it costs the
    demo nothing and the QA harness can still hold the seed to its promises.
    ===================================================================== */
 

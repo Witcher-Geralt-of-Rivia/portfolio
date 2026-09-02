@@ -33,7 +33,7 @@ const LISTS = [
 ];
 
 const ALL = LISTS.map(([s]) => s).join(", ");
-// Restore only what the local reset suppresses — the UA list defaults.
+// Restore only what the local reset suppresses: the UA list defaults.
 const NEUTRALISE = `${ALL} { padding-inline-start: 40px !important; list-style: disc !important; margin-block: 1em !important; }`;
 
 const browser = await chromium.launch({

@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Operations demo — the Leads module.
+ * Operations demo: the Leads module.
  *
  * The first screen in this product that writes. It reads leads and actors once
  * through the domain, hands them to `selectLeadList` for matching and
@@ -86,7 +86,7 @@ export default function LeadsScreen() {
 
   /* A role that cannot open Leads must not keep the previous role's records on
      screen for even one frame. The gate is on `role`, which changes
-     synchronously — not on the query, which resolves a beat later.
+     synchronously, not on the query, which resolves a beat later.
      
      Adjusted during render rather than in an effect: an effect would let one
      frame paint with an overlay belonging to a role that just lost access, and
@@ -132,7 +132,7 @@ export default function LeadsScreen() {
    * "Not in the list" and "not read yet" are different answers.
    *
    * Creating a lead opens it immediately, which is the confirmation that it
-   * was saved — but the list query has not revalidated at that instant, so the
+   * was saved, but the list query has not revalidated at that instant, so the
    * record genuinely is not in `data` yet. Reporting that as an unknown id
    * told the visitor their new lead did not exist, for about half a second,
    * right after they made it. The query has to have settled before absence
@@ -172,7 +172,7 @@ export default function LeadsScreen() {
    * nothing and focus ended up on <body>.
    *
    * So the claim is recorded, and applied once the navigation has actually
-   * landed — the effect below is keyed on the selection being gone, which is
+   * landed: the effect below is keyed on the selection being gone, which is
    * the first render where that is true. */
   const pendingFocus = useRef<"heading" | HTMLElement | null>(null);
 
@@ -311,7 +311,7 @@ export default function LeadsScreen() {
  * Contained inside the shell rather than a redirect: silently sending someone
  * somewhere else hides the fact that the module exists and that their role is
  * the reason it is closed. It is stated plainly, and it is not called
- * security — nothing here is authenticated.
+ * security: nothing here is authenticated.
  */
 function LeadsUnavailable({ role }: { role: string }) {
   return (
@@ -349,7 +349,7 @@ function EmptyLeads({ filtered, onClear }: { filtered: boolean; onClear: () => v
  *
  * One bar rather than three things that happen to sit on the same line. It had
  * a range on the left, the controls floating in the middle and a bare `10`
- * behind the words "PER PAGE" pinned to the right edge — a thousand pixels
+ * behind the words "PER PAGE" pinned to the right edge, a thousand pixels
  * apart on a wide screen, reading as three unrelated fragments.
  *
  * The page size says what it is now. `10` is a number; `10 rows` is an answer

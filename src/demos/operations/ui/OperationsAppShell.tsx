@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Operations demo — the application shell.
+ * Operations demo: the application shell.
  *
  * Sits inside the shared demo chrome and owns everything below it: the
  * sidebar, the top bar and the content area. It supplies the role control into
@@ -13,8 +13,9 @@
  * navigations are on screen.
  */
 
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
+import DemoSelect from "@/components/demos/DemoSelect";
 import DemoShell from "@/components/demos/DemoShell";
 import { useDemoRuntimeContext } from "@/demo-runtime/react/DemoRuntimeProvider";
 import { useDemoSession } from "@/demo-runtime/react/hooks";
@@ -34,29 +35,19 @@ import OperationsSidebar from "./OperationsSidebar";
  */
 function RoleControl({ onAnnounce }: { onAnnounce: (message: string) => void }) {
   const session = useDemoSession();
-  const id = useId();
 
   return (
     <span className="ops-role">
-      <label className="visually-hidden" htmlFor={id}>
-        Demo role
-      </label>
-      <select
-        id={id}
-        className="demo-chrome__action ops-role__select"
+      <DemoSelect
+        className="ops-role__select"
+        srLabel="Demo role"
         value={session.activeRole}
-        onChange={(e) => {
-          const role = e.target.value;
+        options={ROLES.map((role) => ({ value: role, label: role }))}
+        onChange={(role) => {
           session.setRole(role);
           onAnnounce(`Demo role changed to ${role}`);
         }}
-      >
-        {ROLES.map((role) => (
-          <option key={role} value={role}>
-            {role}
-          </option>
-        ))}
-      </select>
+      />
     </span>
   );
 }

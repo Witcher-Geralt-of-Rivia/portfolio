@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * QA FIXTURE — not part of the product, and not a route while it lives here.
+ * QA FIXTURE: not part of the product, and not a route while it lives here.
  *
  * Publishes the Operations domain and the shared runtime on `window` so
  * `qa/stage09c1-operations.mjs` can exercise the real bundled modules against a

@@ -166,10 +166,10 @@ Stage 06 added four more, all harness faults rather than application faults:
   `{ polling: 120 }` for anything timing-sensitive.
 - **Fixed and injected overlays land in full-page captures.** The site
   navigation is `position: fixed`, so scrolling a section into view parks its
-  dark text over that section in a full-page screenshot — sampled as if it were
+  dark text over that section in a full-page screenshot, sampled as if it were
   the section's background, which read 1.00:1. `<nextjs-portal>`, the dev-tools
   indicator, does the same and exists only under `next dev`. Remove both for
-  capture with `display: none` — `visibility: hidden` is not enough, because
+  capture with `display: none`. `visibility: hidden` is not enough, because
   nav children re-assert `visibility: visible`.
 - **Page-wide assertions rot as the page grows.** `stage05-a11y.mjs` counted
   every `[role="tab"]` in the document and asserted exactly one was tabbable.
@@ -404,7 +404,7 @@ the probe.
 Production serves `.next-release-a` or `.next-release-b`, never `.next`. These
 are the measurements that prove a build can no longer disturb the live site.
 
-**Accidental plain build** — production on `.next-release-a`, ran
+**Accidental plain build.** Production on `.next-release-a`, ran
 `npm run build` (writes `.next`) while polling the public site:
 
 ```
@@ -414,7 +414,7 @@ JS chunk   85 requests   85x 200   0 non-200   0 connection failures
 .next BUILD_ID rewritten; .next-release-a BUILD_ID untouched
 ```
 
-**Safe deployment, inactive-slot build window** — `deploy:safe` building
+**Safe deployment, inactive-slot build window.** `deploy:safe` building
 `.next-release-b` while production served `.next-release-a`:
 
 ```
@@ -425,9 +425,9 @@ JS chunk   85 requests   85x 200   0 non-200   0 connection failures
 new one boots. Measured 12.6s, 13.8s and 58.8s across three switches; the 58.8s
 run had the development server competing for RAM. The public monitor recorded
 502s for ~46s during that worst case. This is a real availability gap, not zero
-downtime, and it is the PM2 restart — not the build.
+downtime, and it is the PM2 restart, not the build.
 
-**Rollback drill** — `deploy:safe -FailAfterSwitchForTest`, health check forced
+**Rollback drill.** `deploy:safe -FailAfterSwitchForTest`, health check forced
 to fail after switching:
 
 ```
@@ -644,8 +644,8 @@ PASS. Harnesses: `qa/stage09a-runtime.mjs` (76 checks) and
 
 ### How the browser integration was performed
 
-The demo runtime is browser code — IndexedDB, a memory fallback, cross-tab
-invalidation — and cannot be exercised in Node. Two temporary routes were
+The demo runtime is browser code (IndexedDB, a memory fallback, cross-tab
+invalidation) and cannot be exercised in Node. Two temporary routes were
 created for the run and **deleted before commit**:
 
 ```
@@ -662,7 +662,7 @@ committed tree or in production. Each harness header carries the procedure for
 recreating its fixture; note that a folder beginning with `_` is a Next.js
 private folder and produces no route.
 
-### Runtime — 76 checks
+### Runtime - 76 checks
 
 ```
 persistence mode     IndexedDB selected in a normal browser
@@ -697,7 +697,7 @@ cross-tab            a mutation in one tab notified the other, which picked up
 network              0 external requests, 0 /api/ calls, 0 console errors
 ```
 
-### Scale — 500 generic records
+### Scale - 500 generic records
 
 A sanity check on this runtime in this browser, not a benchmark, and not a
 statement about production capacity. Three runs:
@@ -713,7 +713,7 @@ reset                     598 / 425 / 345 ms
 Reset was 1444ms before the cursor-purge bug was fixed; the keyed range delete
 that replaced it is also what made it correct.
 
-### Shell — 85 checks
+### Shell - 85 checks
 
 ```
 geometry     1920/1440/1366  36px    1024  37px    768  37px
@@ -906,7 +906,7 @@ memory fallback                  PASS, renders, mutates and resets
 All PASS at 1920x1080, 1440x900, 1366x768, 1180x820, 1024x768, 768x1024,
 430x932, 390x844 and 360x800: no horizontal overflow, no clipped text, exactly
 one navigation presentation at every width, and the role control inside the
-bar. KPI columns are intrinsic on phones — two at 430 (188px) and 390 (168px),
+bar. KPI columns are intrinsic on phones: two at 430 (188px) and 390 (168px),
 one at 360 (321px).
 
 ### Accessibility and contrast
@@ -925,7 +925,7 @@ reservations table has four scope="col" headers
 
 Measured inside the page. Driving these through Playwright reports seconds,
 because its default rAF polling starves against an application that schedules
-no frames at rest — the delay is in the harness, not the product.
+no frames at rest: the delay is in the harness, not the product.
 
 ```
 role switch                 9-34 ms
@@ -947,7 +947,7 @@ rather than suppressed.
 
 ### Screenshots
 
-`qa/shots/stage09c2/` — overview at 1440x900, 1024x768 and 390x844, the
+`qa/shots/stage09c2/`: overview at 1440x900, 1024x768 and 390x844, the
 Finance Analyst role at 1440x900, and the notification panel at 390x844.
 
 ### Regression
@@ -1040,7 +1040,7 @@ Fleet Coordinator     2  Fleet · Upcoming · Queue                      2      
 Finance Analyst       1  Payment status · Contract status · Queue      0      3
 ```
 
-Finance's badge is 0 because its own notifications are all read in the seed —
+Finance's badge is 0 because its own notifications are all read in the seed,
 which is the point: the badge now counts the list it labels. Every badge equals
 the unread rows in that role's own panel.
 
@@ -1072,7 +1072,7 @@ rendered      30px tall in site navigation, 22px in the demo bar
 
 ### Screenshots
 
-`qa/shots/stage09c21/` — captured from **production over HTTPS**, not from a
+`qa/shots/stage09c21/`, captured from **production over HTTPS**, not from a
 local build: the Overview at 1440x900, 1024x768 and 390x844, the notification
 sheet at 390x844, and the Finance Analyst role at 1440x900.
 
@@ -1344,10 +1344,10 @@ focus          2px ring on the wrapper via :focus-within
 ### Sort
 
 One control, twelve options, no direction button. Each option names its field
-and its direction: `Last activity — newest`, `Next follow-up — soonest`,
-`Lead name — A–Z`, `Stage — early first`, `Priority — high first`,
-`Created — oldest`. The semantics are the frozen ones — six fields, both
-directions — expressed as one choice instead of two.
+and its direction: `Last activity: newest`, `Next follow-up: soonest`,
+`Lead name: A–Z`, `Stage: early first`, `Priority: high first`,
+`Created: oldest`. The semantics are the frozen ones (six fields, both
+directions) expressed as one choice instead of two.
 
 ### Provenance band
 
@@ -1367,7 +1367,7 @@ Below 861px the bar is wrapping flex rather than grid, and that is measured:
 at 360px the back link (120px), the role select (167px intrinsic - "Fleet
 Coordinator" needs it) and Reset (59px) are 363px of content in a 321px bar. A
 two-column grid grew to hold them and the band, spanning both columns,
-stretched to that overflowed width. Two rows at 430px and above, three below —
+stretched to that overflowed width. Two rows at 430px and above, three below,
 which is what it was before this stage.
 
 ### Pagination
@@ -1387,7 +1387,7 @@ steps     real <button disabled> on the first and last page, so the state
 No horizontal overflow and nothing clipped at 1920x1080, 1600x900, 1440x900,
 1366x768, 1180x820, 1024x768, 768x1024, 430x932, 390x844, 375x812 and 360x800.
 
-The `visually-hidden` labels report as clipped by any naive scrollWidth check —
+The `visually-hidden` labels report as clipped by any naive scrollWidth check:
 they are 1px-clipped by design. The suite excludes them, as it has since 09C2.
 
 ### Regression
@@ -1412,3 +1412,129 @@ One pre-existing harness weakness was fixed rather than worked around: the
 responsive section waited for the result-count element, which renders a blank
 placeholder before the query settles, so it could measure an empty table. It
 waits for a record now.
+
+---
+
+## Stage 09C3.1.2 - Custom Select System
+
+PASS. Harness: `qa/stage09c31-leads.mjs`, grown from 398 to **407 checks**
+(378 without the domain probe, which is what runs against production), plus
+the new `npm run qa:style` guard.
+
+### What the external review found
+
+Six dropdowns whose closed control looked right and whose open menu did not.
+The popup belongs to the operating system, so it arrived with square corners,
+almost no option padding, a saturated system-blue selection band and a border
+from Windows. No CSS on `<option>` reaches any of it.
+
+### The menu, as measured
+
+Identical across all six controls, and across the five that were converted
+alongside them:
+
+```
+menu radius        12px          menu padding      6px
+option padding     9px / 12px    option radius     8px
+option text        13.5px        selected          soft sky, with a tick
+stacking           z-index 70    position          fixed, measured
+native selects     0 on the page (6 role=combobox triggers)
+```
+
+### The six controls
+
+```
+Stage    7 options    Source   6 options    Owner   3 options
+Sort    12 options    Rows     2 options    Role    4 options
+```
+
+Every one: rounded menu, padded rounded options, soft sky selected state with
+a tick, keyboard operable, within the viewport, no clipping.
+
+### Behaviour
+
+```
+open          Enter, Space, ArrowDown or ArrowUp, onto the CURRENT value
+navigate      ArrowUp/ArrowDown, Home, End
+choose        Enter, or click
+Escape        closes, value unchanged, focus stays on the trigger
+Tab           closes and moves on
+typeahead     "q" reaches Qualified; 600ms buffer, cleared on unmount
+outside click closes, value unchanged
+exclusivity   opening one menu closes any other
+placement     below when there is room, above when there is not
+              (page size at 1366x768 opens upward and stays in view)
+height        12 sort options cap at 320px and scroll internally
+width         grows past the trigger for "Returning customer" without clipping
+              and never crosses the viewport edge
+```
+
+### Accessibility
+
+`role="combobox"` with `aria-haspopup="listbox"`, `aria-expanded`,
+`aria-controls` and `aria-activedescendant`; the menu is `role="listbox"` and
+options are `role="option"` with `aria-selected`. Focus never leaves the
+trigger, which is what makes Escape, Tab and outside-click behave.
+
+The accessible name is `aria-labelledby` over the visible label and the current
+value, so a reader hears "Stage, All stages" once rather than a decorative
+label read and then repeated. The chevron and the tick are `aria-hidden`.
+
+Focus ring measured at 2px solid with `:focus-visible` true after tabbing to
+the control (programmatic focus does not match `:focus-visible`, so the check
+tabs).
+
+### Inside a dialog
+
+A menu opened from the phone filter sheet is portalled into that `<dialog>`
+rather than into `document.body`. A modal dialog is in the browser's top layer,
+above every z-index, so a body-portalled menu would have been painted behind
+the sheet that opened it. Verified at 390 and 360: `parentTag: DIALOG`, menu
+on top, within the viewport, 12 sort options scrolling at 320px.
+
+### Em dash removal
+
+```
+before      791 occurrences in 161 tracked files
+after         0
+guard       npm run qa:style, reports file, line and column
+canonical   CLAUDE.md "Writing style", D-073
+```
+
+Each was judged in context rather than substituted: a colon where the second
+half explains, a comma for an aside, a full stop between two sentences,
+parentheses around a bracketed clause that contains its own commas, a hyphen in
+a heading. The sort labels moved to `Last activity: newest`, and the tables'
+empty-value placeholder to a hyphen.
+
+`AGENTS.md` is regenerated by `next dev` and will reintroduce two occurrences
+if that command is run. The guard catches it.
+
+### Regression
+
+```
+stage09a-runtime                76/76
+stage09a-shell                  85/85
+stage09b-operations-spec        96/96
+stage09c1-operations          211/211
+stage09c2-operations-ui       141/141
+stage09c21-hardening          111/111
+stage09c31-leads              407/407
+public-repo-safety              19/19  (with --history)
+copy-style                        1/1
+qa:memory                       18/18
+tsc --noEmit                    clean
+eslint                          0 errors (1 pre-existing warning in qa/texture.mjs)
+                              ------
+                             1165 checks
+```
+
+The suites that drive the role control were updated: it is a listbox now, so
+`selectOption` was replaced by opening the menu and clicking an option.
+
+One assertion changed meaning rather than form. The 09C3.1 role-leak test drove
+the role while a lead detail was open, which `selectOption` allowed because it
+does not hit-test. The detail is a modal `<dialog>`, so the chrome behind it is
+genuinely inert and a visitor cannot reach the role control at all. The suite
+now asserts that inertness, then closes the detail and checks the leak
+protection as before.

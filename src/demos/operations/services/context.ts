@@ -1,10 +1,10 @@
 /**
- * Operations demo — service context and shared plumbing.
+ * Operations demo: service context and shared plumbing.
  *
  * Every mutating service takes a context carrying the runtime and the current
  * simulated session, and enforces its own permission. A service that trusted
  * its caller to have checked would be a service whose rules live in whichever
- * screen happened to call it — which is exactly the pattern that makes
+ * screen happened to call it, which is exactly the pattern that makes
  * frontend role handling decorative.
  */
 

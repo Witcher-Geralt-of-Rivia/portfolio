@@ -1,5 +1,5 @@
 /**
- * Demo runtime — composition root.
+ * Demo runtime: composition root.
  *
  * Owns a single demo's persistence, clock, counters, revision, audit sequence
  * and job queue, and is the only module that writes. Everything a product does
@@ -75,7 +75,7 @@ export type MutationContext = {
   tick(by?: number): string;
   /** Next deterministic id in a collection, e.g. `customer_0007`. */
   nextId(collection: CollectionName, prefix: string): string;
-  /** Who the audit trail should credit — the current simulated role. */
+  /** Who the audit trail should credit: the current simulated role. */
   readonly actor: string;
   /** Build a fully-formed record, stamped with the logical clock. */
   record<T>(collection: CollectionName, id: string, data: T, previous?: DemoRecord<T>): DemoRecord<T>;
@@ -315,7 +315,7 @@ export function createDemoRuntime(options: DemoRuntimeOptions): DemoRuntime {
       } else if (stored.seedVersion !== seed.seedVersion) {
         /* The canonical dataset changed shape between releases. Keeping the
            old rows would mean a demo built from two incompatible versions of
-           the truth, so this demo — and only this demo — returns to canonical
+           the truth, so this demo, and only this demo, returns to canonical
            state. See docs/DEMO_PLATFORM.md, "Release compatibility". */
         await applySeed("reset");
       } else {

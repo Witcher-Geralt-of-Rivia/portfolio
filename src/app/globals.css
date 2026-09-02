@@ -1,5 +1,5 @@
 /* =====================================================================
-   MILKY INTELLIGENCE — GLOBAL STYLESHEET
+   MILKY INTELLIGENCE - GLOBAL STYLESHEET
    Composition root only. Tokens, typography, motion, background layers
    and surfaces each live in their own file; this one wires them together
    and sets the base document rules.
@@ -85,7 +85,7 @@ select {
 /* ---------------------------------------------------------------------
    BASE DOCUMENT
    Heading, paragraph, code and role typography all live in
-   styles/typography.css — this file does not restate them.
+   styles/typography.css. This file does not restate them.
    --------------------------------------------------------------------- */
 
 ::selection {

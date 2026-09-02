@@ -110,7 +110,7 @@ Portfolio application
 
 Stage 09A built the shared foundation and froze it. Stage 09B froze the
 Operations domain's contract in `docs/DEMO_OPERATIONS_SPEC.md`, and Stage 09C1
-built that domain — `src/demos/operations/`, twenty-one modules of types, seed,
+built that domain: `src/demos/operations/`, twenty-one modules of types, seed,
 selectors and services with no interface at all. Field and Learning remain
 unspecified and unbuilt.
 
@@ -121,7 +121,7 @@ One layer was missing until Stage 09C3.1 and is worth naming, because its
 absence was invisible: **workflows**. A service commits and publishes domain
 events; the automation engine evaluates events; nothing joined the two, so the
 rules never ran outside the QA harness. `services/lead-workflows.ts` is that
-join — it runs a mutation, collects what it published on the runtime's event
+join: it runs a mutation, collects what it published on the runtime's event
 bus, and hands it to the rule engine (D-063). Screens call workflows where a
 rule is meant to fire, and services directly where none is.
 
@@ -129,7 +129,7 @@ The rule that keeps one runtime serving three unrelated products: the runtime
 knows records, collections, events, jobs, audit, roles, a clock and
 persistence, and never knows what a lead, a vehicle or a lesson is. UI never
 touches IndexedDB; everything above the persistence adapter speaks to its
-interface. Dependency direction is one-way — types, then persistence/clock/ids,
+interface. Dependency direction is one-way: types, then persistence/clock/ids,
 then repository, then runtime, then React, then a demo's domain, then its UI.
 
 `src/app/demos/layout.tsx` sets `robots: noindex` for the subtree. Its only
@@ -211,7 +211,7 @@ readable function. Both of its timers are cleared by effect cleanup.
 `LabWorkspace.tsx` holds the selected experiment, its variant, and how far the
 frame sequence has advanced. Each experiment is a precomputed frame list, so
 running one is an index walking forward and the render is a pure function of
-that index — which is what makes the sequences reproducible.
+that index, which is what makes the sequences reproducible.
 
 The four selectors (`ArchitectureModeSelector`, `ProductScenarioSelector`,
 `LearningScenarioSelector`, `LabExperimentSelector`) are client only because a

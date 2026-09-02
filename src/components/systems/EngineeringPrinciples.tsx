@@ -1,5 +1,5 @@
 /**
- * Four principles as a compact strip. Number and title only — no paragraphs,
+ * Four principles as a compact strip. Number and title only: no paragraphs,
  * no cards. Server-rendered.
  */
 

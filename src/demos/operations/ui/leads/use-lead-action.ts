@@ -1,11 +1,11 @@
 "use client";
 
 /**
- * Operations demo — running one lead mutation.
+ * Operations demo: running one lead mutation.
  *
  * `useDemoMutation` from the shared runtime takes a mutation builder and
- * commits it directly. The lead services do their own committing — that is
- * where the permission check and the business rules live — so a screen calling
+ * commits it directly. The lead services do their own committing (that is
+ * where the permission check and the business rules live), so a screen calling
  * them needs the same three things around a different shape of call: a pending
  * flag that survives the await, a failure translated into words, and a
  * guarantee that a second click cannot start a second commit.

@@ -2,7 +2,7 @@ import type { ProductScenario, Tone, WebBlock } from "./product-scenarios";
 
 /**
  * The web product surface: a custom application frame built from HTML and CSS.
- * No screenshot, no template — every pixel is authored here so the section
+ * No screenshot, no template. Every pixel is authored here so the section
  * demonstrates our own product design rather than someone else's.
  *
  * One renderer covers all three scenarios by walking the scenario's block list.

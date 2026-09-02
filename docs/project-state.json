@@ -4,7 +4,7 @@
   "currentStage": 8,
   "stage05Started": true,
   "nextStage": "stage-09c3-2",
-  "nextStageTitle": "Stage 09C3.2 - Operations CRM: Customers (BLOCKED UNTIL EXTERNAL LIVE REVIEW OF 09C3.1.1)",
+  "nextStageTitle": "Stage 09C3.2 - Operations CRM: Customers (BLOCKED UNTIL EXTERNAL LIVE REVIEW OF STAGE 09C3.1.2)",
   "frozenStages": [
     1,
     2,
@@ -80,6 +80,7 @@
       "src/components/lab/LabExperimentSelector.tsx",
       "src/demo-runtime/react/DemoRuntimeProvider.tsx",
       "src/demo-runtime/react/hooks.ts",
+      "src/components/demos/DemoSelect.tsx",
       "src/components/demos/DemoShell.tsx",
       "src/components/demos/DemoResetControl.tsx",
       "src/demos/operations/ui/OperationsRoute.tsx",
@@ -228,7 +229,7 @@
     "disclosure": "INTERACTIVE ENGINEERING DEMO / SYNTHETIC DATA - FRONTEND ONLY",
     "operationsSpec": "frozen; docs/DEMO_OPERATIONS_SPEC.md",
     "operationsDomain": "built; docs/DEMO_OPERATIONS_IMPLEMENTATION.md",
-    "operationsReview": "Leads visual hardening deployed for external live review; 09C3.2 blocked until reviewed"
+    "operationsReview": "Leads custom select system deployed for external live review; 09C3.2 blocked until reviewed"
   },
   "stage09bComplete": true,
   "stage09c1Complete": true,
@@ -244,5 +245,10 @@
     "policy": "every verified commit and tag is pushed and SHA-verified after its stage's own QA, and after production deployment where the stage requires one",
     "historyRewrite": "prohibited. The one-time authorship rewrite before initial publication was explicitly authorised and is spent"
   },
-  "stage09c311Complete": true
+  "stage09c311Complete": true,
+  "stage09c312Complete": true,
+  "copyStyle": {
+    "emDash": "banned in all project-authored content",
+    "guard": "npm run qa:style"
+  }
 }

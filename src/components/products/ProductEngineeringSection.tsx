@@ -25,7 +25,7 @@ export default function ProductEngineeringSection() {
         <div className="products__intro-support">
           <p className="products__lead">
             Web applications, mobile experiences and AI-assisted workflows
-            designed as one product system — from interface state and APIs to
+            designed as one product system, from interface state and APIs to
             data, background execution and synchronized user experiences.
           </p>
           <p className="products__capabilities">

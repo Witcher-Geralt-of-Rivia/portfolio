@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Demo runtime — React hooks.
+ * Demo runtime: React hooks.
  *
  * Four, not thirty. Each one exists because a demo screen genuinely needs it:
  * reach the runtime, read the simulated role, read data that must refresh when
@@ -11,7 +11,7 @@
  * Data freshness runs through `useSyncExternalStore` over the runtime's
  * revision. That is the whole subscription model: a mutation increments the
  * revision, subscribers are notified, and queries re-run. Nothing polls
- * IndexedDB, and there is no timer — at rest the runtime does no work at all.
+ * IndexedDB, and there is no timer. At rest the runtime does no work at all.
  */
 
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
@@ -115,7 +115,7 @@ export type QueryState<T> = {
  *
  * `read` closes over whatever it needs; `deps` declares what would make it a
  * different query. The revision is always part of the trigger, so any
- * committed mutation refreshes every live query — which is what makes a
+ * committed mutation refreshes every live query, which is what makes a
  * dashboard count agree with the list it counts.
  *
  * `deps` must be primitives (ids, filter strings, page numbers). They are
@@ -136,8 +136,8 @@ export type QueryState<T> = {
  *
  * The identity of the query is what decides this, not the trigger. A new
  * revision re-reads the *same* question, so the old answer is stale but still
- * this query's. Changed `deps` ask a *different* question — switching role,
- * page or filter — and the previous answer is then someone else's data, so it
+ * this query's. Changed `deps` ask a *different* question (switching role,
+ * page or filter), and the previous answer is then someone else's data, so it
  * is dropped rather than shown for a frame.
  */
 export function useDemoQuery<T>(
@@ -190,7 +190,7 @@ export function useDemoQuery<T>(
       live = false;
     };
     /* `token` is the whole trigger: it already folds in status, revision,
-       nonce and every declared dep. `read` is intentionally excluded — it is
+       nonce and every declared dep. `read` is intentionally excluded: it is
        usually an inline arrow and would re-run this on every render. */
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [runtime, token]);
@@ -211,8 +211,8 @@ export type MutationState = {
 /**
  * Perform a change through the runtime.
  *
- * Returns the pending flag a real interface needs — a disabled button, a
- * spinner on the row being saved — because the mock service boundary makes
+ * Returns the pending flag a real interface needs (a disabled button, a
+ * spinner on the row being saved) because the mock service boundary makes
  * mutations genuinely asynchronous.
  */
 export function useDemoMutation() {

@@ -3,7 +3,7 @@
  *
  * Used to prove that building an inactive release slot cannot disturb the live
  * site. Uses a keep-alive https.Agent so the run does not perform a fresh DNS
- * lookup per request — hammering DuckDNS that way trips the resolver and
+ * lookup per request. Hammering DuckDNS that way trips the resolver and
  * produces ENOTFOUND failures that look like an outage but are not.
  *
  *   node qa/deploy-continuity.mjs <seconds> <out.json> [assetPath...]

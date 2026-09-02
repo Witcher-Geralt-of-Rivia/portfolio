@@ -23,7 +23,7 @@
  * A plain <img> is deliberate, as it was before: `next/image` would add a
  * wrapper and a loader path for a 12 KB asset that is already the right size.
  *
- * Decorative — the adjacent wordmark names the site, so an empty alt avoids
+ * Decorative: the adjacent wordmark names the site, so an empty alt avoids
  * announcing it twice.
  */
 

@@ -4,7 +4,7 @@ import type { ProductScenario } from "./product-scenarios";
  * The AI-assist surface.
  *
  * Deliberately provider-neutral and deliberately not a chatbot. It shows what
- * an assistive surface does in a product — context, a summary, a next action —
+ * an assistive surface does in a product (context, a summary, a next action)
  * with entirely deterministic local content. There is no text input, no model,
  * and no network call anywhere in this component.
  */

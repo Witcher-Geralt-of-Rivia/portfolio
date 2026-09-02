@@ -17,8 +17,8 @@ registerGeometry(LEARNING_SCENARIOS);
 
 /**
  * The centre visual. One renderer serves all three scenarios: a knowledge map,
- * an evaluation graph and a path roadmap are the same structure — nodes, edges
- * and a highlighted route — drawn from different data.
+ * an evaluation graph and a path roadmap are the same structure (nodes, edges
+ * and a highlighted route) drawn from different data.
  *
  * The SVG is decorative and hidden from assistive technology. The lab supplies
  * one sentence describing the current state instead, which is far more useful

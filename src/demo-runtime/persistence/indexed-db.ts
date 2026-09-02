@@ -1,5 +1,5 @@
 /**
- * Demo runtime — IndexedDB persistence.
+ * Demo runtime: IndexedDB persistence.
  *
  * A small typed wrapper over the native API. No library: the required surface
  * is four stores, five indexes, one transaction shape and one upgrade path,
@@ -10,8 +10,8 @@
  *
  *   1. A transaction commits as soon as control returns to the event loop with
  *      no request outstanding. Anything awaited mid-transaction that is not an
- *      IndexedDB request — a fetch, a timer, even an already-resolved promise
- *      in some engines — ends the transaction early and the rest of the writes
+ *      IndexedDB request (a fetch, a timer, even an already-resolved promise
+ *      in some engines) ends the transaction early and the rest of the writes
  *      land outside it, or throw. `commit` therefore takes a finished write
  *      set and issues every request synchronously before awaiting completion.
  *
@@ -373,8 +373,8 @@ export function createIndexedDbAdapter(
 }
 
 /**
- * Delete the whole demo database. Not used by the application — a visitor's
- * reset is always scoped to one demo — but kept for QA teardown so a harness
+ * Delete the whole demo database. Not used by the application (a visitor's
+ * reset is always scoped to one demo), but kept for QA teardown so a harness
  * can start from nothing.
  */
 export function deleteDemoDatabase(databaseName: string = DEMO_DB_NAME): Promise<void> {

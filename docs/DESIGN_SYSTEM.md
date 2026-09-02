@@ -169,8 +169,8 @@ five packets exist at once.
 ## Product Surface Language
 
 Product surfaces are authored, never borrowed. The web frame is our own
-application window: three pastel dots, a route field and a `DEMO DATA` label —
-no address bar, no back/forward, no vendor chrome, no facsimile of any real
+application window: three pastel dots, a route field and a `DEMO DATA` label.
+No address bar, no back/forward, no vendor chrome, no facsimile of any real
 browser. The phone is a neutral container with a sensor capsule: no camera, no
 notch clone, no manufacturer detail, no hardware branding.
 
@@ -212,13 +212,13 @@ synthetic mastery figures as real assessment.
 
 Stage 08 is the most technical surface in the project and the least decorated:
 precise grids, small diagnostic labels, controlled state transitions. It is an
-instrument panel, not a terminal — no dark theme, no monospace wall, no
+instrument panel, not a terminal: no dark theme, no monospace wall, no
 scrolling log.
 
 State colour is semantic and always soft: mint for success, peach or rose for
 failure, lavender for waiting, sky for in progress. Never a saturated traffic
-light. Each experiment carries one accent hue — sky, lavender, mint, peach,
-aqua — used on a handful of small marks; the workspace itself never changes
+light. Each experiment carries one accent hue (sky, lavender, mint, peach,
+aqua) used on a handful of small marks; the workspace itself never changes
 colour with the experiment.
 
 Failure is shown, not alarmed. A refused request is an outlined dashed dot

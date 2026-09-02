@@ -1,5 +1,5 @@
 /**
- * Stage 09A — demo runtime QA.
+ * Stage 09A - demo runtime QA.
  *
  * The runtime is browser code: it persists to IndexedDB, falls back to memory,
  * and invalidates across tabs. None of that can be exercised in Node, so this
@@ -11,7 +11,7 @@
  * publishes its factories on `window.__demoProbe`. Playwright loads that page
  * and runs each assertion inside `page.evaluate`, so every test executes the
  * same compiled code a demo would. The probe route is created for this run and
- * DELETED BEFORE COMMIT — it is a test fixture, not a product surface, and a
+ * DELETED BEFORE COMMIT: it is a test fixture, not a product surface, and a
  * QA route must not exist in production.
  *
  * To re-run:
@@ -68,7 +68,7 @@ const seedFor = (demoId, count = 4, seedVersion = 1) => ({
 const browser = await chromium.launch();
 
 /* ===========================================================================
-   PASS 1 — core semantics, failure modes, isolation, determinism
+   PASS 1 - core semantics, failure modes, isolation, determinism
    =========================================================================== */
 
 const ctx = await browser.newContext();
@@ -475,7 +475,7 @@ check("a compatible seed version preserves demo state", versioning.sameVersionCo
 check("an incompatible seed version resets to canonical", versioning.newVersionCount === 4, `${versioning.newVersionCount} records`);
 check("the reset from a seed bump is at canonical revision", versioning.newVersionRevision === 0);
 
-section("SCALE — 500 GENERIC RECORDS");
+section("SCALE - 500 GENERIC RECORDS");
 const scale = await page.evaluate(async (seed) => {
   const p = window.__demoProbe;
   await p.deleteDemoDatabase();
@@ -574,7 +574,7 @@ check("no console errors or warnings", consoleProblems.length === 0, consoleProb
 await ctx.close();
 
 /* ===========================================================================
-   PASS 2 — reload persistence, in a fresh page of the same context
+   PASS 2 - reload persistence, in a fresh page of the same context
    =========================================================================== */
 
 section("RELOAD PERSISTENCE");
@@ -627,7 +627,7 @@ check("persistence was IndexedDB, not memory", survived.mode === "indexeddb", su
 await persistCtx.close();
 
 /* ===========================================================================
-   PASS 3 — forced IndexedDB failure, memory fallback
+   PASS 3 - forced IndexedDB failure, memory fallback
    =========================================================================== */
 
 section("MEMORY FALLBACK");
@@ -694,7 +694,7 @@ check("reset restores canonical revision on the fallback", fallback.revisionAfte
 await failCtx.close();
 
 /* ===========================================================================
-   PASS 4 — cross-tab invalidation
+   PASS 4 - cross-tab invalidation
    =========================================================================== */
 
 section("CROSS-TAB INVALIDATION");

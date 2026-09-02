@@ -10,7 +10,7 @@
  *
  * It is deliberately not styled like the product beneath it. A visitor must be
  * able to tell at a glance which parts of the screen are the demonstration and
- * which are the frame around it — a disclosure that looked like the fictional
+ * which are the frame around it: a disclosure that looked like the fictional
  * company's own header would be the one thing most likely to be read as part
  * of the simulation and ignored.
  *
@@ -31,7 +31,7 @@ export type DemoShellProps = {
    * Optional working title.
    *
    * Deliberately optional and deliberately unused by a finished demo. This bar
-   * is the provenance layer — whose frame this is, that the data is synthetic,
+   * is the provenance layer: whose frame this is, that the data is synthetic,
    * how to leave and how to reset. The product names itself inside its own
    * shell, and printing that name here too made the bar read as part of the
    * fictional company rather than as the portfolio's frame around it.

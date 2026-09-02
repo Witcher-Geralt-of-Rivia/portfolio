@@ -4,14 +4,14 @@
 # Decisions
 
 An ADR-lite log. Each entry records what was decided and, more importantly, the
-evidence behind it — so a later session does not "fix" something that was
+evidence behind it, so a later session does not "fix" something that was
 deliberate.
 
 Status values: `Accepted`, `Superseded`, `Reversed`.
 
 ---
 
-## D-001 — The portfolio visual identity
+## D-001 - The portfolio visual identity
 
 Status: Accepted
 Stage: 01
@@ -36,7 +36,7 @@ Only on explicit user instruction. The anti-pattern list in
 
 ---
 
-## D-002 — Persistent aurora rather than a static background
+## D-002 - Persistent aurora rather than a static background
 
 Status: Accepted
 Stage: 01
@@ -59,7 +59,7 @@ become a static white surface.
 
 ---
 
-## D-003 — Grain opacity is 0.024, not the lower figure first sketched
+## D-003 - Grain opacity is 0.024, not the lower figure first sketched
 
 Status: Accepted
 Stage: 01
@@ -81,7 +81,7 @@ Only if measured banding behaviour changes. Re-run `qa/texture.mjs`.
 
 ---
 
-## D-004 — Three surfaces only: Milk, Frost, Prism
+## D-004 - Three surfaces only: Milk, Frost, Prism
 
 Status: Accepted
 Stage: 01
@@ -99,7 +99,7 @@ Adding a surface requires an explicit user instruction and an update here.
 
 ---
 
-## D-005 — Geist Sans + Geist Mono, self-hosted
+## D-005 - Geist Sans + Geist Mono, self-hosted
 
 Status: Accepted
 Stage: 02
@@ -123,7 +123,7 @@ Never load a font from a third-party origin.
 
 ---
 
-## D-006 — Display measures in calibrated `em`, not `ch`
+## D-006 - Display measures in calibrated `em`, not `ch`
 
 Status: Accepted
 Stage: 02
@@ -135,7 +135,7 @@ stay in `ch`.
 ### Reason
 This is the single most counter-intuitive decision in the project. `ch` resolves
 against the *currently rendered* font's "0" advance. Measured: Geist Sans "0" is
-0.662em, the next/font metric-adjusted fallback is 0.555em — a 19% gap. So `13ch`
+0.662em, the next/font metric-adjusted fallback is 0.555em, a 19% gap. So `13ch`
 meant 723px before the font arrived and 862px after, which changed the display
 heading's line count and cost 0.016–0.021 CLS. Preload and `font-display` tuning
 cannot fix it, because it is a unit-resolution problem, not a timing one. The em
@@ -152,7 +152,7 @@ with `qa/ch-measure.mjs`.
 
 ---
 
-## D-007 — `--text-annotation` added; `--text-muted` restricted
+## D-007 - `--text-annotation` added; `--text-muted` restricted
 
 Status: Accepted
 Stage: 02
@@ -162,7 +162,7 @@ Stage: 02
 `--text-muted: #7c8190` is decorative only.
 
 ### Reason
-Measured against the live moving background, muted lands near 3.2:1 — below AA
+Measured against the live moving background, muted lands near 3.2:1, below AA
 for any meaningful text. Annotation measures 5.2–6.4:1 everywhere it is used.
 The Stage 01 muted token was left unchanged rather than altered, so the original
 palette is intact and the accessible role is additive.
@@ -172,7 +172,7 @@ Never use muted for body copy, captions, control labels or technical labels.
 
 ---
 
-## D-008 — Five navigation destinations, nothing else
+## D-008 - Five navigation destinations, nothing else
 
 Status: Accepted
 Stage: 03
@@ -187,11 +187,11 @@ About, Blog, Resume, Testimonials and Services are all deliberately absent.
 
 ### Future modification condition
 Adding a destination requires an explicit user instruction. Adding any contact
-destination is forbidden outright — see `docs/PRIVACY_AND_SECURITY.md`.
+destination is forbidden outright. See `docs/PRIVACY_AND_SECURITY.md`.
 
 ---
 
-## D-009 — Compact navigation below 900px
+## D-009 - Compact navigation below 900px
 
 Status: Accepted
 Stage: 03
@@ -212,13 +212,13 @@ Keep the accessibility-tree guarantee: the hidden presentation must be
 
 ---
 
-## D-010 — Custom SVG system mark, one canonical source
+## D-010 - Custom SVG system mark, one canonical source
 
 Status: Accepted
 Stage: 03
 
 ### Decision
-The Stage 03 mark — 890 bytes, viewBox `0 0 28 28`, four connected
+The Stage 03 mark: 890 bytes, viewBox `0 0 28 28`, four connected
 nodes plus a central hub. Referenced through a thin `SystemMarkImage` component
 using a plain `<img>`.
 
@@ -227,15 +227,15 @@ No logo may be downloaded, and no third-party company mark may appear. Keeping
 the SVG in one file rather than duplicating it into JSX avoids two sources of
 truth. `next/image` would add a wrapper and a loader path for an 890-byte vector
 without shrinking anything, so a plain `<img>` with explicit width and height is
-correct here — and it keeps the mark shift-free.
+correct here, and it keeps the mark shift-free.
 
 ### Future modification condition
 If the mark becomes interactive or needs per-instance theming, inlining it may be
-reconsidered — but then the public file should be removed, not kept alongside.
+reconsidered, but then the public file should be removed, not kept alongside.
 
 ---
 
-## D-011 — Intelligence Constellation in CSS and SVG, not WebGL
+## D-011 - Intelligence Constellation in CSS and SVG, not WebGL
 
 Status: Accepted
 Stage: 04
@@ -247,8 +247,8 @@ No Canvas, no WebGL, no Three.js.
 ### Reason
 The composition needs about 38 SVG shapes and eight labels. WebGL would add a
 large dependency, a canvas that cannot be styled by the design system, text that
-does not inherit the font stack, and no accessibility story — to draw something
-CSS renders on the compositor for free.
+does not inherit the font stack, and no accessibility story, all to draw
+something CSS renders on the compositor for free.
 
 ### Alternatives rejected
 Three.js / React Three Fiber, Canvas 2D, an animated raster or video.
@@ -259,7 +259,7 @@ component.
 
 ---
 
-## D-012 — Constellation node chips are HTML over SVG, not SVG text
+## D-012 - Constellation node chips are HTML over SVG, not SVG text
 
 Status: Accepted
 Stage: 04
@@ -271,7 +271,7 @@ are SVG.
 
 ### Reason
 SVG `<text>` scales with the artboard. At the mobile artboard width (335px) a
-13px label would render near 7px — unreadable. As HTML the labels stay at real
+13px label would render near 7px: unreadable. As HTML the labels stay at real
 CSS pixels and can be tuned per breakpoint, which is what the responsive
 requirements demand. Consequence: the core uses a CSS radial-gradient rather than
 an SVG one, which is the only way to satisfy both the 112px desktop size and the
@@ -286,13 +286,13 @@ If node positions or chip sizes change, re-run `qa/stage04-geometry.mjs` and
 
 ---
 
-## D-013 — No `backdrop-filter` on the drifting chips
+## D-013 - No `backdrop-filter` on the drifting chips
 
 Status: Accepted
 Stage: 04
 
 ### Decision
-Constellation chips use a translucent fill, border and shadow — the Frost
+Constellation chips use a translucent fill, border and shadow: the Frost
 language minus the blur.
 
 ### Reason
@@ -305,7 +305,7 @@ Only if the chips stop moving.
 
 ---
 
-## D-014 — Cross-link routing bows asymmetrically
+## D-014 - Cross-link routing bows asymmetrically
 
 Status: Accepted
 Stage: 04
@@ -317,7 +317,7 @@ arcs run parallel. Ring links use flat alternating chords.
 
 ### Reason
 The first implementation bowed every ring and cross link outward with a uniform
-curvature. Visual inspection showed the result read as a wireframe **sphere** —
+curvature. Visual inspection showed the result read as a wireframe **sphere**:
 meridian lines around an orb, which is an explicit design failure condition.
 Asymmetric interior routing restores the network reading.
 
@@ -330,7 +330,7 @@ orb failure mode. Numbers alone will not catch it.
 
 ---
 
-## D-015 — Connections terminate at node edges, never centres
+## D-015 - Connections terminate at node edges, never centres
 
 Status: Accepted
 Stage: 04
@@ -342,7 +342,7 @@ the orchestrator's rim.
 ### Reason
 A line drawn to a node centre passes under its label. Terminating at edges means
 a line is always either outside a chip or hidden behind it. Verified: maximum
-pixel bleed over label text is 1/255 at 390px and 360px — below the grain
+pixel bleed over label text is 1/255 at 390px and 360px, below the grain
 dither's own amplitude. Mobile chip fill is 0.82 alpha rather than 0.72
 specifically to keep it there.
 
@@ -351,7 +351,7 @@ Re-verify with `qa/stage04-occlusion.mjs` after any geometry change.
 
 ---
 
-## D-016 — Mobile capability rail drops its vertical dividers
+## D-016 - Mobile capability rail drops its vertical dividers
 
 Status: Accepted
 Stage: 04
@@ -363,7 +363,7 @@ below 380px) with no left borders.
 ### Reason
 Once items wrap, a left border lands at the *start* of a row, where it reads as a
 stray mark rather than a separator. It also left the first item un-indented while
-the rest were indented — visible as a bug in the first 360px capture. Spacing
+the rest were indented, visible as a bug in the first 360px capture. Spacing
 carries the separation instead.
 
 ### Future modification condition
@@ -372,7 +372,7 @@ with it.
 
 ---
 
-## D-017 — `.site-main:has(.hero)` zeroes the shell's top padding
+## D-017 - `.site-main:has(.hero)` zeroes the shell's top padding
 
 Status: Accepted
 Stage: 04
@@ -393,7 +393,7 @@ duplicating the padding logic.
 
 ---
 
-## D-018 — No scroll cue, and no forced line break in the hero heading
+## D-018 - No scroll cue, and no forced line break in the hero heading
 
 Status: Accepted
 Stage: 04
@@ -408,12 +408,12 @@ improving the composition. Balanced wrapping produces "Engineering / intelligent
 systems." on desktop and the intended three lines on mobile without help.
 
 ### Future modification condition
-Only if a tested width produces genuinely inferior wrapping — and then record the
+Only if a tested width produces genuinely inferior wrapping, and then record the
 width here.
 
 ---
 
-## D-019 — No navigation item is active while the hero owns the viewport
+## D-019 - No navigation item is active while the hero owns the viewport
 
 Status: Accepted
 Stage: 04
@@ -434,7 +434,7 @@ assertion was updated to match.
 
 ---
 
-## D-020 — `allowedDevOrigins` must list the VPS IP, localhost and 127.0.0.1
+## D-020 - `allowedDevOrigins` must list the VPS IP, localhost and 127.0.0.1
 
 Status: Accepted
 Stage: remote preview
@@ -446,7 +446,7 @@ Stage: remote preview
 ### Reason
 Next 16 blocks `/_next/*` dev resources from origins it does not recognise. A
 real browser on the public IP got a 403 on a chunk and a dead HMR socket while
-`curl` still returned 200 — so a naive smoke test passes while the preview is
+`curl` still returned 200, so a naive smoke test passes while the preview is
 broken. `127.0.0.1` is listed explicitly because Next's default allowance covers
 the hostname `localhost` but not the literal loopback address, which the QA
 harness uses.
@@ -456,7 +456,7 @@ Dev-only. It has no effect on `next build` or `next start`.
 
 ---
 
-## D-021 — `scrollbar-gutter: stable` on `html`
+## D-021 - `scrollbar-gutter: stable` on `html`
 
 Status: Accepted
 Stage: 03
@@ -476,7 +476,7 @@ devices use overlay scrollbars and are unaffected.
 
 ---
 
-## D-022 — QA tooling is retained in the repository
+## D-022 - QA tooling is retained in the repository
 
 Status: Accepted
 Stage: 01 onward
@@ -495,7 +495,7 @@ Do not remove. Screenshot baselines may be regenerated, but keep the scripts.
 
 ---
 
-## D-023 — Typography specimen moved to `/specimen`
+## D-023 - Typography specimen moved to `/specimen`
 
 Status: Accepted
 Stage: 03
@@ -511,7 +511,7 @@ verifiable. It is not linked from the site.
 
 ---
 
-## D-024 — No paid AI runtime, no backend, no contact information
+## D-024 - No paid AI runtime, no backend, no contact information
 
 Status: Accepted
 Stage: project-wide
@@ -532,7 +532,7 @@ that implies them as a conflict and report it. See
 
 ---
 
-## D-025 — The systems section is one architecture lab, not a feature grid
+## D-025 - The systems section is one architecture lab, not a feature grid
 
 Status: Accepted
 Stage: 05
@@ -543,8 +543,8 @@ topologies, plus an execution trace and a four-item principles strip.
 
 ### Reason
 A capability list or six feature cards proves familiarity with words. A working
-topology — input, orchestration, capabilities, validation, human control,
-output — shows that the whole system is understood. The brief for this section
+topology (input, orchestration, capabilities, validation, human control,
+output) shows that the whole system is understood. The brief for this section
 was explicitly that a technical client should conclude the developer
 understands how complete intelligent systems operate.
 
@@ -554,7 +554,7 @@ editor.
 
 ---
 
-## D-026 — Architecture modes are data, not four JSX trees
+## D-026 - Architecture modes are data, not four JSX trees
 
 Status: Accepted
 Stage: 05
@@ -573,7 +573,7 @@ Adding a mode means adding a data entry, not a component.
 
 ---
 
-## D-027 — Connection gradients use userSpaceOnUse
+## D-027 - Connection gradients use userSpaceOnUse
 
 Status: Accepted
 Stage: 05
@@ -594,7 +594,7 @@ Never revert to the default units on a diagram containing axis-aligned paths.
 
 ---
 
-## D-028 — Connections are drawn above the spec's opacity range
+## D-028 - Connections are drawn above the spec's opacity range
 
 Status: Accepted
 Stage: 05
@@ -605,13 +605,13 @@ range the Stage 05 brief suggested.
 
 ### Reason
 Visual inspection. At 0.16 and 1px the routing was effectively invisible, and
-the routing is the entire point of the diagram — without it the panel reads as
+the routing is the entire point of the diagram: without it the panel reads as
 scattered cards, which is the stated failure condition for this section. The
 lines remain far quieter than the node surfaces.
 
 ---
 
-## D-029 — The trace drops below the canvas at 1149px, not 999px
+## D-029 - The trace drops below the canvas at 1149px, not 999px
 
 Status: Accepted
 Stage: 05
@@ -631,7 +631,7 @@ If node widths or band membership change, re-run the overlap check across
 
 ---
 
-## D-030 — Production serves alternating release directories, never `.next`
+## D-030 - Production serves alternating release directories, never `.next`
 
 Status: Accepted
 Stage: infrastructure hardening (after Stage 05)
@@ -647,7 +647,7 @@ During Stage 05 the live site broke twice: `next build` rewrote the same `.next`
 directory the running production process was reading, so the served page
 referenced chunks that had just been replaced and the site returned 500s until
 PM2 was restarted. Documentation had already warned about this and it happened
-anyway — the guarantee had to become structural.
+anyway. The guarantee had to become structural.
 
 Measured after the change: with production on `.next-release-a`, a plain
 `npm run build` ran to completion while the public site was polled continuously.
@@ -655,10 +655,10 @@ Measured after the change: with production on `.next-release-a`, a plain
 real `deploy:safe` build of the inactive slot, 327 of 327 requests returned 200.
 
 ### Alternatives rejected
-- Documentation alone — already tried, and it failed.
-- A pre-build guard that refuses to build — would break ordinary local builds,
-  which developers legitimately need.
-- Copying a built app to a separate production directory — more moving parts,
+- Documentation alone: already tried, and it failed.
+- A pre-build guard that refuses to build: it would break ordinary local
+  builds, which developers legitimately need.
+- Copying a built app to a separate production directory: more moving parts,
   and the copy step becomes the new race.
 
 ### Consequences
@@ -674,7 +674,7 @@ both allow-lists and to the alternation logic together.
 
 ---
 
-## D-031 — PM2 introspection goes through a Node helper
+## D-031 - PM2 introspection goes through a Node helper
 
 Status: Accepted
 Stage: infrastructure hardening
@@ -688,11 +688,11 @@ PowerShell 5.1's `ConvertFrom-Json` treats object keys case-insensitively and
 throws `duplicated keys 'username' and 'USERNAME'` on any Windows process
 environment. The deployment script read this as "PM2 process not found" and
 aborted. Node's `JSON.parse` handles it, and the helper prints only the fields
-the script needs — never an environment value.
+the script needs, never an environment value.
 
 ---
 
-## D-032 — The deployment strips tooling variables before touching PM2
+## D-032 - The deployment strips tooling variables before touching PM2
 
 Status: Accepted
 Stage: infrastructure hardening
@@ -709,14 +709,14 @@ long-lived process that way. The production environment is now two variables:
 
 ---
 
-## D-033 — Product surfaces are authored, never screenshotted
+## D-033 - Product surfaces are authored, never screenshotted
 
 Status: Accepted
 Stage: 6
 
 ### Decision
-Every frame in the Product Engineering Studio — the web application window, the
-phone, the assist panel — is built from HTML and CSS in this repository. No
+Every frame in the Product Engineering Studio (the web application window, the
+phone, the assist panel) is built from HTML and CSS in this repository. No
 screenshot, no device-mockup package, no vendor browser chrome, no notch clone.
 The phone carries a neutral sensor capsule and nothing else.
 
@@ -728,7 +728,7 @@ scenarios share one renderer driven by `product-scenarios.ts`.
 
 ---
 
-## D-034 — One block renderer per surface, driven by scenario data
+## D-034 - One block renderer per surface, driven by scenario data
 
 Status: Accepted
 Stage: 6
@@ -747,7 +747,7 @@ the renderers it actually uses.
 
 ---
 
-## D-035 — The product flow is a local interval, torn down on every exit
+## D-035 - The product flow is a local interval, torn down on every exit
 
 Status: Accepted
 Stage: 6
@@ -762,7 +762,7 @@ or unmounting all abandon the run. No state-management library was introduced.
 Seven ordered steps do not justify a reducer library. The real risk is a
 timer outliving its scenario and writing into the wrong one, so the teardown is
 the load-bearing part: measured at zero stale state after abandoning a run
-mid-flight. The flow performs no network request of any kind — 0 requests
+mid-flight. The flow performs no network request of any kind: 0 requests
 across 15 runs and 30 scenario changes.
 
 ### Consequence
@@ -772,7 +772,7 @@ lint error under `react-hooks/set-state-in-effect`.
 
 ---
 
-## D-036 — The AI surface is provider-neutral and has no input
+## D-036 - The AI surface is provider-neutral and has no input
 
 Status: Accepted
 Stage: 6
@@ -786,12 +786,12 @@ form; that is the whole behaviour.
 ### Reason
 The project forbids any paid AI runtime, and a chat box would imply one. What a
 product actually needs from an assistive surface is context, a summary and a
-next action — which is demonstrable deterministically. Naming a provider would
+next action, which is demonstrable deterministically. Naming a provider would
 also date the work and imply a dependency that does not exist.
 
 ---
 
-## D-037 — Release slots are ignored by ESLint for the same reason `.next` is
+## D-037 - Release slots are ignored by ESLint for the same reason `.next` is
 
 Status: Accepted
 Stage: 6
@@ -804,12 +804,12 @@ alongside `.next/**`.
 The A/B hardening introduced two more directories holding generated build
 output, but the ignore list inherited from `eslint-config-next` only covers
 `.next`. Linting them reported 174 errors in code we did not write, and
-`safe-deploy.ps1` runs ESLint in its validate phase — so this would have
+`safe-deploy.ps1` runs ESLint in its validate phase, so this would have
 blocked every deployment from Stage 06 onward.
 
 ---
 
-## D-038 — QA harnesses take a base URL, and frozen stages are re-verified against production
+## D-038 - QA harnesses take a base URL, and frozen stages are re-verified against production
 
 Status: Accepted
 Stage: 6
@@ -837,7 +837,7 @@ navigation itself was not touched.
 
 ---
 
-## D-039 — The smoke gate asserts every built section, not just the first
+## D-039 - The smoke gate asserts every built section, not just the first
 
 Status: Accepted
 Stage: 6 (post-stage hardening)
@@ -870,7 +870,7 @@ the deployment script.
 
 ---
 
-## D-040 — Stage 06 lists stay semantic; the marker is removed locally
+## D-040 - Stage 06 lists stay semantic; the marker is removed locally
 
 Status: Accepted
 Stage: 6 (post-stage hardening)
@@ -901,7 +901,7 @@ with the reset neutralised and in force, and encodes the 14px expectation.
 
 ---
 
-## D-041 — One renderer draws all three learning visuals
+## D-041 - One renderer draws all three learning visuals
 
 Status: Accepted
 Stage: 7
@@ -926,7 +926,7 @@ The interaction harness now asserts the signal count.
 
 ---
 
-## D-042 — The adapt sequence is a reducer with two timers, both torn down
+## D-042 - The adapt sequence is a reducer with two timers, both torn down
 
 Status: Accepted
 Stage: 7
@@ -957,7 +957,7 @@ sequence may use one interval provided it is torn down on every exit.
 
 ---
 
-## D-043 — Map type is sized in viewBox units, so the phone view sheds labels
+## D-043 - Map type is sized in viewBox units, so the phone view sheds labels
 
 Status: Accepted
 Stage: 7
@@ -985,14 +985,14 @@ a node is ever added, re-run that harness rather than eyeballing the result.
 
 ---
 
-## D-044 — Every experiment is a precomputed frame list
+## D-044 - Every experiment is a precomputed frame list
 
 Status: Accepted
 Stage: 8
 
 ### Decision
 Each Engineering Lab experiment declares a list of frames in
-`lab-experiments.ts`. A frame carries the complete state the UI needs — the
+`lab-experiments.ts`. A frame carries the complete state the UI needs: the
 active flow stage, the observation state and event, and a typed view model.
 Running an experiment is an index walking forward on one interval, and the
 render is a pure function of that index. There is no `Math.random` and no
@@ -1017,7 +1017,7 @@ written once.
 
 ---
 
-## D-045 — The lab shows a TIME field, and never a fabricated one
+## D-045 - The lab shows a TIME field, and never a fabricated one
 
 Status: Accepted
 Stage: 8
@@ -1030,7 +1030,7 @@ not an elapsed measurement.
 
 ### Reason
 An API inspector with no timing field looks incomplete, but a fabricated
-"42ms" would be a false claim about a system that does not exist — the project
+"42ms" would be a false claim about a system that does not exist. The project
 forbids invented metrics outright. Naming the sequence position keeps the
 field, keeps it honest, and still communicates that stages happen in order.
 
@@ -1041,7 +1041,7 @@ no number in this section may be read as performance.
 
 ---
 
-## D-046 — "No database" means no server database; browser-local synthetic storage is permitted
+## D-046 - "No database" means no server database; browser-local synthetic storage is permitted
 
 Status: Accepted
 Stage: 9A
@@ -1065,7 +1065,7 @@ exists instead of a quiet reinterpretation. The distinction is real: a server
 database is a request-handling attack surface, an operational dependency and a
 running cost. `indexedDB` in the visitor's browser is none of those. Nothing
 leaves the machine, nothing is served, and `docs/PRIVACY_AND_SECURITY.md`
-already describes the constraint in server terms — "no database connection, so
+already describes the constraint in server terms: "no database connection, so
 there is no request-handling attack surface".
 
 ### Consequence
@@ -1075,7 +1075,7 @@ Anyone reading "no database" in D-024 should read this entry beside it.
 
 ---
 
-## D-047 — Native IndexedDB with a memory fallback, and no library
+## D-047 - Native IndexedDB with a memory fallback, and no library
 
 Status: Accepted
 Stage: 9A
@@ -1108,15 +1108,15 @@ assertions against both. Adding a store means editing `upgrade()` and bumping
 
 ---
 
-## D-048 — Deterministic ids, a logical clock, and plans computed before they are written
+## D-048 - Deterministic ids, a logical clock, and plans computed before they are written
 
 Status: Accepted
 Stage: 9A
 
 ### Decision
 Entity ids are a monotonic counter per demo and collection, formatted
-`customer_0001`. Timestamps come from a logical clock — a seed instant plus a
-tick per mutation — never from `Date.now()`. Domain services compute a complete
+`customer_0001`. Timestamps come from a logical clock (a seed instant plus a
+tick per mutation), never from `Date.now()`. Domain services compute a complete
 mutation plan first; the runtime then commits every operation in one
 transaction, allocating ids and time against a scratch copy of the demo's
 metadata.
@@ -1139,14 +1139,14 @@ write persistence rejects, leaves counters and clock untouched and burns no id.
 
 ### Consequence
 `crypto.randomUUID()` is not used for canonical entities. Seed data must be
-plain data — no generated values, nothing derived from the wall clock — because
+plain data (no generated values, nothing derived from the wall clock) because
 reset replays it verbatim and two resets have to produce identical state. The
 QA harness asserts that the same reset yields the same dataset, clock and
 counters.
 
 ---
 
-## D-049 — The runtime knows records; it never knows leads, vehicles or lessons
+## D-049 - The runtime knows records; it never knows leads, vehicles or lessons
 
 Status: Accepted
 Stage: 9A
@@ -1159,8 +1159,8 @@ types → persistence/clock/ids/events → repository → runtime → React → 
 UI, and nothing flows back.
 
 ### Reason
-Three unrelated products — an operations SaaS, a field service tool and a
-learning platform — can share one runtime only if the runtime has no opinion
+Three unrelated products (an operations SaaS, a field service tool and a
+learning platform) can share one runtime only if the runtime has no opinion
 about what they store. The moment it learns what a lead is, the second demo
 starts working around it and the third rewrites it.
 
@@ -1170,13 +1170,13 @@ demonstrated with.
 
 ### Consequence
 Business seeds belong to each product specification, not to Stage 09A. The
-runtime QA harness supplies its own generic fixtures — "alpha", "beta" — rather
+runtime QA harness supplies its own generic fixtures ("alpha", "beta") rather
 than importing anything from `src/`, so it cannot drift into asserting product
 behaviour.
 
 ---
 
-## D-050 — Three verified demos are required before `#work` is integrated
+## D-050 - Three verified demos are required before `#work` is integrated
 
 Status: Accepted
 Stage: 9A
@@ -1198,13 +1198,13 @@ development without becoming publishable by accident.
 
 ### Consequence
 Stage 09 completes only when all three demos are verified and `#work` has been
-integrated and QA'd. Until that point no demo route is created at all — an
+integrated and QA'd. Until that point no demo route is created at all: an
 unfinished product must not be reachable, so a demo becomes a route only when
 it is finished.
 
 ---
 
-## D-051 — Demo 01 is a rental operations product, specified before it is built
+## D-051 - Demo 01 is a rental operations product, specified before it is built
 
 Status: Accepted
 Stage: 9B
@@ -1212,15 +1212,15 @@ Stage: 9B
 ### Decision
 Demo 01's domain is motorcycle and light-vehicle rental operations, published
 as "Rental Operations Platform" with the in-app identity "Operations Console".
-Its complete product contract — eleven modules, four roles and their permission
+Its complete product contract (eleven modules, four roles and their permission
 matrix, thirteen domain entities, five automation rules, six acceptance
-workflows, every seed count and distribution — is frozen in
+workflows, every seed count and distribution) is frozen in
 `docs/DEMO_OPERATIONS_SPEC.md` before any of it is implemented.
 
 ### Reason
 Rental operations is the one scenario that exercises every capability the demo
-has to prove — CRM, fleet, contracts, payments, maintenance, conversations,
-automation and reporting — while staying a coherent business rather than a
+has to prove (CRM, fleet, contracts, payments, maintenance, conversations,
+automation and reporting) while staying a coherent business rather than a
 tour of unrelated screens. A generic "admin dashboard" would demonstrate
 layout; this demonstrates a domain.
 
@@ -1243,7 +1243,7 @@ rather than absorbed by editing the specification to match the code.
 
 ---
 
-## D-052 — The seed carries audit history, which the runtime must be extended to allow
+## D-052 - The seed carries audit history, which the runtime must be extended to allow
 
 Status: Accepted
 Stage: 9B
@@ -1257,8 +1257,8 @@ the same transaction as the purge and reseed, in both adapters.
 ### Reason
 Auditability is one of the capabilities Demo 01 exists to demonstrate, and a
 Customer or Contract whose Activity panel is empty on first launch demonstrates
-the opposite. Every other seeded collection — including automation runs and
-notifications — is ordinary records and needs nothing; audit is the one store
+the opposite. Every other seeded collection, including automation runs and
+notifications, is ordinary records and needs nothing; audit is the one store
 the reset payload cannot currently reach.
 
 The alternative was to let audit accumulate only from the visitor's own
@@ -1267,8 +1267,8 @@ a product that appears not to record anything.
 
 Recording it here rather than making the change quietly matters because Stage
 09A is frozen and tagged `portfolio-demo-runtime-v1`. The extension is small
-and preserves every existing guarantee — one transaction, demo isolation, and
-identical semantics between the IndexedDB and memory adapters — but it is still
+and preserves every existing guarantee (one transaction, demo isolation, and
+identical semantics between the IndexedDB and memory adapters), but it is still
 a change to frozen code and should arrive as a decision, not a surprise.
 
 ### Consequence
@@ -1279,7 +1279,7 @@ cover seeded audit before the change is considered done.
 
 ---
 
-## D-053 — Overdue is derived, money is integer cents, and the follow-up offset is two days
+## D-053 - Overdue is derived, money is integer cents, and the follow-up offset is two days
 
 Status: Accepted
 Stage: 9C1
@@ -1290,8 +1290,8 @@ was implemented:
 
 1. A Payment's stored `status` is `Pending | Paid`. `Overdue` exists only as an
    effective value derived from `dueAt` against the logical clock.
-2. Every monetary amount — `dailyRate`, `totalAmount`, `paidAmount` and a
-   payment's `amount` — is an integer number of cents.
+2. Every monetary amount (`dailyRate`, `totalAmount`, `paidAmount` and a
+   payment's `amount`) is an integer number of cents.
 3. Rule 02 sets `nextFollowUpAt` to the qualifying instant plus exactly two
    days.
 
@@ -1300,7 +1300,7 @@ Each closes a gap the Stage 09C1 specification asked to be resolved rather than
 chosen silently in code.
 
 The first was a real contradiction. Stage 09B stored all three payment statuses
-"so the collection stays queryable" while also deriving the effective value —
+"so the collection stays queryable" while also deriving the effective value,
 which is precisely the stale second source of truth the derived-state rules
 exist to prevent. The moment the logical clock passes a due date the stored
 value is wrong, and a payments list that disagrees with the demo's own clock
@@ -1325,7 +1325,7 @@ value the clock can invalidate.
 
 ---
 
-## D-054 — The approved logo is canonical, and the old design-language name is retired
+## D-054 - The approved logo is canonical, and the old design-language name is retired
 
 Status: Accepted
 Stage: 9C2
@@ -1343,7 +1343,7 @@ domain. The palette, tokens and every visual rule are unchanged.
 
 ### Reason
 Both are explicit user instructions, and the second is deliberately narrow: a
-terminology change, not a redesign. CSS token names were left alone — renaming
+terminology change, not a redesign. CSS token names were left alone: renaming
 `--aurora-lavender` to satisfy a wording change would risk a regression across
 eight frozen stages for no gain.
 
@@ -1355,7 +1355,7 @@ colours.
 Deriving rather than shipping the master matters. The master is 1254px and
 844 KB; the navigation needs 28px and the tab needs 256. `icon.png` is 256
 rather than the more usual 512 because the mark is a soft gradient that PNG
-compresses poorly — 512 costs 164 KB against 55 KB — and a 164 KB tab icon
+compresses poorly (512 costs 164 KB against 55 KB) and a 164 KB tab icon
 would be out of proportion in a project whose previous mark was 890 bytes.
 
 At 16px the fine detail dissolves and what survives is the silhouette and the
@@ -1367,12 +1367,12 @@ stated objective and it was measured rather than assumed.
 of every derivative, that no `favicon.ico` shadows the new icon, that the
 retired name appears nowhere in the working tree, and that the old mark has no
 remaining references. The old mark file is deleted and the deployment smoke
-gate now asserts the new asset instead — a smoke test should check what the
+gate now asserts the new asset instead: a smoke test should check what the
 site actually serves.
 
 ---
 
-## D-055 — The action queue leads with what is most urgent
+## D-055 - The action queue leads with what is most urgent
 
 Status: Accepted
 Stage: 9C2
@@ -1395,22 +1395,22 @@ The within-category tie-break exists because a list that reshuffles between
 renders cannot be acted on, and because it makes the order assertable.
 
 ### Consequence
-The queue labels carry the data that distinguishes their rows — an amount and
-a due date, a customer name — rather than a category that repeats. Raw entity
+The queue labels carry the data that distinguishes their rows (an amount and
+a due date, a customer name) rather than a category that repeats. Raw entity
 ids stay in the model for the later stages that will link these rows to their
 records, and are not displayed: they are internal plumbing, not product
 content.
 
 ---
 
-## D-056 — The Overview's composition is one table derived from the permission matrix
+## D-056 - The Overview's composition is one table derived from the permission matrix
 
 Status: Accepted
 Stage: 9C2.1
 
 ### Decision
-`src/demos/operations/ui/overview-policy.ts` maps every Overview surface — each
-KPI, each panel, each action-queue category, each notification category — to
+`src/demos/operations/ui/overview-policy.ts` maps every Overview surface (each
+KPI, each panel, each action-queue category, each notification category) to
 the module whose data it summarises, and asks `permissions.ts` whether the role
 can open that module. The screen renders what the policy returns and decides
 nothing itself.
@@ -1419,7 +1419,7 @@ nothing itself.
 09C2 filtered the KPI cards by role and left everything else alone, so the rule
 was half applied. A panel is a module's data in summary form: leaving the Lead
 funnel on screen for a role that cannot open Leads makes the Overview a hole in
-the policy it is supposed to demonstrate. The same was true one level down —
+the policy it is supposed to demonstrate. The same was true one level down:
 the action queue and the notification list are built from records belonging to
 modules, and both leaked.
 
@@ -1447,13 +1447,13 @@ operational panel, so Finance is not left with a single card and a list.
 role sees a surface from a module it cannot open, and asserts containment: no
 role sees anything Admin cannot, and each sees strictly less.
 
-This is still an interaction simulation, not a security boundary — every record
+This is still an interaction simulation, not a security boundary: every record
 remains readable in browser storage whatever role is selected. What it
 demonstrates is that one table governs the whole screen.
 
 ---
 
-## D-057 — A KPI states its breakdown, not a progress bar
+## D-057 - A KPI states its breakdown, not a progress bar
 
 Status: Accepted
 Stage: 9C2.1
@@ -1464,7 +1464,7 @@ derived note giving the headline its denominator. They carry no progress bars.
 
 ### Reason
 The bars had no denominator. "38 open leads" is not 38% of anything, so the
-fill was chosen to look plausible — a decoration drawn in the visual language
+fill was chosen to look plausible, a decoration drawn in the visual language
 of a measurement, which is the same failure as a fabricated metric even though
 no number was invented.
 
@@ -1482,12 +1482,12 @@ VEHICLES        10    of 24 fleet assets
 ### Consequence
 Every KPI is falsifiable from the rest of the screen. The harness asserts the
 sums rather than the pixels, and asserts that no comparison language ("vs last
-month", "+12%", "trending") appears anywhere — there is no previous period in
+month", "+12%", "trending") appears anywhere: there is no previous period in
 this demo, so any comparison would be invented.
 
 ---
 
-## D-058 — A revalidating query keeps its previous answer
+## D-058 - A revalidating query keeps its previous answer
 
 Status: Accepted
 Stage: 9C2.1
@@ -1504,13 +1504,13 @@ Discarding the data on every revalidation made the interface state things that
 were not true. Marking eight notifications read issues eight writes; each one
 bumped the revision and blanked the query, and `NotificationCenter` renders
 `data ?? []`. The result was a badge that vanished and a list that read "No
-notifications" while six of the eight writes were still outstanding — and
+notifications" while six of the eight writes were still outstanding, and
 because a reload then restored the six, the demo appeared to lose data it had
 in fact never saved.
 
 The QA harness caught it as an intermittent failure. Measuring the store
 directly showed the truth: at the moment the badge cleared, IndexedDB still
-held six or seven unread. The persistence layer was correct throughout — the
+held six or seven unread. The persistence layer was correct throughout: the
 adapter awaits `tx.oncomplete`, so a resolved commit is durable. What was wrong
 was a screen that reported completion before the work was done.
 
@@ -1520,15 +1520,15 @@ role would show the previous role's records for a frame, which is exactly the
 leak D-056 closes.
 
 ### Consequence
-`OperationsOverview` no longer falls back to its skeleton on every mutation —
-the skeleton is for having nothing to show, not for refreshing what is already
-on screen — so a change updates the figures in place. Callers that branch on
+`OperationsOverview` no longer falls back to its skeleton on every mutation
+(the skeleton is for having nothing to show, not for refreshing what is already
+on screen), so a change updates the figures in place. Callers that branch on
 `loading` behave exactly as before. The shared runtime keeps its rule that
 nothing polls and no timer runs at rest.
 
 ---
 
-## D-059 — The mark is derived tight, not square
+## D-059 - The mark is derived tight, not square
 
 Status: Accepted
 Stage: 9C2.1
@@ -1546,7 +1546,7 @@ visible mark, reading small beside 12px type. The padding was measured, not
 assumed: alpha bounds at both `>1` and `>128` give the same figure, which is
 what proves the horizontal margin is genuinely empty rather than faint glow.
 
-Trimming to a square would have recovered only about 2% — the artwork is taller
+Trimming to a square would have recovered only about 2%: the artwork is taller
 than it is wide, so a square trim is bounded by its height. Preserving the
 aspect is what recovers the rest.
 
@@ -1558,7 +1558,7 @@ drawn behind it on any surface.
 
 ---
 
-## D-060 — The shared bar stands down where the product names itself
+## D-060 - The shared bar stands down where the product names itself
 
 Status: Accepted
 Stage: 9C2.1
@@ -1570,7 +1570,7 @@ chrome. The filler that holds the bar's row open is hidden once the bar wraps.
 
 ### Reason
 The bar read "Operations Console" directly above a product whose sidebar and
-route heading already said so — the same words three times in the top 120px.
+route heading already said so: the same words three times in the top 120px.
 Naming is the product's job; the shared bar's job is the disclosure, the way
 back, and the reset.
 
@@ -1580,13 +1580,13 @@ Portfolio" to the right-hand edge of a phone screen. `margin-left: auto` on the
 controls does the same work without occupying a row.
 
 ### Consequence
-On a phone the bar is three honest rows — back, then role and reset, then the
-disclosure — with every item on screen and no empty row. The disclosure text is
+On a phone the bar is three honest rows (back, then role and reset, then the
+disclosure) with every item on screen and no empty row. The disclosure text is
 unchanged and remains mandatory on every demo route.
 
 ---
 
-## D-061 — Demo 01 is deployed for external review before its remaining modules are built
+## D-061 - Demo 01 is deployed for external review before its remaining modules are built
 
 Status: Accepted
 Stage: 9C2.1
@@ -1599,9 +1599,9 @@ keeps `operations = building`, `#work` is untouched and still renders its Stage
 reviewed live.
 
 ### Reason
-The four defects this stage fixed — a decorative progress bar, a half-applied
+The four defects this stage fixed (a decorative progress bar, a half-applied
 role rule, a notification panel that overflowed a phone, a mark too small to
-read — were all found by looking at rendered pixels, and three of them survived
+read) were all found by looking at rendered pixels, and three of them survived
 a QA suite that passed. A local production build answers whether the code
 works; it does not answer whether the product reads well on a real screen at
 arm's length. Deferring that judgement until all eleven modules exist would
@@ -1617,13 +1617,13 @@ was verified healthy afterwards.
 
 ---
 
-## D-062 — Stage 09C3 is built one module at a time
+## D-062 - Stage 09C3 is built one module at a time
 
 Status: Accepted
 Stage: 9C3.1
 
 ### Decision
-The 09C3 umbrella — Leads, Customers and Inbox — is built as three stages:
+The 09C3 umbrella (Leads, Customers and Inbox) is built as three stages:
 09C3.1 Leads, 09C3.2 Customers, 09C3.3 Inbox and the integrated CRM workflow.
 The scope of 09C3 is unchanged; only its sequencing is.
 
@@ -1632,7 +1632,7 @@ Leads is the module that establishes the patterns the others reuse: a data
 table, a mobile record list, search, filters, sort, pagination, a detail
 drawer, forms, confirmations, URL-driven selection and mutation feedback.
 Building three screens before any of those patterns had been reviewed would
-mean discovering a problem in the pattern three times over — the same argument
+mean discovering a problem in the pattern three times over, the same argument
 D-061 makes about the shell, one level down.
 
 ### Consequence
@@ -1642,7 +1642,7 @@ as the next task and records that it is blocked until Leads has been reviewed.
 
 ---
 
-## D-063 — Mutations wake the automation rules through a workflow layer
+## D-063 - Mutations wake the automation rules through a workflow layer
 
 Status: Accepted
 Stage: 9C3.1
@@ -1660,7 +1660,7 @@ The lead services build the correct domain events and hand them to
 `runtime.commit`, which publishes them. `processEvents` in `automations.ts`
 says of itself: *"Called by workflows after the mutation that produced the
 events."* No workflow existed, `processEvents` had no caller outside its own
-module, and the runtime's event bus — built for exactly this — had no
+module, and the runtime's event bus, built for exactly this, had no
 subscribers. So creating a website lead never assigned it, and qualifying a
 lead never set a follow-up date, both of which the frozen 09B contract
 requires.
@@ -1689,7 +1689,7 @@ pending, and the module says so rather than leaving it to be discovered.
 
 ---
 
-## D-064 — The lead domain gained the guards the screen would otherwise have faked
+## D-064 - The lead domain gained the guards the screen would otherwise have faked
 
 Status: Accepted
 Stage: 9C3.1
@@ -1709,7 +1709,7 @@ button:
   against: a rule enforced by a hidden button is not enforced.
 - **A converted lead could be moved back down the pipeline.** `changeLeadStage`
   refused Won so that a Won lead always has a customer behind it, and then
-  allowed the same contradiction from the other side — a Won lead with a live
+  allowed the same contradiction from the other side: a Won lead with a live
   `convertedCustomerId` could be set back to New.
 - **Editing was not audited**, while every other lead mutation was. The detail
   drawer's activity was silent about a change the visitor had just made and
@@ -1728,7 +1728,7 @@ is structural rather than a condition someone has to remember to write.
 
 ---
 
-## D-065 — A lead reaches Won by being converted, and the menu says so
+## D-065 - A lead reaches Won by being converted, and the menu says so
 
 Status: Accepted
 Stage: 9C3.1
@@ -1750,12 +1750,12 @@ contains Won, because that is what a converted lead is.
 ### Consequence
 The Convert action is withdrawn once a lead is converted, and the drawer says
 where the lead ended up instead. The domain still raises CONFLICT on a second
-conversion, and the QA suite asserts both layers — the button that is not there
+conversion, and the QA suite asserts both layers: the button that is not there
 and the service that would refuse anyway.
 
 ---
 
-## D-066 — The selected record lives in the URL; the list query does not
+## D-066 - The selected record lives in the URL; the list query does not
 
 Status: Accepted
 Stage: 9C3.1
@@ -1771,7 +1771,7 @@ address bar could contradict.
 
 The list query is deliberately not in the URL. Every keystroke in the search
 box would become a history entry, and Back would then walk letter by letter out
-of a search term instead of closing what the visitor opened — which is the one
+of a search term instead of closing what the visitor opened, which is the one
 job Back has on this screen.
 
 ### Consequence
@@ -1791,7 +1791,7 @@ anything once the query has settled.
 
 ---
 
-## D-067 — Leads is deployed for external review before Customers is built
+## D-067 - Leads is deployed for external review before Customers is built
 
 Status: Accepted
 Stage: 9C3.1
@@ -1818,7 +1818,7 @@ task is blocked, deliberately, on a person looking at the live URL.
 
 ---
 
-## D-068 — The source is published, and authorship was anonymised once to allow it
+## D-068 - The source is published, and authorship was anonymised once to allow it
 
 Status: Accepted
 Stage: 9C3.1
@@ -1826,7 +1826,7 @@ Stage: 9C3.1
 ### Decision
 The repository is public at `https://github.com/Witcher-Geralt-of-Rivia/portfolio`
 on branch `main`. Every verified commit and tag is pushed after its own stage's
-QA — and after production deployment, where the stage requires one — and the
+QA (and after production deployment, where the stage requires one), and the
 remote SHA is verified against the local one.
 
 Before the first push, and only then, the author and committer email on all 25
@@ -1835,7 +1835,7 @@ the account's GitHub noreply address. History rewriting is prohibited again.
 
 ### Reason
 Publishing the history publishes its metadata. Every commit carried a personal
-Gmail address, and the GitHub account is pseudonymous — so pushing as-is would
+Gmail address, and the GitHub account is pseudonymous, so pushing as-is would
 have permanently linked the pseudonym to that address and put it in every
 clone. The project already forbids an email address on every surface of the
 product; git authorship is the one surface that rule had not reached.
@@ -1868,7 +1868,7 @@ deployment.
 
 ---
 
-## D-069 — A control states what it is, and a sort states which way
+## D-069 - A control states what it is, and a sort states which way
 
 Status: Accepted
 Stage: 9C3.1.1
@@ -1881,15 +1881,15 @@ The Leads filters, the sort and the page size all use it, and later modules
 reuse it rather than restyling their own.
 
 Sort is one control. Each of the six fields appears with both of its
-directions, worded for the field — "Last activity — newest", "Lead name —
-A–Z" — and the separate direction button is gone.
+directions, worded for the field ("Last activity: newest",
+"Lead name: A-Z"), and the separate direction button is gone.
 
 ### Reason
 The first external review of Leads found four presentation faults, and three
 of them were the same fault: a control that did not say what it was.
 
 The filters were a small uppercase word beside a browser select. Two elements,
-read as two things, repeated four times across a toolbar — the label was
+read as two things, repeated four times across a toolbar: the label was
 detached from the value it labelled, and the select still wore the platform's
 own arrow, so the row looked like a form someone had not finished styling.
 Inside one border, `Stage · Qualified` is a single object whose current value
@@ -1912,7 +1912,7 @@ free in a hand-built menu.
 
 ### Consequence
 Width is left to the browser, which sizes a select to its widest option, so a
-control does not resize when its value changes — choosing "Returning customer"
+control does not resize when its value changes: choosing "Returning customer"
 cannot reflow the toolbar under the pointer. The QA suite asserts that, along
 with the geometry (40–42px filters, 38–40px page size, 11–12px radii), the
 active marking, the accessible names and the absence of the old direction
@@ -1930,13 +1930,13 @@ select anyway, and is the safe direction to be wrong in.
 
 ---
 
-## D-070 — The provenance band takes the width, and gives it back on a phone
+## D-070 - The provenance band takes the width, and gives it back on a phone
 
 Status: Accepted
 Stage: 9C3.1.1
 
 ### Decision
-The demo chrome is three zones — identity, provenance, controls — with the
+The demo chrome is three zones (identity, provenance, controls) with the
 middle one `minmax(0, 1fr)`, so the disclosure band grows into whatever the two
 ends leave. Below 861px the bar returns to wrapping flex and the band takes a
 full-width row of its own.
@@ -1955,7 +1955,7 @@ The narrow layout is flex rather than grid, and that is measured rather than
 preferred. A two-column grid puts the back link and the controls in one row
 whether or not they fit, and at 360px they do not: the back link is 120px, the
 role select's intrinsic width is 167px because "Fleet Coordinator" needs it,
-and Reset is 59px — 363px of content in 321px of bar. The grid grew to hold
+and Reset is 59px: 363px of content in 321px of bar. The grid grew to hold
 them and the band, spanning both columns, stretched to that overflowed width.
 Wrapping flex lets the row break on its own terms, and `flex-basis: 100%` on
 the band still forces it onto a row of its own.
@@ -1969,15 +1969,15 @@ name or dropping the word "Portfolio" from the back link, and neither is worth
 
 ---
 
-## D-071 — The pagination footer is one bar
+## D-071 - The pagination footer is one bar
 
 Status: Accepted
 Stage: 9C3.1.1
 
 ### Decision
 The range, the Previous/Next controls and the page size sit in one grid under a
-rule: range left, controls centred, page size right. On a phone they stack —
-range, page indicator, the two steps side by side, then the page size — and
+rule: range left, controls centred, page size right. On a phone they stack
+(range, page indicator, the two steps side by side, then the page size), and
 nothing is pinned to an edge alone.
 
 ### Reason
@@ -1990,5 +1990,101 @@ screen, and the page size was a bare number under a label at the far right.
 The steps are real `<button disabled>` on the first and last page, so the state
 is announced rather than merely drawn, and they keep their size when disabled so
 the row does not resize as the visitor pages through. The page indicator is a
-polite live region — the number changing is the result of the visitor's own
+polite live region: the number changing is the result of the visitor's own
 click, not news to interrupt them with.
+
+---
+
+## D-072 - The product draws its own select menu
+
+Status: Accepted
+Stage: 9C3.1.2
+
+### Decision
+`src/components/demos/DemoSelect.tsx` is the demo platform's select: a
+`role="combobox"` button that owns a `role="listbox"` the project draws itself.
+Every select in the product uses it - the three Leads filters, the sort, the
+page size, the demo role, and the create/edit form and detail controls.
+
+### Reason
+A native `<select>` can be styled shut but not open. The popup belongs to the
+operating system, so however carefully the closed control is drawn, opening it
+produced square corners, almost no option padding, a saturated system-blue
+selection band and a border from Windows. The external review found the same
+defect on six controls at once, and no amount of CSS on `<option>` addresses
+it: the element is not ours to style.
+
+So the menu is authored and the trigger keeps the design that was already
+approved. Only the open state changed.
+
+### Consequence
+The pattern is WAI-ARIA's select-only combobox, and focus never leaves the
+trigger: the active option is pointed at with `aria-activedescendant`. That is
+what keeps Escape, Tab and outside-click simple, because there is only ever one
+focused element to return to. Enter, Space, ArrowUp, ArrowDown, Home, End and a
+600ms typeahead buffer all behave as the pattern specifies, and the menu opens
+onto the current value rather than the first item.
+
+The accessible name is `aria-labelledby` over the visible label and the current
+value together, so a reader hears "Stage, All stages" once instead of a
+decorative label read and then repeated.
+
+The menu is portalled into the nearest `<dialog>` ancestor when there is one
+and into `document.body` otherwise. A modal dialog sits in the browser's top
+layer, above every z-index on the page, so a menu portalled to the body from
+inside the filter sheet would have been painted behind the sheet that opened
+it. Fixed positioning, measured from the trigger, keeps it clear of any
+scrolling ancestor that would otherwise clip it, and it flips above the trigger
+when there is not room below. Twelve sort options cap at 320px and scroll.
+
+Stacking is stated rather than raced: 70 for these menus, above the
+notification panel and mobile drawer at 60 and the chrome at 40.
+
+One menu is open at a time, enforced by a module-level registry rather than by
+hoping two never overlap.
+
+There is no new dependency. The one timer is the typeahead buffer, cleared on
+unmount.
+
+---
+
+## D-073 - No em dash in anything this project writes
+
+Status: Accepted
+Stage: 9C3.1.2
+
+### Decision
+The character U+2014 does not appear in project-authored content: UI copy,
+documentation, source comments, QA messages, metadata or commit messages.
+`npm run qa:style` enforces it over every tracked text file.
+
+### Reason
+The project owner rejects it. That is sufficient reason for a house style rule,
+and house style is worth having written down rather than re-litigated.
+
+The rule is not "replace it with a hyphen". An em dash does several different
+jobs, and each wants its own punctuation: a colon where the second half
+explains the first, a comma for a loose aside, a full stop where the halves are
+really two sentences, parentheses around a bracketed clause that contains its
+own commas, a hyphen in a heading or a label. Substituting one character
+everywhere would have left 765 sentences that parse but do not read.
+
+### Consequence
+765 occurrences across 154 files were rewritten, each judged in context. The
+Leads sort labels moved from "Last activity - newest" with an em dash to
+"Last activity: newest", which is also a better label: the colon says the
+direction belongs to the field.
+
+The empty-value placeholder in the tables moved from an em dash to a hyphen.
+
+`qa/copy-style.mjs` builds the banned character from its codepoint rather than
+typing it, so the guard does not fail the rule it enforces. It reports file,
+line and column, and prints the offending line with the character replaced so
+its own output stays clean.
+
+One caveat is recorded rather than hidden: `AGENTS.md` is regenerated by
+`next dev`, and the two em dashes it writes will return if that command is run.
+The guard catches it; the fix is to correct the file again before committing.
+
+The en dash (U+2013) is a different character and is not covered by this rule.
+A few remain in numeric ranges such as `40-42px` and in the pagination range.

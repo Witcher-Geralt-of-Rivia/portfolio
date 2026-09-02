@@ -1,12 +1,12 @@
 /**
- * Stage 09 — Selected Engineering Case Studies.
+ * Stage 09 - Selected Engineering Case Studies.
  *
  * Case studies describe real work. This module is therefore built around one
  * rule: nothing reaches the page unless it has been verified.
  *
  * Every entry carries a `status`. Only `"verified"` entries are publishable,
  * and `publishableCaseStudies()` is the single accessor the renderer may use.
- * A `"draft"` entry is a slot waiting for confirmed facts — it exists so the
+ * A `"draft"` entry is a slot waiting for confirmed facts: it exists so the
  * shape of the missing information is explicit, not so it can be filled in
  * with something plausible.
  *
@@ -145,7 +145,7 @@ export function sectionIsPublishable(all: CaseStudy[] = CASE_STUDIES): boolean {
 }
 
 /* =====================================================================
-   CASE 01 — Internal Production Delivery System
+   CASE 01 - Internal Production Delivery System
 
    This is the portfolio's own deployment system, not client work, and it
    says so on the surface. Every fact below is reproducible from this

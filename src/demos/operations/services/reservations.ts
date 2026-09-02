@@ -1,5 +1,5 @@
 /**
- * Operations demo — reservation services, and vehicle availability.
+ * Operations demo: reservation services, and vehicle availability.
  *
  * Availability is the interesting part. A vehicle is eligible only when
  * nothing else claims its dates: no overlapping active contract, no

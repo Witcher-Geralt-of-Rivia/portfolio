@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Operations demo — the notification centre.
+ * Operations demo: the notification centre.
  *
  * A disclosure button and a popover. The button is a real `<button>` carrying
  * `aria-expanded` and `aria-controls`; the panel is a labelled group that
@@ -43,7 +43,7 @@ export default function NotificationCenter() {
   );
   /* Filtered by role, and the badge counts the filtered set.
      A notification names the area it came from, so a role that cannot open
-     that area must not be told about it — and must not be shown a count that
+     that area must not be told about it, and must not be shown a count that
      includes it. Counting the unfiltered set was a leak: Finance saw a badge
      of eight while its own list held three. */
   const notifications: DemoRecord<Notification>[] = (data ?? []).filter((n) =>

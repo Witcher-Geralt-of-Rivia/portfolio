@@ -1,5 +1,5 @@
 /**
- * Operations demo — Overview and report selectors.
+ * Operations demo: Overview and report selectors.
  *
  * Every figure is computed from the records that back it. Nothing here is
  * stored, and no KPI has a literal value: a dashboard number that disagrees
@@ -214,8 +214,8 @@ export function selectReports(input: ReportsInput): ReportsData {
   const from = periodStart(input.period, input.now);
 
   /* Leads and contracts are time-filtered because they have a moment of
-     origin. The fleet is a snapshot — a vehicle's status is what it is now,
-     not what happened in a window — so the period does not apply to it. */
+     origin. The fleet is a snapshot (a vehicle's status is what it is now,
+     not what happened in a window), so the period does not apply to it. */
   const leads = input.leads.filter(
     (l) => !l.data.archived && withinPeriod(l.createdAt, from)
   );

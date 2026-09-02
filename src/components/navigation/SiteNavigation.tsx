@@ -11,8 +11,8 @@ import { NAV_ITEMS } from "./nav-items";
  *
  * It owns exactly five behaviours: compact menu state, focus management,
  * active-section tracking, Escape handling and the body scroll lock.
- * Everything visual — hover, active styling, the panel transition, the
- * icon morph — is CSS. Nothing here runs on a timer or a scroll event,
+ * Everything visual (hover, active styling, the panel transition, the
+ * icon morph) is CSS. Nothing here runs on a timer or a scroll event,
  * so an idle page does no navigation work at all.
  */
 export default function SiteNavigation() {
@@ -28,7 +28,7 @@ export default function SiteNavigation() {
   const close = useCallback(() => setOpen(false), []);
   const toggle = useCallback(() => setOpen((value) => !value), []);
 
-  /* Active section. IntersectionObserver only — no scroll listener. */
+  /* Active section. IntersectionObserver only: no scroll listener. */
   useEffect(() => {
     const intersecting = new Map<string, boolean>();
     const targets = NAV_ITEMS.map((item) =>
@@ -45,7 +45,7 @@ export default function SiteNavigation() {
         /* Resolving in document order guarantees a single active item
            even while two sections overlap the detection band. Sections are
            contiguous, so "nothing intersecting" only happens above the
-           first one — at the hero — where nothing should be active. */
+           first one, at the hero, where nothing should be active. */
         const current = NAV_ITEMS.find((item) => intersecting.get(item.id));
         setActiveId(current ? current.id : "");
       },
@@ -104,7 +104,7 @@ export default function SiteNavigation() {
     return () => document.body.classList.remove("nav-locked");
   }, [open]);
 
-  /* Focus enters the panel on open and returns to the trigger on close —
+  /* Focus enters the panel on open and returns to the trigger on close,
      but only when this component was the thing that moved it. */
   useEffect(() => {
     if (open) {

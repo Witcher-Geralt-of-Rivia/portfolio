@@ -1,5 +1,5 @@
 /**
- * Operations demo — synthetic name and text pools.
+ * Operations demo: synthetic name and text pools.
  *
  * Every display name in the demo is composed from these arrays by index. No
  * randomness, so the same reset always produces the same people, and no name
@@ -82,7 +82,7 @@ const CUSTOMER_MESSAGES = [
 
 const STAFF_MESSAGES = [
   "Checking availability now, one moment.",
-  "That change is possible — I have updated the booking.",
+  "That change is possible. I have updated the booking.",
   "The daily rate covers the vehicle and routine servicing.",
   "Collection time updated as requested.",
   "The touring class is the better fit for that distance.",

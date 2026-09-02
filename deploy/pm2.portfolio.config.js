@@ -11,7 +11,7 @@
 // PRODUCTION NEVER SERVES `.next`.
 //
 // It serves one of two alternating release slots, so that an ordinary
-// `next build` — which writes `.next` — cannot touch the files the running
+// `next build`, which writes `.next`, cannot touch the files the running
 // production process is reading. That failure took the live site down twice
 // during Stage 05. The slot is supplied through PORTFOLIO_DIST_DIR and is
 // validated here as well as in next.config.ts; `.next` is deliberately NOT
@@ -26,7 +26,7 @@ const slot = (process.env.PORTFOLIO_DIST_DIR || "").trim();
 
 if (!ALLOWED_RELEASE_SLOTS.includes(slot)) {
   throw new Error(
-    `PORTFOLIO_DIST_DIR must be one of ${ALLOWED_RELEASE_SLOTS.join(", ")} — received ` +
+    `PORTFOLIO_DIST_DIR must be one of ${ALLOWED_RELEASE_SLOTS.join(", ")}. Received ` +
       `"${slot || "(unset)"}". Production must not run from .next; use deploy/safe-deploy.ps1.`
   );
 }

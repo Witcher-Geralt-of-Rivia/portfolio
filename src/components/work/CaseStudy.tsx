@@ -6,8 +6,8 @@ import type { CaseStudy as CaseStudyData } from "@/content/case-studies";
 /**
  * One case study, as a vertical editorial block rather than a project card.
  *
- * The order is fixed — overview, problem, architecture, challenge, decisions,
- * result, implementation — because it is the order the questions get asked in:
+ * The order is fixed (overview, problem, architecture, challenge, decisions,
+ * result, implementation) because it is the order the questions get asked in:
  * what was needed, what was hard, what was built, why that way, what came out.
  *
  * `index` drives the alternating composition on wide screens only; on a phone

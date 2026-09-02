@@ -1,5 +1,5 @@
 /**
- * Operations demo — the automation engine.
+ * Operations demo: the automation engine.
  *
  * Five typed rules, each a small function. There is no generic expression
  * evaluator: five known rules written plainly are easier to read, impossible
@@ -10,7 +10,7 @@
  * ```
  *
  * Processing is explicit. Nothing polls, nothing runs on a timer, and a rule
- * fires because a workflow asked it to — which is what keeps the runtime idle
+ * fires because a workflow asked it to, which is what keeps the runtime idle
  * at rest and every sequence reproducible.
  *
  * A disabled rule still produces a run, marked Skipped. Silently doing nothing
@@ -78,7 +78,7 @@ const str = (payload: EventPayload, key: string): string | null =>
   typeof payload[key] === "string" ? (payload[key] as string) : null;
 
 /**
- * Rule 01 — assign a website lead to the next Sales Agent.
+ * Rule 01: assign a website lead to the next Sales Agent.
  *
  * The rotation is deterministic: agents sorted by id, indexed by how many
  * leads they already hold. With one Sales Agent in the canonical seed it
@@ -142,7 +142,7 @@ async function runWebsiteLeadAssignment(
   return `Assigned to ${agent.data.displayName}`;
 }
 
-/** Rule 02 — set the follow-up date two days out (D-053) and notify. */
+/** Rule 02: set the follow-up date two days out (D-053) and notify. */
 async function runQualifiedFollowUp(
   ctx: OperationsContext,
   event: DomainEvent
@@ -174,7 +174,7 @@ async function runQualifiedFollowUp(
   return "Follow-up scheduled two days ahead";
 }
 
-/** Rule 03 — append a System message to the customer's conversation. */
+/** Rule 03: append a System message to the customer's conversation. */
 async function runReservationMessage(
   ctx: OperationsContext,
   event: DomainEvent
@@ -330,7 +330,7 @@ export async function processEvents(
     if (!rule) continue;
 
     /* The job exists so the deferred path is real rather than implied. It is
-       enqueued and drained in the same breath — there is no worker. */
+       enqueued and drained in the same breath: there is no worker. */
     await ctx.runtime.commit(() => ({
       ops: [
         {
@@ -515,7 +515,7 @@ export async function testRule(
  *
  * A payment becomes overdue because the clock passed its due date, not because
  * anything happened to the record. Rather than polling for that, a workflow
- * calls this and the transition is raised explicitly — which keeps the runtime
+ * calls this and the transition is raised explicitly, which keeps the runtime
  * idle at rest while still letting Rule 04 fire.
  */
 export async function reconcileTimeDerivedState(

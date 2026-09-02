@@ -1,30 +1,25 @@
 "use client";
 
 /**
- * Operations demo — the product's select control.
+ * Operations demo - the product's select.
  *
- * One control, six uses: the three Leads filters, the sort, the page size, and
- * whatever the next module needs. It exists because the alternative was six
- * copies of the same markup, not because a design system was wanted — the
- * later modules will reuse this one rather than inherit a framework.
+ * A thin wrapper over `DemoSelect`, which owns the behaviour and the menu.
+ * This adds only what is specific to this product: the contextual label inside
+ * the border, the compact variant the pagination uses, and the quiet marking
+ * of a filter that is not at its default.
  *
- * The contextual label lives **inside** the control's border. A small
- * uppercase word floating beside a browser select reads as two things that
- * happen to be adjacent; `Stage · Qualified` in one bordered box reads as one
- * control that is currently set to Qualified, which is what it is.
+ * It used to be a styled native `<select>`. That looked right closed and wrong
+ * open: the popup is drawn by the operating system, so it arrived with square
+ * corners, no option padding and a saturated system-blue selection. The
+ * closed design is unchanged; the menu is now the project's own.
  *
- * A real `<select>` underneath, always. `appearance: none` removes the
- * platform's own arrow so the control can look like the rest of the product,
- * and a locally authored chevron replaces it — but the element is still a
- * select, so it keeps the keyboard behaviour, the screen-reader semantics and
- * the native option list on a phone, which no hand-built menu gets for free.
- *
- * Width is left to the browser, which sizes a select to its widest option.
- * That is deliberate: the control does not resize when the value changes, so
- * choosing "Returning customer" cannot reflow the toolbar under the pointer.
+ * There is one menu implementation in the codebase, not two. The shared demo
+ * role control uses the same primitive.
  */
 
-export type OpsSelectOption = { value: string; label: string };
+import DemoSelect, { type DemoSelectOption } from "@/components/demos/DemoSelect";
+
+export type OpsSelectOption = DemoSelectOption;
 
 export default function OpsSelect({
   label,
@@ -35,12 +30,9 @@ export default function OpsSelect({
   active = false,
   compact = false,
   disabled = false,
-  id,
 }: {
-  /** Shown inside the control. Omit where the value speaks for itself. */
+  /** Shown inside the control, and read as part of its accessible name. */
   label?: string;
-  /** The accessible name. Begins with `label` where there is one, so what is
-      spoken contains what is seen. */
   srLabel: string;
   value: string;
   options: readonly OpsSelectOption[];
@@ -49,67 +41,19 @@ export default function OpsSelect({
   active?: boolean;
   compact?: boolean;
   disabled?: boolean;
-  id?: string;
 }) {
   return (
-    <span
-      className={`ops-control${compact ? " ops-control--compact" : ""}`}
-      data-active={active ? "true" : undefined}
-      data-disabled={disabled ? "true" : undefined}
-    >
-      {label && (
-        /* Decorative: the accessible name comes from `srLabel`, and announcing
-           this too would say "Stage" twice. */
-        <span className="ops-control__label" aria-hidden="true">
-          {label}
-        </span>
-      )}
-
-      <select
-        id={id}
-        className="ops-control__select"
-        aria-label={srLabel}
-        value={value}
-        disabled={disabled}
-        onChange={(e) => onChange(e.target.value)}
-      >
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-
-      <ChevronDown />
-    </span>
-  );
-}
-
-/**
- * The chevron.
- *
- * Authored here rather than pulled from an icon package — one path, and the
- * project ships no icon dependency. `pointer-events: none` in CSS keeps the
- * click on the select underneath it.
- */
-function ChevronDown() {
-  return (
-    <svg
-      className="ops-control__chevron"
-      width="10"
-      height="6"
-      viewBox="0 0 10 6"
-      fill="none"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <path
-        d="M1 1L5 5L9 1"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
+    <DemoSelect
+      className="ops-control"
+      triggerClassName="ops-control__trigger"
+      label={label}
+      srLabel={srLabel}
+      value={value}
+      options={options}
+      onChange={onChange}
+      active={active}
+      compact={compact}
+      disabled={disabled}
+    />
   );
 }

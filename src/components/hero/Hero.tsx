@@ -47,7 +47,7 @@ export default function Hero() {
 
           <p className="hero__lead">
             AI agents, automation, SaaS, APIs, web, mobile and adaptive
-            learning systems — engineered across interfaces, workflows, data
+            learning systems, engineered across interfaces, workflows, data
             and backend infrastructure.
           </p>
 

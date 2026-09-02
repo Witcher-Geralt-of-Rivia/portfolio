@@ -1,11 +1,11 @@
 /**
- * Stage 09C3.1 — Operations Leads QA.
+ * Stage 09C3.1 - Operations Leads QA.
  *
  * Two layers, one suite.
  *
  * The DOMAIN part drives the real bundled services through the QA probe, and
- * exists because the rules this stage added — automations that actually fire,
- * guards on archived and converted leads, an audited edit — must hold whether
+ * exists because the rules this stage added (automations that actually fire,
+ * guards on archived and converted leads, an audited edit) must hold whether
  * or not a screen remembers to ask. The UI part drives the product.
  *
  * Both need a route that only exists during a QA run:
@@ -93,8 +93,8 @@ async function freshLeads(viewport = { width: 1440, height: 900 }) {
 /**
  * Wait for the detail to actually hold a record.
  *
- * The drawer opens before the record is read — it shows a skeleton so a click
- * is never ignored — so `.ops-detail__title` is present while the content is
+ * The drawer opens before the record is read (it shows a skeleton so a click
+ * is never ignored), so `.ops-detail__title` is present while the content is
  * still arriving. The id only exists once the lead is in hand, and the
  * unavailable panel is the other settled outcome.
  */
@@ -107,15 +107,35 @@ const waitForDetail = (page) =>
     POLL
   );
 
+/**
+ * Choose a value from one of the product's custom selects.
+ *
+ * There is no native `<select>` left to drive: the trigger is a
+ * `role="combobox"` button and the options are `role="option"` in a portalled
+ * listbox, addressed by the `data-value` each one carries.
+ */
+async function choose(page, trigger, value) {
+  await page.click(trigger);
+  await page.waitForSelector('[role="listbox"]', POLL);
+  await page.click(`[role="listbox"] [role="option"][data-value="${value}"]`);
+  await page.waitForFunction(() => !document.querySelector('[role="listbox"]'), null, POLL);
+  await page.waitForTimeout(120);
+}
+
+/** The filter triggers, in toolbar order: stage, source, owner, sort. */
+const FILTER = (n) => `.ops-leads__filters .demo-select__trigger >> nth=${n}`;
+const PAGE_SIZE = ".ops-pager__size .demo-select__trigger";
+const ROLE_SELECT = ".ops-role__select .demo-select__trigger";
+
 const countOf = (page) => page.$eval(".ops-leads__count", (e) => e.textContent.trim());
 const badgeOf = (page) =>
   page.evaluate(() => document.querySelector(".ops-notify__badge")?.textContent ?? "0");
 
 /* =====================================================================
-   1. DOMAIN — the rules hold without a screen
+   1. DOMAIN - the rules hold without a screen
    ===================================================================== */
 
-section("DOMAIN — AUTOMATIONS AND GUARDS");
+section("DOMAIN - AUTOMATIONS AND GUARDS");
 {
   const ctx = await browser.newContext();
   const page = await ctx.newPage();
@@ -149,7 +169,7 @@ section("DOMAIN — AUTOMATIONS AND GUARDS");
       const seeded = await rt.repository.all("leads");
       const archivedSeeds = seeded.filter((l) => l.data.archived).length;
 
-      /* Rule 01 — a website lead is assigned, and nothing else is. */
+      /* Rule 01: a website lead is assigned, and nothing else is. */
       const before = (await rt.repository.all("automation_runs")).length;
       const web = await ops.leadWorkflows.createLeadWorkflow(admin, {
         displayName: "QA Website",
@@ -166,7 +186,7 @@ section("DOMAIN — AUTOMATIONS AND GUARDS");
       });
       const refLead = await rt.repository.get("leads", ref.result.id);
 
-      /* Rule 02 — qualifying schedules the follow-up two logical days out,
+      /* Rule 02: qualifying schedules the follow-up two logical days out,
          measured from the automation's own clock rather than from any earlier
          timestamp. */
       await ops.leadWorkflows.changeLeadStageWorkflow(admin, ref.result.id, "Contacted");
@@ -181,7 +201,7 @@ section("DOMAIN — AUTOMATIONS AND GUARDS");
         .filter((r) => r.data.ruleId === "automation_rule_0002")
         .sort((a, b) => b.data.completedAt.localeCompare(a.data.completedAt))[0];
       /* Anchored on the run record, which is written by a *second* commit
-         after the rule has acted — and every commit advances the logical
+         after the rule has acted, and every commit advances the logical
          clock by one tick. So the honest expectation is the offset minus one
          tick, computed from the domain's own constants rather than from a
          number typed into this file. */
@@ -477,16 +497,16 @@ section("SEARCH AND FILTERS");
   /* The seed's own distribution, asserted through the product. */
   const stages = { New: 12, Contacted: 10, Qualified: 9, Proposal: 7, Won: 6, Lost: 4 };
   for (const [stage, expected] of Object.entries(stages)) {
-    await page.selectOption(".ops-leads__filters .ops-control__select >> nth=0", stage);
+    await choose(page, FILTER(0), stage);
     const got = await settle(`${expected} leads`);
     check(`stage ${stage} matches the seeded distribution`, got === `${expected} leads`, got);
   }
-  await page.selectOption(".ops-leads__filters .ops-control__select >> nth=0", "all");
+  await choose(page, FILTER(0), "all");
   await settle("48 leads");
 
-  await page.selectOption(".ops-leads__filters .ops-control__select >> nth=1", "Website");
+  await choose(page, FILTER(1), "Website");
   const website = await countOf(page);
-  await page.selectOption(".ops-leads__filters .ops-control__select >> nth=2", "unassigned");
+  await choose(page, FILTER(2), "unassigned");
   const both = await settle("0 leads");
   check("filters combine", both === "0 leads", `${website} website, then unassigned -> ${both}`);
 
@@ -494,11 +514,14 @@ section("SEARCH AND FILTERS");
   check("Clear filters resets every control", (await settle("48 leads")) === "48 leads", await countOf(page));
   const controls = await page.evaluate(() => ({
     search: document.querySelector(".ops-leads__search-input")?.value,
-    selects: [...document.querySelectorAll(".ops-leads__filters .ops-control__select")].slice(0, 3).map((s) => s.value),
+    selects: [...document.querySelectorAll(".ops-leads__filters .demo-select__value")]
+      .slice(0, 3)
+      .map((e) => e.textContent.trim()),
   }));
   check("Clear filters empties the search box", controls.search === "", String(controls.search));
   check("Clear filters returns each filter to All",
-    controls.selects.join(",") === "all,all,all", controls.selects.join(","));
+    controls.selects.join("|") === "All stages|All sources|All owners",
+    controls.selects.join("|"));
 
   await ctx.close();
 }
@@ -511,7 +534,7 @@ section("SORT");
   /* One control now: the field and its direction are a single option, so the
      old "pick a field, then toggle a mystery square" dance is gone. */
   const sortBy = async (key, direction) => {
-    await page.selectOption(".ops-leads__filters .ops-control__select >> nth=3", `${key}:${direction}`);
+    await choose(page, FILTER(3), `${key}:${direction}`);
     await page.waitForTimeout(150);
     return names();
   };
@@ -537,7 +560,7 @@ section("SORT");
     es.map((e) => e.textContent.trim())
   );
   check("leads with no follow-up sort last, not first",
-    followAsc[0] !== "—", followAsc.slice(0, 3).join(","));
+    followAsc[0] !== "-", followAsc.slice(0, 3).join(","));
 
   await ctx.close();
 }
@@ -565,7 +588,7 @@ section("PAGINATION");
   await page.waitForTimeout(200);
   check("Previous returns to the first page", (await ids()).join("|") === p1.join("|"));
 
-  await page.selectOption(".ops-pager__size .ops-control__select", "20");
+  await choose(page, PAGE_SIZE, "20");
   await page.waitForTimeout(200);
   check("the page size can be raised to twenty",
     (await ids()).length === 20, String((await ids()).length));
@@ -574,7 +597,7 @@ section("PAGINATION");
 
   await page.click(".ops-pager__step >> nth=1");
   await page.waitForTimeout(200);
-  await page.selectOption(".ops-leads__filters .ops-control__select >> nth=0", "Lost");
+  await choose(page, FILTER(0), "Lost");
   await page.waitForTimeout(250);
   check("changing a filter returns to page one",
     (await page.$eval(".ops-pager__page", (e) => e.textContent)).startsWith("Page 1"),
@@ -583,7 +606,7 @@ section("PAGINATION");
   /* Every record is reachable and none is duplicated across the whole set. */
   await page.click(".ops-link-button");
   await page.waitForTimeout(200);
-  await page.selectOption(".ops-pager__size .ops-control__select", "10");
+  await choose(page, PAGE_SIZE, "10");
   await page.waitForTimeout(200);
   const seen = [];
   for (let i = 0; i < 5; i += 1) {
@@ -755,9 +778,9 @@ section("CREATE");
   check("the submit button is inert until the lead has a name", fields.submitDisabled);
 
   await page.fill(".ops-form input.ops-input", "QA Website Lead");
-  await page.selectOption(".ops-form select >> nth=0", "Website");
-  await page.selectOption(".ops-form select >> nth=1", "Touring");
-  await page.selectOption(".ops-form select >> nth=2", "High");
+  await choose(page, ".ops-form .demo-select__trigger >> nth=0", "Website");
+  await choose(page, ".ops-form .demo-select__trigger >> nth=1", "Touring");
+  await choose(page, ".ops-form .demo-select__trigger >> nth=2", "High");
   await page.click('.ops-form button[type="submit"]');
 
   await page.waitForSelector(".ops-overlay--drawer", POLL);
@@ -790,7 +813,7 @@ section("CREATE");
   await page.click(".ops-leads__lead-row .ops-button--primary");
   await page.waitForSelector(".ops-form", POLL);
   await page.fill(".ops-form input.ops-input", "QA Walk-in Lead");
-  await page.selectOption(".ops-form select >> nth=0", "Walk-in");
+  await choose(page, ".ops-form .demo-select__trigger >> nth=0", "Walk-in");
   await page.click('.ops-form button[type="submit"]');
   await page.waitForSelector(".ops-overlay--drawer", POLL);
   await waitForDetail(page);
@@ -824,7 +847,7 @@ section("EDIT, STAGE AND ASSIGNMENT");
     editFields.labels.join("|"));
 
   await page.fill(".ops-form input.ops-input", "QA Renamed Lead");
-  await page.selectOption(".ops-form select >> nth=2", "Low");
+  await choose(page, ".ops-form .demo-select__trigger >> nth=2", "Low");
   await page.click('.ops-form button[type="submit"]');
   await page.waitForFunction(() => !document.querySelector(".ops-form"), null, POLL);
   await page.waitForTimeout(400);
@@ -836,7 +859,7 @@ section("EDIT, STAGE AND ASSIGNMENT");
 
   /* Qualifying is where Rule 02 has to fire through the product. */
   const badgeBefore = await badgeOf(page);
-  await page.selectOption(".ops-detail__actions select >> nth=0", "Qualified");
+  await choose(page, ".ops-detail__actions .demo-select__trigger >> nth=0", "Qualified");
   await page.waitForFunction(
     () => [...document.querySelectorAll(".ops-facts__value")][3]?.textContent === "Qualified",
     null,
@@ -857,16 +880,21 @@ section("EDIT, STAGE AND ASSIGNMENT");
     qualified.activity.some((a) => /moved from .* to Qualified/.test(a)), qualified.activity[0]);
 
   /* Assignment is a dedicated control, not part of the edit form. */
-  await page.selectOption(".ops-detail__actions select >> nth=1", "unassigned");
+  await choose(page, ".ops-detail__actions .demo-select__trigger >> nth=1", "unassigned");
   await page.waitForFunction(
     () => [...document.querySelectorAll(".ops-facts__value")][2]?.textContent === "Unassigned",
     null,
     POLL
   );
   check("the owner can be cleared", true, "Unassigned");
-  const ownerOptions = await page.$$eval(".ops-detail__actions select >> nth=1 >> option", (os) =>
-    os.map((o) => o.textContent)
+  /* Read from the open menu: the owner control is a custom listbox now. */
+  await page.click(".ops-detail__actions .demo-select__trigger >> nth=1");
+  await page.waitForSelector('[role="listbox"]', POLL);
+  const ownerOptions = await page.$$eval('[role="listbox"] [role="option"]', (os) =>
+    os.map((o) => o.textContent.trim())
   );
+  await page.keyboard.press("Escape");
+  await page.waitForFunction(() => !document.querySelector('[role="listbox"]'), null, POLL);
   check("only CRM owners are offered",
     ownerOptions.join("|") === "Unassigned|Avery Chen", ownerOptions.join("|"));
 
@@ -988,7 +1016,7 @@ section("ROLES");
   };
 
   for (const [role, want] of Object.entries(expected)) {
-    await page.selectOption(".ops-role__select", role);
+    await choose(page, ROLE_SELECT, role);
     await page.waitForFunction(
       (r) => document.querySelector(".ops-actor__role")?.textContent === r,
       role,
@@ -1024,7 +1052,7 @@ section("ROLES");
 
   /* The specific leak D-058 exists to prevent: a drawer full of Admin's data
      must not survive one frame of a role that cannot open the module. */
-  await page.selectOption(".ops-role__select", "Admin");
+  await choose(page, ROLE_SELECT, "Admin");
   await page.waitForFunction(
     () => document.querySelector(".ops-actor__role")?.textContent === "Admin",
     null,
@@ -1034,7 +1062,23 @@ section("ROLES");
   await page.click(".ops-leads__name >> nth=0");
   await page.waitForSelector(".ops-overlay--drawer", POLL);
 
-  await page.selectOption(".ops-role__select", "Finance Analyst");
+  /* The detail is a modal dialog, so the chrome behind it is inert and the
+     role control genuinely cannot be reached while a record is open. That is
+     correct, and worth stating: the previous suite drove the role with
+     `selectOption`, which does not hit-test, so it was exercising something a
+     visitor could not do. */
+  const roleReachable = await page.evaluate(() => {
+    const trigger = document.querySelector('.ops-role__select [role="combobox"]');
+    const r = trigger.getBoundingClientRect();
+    const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+    return trigger.contains(hit);
+  });
+  check("an open record makes the chrome inert", !roleReachable);
+
+  await page.keyboard.press("Escape");
+  await page.waitForFunction(() => !document.querySelector(".ops-overlay--drawer"), null, POLL);
+
+  await choose(page, ROLE_SELECT, "Finance Analyst");
   /* Sampled immediately, with no settle: the point is that there is no frame
      in which the previous role's records are still on screen. */
   const immediate = await page.evaluate(() => ({
@@ -1042,11 +1086,11 @@ section("ROLES");
     rows: document.querySelectorAll(".ops-leads__row").length,
     leaked: /lead_\d{4}/.test(document.body.innerText),
   }));
-  check("switching to a barred role closes the detail at once", !immediate.drawer);
+  check("no detail survives the switch to a barred role", !immediate.drawer);
   check("no lead row survives the switch", immediate.rows === 0, String(immediate.rows));
   check("no lead id survives the switch", !immediate.leaked);
 
-  await page.selectOption(".ops-role__select", "Admin");
+  await choose(page, ROLE_SELECT, "Admin");
   await page.waitForSelector(".ops-leads__row", POLL);
   check("switching back restores the module",
     (await page.$$eval(".ops-leads__row", (es) => es.length)) === 10);
@@ -1077,7 +1121,7 @@ section("OVERVIEW REGRESSION");
   await page.click(".ops-leads__lead-row .ops-button--primary");
   await page.waitForSelector(".ops-form", POLL);
   await page.fill(".ops-form input.ops-input", "QA Overview Probe");
-  await page.selectOption(".ops-form select >> nth=0", "Referral");
+  await choose(page, ".ops-form .demo-select__trigger >> nth=0", "Referral");
   await page.click('.ops-form button[type="submit"]');
   await page.waitForSelector(".ops-overlay--drawer", POLL);
   await waitForDetail(page);
@@ -1092,7 +1136,7 @@ section("OVERVIEW REGRESSION");
   await page.goto(`${LEADS}?selected=${newId}`, { waitUntil: "networkidle" });
   await waitForDetail(page);
   await page.waitForSelector(".ops-detail__actions", POLL);
-  await page.selectOption(".ops-detail__actions select >> nth=0", "Qualified");
+  await choose(page, ".ops-detail__actions .demo-select__trigger >> nth=0", "Qualified");
   await page.waitForFunction(
     () => [...document.querySelectorAll(".ops-facts__value")][3]?.textContent === "Qualified",
     null,
@@ -1108,7 +1152,7 @@ section("OVERVIEW REGRESSION");
   await page.goto(`${LEADS}?selected=${newId}`, { waitUntil: "networkidle" });
   await waitForDetail(page);
   await page.waitForSelector(".ops-detail__actions", POLL);
-  await page.selectOption(".ops-detail__actions select >> nth=0", "Lost");
+  await choose(page, ".ops-detail__actions .demo-select__trigger >> nth=0", "Lost");
   await page.waitForFunction(
     () => [...document.querySelectorAll(".ops-facts__value")][3]?.textContent === "Lost",
     null,
@@ -1134,7 +1178,7 @@ section("PERSISTENCE AND RESET");
   await page.click(".ops-leads__lead-row .ops-button--primary");
   await page.waitForSelector(".ops-form", POLL);
   await page.fill(".ops-form input.ops-input", "QA Persisted Lead");
-  await page.selectOption(".ops-form select >> nth=0", "Campaign");
+  await choose(page, ".ops-form .demo-select__trigger >> nth=0", "Campaign");
   await page.click('.ops-form button[type="submit"]');
   await page.waitForSelector(".ops-overlay--drawer", POLL);
   await waitForDetail(page);
@@ -1359,8 +1403,8 @@ section("ACCESSIBILITY AND CONTRAST");
       );
     return {
       searchLabelled: labelled(document.querySelector(".ops-leads__search-input")),
-      filtersLabelled: [...document.querySelectorAll(".ops-leads__filters .ops-control__select")].every(labelled),
-      pageSizeLabelled: labelled(document.querySelector(".ops-pager__size .ops-control__select")),
+      filtersLabelled: [...document.querySelectorAll('.ops-leads__filters [role="combobox"]')].every(labelled),
+      pageSizeLabelled: labelled(document.querySelector('.ops-pager__size [role="combobox"]')),
       sortHeadersFocusable: [...document.querySelectorAll(".ops-th-sort")].length,
       liveRegions: document.querySelectorAll('[role="status"][aria-live="polite"]').length,
       caption: Boolean(document.querySelector(".ops-leads__table caption")),
@@ -1404,8 +1448,8 @@ section("ACCESSIBILITY AND CONTRAST");
     /**
      * The colour a reader actually sees behind the text.
      *
-     * The pills are deliberately translucent — `rgba(115, 168, 235, 0.16)` and
-     * the like — so taking the first non-transparent background found while
+     * The pills are deliberately translucent (`rgba(115, 168, 235, 0.16)` and
+     * the like), so taking the first non-transparent background found while
      * walking up reports the tint itself rather than the tint over the surface
      * beneath it, and understates the contrast badly. Every translucent layer
      * is composited onto the one below, which is what the browser does.
@@ -1430,7 +1474,7 @@ section("ACCESSIBILITY AND CONTRAST");
     };
     const targets = [
       ".ops-leads__name", ".ops-leads__count", ".ops-table td", ".ops-th-sort",
-      ".ops-pager__range", ".ops-control__label", ".ops-leads__unassigned",
+      ".ops-pager__range", ".demo-select__label", ".ops-leads__unassigned",
     ];
     /* Every distinct stage and priority tone, not merely the first one that
        happens to sort to the top of the page. */
@@ -1486,13 +1530,13 @@ section("NETWORK, IDLE AND CONTENT");
   await page.fill(".ops-leads__search-input", "alina");
   await page.waitForTimeout(150);
   await page.fill(".ops-leads__search-input", "");
-  await page.selectOption(".ops-leads__filters .ops-control__select >> nth=0", "Qualified");
+  await choose(page, FILTER(0), "Qualified");
   await page.waitForTimeout(150);
   await page.click(".ops-link-button");
   await page.waitForTimeout(150);
   await page.click(".ops-leads__name >> nth=0");
   await page.waitForSelector(".ops-overlay--drawer", POLL);
-  await page.selectOption(".ops-detail__actions select >> nth=0", "Contacted");
+  await choose(page, ".ops-detail__actions .demo-select__trigger >> nth=0", "Contacted");
   await page.waitForTimeout(500);
   await page.keyboard.press("Escape");
   await page.waitForTimeout(300);
@@ -1564,17 +1608,21 @@ section("PERFORMANCE SANITY");
     };
     const search = await time(async () => set(input, "alina"));
     const clear = await time(async () => set(input, ""));
-    const sel = document.querySelectorAll(".ops-leads__filters .ops-control__select")[0];
+    /* The filter is a custom listbox, so the measured action is what a visitor
+       actually does: open it and click an option. */
+    const trigger = document.querySelectorAll('.ops-leads__filters [role="combobox"]')[0];
     const filter = await time(async () => {
-      sel.value = "Qualified";
-      sel.dispatchEvent(new Event("change", { bubbles: true }));
+      trigger.click();
+      await settle();
+      const option = document.querySelector('[role="option"][data-value="Qualified"]');
+      option?.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true }));
     });
     return { search, clear, filter };
   });
   check("search responds immediately", timings.search < 400, `${timings.search} ms`);
   check("clearing responds immediately", timings.clear < 400, `${timings.clear} ms`);
   check("filtering responds immediately", timings.filter < 400, `${timings.filter} ms`);
-  console.log("  QA SANITY MEASUREMENT — NOT A PRODUCTION BENCHMARK.");
+  console.log("  QA SANITY MEASUREMENT, NOT A PRODUCTION BENCHMARK.");
 
   const cls = await page.evaluate(
     () =>
@@ -1603,26 +1651,34 @@ section("FILTER AND SORT CONTROLS");
   const controls = await page.evaluate(() => {
     const out = [];
     for (const el of document.querySelectorAll(".ops-leads__filters .ops-control")) {
-      const select = el.querySelector("select");
-      const label = el.querySelector(".ops-control__label");
-      const chevron = el.querySelector("svg.ops-control__chevron");
-      const r = el.getBoundingClientRect();
-      const cs = getComputedStyle(el);
-      const ss = getComputedStyle(select);
+      const trigger = el.querySelector('[role="combobox"]');
+      const label = el.querySelector(".demo-select__label");
+      const chevron = el.querySelector("svg.demo-select__chevron");
+      const value = el.querySelector(".demo-select__value");
+      const r = trigger.getBoundingClientRect();
+      const cs = getComputedStyle(trigger);
       out.push({
         label: label?.textContent ?? null,
-        labelInside: label ? el.contains(label) : false,
-        value: select.selectedOptions[0]?.textContent ?? "",
+        labelInside: label ? trigger.contains(label) : false,
+        value: value?.textContent ?? "",
         height: Math.round(r.height),
         radius: parseFloat(cs.borderTopLeftRadius),
-        fontSize: parseFloat(ss.fontSize),
+        fontSize: parseFloat(cs.fontSize),
         padding: parseFloat(cs.paddingLeft),
-        appearance: ss.appearance,
-        ariaLabel: select.getAttribute("aria-label"),
+        /* No native select survives anywhere in the control. */
+        nativeSelects: el.querySelectorAll("select").length,
+        haspopup: trigger.getAttribute("aria-haspopup"),
+        expanded: trigger.getAttribute("aria-expanded"),
+        controls: Boolean(trigger.getAttribute("aria-controls")),
+        /* The name is built from the visible label and the current value, so
+           it is spoken once rather than as "Stage Stage All stages". */
+        labelledBy: (trigger.getAttribute("aria-labelledby") ?? "").split(" ").length,
+        namedParts: (trigger.getAttribute("aria-labelledby") ?? "")
+          .split(" ")
+          .map((id) => document.getElementById(id)?.textContent ?? "")
+          .filter(Boolean),
         chevron: Boolean(chevron),
         chevronHidden: chevron?.getAttribute("aria-hidden") === "true",
-        labelHidden: label?.getAttribute("aria-hidden") === "true",
-        optionCount: select.options.length,
       });
     }
     return out;
@@ -1632,57 +1688,63 @@ section("FILTER AND SORT CONTROLS");
 
   for (const c of controls) {
     const name = (c.label ?? "sort").toLowerCase();
-    /* The label used to be a separate word sitting beside the select. Inside
-       the same border it reads as one control rather than two things that
-       happen to be adjacent. */
-    check(`${name}: the label sits inside the control`, c.labelInside);
+    check(`${name}: the label sits inside the control`, c.labelInside || c.label === null);
     check(`${name}: height is 40-42px`, c.height >= 40 && c.height <= 42, `${c.height}px`);
     check(`${name}: radius is 11-12px`, c.radius >= 11 && c.radius <= 12, `${c.radius}px`);
     check(`${name}: value text is 13-14px`, c.fontSize >= 13 && c.fontSize <= 14, `${c.fontSize}px`);
     check(`${name}: horizontal padding is 12-14px`, c.padding >= 12 && c.padding <= 14, `${c.padding}px`);
-    /* The platform arrow is replaced rather than hidden behind another one. */
-    check(`${name}: the native arrow is removed`, c.appearance === "none", c.appearance);
-    check(`${name}: a locally drawn chevron replaces it`, c.chevron);
+    /* The whole point of the stage: no native popup anywhere. */
+    check(`${name}: no native select remains`, c.nativeSelects === 0, `${c.nativeSelects}`);
+    check(`${name}: the trigger is a listbox combobox`, c.haspopup === "listbox", String(c.haspopup));
+    check(`${name}: it reports its expanded state`, c.expanded === "false", String(c.expanded));
+    check(`${name}: it owns its listbox`, c.controls);
+    check(`${name}: a locally drawn chevron replaces the platform arrow`, c.chevron);
     check(`${name}: the chevron is decorative`, c.chevronHidden);
-    check(`${name}: the visible label is not announced twice`, c.labelHidden !== false);
-    check(`${name}: the control has an accessible name`, Boolean(c.ariaLabel), String(c.ariaLabel));
+    check(`${name}: the name is the label plus the value, said once`,
+      c.labelledBy === 2 && c.namedParts.length === 2, c.namedParts.join(" / "));
   }
 
-  /* Sort is one control now. The separate direction button is gone, and each
+  /* Sort is one control. The separate direction button is gone, and each
      option states its field and its direction. */
-  const sort = controls[3];
   check("sort has no separate direction button",
     (await page.$(".ops-sort-dir")) === null);
-  check("sort is announced as Sort leads", sort.ariaLabel === "Sort leads", String(sort.ariaLabel));
-  check("sort offers each field in both directions", sort.optionCount === 12, String(sort.optionCount));
+  const sortName = controls[3].namedParts.join(" ");
+  check("sort is announced as Sort leads",
+    sortName.startsWith("Sort") || sortName.includes("Sort"), sortName);
 
-  const sortOptions = await page.$$eval(
-    ".ops-leads__filters .ops-control__select >> nth=3 >> option",
-    (os) => os.map((o) => o.textContent)
+  /* Read from the open menu, because there is no native option list to read. */
+  await page.click(FILTER(3));
+  await page.waitForSelector('[role="listbox"]', POLL);
+  const sortOptions = await page.$$eval('[role="listbox"] [role="option"]', (os) =>
+    os.map((o) => o.textContent.trim())
   );
+  check("sort offers each field in both directions", sortOptions.length === 12,
+    String(sortOptions.length));
+  await page.keyboard.press("Escape");
+  await page.waitForFunction(() => !document.querySelector('[role="listbox"]'), null, POLL);
   for (const expected of [
-    "Last activity — newest",
-    "Last activity — oldest",
-    "Next follow-up — soonest",
-    "Lead name — A–Z",
+    "Last activity: newest",
+    "Last activity: oldest",
+    "Next follow-up: soonest",
+    "Lead name: A-Z",
   ]) {
     check(`sort offers "${expected}"`, sortOptions.includes(expected));
   }
   check("every sort option names a direction",
-    sortOptions.every((o) => o.includes("—")), sortOptions[0]);
+    sortOptions.every((o) => o.includes(":")), sortOptions[0]);
 
   /* Setting a filter is visible without shouting. */
   const before = await page.$eval(".ops-leads__filters .ops-control", (e) => e.dataset.active ?? "-");
-  await page.selectOption(".ops-leads__filters .ops-control__select >> nth=0", "Qualified");
+  await choose(page, FILTER(0), "Qualified");
   await page.waitForTimeout(250);
   const after = await page.evaluate(() => {
     const el = document.querySelector(".ops-leads__filters .ops-control");
     const cs = getComputedStyle(el);
     return {
       active: el.dataset.active ?? "-",
-      value: el.querySelector("select").selectedOptions[0].textContent,
+      value: el.querySelector(".demo-select__value").textContent,
       bg: cs.backgroundColor,
-      height: Math.round(el.getBoundingClientRect().height),
+      height: Math.round(el.querySelector('[role="combobox"]').getBoundingClientRect().height),
     };
   });
   check("a default filter is not marked active", before === "-", before);
@@ -1691,7 +1753,7 @@ section("FILTER AND SORT CONTROLS");
   check("marking a filter does not resize it", after.height >= 40 && after.height <= 42, `${after.height}px`);
 
   /* The longest value in the product must not break the row. */
-  await page.selectOption(".ops-leads__filters .ops-control__select >> nth=1", "Returning customer");
+  await choose(page, FILTER(1), "Returning customer");
   await page.waitForTimeout(250);
   const longest = await page.evaluate(() => ({
     clipped: [...document.querySelectorAll(".ops-leads__filters *")].filter(
@@ -1706,20 +1768,30 @@ section("FILTER AND SORT CONTROLS");
   check("the longest source value causes no overflow", longest.overflow <= 0, `${longest.overflow}px`);
 
   /* Keyboard reach and a visible ring. */
-  await page.focus(".ops-leads__filters .ops-control__select");
+  /* Tabbed to, not focused programmatically: `:focus-visible` is what draws
+     the ring, and it only matches when focus arrived from the keyboard. */
+  await page.click(".ops-leads__search-input");
+  let reached = false;
+  for (let i = 0; i < 8 && !reached; i += 1) {
+    await page.keyboard.press("Tab");
+    reached = await page.evaluate(
+      () => document.activeElement?.getAttribute("role") === "combobox"
+    );
+  }
   const focused = await page.evaluate(() => {
-    const el = document.querySelector(".ops-leads__filters .ops-control");
+    const el = document.activeElement;
     const cs = getComputedStyle(el);
     return {
-      isSelect: document.activeElement?.tagName === "SELECT",
+      isCombobox: el?.getAttribute("role") === "combobox",
+      focusVisible: el?.matches(":focus-visible") ?? false,
       outlineWidth: parseFloat(cs.outlineWidth),
       outlineStyle: cs.outlineStyle,
     };
   });
-  check("a filter is reachable by keyboard", focused.isSelect);
+  check("a filter is reachable by keyboard", focused.isCombobox);
   check("focus draws a visible ring on the control",
-    focused.outlineWidth >= 2 && focused.outlineStyle !== "none",
-    `${focused.outlineWidth}px ${focused.outlineStyle}`);
+    focused.focusVisible && focused.outlineWidth >= 2 && focused.outlineStyle !== "none",
+    `${focused.outlineWidth}px ${focused.outlineStyle}, :focus-visible ${focused.focusVisible}`);
 
   await ctx.close();
 }
@@ -1728,23 +1800,35 @@ section("PAGE SIZE AND PAGINATION COMPOSITION");
 {
   const { ctx, page } = await freshLeads();
 
+  /* Options come from the open menu; the closed control shows only its value. */
+  await page.click(PAGE_SIZE);
+  await page.waitForSelector('[role="listbox"]', POLL);
+  const sizeOptions = await page.$$eval('[role="listbox"] [role="option"]', (os) =>
+    os.map((o) => o.textContent.trim())
+  );
+  await page.keyboard.press("Escape");
+  await page.waitForFunction(() => !document.querySelector('[role="listbox"]'), null, POLL);
+
   const size = await page.evaluate(() => {
     const el = document.querySelector(".ops-pager__size .ops-control");
-    const select = el.querySelector("select");
-    const r = el.getBoundingClientRect();
-    const cs = getComputedStyle(el);
+    const trigger = el.querySelector('[role="combobox"]');
+    const r = trigger.getBoundingClientRect();
+    const cs = getComputedStyle(trigger);
     return {
       height: Math.round(r.height),
       width: Math.round(r.width),
       radius: parseFloat(cs.borderTopLeftRadius),
       padding: parseFloat(cs.paddingLeft),
-      value: select.selectedOptions[0].textContent,
-      options: [...select.options].map((o) => o.textContent),
-      ariaLabel: select.getAttribute("aria-label"),
-      appearance: getComputedStyle(select).appearance,
-      chevron: Boolean(el.querySelector("svg.ops-control__chevron")),
+      value: el.querySelector(".demo-select__value").textContent,
+      nativeSelects: el.querySelectorAll("select").length,
+      named: (trigger.getAttribute("aria-labelledby") ?? "")
+        .split(" ")
+        .map((id) => document.getElementById(id)?.textContent ?? "")
+        .filter(Boolean),
+      chevron: Boolean(el.querySelector("svg.demo-select__chevron")),
     };
   });
+  size.options = sizeOptions;
 
   /* "10" was a number with no question attached to it. */
   check("the page size says what it counts", size.value === "10 rows", size.value);
@@ -1754,8 +1838,9 @@ section("PAGE SIZE AND PAGINATION COMPOSITION");
   check("page size width is 92-104px", size.width >= 92 && size.width <= 104, `${size.width}px`);
   check("page size radius is 11-12px", size.radius >= 11 && size.radius <= 12, `${size.radius}px`);
   check("page size padding is 14px", size.padding === 14, `${size.padding}px`);
-  check("page size has an accessible name", size.ariaLabel === "Rows per page", String(size.ariaLabel));
-  check("page size drops the native arrow", size.appearance === "none");
+  check("page size has an accessible name",
+    size.named.some((part) => part === "Rows per page"), size.named.join(" / "));
+  check("page size uses no native select", size.nativeSelects === 0, `${size.nativeSelects}`);
   check("page size carries the drawn chevron", size.chevron);
 
   /* One footer, not three fragments. */
@@ -1803,7 +1888,7 @@ section("PAGE SIZE AND PAGINATION COMPOSITION");
   check("the page indicator is announced politely", pager.live === "polite", String(pager.live));
 
   /* Both page sizes, and the page arithmetic that follows from them. */
-  await page.selectOption(".ops-pager__size .ops-control__select", "20");
+  await choose(page, PAGE_SIZE, "20");
   await page.waitForTimeout(250);
   const twenty = await page.evaluate(() => ({
     rows: document.querySelectorAll(".ops-leads__row").length,
@@ -1826,7 +1911,7 @@ section("PAGE SIZE AND PAGINATION COMPOSITION");
   check("the last page disables Next", last.nextDisabled === true, last.page);
   check("the last page keeps Previous available", last.prevDisabled === false);
 
-  await page.selectOption(".ops-pager__size .ops-control__select", "10");
+  await choose(page, PAGE_SIZE, "10");
   await page.waitForTimeout(250);
   const back = await page.evaluate(() => document.querySelector(".ops-pager__page").textContent.trim());
   check("changing the page size returns to a valid page", /Page [1-5] of 5/.test(back), back);
@@ -1893,8 +1978,8 @@ section("PROVENANCE BAND");
       /* The band takes the middle column rather than sitting at the width of
          its own text with several hundred pixels of nothing beside it.
          
-         Measured against what is actually available — the bar minus the two
-         intrinsic ends — rather than as a share of the whole. The ends are a
+         Measured against what is actually available (the bar minus the two
+         intrinsic ends) rather than as a share of the whole. The ends are a
          fixed ~430px, so at 1024 they are half the bar and at 1920 a fifth;
          a percentage-of-total threshold would be asserting the viewport
          width, not the behaviour. */

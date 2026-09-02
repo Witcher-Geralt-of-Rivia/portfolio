@@ -46,7 +46,7 @@ emit("pm_id", app.pm_id);
 emit("slot", slot || "");
 emit("node_env", env.NODE_ENV ?? "");
 
-// Names only — never values.
+// Names only, never values.
 const suspicious = Object.keys(env).filter((k) =>
   /^(CLAUDE|OPENAI|ANTHROPIC|GEMINI|AWS)|SECRET|TOKEN|PASSWORD|DATABASE|CREDENTIAL/i.test(k)
 );

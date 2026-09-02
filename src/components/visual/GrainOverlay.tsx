@@ -1,5 +1,5 @@
 /**
- * GrainOverlay — background layer D.
+ * GrainOverlay: background layer D.
  *
  * A 256px monochrome noise tile, generated locally as SVG turbulence and
  * repeated across the viewport. It exists to dither the aurora gradients

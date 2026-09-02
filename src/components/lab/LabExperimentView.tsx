@@ -2,7 +2,7 @@ import type { View } from "./lab-experiments";
 
 /**
  * The centre visual. Every experiment produces a typed view for the current
- * frame, and this component renders whichever one arrived — so the workspace
+ * frame, and this component renders whichever one arrived, so the workspace
  * shell, the flow, the observation panel and the controls are written once
  * and the experiments differ only in what they put in the middle.
  *
@@ -41,7 +41,7 @@ function ApiResponse({ view }: { view: Extract<View, { kind: "api" }> }) {
         </>
       ) : (
         <p className="lresp__empty">
-          {view.step ? `Awaiting handler — ${view.step}` : "No response yet. Send a request."}
+          {view.step ? `Awaiting handler: ${view.step}` : "No response yet. Send a request."}
         </p>
       )}
     </div>
@@ -79,7 +79,7 @@ function RateStream({ view }: { view: Extract<View, { kind: "rate" }> }) {
       {view.blocked && (
         <p className="lrate__blocked">
           <span className="lrate__blocked-code">429</span>
-          REQUEST BLOCKED — TOO MANY REQUESTS
+          REQUEST BLOCKED / TOO MANY REQUESTS
         </p>
       )}
     </div>

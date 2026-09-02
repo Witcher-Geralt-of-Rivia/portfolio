@@ -2,7 +2,7 @@ import type { CaseStudy } from "@/content/case-studies";
 
 /**
  * A quiet index rail over the case studies, doubling as local anchor
- * navigation. Number, label and category only — no thumbnails, because a
+ * navigation. Number, label and category only: no thumbnails, because a
  * thumbnail of a client interface is exactly the kind of asset this section
  * must not carry.
  */

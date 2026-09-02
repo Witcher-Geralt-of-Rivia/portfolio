@@ -1,5 +1,5 @@
 /* =====================================================================
-   MILKY INTELLIGENCE — MOTION
+   MILKY INTELLIGENCE - MOTION
    Every aurora field owns an independent, asynchronous cycle.
    All movement is expressed through `transform` and `opacity` only, so
    the compositor can run it without repainting the blurred layers.
@@ -9,11 +9,11 @@
 
    Note on colour morphing: the palette shift is produced entirely by
    translucent fields drifting through one another. Animated hue-rotate is
-   deliberately avoided — it is a filter, and re-filtering six 140px-blurred
+   deliberately avoided: it is a filter, and re-filtering six 140px-blurred
    layers every frame is exactly the cost this system is designed to skip.
    ===================================================================== */
 
-/* --- Layer B — aurora field drift ---------------------------------- */
+/* --- Layer B - aurora field drift ---------------------------------- */
 
 @keyframes aurora-drift-1 {
   0% {
@@ -168,7 +168,7 @@
   }
 }
 
-/* --- Layer C — prism light sweep ------------------------------------ */
+/* --- Layer C - prism light sweep ------------------------------------ */
 
 @keyframes prism-sweep-a {
   0% {

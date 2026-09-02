@@ -1,5 +1,5 @@
 /**
- * Demo runtime — generic repository and query layer.
+ * Demo runtime: generic repository and query layer.
  *
  * Reads and shapes records. It knows nothing about business rules, which is
  * why a domain service wraps it rather than the UI calling it directly: a
@@ -45,7 +45,7 @@ function matchesSearch<T>(
  * Comparison used by sorting.
  *
  * Strings compare with `localeCompare` so ordering is stable and human, and
- * numbers compare numerically rather than lexically — the difference between
+ * numbers compare numerically rather than lexically: the difference between
  * `2 < 10` and `"10" < "2"`, which is the classic way a sorted demo table
  * looks broken.
  */
@@ -62,7 +62,7 @@ function compare(a: unknown, b: unknown): number {
  * Apply a query to records already read from persistence.
  *
  * Exported separately from the repository so a domain service can filter a
- * set it has already assembled — and so the QA harness can test the query
+ * set it has already assembled, and so the QA harness can test the query
  * semantics without any persistence at all.
  */
 export function runQuery<T>(

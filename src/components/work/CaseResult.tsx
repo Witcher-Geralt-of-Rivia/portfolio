@@ -3,7 +3,7 @@ import { publishableMetrics, type CaseStudy } from "@/content/case-studies";
 /**
  * What was delivered, plus any metric that has been verified.
  *
- * Outcomes are allowed to be qualitative — "centralised workflow state in one
+ * Outcomes are allowed to be qualitative: "centralised workflow state in one
  * system" is a real result. An unverified metric is dropped here rather than
  * rendered with a caveat, because a caveat still puts the number on the page.
  */

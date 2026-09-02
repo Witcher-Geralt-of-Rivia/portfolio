@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Operations demo — the Leads table.
+ * Operations demo: the Leads table.
  *
  * A real `<table>` with real `<th scope="col">`. The rows are tabular data and
  * announcing them as such is what lets a screen reader say "Stage, Qualified"
@@ -130,16 +130,16 @@ export default function LeadsTable({
                 </td>
                 <td className="ops-leads__date">
                   <time dateTime={absoluteDate(lead.data.lastActivityAt)}>
-                    {now ? relativeDate(lead.data.lastActivityAt, now) : "—"}
+                    {now ? relativeDate(lead.data.lastActivityAt, now) : "-"}
                   </time>
                 </td>
                 <td className="ops-leads__date">
                   {lead.data.nextFollowUpAt ? (
                     <time dateTime={absoluteDate(lead.data.nextFollowUpAt)}>
-                      {now ? relativeDate(lead.data.nextFollowUpAt, now) : "—"}
+                      {now ? relativeDate(lead.data.nextFollowUpAt, now) : "-"}
                     </time>
                   ) : (
-                    <span className="ops-leads__none">—</span>
+                    <span className="ops-leads__none">-</span>
                   )}
                 </td>
               </tr>

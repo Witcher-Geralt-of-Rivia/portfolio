@@ -1,5 +1,5 @@
 /**
- * Stage 09C1 — Operations domain QA.
+ * Stage 09C1 - Operations domain QA.
  *
  * The domain is browser code: it persists through the shared runtime to
  * IndexedDB and falls back to memory. It cannot be exercised in Node, so this
@@ -250,7 +250,7 @@ const suite = async (api) => {
   const startAt = ops.derive ? new Date(Date.parse(now()) + 20 * 86400000).toISOString() : "";
   const endAt = new Date(Date.parse(now()) + 24 * 86400000).toISOString();
   /* Utility, because every Urban vehicle in the canonical seed is currently
-     Rented or Reserved — the ten Available vehicles are Touring and Utility.
+     Rented or Reserved: the ten Available vehicles are Touring and Utility.
      The Urban class is used below, where a currently-rented vehicle is what
      the precedence case needs. */
   const reservation = await ops.reservations.createReservation(ctx, {
@@ -527,7 +527,7 @@ const suite = async (api) => {
 };
 
 for (const adapter of ["indexeddb", "memory"]) {
-  section(`BUSINESS SUITE — ${adapter}`);
+  section(`BUSINESS SUITE - ${adapter}`);
   const r = await run(adapter, suite);
 
   const C = r.counts;
@@ -750,7 +750,7 @@ const isolation = await page.evaluate(async () => {
   const afterLeads = (await ops.repository.all("leads")).length;
   const afterAudit = (await ops.listAudit()).length;
 
-  /* A seed with no audit history must still clear audit on reset — the
+  /* A seed with no audit history must still clear audit on reset: the
      optional field must not have changed the demos that do not use it. */
   await field.reset();
   const fieldAuditAfterReset = (await field.listAudit()).length;
@@ -828,7 +828,7 @@ const content = await page.evaluate(async () => {
 
   /* ISO timestamps are digits, dots and dashes, so a naive telephone pattern
      matches every one of them. They are excluded before the digit patterns
-     run — a date is not a phone number, and flagging it would train the next
+     run: a date is not a phone number, and flagging it would train the next
      reader to ignore this check. */
   const isTimestamp = (v) => /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9:.]+Z?$/.test(v);
 

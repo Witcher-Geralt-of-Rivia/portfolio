@@ -1,5 +1,5 @@
 /**
- * Operations demo — one page-scroll lock, counted.
+ * Operations demo: one page-scroll lock, counted.
  *
  * Several surfaces cover the page on a phone: the notification sheet, the
  * filter sheet, the lead detail, a form, a confirmation. Each of them wants
@@ -7,7 +7,7 @@
  * `document.body.style.overflow` directly.
  *
  * That works until two of them overlap. The second to open sets `hidden`, and
- * the first to close sets `""` — restoring scrolling underneath a sheet that
+ * the first to close sets `""`, restoring scrolling underneath a sheet that
  * is still on screen. Counting the holders instead means the page is unlocked
  * exactly when the last one lets go, and the order they close in stops
  * mattering.

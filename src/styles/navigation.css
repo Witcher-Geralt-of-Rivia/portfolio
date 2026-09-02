@@ -1,10 +1,10 @@
 /* =====================================================================
-   MILKY INTELLIGENCE — NAVIGATION
+   MILKY INTELLIGENCE - NAVIGATION
    A precision instrument floating over the aurora, not a panel sitting
    on top of it.
 
-   The surface is the Stage 01 Frost recipe — same border, same blur,
-   same floating shadow — carried at a slightly higher alpha so link
+   The surface is the Stage 01 Frost recipe (same border, same blur,
+   same floating shadow) carried at a slightly higher alpha so link
    text stays stable while colour fields drift underneath. No fourth
    glass system is introduced.
 
@@ -441,7 +441,7 @@ body.nav-locked {
     transition: opacity 1ms linear, visibility 0s;
   }
 
-  /* No slide, no scale — the panel simply is there. */
+  /* No slide, no scale: the panel simply is there. */
   .site-nav__panel {
     transform: none;
   }

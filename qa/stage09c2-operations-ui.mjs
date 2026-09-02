@@ -1,5 +1,5 @@
 /**
- * Stage 09C2 — Operations shell, Overview and branding QA.
+ * Stage 09C2 - Operations shell, Overview and branding QA.
  *
  * Runs against a LOCAL PRODUCTION BUILD, not the dev server: this stage is
  * about what the built product actually renders.
@@ -16,7 +16,7 @@ import { chromium } from "playwright";
 
 /* Every waitForFunction here passes an explicit polling interval. Playwright
    defaults to requestAnimationFrame, and this application deliberately
-   schedules no frames at rest — so rAF-based polling starves and turns a 43ms
+   schedules no frames at rest, so rAF-based polling starves and turns a 43ms
    mutation into a 19-second measurement. The delay is in the harness, not the
    product. */
 import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
@@ -33,6 +33,24 @@ const check = (label, ok, detail = "") => {
   console.log(`  ${ok ? "PASS" : "FAIL"}  ${label.padEnd(52)}${detail ? "  " + detail : ""}`);
 };
 const section = (t) => console.log(`\n########## ${t} ##########`);
+
+/**
+ * Choose a demo role.
+ *
+ * The role control is the product's custom listbox now, not a native select,
+ * so it is opened and an option is clicked rather than driven with
+ * `selectOption`.
+ */
+async function chooseRole(page, role) {
+  await page.click('.ops-role__select [role="combobox"]');
+  await page.waitForSelector('[role="listbox"]', { polling: 100, timeout: 15000 });
+  await page.click(`[role="listbox"] [role="option"][data-value="${role}"]`);
+  await page.waitForFunction(() => !document.querySelector('[role="listbox"]'), null, {
+    polling: 100,
+    timeout: 15000,
+  });
+}
+
 
 const lum = (c) => {
   const f = c.map((v) => {
@@ -234,8 +252,8 @@ const readOverview = async (p = page) =>
   check("all eleven modules are listed for Admin", o.modules.length === 11, String(o.modules.length));
   /* This asserts temporary build state, and it moves each time a module is
      built: 09C2 shipped Overview alone, 09C3.1 added Leads. By 09C5 every
-     module is interactive and the `implemented` flag that drives this — and
-     this check with it — is deleted. */
+     module is interactive and the `implemented` flag that drives this, and
+     this check with it, is deleted. */
   check("only the built modules are interactive",
     JSON.stringify(o.interactive) === '["Overview","Leads"]',
     JSON.stringify(o.interactive));
@@ -254,7 +272,7 @@ const ROLE_EXPECT = {
 };
 
 for (const [role, want] of Object.entries(ROLE_EXPECT)) {
-  await page.selectOption(".ops-role__select", role);
+  await chooseRole(page, role);
   await page.waitForFunction(
     (r) => document.querySelector(".ops-actor__role")?.textContent === r,
     role,
@@ -274,7 +292,7 @@ section("ROLE PERSISTENCE");
   await ready();
   const role = await page.evaluate(() => document.querySelector(".ops-actor__role")?.textContent);
   check("the selected role survives a reload", role === "Finance Analyst", String(role));
-  await page.selectOption(".ops-role__select", "Admin");
+  await chooseRole(page, "Admin");
   await page.waitForFunction(() => document.querySelector(".ops-actor__role")?.textContent === "Admin",
     null, { polling: 100 });
 }
@@ -405,12 +423,17 @@ section("RESET");
 section("ACCESSIBILITY");
 {
   const a11y = await page.evaluate(() => {
-    const labelled = document.querySelector(".ops-role__select");
-    const labelId = labelled?.getAttribute("id");
+    /* The role control names itself with `aria-labelledby` over a hidden label
+       and its current value, rather than with a `<label for>`: it is a custom
+       combobox now, not a native select. */
+    const labelled = document.querySelector('.ops-role__select [role="combobox"]');
+    const named = (labelled?.getAttribute("aria-labelledby") ?? "")
+      .split(" ")
+      .map((id) => document.getElementById(id)?.textContent?.trim() ?? "")
+      .filter(Boolean);
     return {
-      roleLabel: labelId
-        ? document.querySelector(`label[for="${labelId}"]`)?.textContent?.trim()
-        : null,
+      roleLabel: named[0] ?? null,
+      roleValue: named[1] ?? null,
       liveRegions: document.querySelectorAll('[role="status"]').length,
       svgHidden: [...document.querySelectorAll(".ops-fleet__ring, .ops-funnel__rail")].every(
         (el) => el.getAttribute("aria-hidden") === "true"
@@ -424,6 +447,8 @@ section("ACCESSIBILITY");
     };
   });
   check("the role control is labelled Demo role", a11y.roleLabel === "Demo role", String(a11y.roleLabel));
+  check("its accessible name carries the current role",
+    a11y.roleValue === "Admin", String(a11y.roleValue));
   check("there is a polite status region", a11y.liveRegions >= 1, String(a11y.liveRegions));
   check("data SVG is hidden from assistive tech", a11y.svgHidden === true);
   check("every fleet state is written in text", a11y.fleetTextValues === true);
@@ -528,7 +553,7 @@ for (const [w, h] of VIEWPORTS) {
         return e.getBoundingClientRect().width > 2;
       }).length,
       roleFits:
-        (document.querySelector(".ops-role__select")?.getBoundingClientRect().right ?? 0) <=
+        (document.querySelector('.ops-role__select [role="combobox"]')?.getBoundingClientRect().right ?? 0) <=
         document.documentElement.clientWidth + 1,
     };
   });
@@ -638,8 +663,8 @@ section("PERFORMANCE");
 
   /* Measured inside the page, not through Playwright's action layer.
      Driving these from the harness measures Playwright waiting for
-     actionability — which starves on rAF against an application that
-     schedules no frames — and reports seconds for work that takes tens of
+     actionability (which starves on rAF against an application that
+     schedules no frames) and reports seconds for work that takes tens of
      milliseconds. The numbers below are the application's. */
   const timings = await p.evaluate(async () => {
     const settle = () => new Promise((r) => setTimeout(r, 0));
@@ -652,13 +677,19 @@ section("PERFORMANCE");
     };
 
     const t0 = performance.now();
-    document.querySelector(".ops-role__select").value = "Finance Analyst";
-    document.querySelector(".ops-role__select").dispatchEvent(new Event("change", { bubbles: true }));
+    document.querySelector('.ops-role__select [role="combobox"]').click();
+    await new Promise((r) => setTimeout(r, 80));
+    document
+      .querySelector('[role="listbox"] [role="option"][data-value="Finance Analyst"]')
+      ?.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true }));
     await waitFor(() => document.querySelector(".ops-actor__role")?.textContent === "Finance Analyst");
     const roleSwitch = performance.now() - t0;
 
-    document.querySelector(".ops-role__select").value = "Admin";
-    document.querySelector(".ops-role__select").dispatchEvent(new Event("change", { bubbles: true }));
+    document.querySelector('.ops-role__select [role="combobox"]').click();
+    await new Promise((r) => setTimeout(r, 80));
+    document
+      .querySelector('[role="listbox"] [role="option"][data-value="Admin"]')
+      ?.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true }));
     await waitFor(() => document.querySelector(".ops-actor__role")?.textContent === "Admin");
     await settle();
 

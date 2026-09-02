@@ -124,14 +124,14 @@ require a schema migration.
 ### Upgrades
 
 `onupgradeneeded` creates missing stores and indexes and touches nothing else.
-The database is never deleted on upgrade — that would discard a visitor's demo
+The database is never deleted on upgrade: that would discard a visitor's demo
 state on every release. Individual demos reset when their own seed version
 changes.
 
 ### Fallback
 
-If IndexedDB cannot be opened — a private window, blocked site data, a quota
-failure — the runtime falls back to a memory adapter, stays fully usable for
+If IndexedDB cannot be opened (a private window, blocked site data, a quota
+failure), the runtime falls back to a memory adapter, stays fully usable for
 the session, and the shell shows `PERSISTENCE / SESSION ONLY`. It never implies
 that changes will survive a reload when they will not.
 
@@ -171,7 +171,7 @@ pauses to think has already ended.
 
 Ids and timestamps are allocated against a scratch copy of the demo's metadata.
 A builder that throws, or a write that persistence rejects, leaves counters and
-clock untouched — no id is silently burnt.
+clock untouched: no id is silently burnt.
 
 `revision` increments on every committed mutation. `0` means canonical,
 freshly-seeded state, so `revision > 0` reliably answers "has the visitor
@@ -183,8 +183,8 @@ assertions all read it.
 **Domain events** are a synchronous in-browser bus, scoped to one demo. No
 timer, no queue drain, no network.
 
-**Audit** records meaningful business mutations — a lead converted, a job
-reassigned — written deliberately by workflows. It is not an event dump; a
+**Audit** records meaningful business mutations (a lead converted, a job
+reassigned), written deliberately by workflows. It is not an event dump; a
 trail full of "tab clicked" teaches nobody anything.
 
 **Jobs** are persistent client-side deferred work with `pending`, `processing`,
@@ -208,7 +208,7 @@ access control.
 A visitor-controlled `online` / `offline` flag for demos that show offline
 behaviour. It deliberately does not read `navigator.onLine`: real connectivity
 is not reproducible and is usually true at a desk, which makes the offline path
-impossible to demonstrate on purpose. Session-scoped, not persisted — a reload
+impossible to demonstrate on purpose. Session-scoped, not persisted: a reload
 returns to online, because nothing about the browser is actually offline.
 
 The offline contract for a future demo: queue eligible mutations, show pending
@@ -217,7 +217,7 @@ sync state, replay on simulated reconnect.
 ## Cross-tab
 
 `BroadcastChannel("portfolio-demo-runtime")` carries an invalidation signal
-only — `{ demoId, revision, reason }`. Never record data: the database is
+only: `{ demoId, revision, reason }`. Never record data: the database is
 already the shared source of truth, so re-reading is both smaller and correct
 by construction. Where the API is unavailable the demo works normally in its
 own tab; multi-tab sync is an enhancement, never a requirement.
@@ -228,8 +228,8 @@ limit of a frontend-only demo with no server to arbitrate.
 ## Reset
 
 Reset restores one demo and only that demo: its records, audit, jobs, counters,
-logical clock, revision and default role. Another demo's data is never touched
-— the QA harness asserts this directly.
+logical clock, revision and default role. Another demo's data is never touched:
+the QA harness asserts this directly.
 
 The destructive purge and the reseed share one transaction. A reset that
 emptied the demo and then failed to reseed would leave a visitor with an empty
@@ -253,8 +253,8 @@ canonical dataset is no longer compatible, or they choose Reset.
 
 ## Routing
 
-`src/app/demos/layout.tsx` is a Server Component — a `metadata` export is only
-honoured in one — and nests inside the root layout rather than replacing it.
+`src/app/demos/layout.tsx` is a Server Component (a `metadata` export is only
+honoured in one) and nests inside the root layout rather than replacing it.
 
 It sets `robots: { index: false, follow: false }`. Written as `index: false`,
 not `noindex: true`: the latter keys are typed `never` and deprecated in Next
@@ -305,13 +305,13 @@ collection beneath it is forbidden.
 
 A demo simulates concepts; it must not claim to implement them. Never claim
 secure authentication, an encrypted database, production RBAC or secure payment
-processing. If a demo shows payments they are synthetic business records — no
+processing. If a demo shows payments they are synthetic business records: no
 Stripe, no PayPal, no card entry, no real processing.
 
 Data is synthetic throughout: no real client export, CRM record, customer name,
 email, telephone number, financial record or address. Where an email-like value
 is needed it uses a reserved domain such as `example.com`. Browser storage
-holds only synthetic demo data — no secret, token, API key or private material.
+holds only synthetic demo data: no secret, token, API key or private material.
 
 ## QA contracts
 

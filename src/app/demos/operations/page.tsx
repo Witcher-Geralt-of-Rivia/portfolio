@@ -15,7 +15,7 @@ import OperationsOverview from "@/demos/operations/ui/OperationsOverview";
  * noindex rather than adding to it.
  */
 export const metadata: Metadata = {
-  title: "Rental Operations Platform — Interactive Demo",
+  title: "Rental Operations Platform: Interactive Demo",
   description:
     "An interactive engineering demonstration of a rental operations product. Synthetic data, frontend only.",
 };

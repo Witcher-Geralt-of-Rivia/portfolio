@@ -18,22 +18,23 @@ Stage 09                IN PROGRESS
     09C3 Leads/Customers/Inbox  IN PROGRESS, one module per stage (D-062)
       09C3.1 Leads     COMPLETE and deployed
       09C3.1.1 Leads visual hardening  COMPLETE and deployed
-      09C3.2 Customers BLOCKED - awaiting external live review of 09C3.1.1
+      09C3.1.2 Custom select system    COMPLETE and deployed
+      09C3.2 Customers BLOCKED - awaiting external live review of 09C3.1.2
       09C3.3 Inbox + integrated CRM workflow
 ```
 
 ## The block
 
-Next task: Stage 09C3.2 - Operations CRM: Customers (BLOCKED UNTIL EXTERNAL LIVE REVIEW OF 09C3.1.1)
+Next task: Stage 09C3.2 - Operations CRM: Customers (BLOCKED UNTIL EXTERNAL LIVE REVIEW OF STAGE 09C3.1.2)
 
 Stage 09C3.2 does not start until a human has looked at
 `https://intelligent-systems-lab.duckdns.org/demos/operations/leads` on a real
-screen and said what they think of it. The first such review is why 09C3.1.1
+screen and said what they think of it, including opening the dropdowns. The first such review is why 09C3.1.1
 exists: it found four presentation faults the suite had no opinion about.
 
 This is deliberate, and this stage earned it twice over. Every defect 09C2.1
 fixed was found by looking at rendered pixels, three of four while the QA suite
-passed — and 09C3.1's own review found two more the suite had no opinion about:
+passed, and 09C3.1's own review found two more the suite had no opinion about:
 lead names rendering in the column-header face and sitting ten pixels above
 their row, and a stub of border under the last row's name.
 
@@ -67,9 +68,10 @@ placeholder.
 12. Stage 09C2.1 - Hardening + review deploy    DONE
 13. Stage 09C3.1 - Leads                        DONE
 14. Stage 09C3.1.1 - Leads visual hardening     DONE
-15. Stage 09C3.2 - Customers                    BLOCKED on live review
-16. Stage 09C3.3 - Inbox + CRM workflow         LATER
-17. Stage 09C4-C6 - modules, then QA/deploy     LATER
+15. Stage 09C3.1.2 - Custom select system       DONE
+16. Stage 09C3.2 - Customers                    BLOCKED on live review
+17. Stage 09C3.3 - Inbox + CRM workflow         LATER
+18. Stage 09C4-C6 - modules, then QA/deploy     LATER
 13. Field and Learning specs, then builds       LATER
 14. Stage 09 - #work launcher integration       LATER
 ```

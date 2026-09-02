@@ -4,7 +4,7 @@ import type { MobileBlock, ProductScenario } from "./product-scenarios";
  * The mobile product surface.
  *
  * A restrained product-rendering container, not a hardware advertisement: no
- * camera, no notch clone, no manufacturer detail — just a neutral sensor
+ * camera, no notch clone, no manufacturer detail, just a neutral sensor
  * capsule and a screen.
  */
 

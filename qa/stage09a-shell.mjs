@@ -1,5 +1,5 @@
 /**
- * Stage 09A — shared demo chrome QA.
+ * Stage 09A - shared demo chrome QA.
  *
  * Measures the bar the demos will sit under: its height, its behaviour at the
  * project's eight viewports, its contrast against the live aurora, and the

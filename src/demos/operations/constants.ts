@@ -1,5 +1,5 @@
 /**
- * Operations demo — frozen constants.
+ * Operations demo: frozen constants.
  *
  * Every value here comes from `docs/DEMO_OPERATIONS_SPEC.md` and is guarded by
  * `qa/stage09b-operations-spec.mjs`. Changing one means changing the

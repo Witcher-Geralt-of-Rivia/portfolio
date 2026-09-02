@@ -1,5 +1,5 @@
 /**
- * Operations demo — lead workflows.
+ * Operations demo: lead workflows.
  *
  * The layer that was missing between a mutation and the rules it is supposed
  * to wake.
@@ -7,7 +7,7 @@
  * `processEvents` in `automations.ts` says of itself: "Called by workflows
  * after the mutation that produced the events." No workflow existed. The lead
  * services build the right domain events and hand them to `runtime.commit`,
- * which publishes them on the runtime's event bus — and nothing subscribed, so
+ * which publishes them on the runtime's event bus, and nothing subscribed, so
  * creating a website lead never assigned it and qualifying a lead never set a
  * follow-up date. The frozen specification says both happen. The QA harness
  * appeared to prove they did, because it hand-wrote the events itself and
@@ -18,7 +18,7 @@
  * one awaited mutation, and hands what was published to the rule engine.
  *
  * The rules stay entirely in `automations.ts`. Nothing here knows that a
- * website lead gets assigned or that a qualified lead gets a follow-up date —
+ * website lead gets assigned or that a qualified lead gets a follow-up date:
  * a screen calling these functions is asking for "the mutation and whatever it
  * sets off", not prescribing what that is.
  */
@@ -79,7 +79,7 @@ export async function withAutomations<T>(
  * Create a lead and let the rules see it.
  *
  * A lead from the website wakes Rule 01, which assigns it to a sales agent and
- * raises a CRM notification. Every other source wakes nothing — not because
+ * raises a CRM notification. Every other source wakes nothing, not because
  * this function checks the source, but because `createLead` emits a different
  * event for it and no rule is listening.
  */

@@ -11,7 +11,7 @@
  * shipped products, and the figures in them are illustrative interface data.
  *
  * Everything renders from this file so the studio has no duplicated JSX trees,
- * and the flow runs entirely in React state — no network request of any kind.
+ * and the flow runs entirely in React state: no network request of any kind.
  */
 
 export type ScenarioId = "operations" | "commerce" | "field";

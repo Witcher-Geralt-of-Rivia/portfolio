@@ -2,7 +2,7 @@ import "./page.css";
 
 /* Stage 02 typography specimen, kept on its own route so the type scale
    stays verifiable after Stage 03 made "/" the navigation QA page.
-   Typographic specimens only — neutral test copy, not claims. */
+   Typographic specimens only: neutral test copy, not claims. */
 
 const CODE_SAMPLE = `const workflow = orchestrate({
   retrieval: true,
@@ -138,7 +138,7 @@ export default function Home() {
             <p className="type-technical-micro">STATUS: READY</p>
           </Row>
 
-          <Row role="letterforms — sans and mono">
+          <Row role="letterforms, sans and mono">
             <div className="specimen__letterforms">
               {LETTERFORMS.map((word) => (
                 <span key={word} className="type-body">

@@ -5,7 +5,7 @@ import type { NextConfig } from "next";
  *
  * Production never serves the default `.next`. It alternates between two
  * release directories, so `next build` can never rewrite files the running
- * production process is reading — the failure that took the live site down
+ * production process is reading. That failure took the live site down
  * twice during Stage 05.
  *
  *   development / local build   .next
@@ -25,7 +25,7 @@ function resolveDistDir(): string {
 
   if (!ALLOWED_DIST_DIRS.includes(requested)) {
     throw new Error(
-      `PORTFOLIO_DIST_DIR must be one of ${ALLOWED_DIST_DIRS.join(", ")} — received "${requested}". ` +
+      `PORTFOLIO_DIST_DIR must be one of ${ALLOWED_DIST_DIRS.join(", ")}. Received "${requested}". ` +
         "Refusing to build or serve from an unexpected directory."
     );
   }

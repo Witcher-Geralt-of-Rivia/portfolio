@@ -1,5 +1,5 @@
 /* =====================================================================
-   MILKY INTELLIGENCE — SURFACES
+   MILKY INTELLIGENCE - SURFACES
    Exactly three reusable surface treatments. Everything that sits on the
    aurora uses one of them; nothing invents its own glass recipe.
 
@@ -12,7 +12,7 @@
    ===================================================================== */
 
 /* ---------------------------------------------------------------------
-   SURFACE 1 — MILK
+   SURFACE 1 - MILK
    The workhorse. Reads as poured milk over colour: it lets the aurora
    through without ever letting text lose contrast.
    --------------------------------------------------------------------- */
@@ -31,7 +31,7 @@
 }
 
 /* ---------------------------------------------------------------------
-   SURFACE 2 — FROST
+   SURFACE 2 - FROST
    Thinner and colder than milk, with a heavier backdrop blur so it can
    float over anything without competing with it.
    --------------------------------------------------------------------- */
@@ -50,7 +50,7 @@
 }
 
 /* ---------------------------------------------------------------------
-   SURFACE 3 — PRISM
+   SURFACE 3 - PRISM
    Reserved for showcase moments. The edge is a refraction, not a rainbow:
    two pastel hues at opposing corners with plain light in between, drawn
    as a masked 1px ring so it never thickens into a coloured outline.

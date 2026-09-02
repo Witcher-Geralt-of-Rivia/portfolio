@@ -1,5 +1,5 @@
 /**
- * Operations demo — the composition root.
+ * Operations demo: the composition root.
  *
  * Binds the canonical seed to a shared demo runtime and re-exports the domain
  * surface, so a future screen imports one module rather than reaching into
@@ -52,7 +52,7 @@ export function sessionFor(role: Role): OperationsSession {
  * A service context for the runtime's currently selected role.
  *
  * The role lives in the shared runtime's session, so switching it in the demo
- * chrome changes what every service will permit — one source of truth rather
+ * chrome changes what every service will permit: one source of truth rather
  * than a role the UI holds and the domain never sees.
  */
 export function contextFor(runtime: DemoRuntime): OperationsContext {

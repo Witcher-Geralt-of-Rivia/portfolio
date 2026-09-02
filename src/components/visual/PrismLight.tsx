@@ -1,5 +1,5 @@
 /**
- * PrismLight — background layer C.
+ * PrismLight: background layer C.
  *
  * Two broad diagonal light sweeps crossing the composition on long,
  * mismatched cycles (58s and 68s). Their job is to make surfaces read as

@@ -1,9 +1,9 @@
 /**
- * Operations demo — the role policy.
+ * Operations demo: the role policy.
  *
  * One table, consulted by the domain services and later by the UI. Putting it
  * here rather than in each screen means a permission cannot be enforced in the
- * sidebar and forgotten in the service beneath it — which is the bug that makes
+ * sidebar and forgotten in the service beneath it, which is the bug that makes
  * frontend role handling look like decoration.
  *
  * This is an interaction simulation, not a security boundary. Nothing is

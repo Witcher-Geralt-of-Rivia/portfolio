@@ -1,5 +1,5 @@
 /**
- * Operations demo — what each role sees on the Overview.
+ * Operations demo: what each role sees on the Overview.
  *
  * One table, not a scatter of `role === "..."` tests through the JSX. The
  * rule it encodes is stronger than hiding KPI cards: **a role must not see a
@@ -124,7 +124,7 @@ export function overviewFor(role: Role): OverviewComposition {
  * Notifications a role should not see.
  *
  * A notification carries a category naming the area it came from, so a role
- * that cannot open that area should not be told about it either — otherwise
+ * that cannot open that area should not be told about it either. Otherwise
  * the action queue leaks through the door the panel filter just closed.
  */
 const NOTIFICATION_MODULE: Record<string, ModuleName> = {

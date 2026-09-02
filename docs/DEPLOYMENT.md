@@ -112,7 +112,7 @@ npm run build && pm2 restart portfolio      <-- NO
 ```
 
 `npm run build` writes `.next`. Production does not serve `.next`, so a plain
-build is now harmless — but it also does not deploy anything. Restarting PM2 by
+build is now harmless, but it also does not deploy anything. Restarting PM2 by
 hand skips validation, the smoke test and the rollback path.
 
 ### Why production never serves `.next`
@@ -135,8 +135,8 @@ a directory the build never touches, so the failure mode is structurally
 impossible rather than merely documented.
 
 Measured proof: with production serving `.next-release-a`, a plain
-`npm run build` ran to completion while the public site was polled continuously
-— 255 of 255 requests returned 200 (page, CSS chunk and JS chunk).
+`npm run build` ran to completion while the public site was polled
+continuously. All 255 requests returned 200 (page, CSS chunk and JS chunk).
 
 ### What deploy:safe does
 

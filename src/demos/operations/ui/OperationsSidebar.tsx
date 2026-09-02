@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Operations demo — the product sidebar.
+ * Operations demo: the product sidebar.
  *
  * Role and build state are two independent questions, and the sidebar answers
  * them separately:

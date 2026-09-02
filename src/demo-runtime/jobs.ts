@@ -1,5 +1,5 @@
 /**
- * Demo runtime — client-side job queue.
+ * Demo runtime: client-side job queue.
  *
  * Persistent deferred work: an automation run, a queued mutation waiting for
  * simulated reconnection, a notification to be delivered. Jobs are records
@@ -8,7 +8,7 @@
  * There is no worker and no timer. A job moves only when a workflow calls
  * `processPending`, which is a deliberate choice on two counts: the project
  * forbids anything running on a timer at rest, and explicit processing is what
- * makes a queue demonstrable — a visitor can press a control and watch the
+ * makes a queue demonstrable. A visitor can press a control and watch the
  * backlog drain one step at a time instead of guessing when a hidden loop
  * decided to run.
  *

@@ -1,5 +1,5 @@
 /**
- * Stage 09B — Operations specification guard.
+ * Stage 09B - Operations specification guard.
  *
  * Asserts that `docs/DEMO_OPERATIONS_SPEC.md` still contains the frozen product
  * contract. It exists because a specification is only useful if it is the same
@@ -7,7 +7,7 @@
  * 09C is exactly the situation in which a seed count quietly becomes "about
  * fifty" and a module list grows a Settings entry.
  *
- * This checks the document, not an implementation — there is no implementation
+ * This checks the document, not an implementation: there is no implementation
  * yet. Stage 09C's own harness will assert that the built product matches.
  *
  * Node built-ins only. Run with: node qa/stage09b-operations-spec.mjs
@@ -56,7 +56,7 @@ check("never described as client work", /never described as client work/i.test(s
 check("domain is frozen", spec.includes("motorcycle / light-vehicle rental operations"));
 
 /* =====================================================================
-   2. Modules — exactly eleven, and no Settings
+   2. Modules - exactly eleven, and no Settings
    ===================================================================== */
 
 section("MODULES");
@@ -101,7 +101,7 @@ check(
 check("it is not called access denied", !/access denied/i.test(spec));
 
 /* =====================================================================
-   4. Entities — exactly thirteen
+   4. Entities - exactly thirteen
    ===================================================================== */
 
 section("ENTITIES");
@@ -177,7 +177,7 @@ for (const [pattern, what] of CONTACT_PATTERNS) {
 }
 
 /* =====================================================================
-   6. Automation — exactly five rules
+   6. Automation - exactly five rules
    ===================================================================== */
 
 section("AUTOMATION");
@@ -209,23 +209,23 @@ check(
 );
 
 /* =====================================================================
-   7. Workflows — exactly six
+   7. Workflows - exactly six
    ===================================================================== */
 
 section("WORKFLOWS");
 const WORKFLOWS = [
-  "W1 — Lead to customer",
-  "W2 — Reservation to rental",
-  "W3 — Payment",
-  "W4 — Maintenance",
-  "W5 — Inbox and assist",
-  "W6 — Automation control",
+  "W1 - Lead to customer",
+  "W2 - Reservation to rental",
+  "W3 - Payment",
+  "W4 - Maintenance",
+  "W5 - Inbox and assist",
+  "W6 - Automation control",
 ];
 check("all six workflows are frozen", containsAll(WORKFLOWS).length === 0, containsAll(WORKFLOWS).join(", "));
 check("workflow count is six", WORKFLOWS.length === 6);
 
 /* =====================================================================
-   8. Seed counts — the numbers most likely to drift
+   8. Seed counts - the numbers most likely to drift
    ===================================================================== */
 
 section("SEED COUNTS");
@@ -290,7 +290,7 @@ check("6 Won leads match 6 sourced customers", spec.includes("6 Won leads       
 check("seeded audit total is documented", /^total                     63$/m.test(spec));
 
 /* =====================================================================
-   10. Derived state — the anti-hardcoding rules
+   10. Derived state - the anti-hardcoding rules
    ===================================================================== */
 
 section("DERIVED STATE");
@@ -358,7 +358,7 @@ check(
 
 section("STAGE STATE");
 check("the spec records what is built", spec.includes("SPEC FROZEN / DOMAIN BUILT / UI NOT BUILT"));
-check("Stage 09C is named as next", spec.includes("Stage 09C — Build Operations / CRM / ERP SaaS Demo"));
+check("Stage 09C is named as next", spec.includes("Stage 09C - Build Operations / CRM / ERP SaaS Demo"));
 check(
   "the registry lifecycle is documented",
   /`planned` before 09C, `building` while it is under construction, and `verified`/.test(prose)

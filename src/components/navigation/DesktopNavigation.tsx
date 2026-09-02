@@ -2,7 +2,7 @@ import { NAV_ITEMS } from "./nav-items";
 import PortfolioMark from "./PortfolioMark";
 
 /**
- * The floating desktop bar (>= 900px). Purely presentational — the active
+ * The floating desktop bar (>= 900px). Purely presentational: the active
  * section is resolved by SiteNavigation and handed down.
  */
 export default function DesktopNavigation({ activeId }: { activeId: string }) {

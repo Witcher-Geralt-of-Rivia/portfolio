@@ -26,7 +26,7 @@ import {
  * no randomness and no generated timing, so the same click always produces the
  * same sequence. The interval is torn down whenever the experiment changes,
  * the variant changes, the sequence restarts, Reset is pressed or the
- * component unmounts — a stale experiment can never receive a late frame.
+ * component unmounts: a stale experiment can never receive a late frame.
  */
 
 /* Reduced motion walks the same frames in short discrete steps rather than
@@ -138,8 +138,8 @@ export default function LabWorkspace() {
       : experiment.action.run;
 
   const status = frame
-    ? `${experiment.flow[Math.max(0, frame.stage)]?.label ?? "Complete"} — ${frame.state.toLowerCase()}`
-    : "Idle — every experiment runs entirely in the browser.";
+    ? `${experiment.flow[Math.max(0, frame.stage)]?.label ?? "Complete"}: ${frame.state.toLowerCase()}`
+    : "Idle. Every experiment runs entirely in the browser.";
 
   return (
     <>

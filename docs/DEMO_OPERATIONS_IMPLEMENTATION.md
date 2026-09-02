@@ -1,7 +1,7 @@
 <!-- PROJECT_STAGE: 8 -->
 <!-- DOCUMENT_STATUS: CURRENT -->
 
-# Demo 01 — Operations Implementation
+# Demo 01 - Operations Implementation
 
 How the Operations domain is built. The product contract it implements is
 `docs/DEMO_OPERATIONS_SPEC.md`, which stays canonical; this document records
@@ -25,6 +25,7 @@ ROUTE       /demos/operations and /demos/operations/leads DEPLOYED,
 09C3  built one module per stage (D-062)
   09C3.1 Leads                                       COMPLETE
   09C3.1.1 Leads control presentation                COMPLETE
+  09C3.1.2 Custom select system                      COMPLETE
   09C3.2 Customers                                   BLOCKED on live review
   09C3.3 Inbox + integrated CRM workflow
 09C4  Reservations + Contracts + Fleet + Maintenance + Payments
@@ -77,7 +78,7 @@ apart is the failure that arrangement invites.
 `src/demo-runtime/` never learns what a lead is. The dependency runs one way,
 and `qa/stage09c1-operations.mjs` asserts it by reading the source: no runtime
 module imports from `src/demos/`, and no Operations entity name appears in
-runtime code once comments are stripped — the runtime's own prose explains what
+runtime code once comments are stripped. The runtime's own prose explains what
 it must not know, and that explanation is not a leak.
 
 ```
@@ -100,7 +101,7 @@ Persistence adapter →  IndexedDB   (memory fallback)
 Three values are computed, never trusted as stored flags. This is what stops
 the demo contradicting itself.
 
-**Vehicle status.** `deriveVehicleStatus` applies the frozen precedence — an
+**Vehicle status.** `deriveVehicleStatus` applies the frozen precedence: an
 active work order, then an Active contract, then a Confirmed reservation, then
 Available. Every service that touches a contract, reservation or work order
 ends by calling `refreshedVehicle`, which rewrites the status *and* clears the
@@ -122,7 +123,7 @@ from several payments cannot drift.
 
 ## Determinism
 
-No `Math.random`, no `crypto.randomUUID`, no `Date.now()` — asserted by the
+No `Math.random`, no `crypto.randomUUID`, no `Date.now()`, asserted by the
 harness across the whole domain. Ids come from the runtime's per-collection
 counters; timestamps come from the logical clock, based at
 `2026-09-01T09:00:00Z`.
@@ -130,7 +131,7 @@ counters; timestamps come from the logical clock, based at
 The seed is built by functions rather than hand-authored: 301 literal records
 would be unreadable and impossible to keep consistent. Distributions are
 expanded from the frozen counts and then walked with a stride coprime to their
-length, which visits every element exactly once — the counts are untouched and
+length, which visits every element exactly once: the counts are untouched and
 the order is still completely determined, but a list does not open with twelve
 consecutive "New" leads.
 
@@ -150,7 +151,7 @@ afterwards. The vehicle indices are carved into four pools that never overlap:
 audited; transitions are, which is the rule the live services follow too.
 
 The Stage 09A runtime could not express this: `ResetPayload` carried only
-`records` and `meta`. The extension is minimal — an optional `audit` array on
+`records` and `meta`. The extension is minimal: an optional `audit` array on
 `ResetPayload`, written inside the same transaction as the purge and reseed in
 both adapters. `DemoSeed` gained an optional `audit`, and the runtime assigns
 `demoId` and the sequence numbers so a seed cannot hand out a sequence that
@@ -164,7 +165,7 @@ zero, which the harness checks against a generic Field fixture.
 
 One table in `permissions.ts`, consulted by services and later by the UI. Every
 mutating service calls `requireWrite` itself, so a write cannot reach
-persistence because a screen forgot to hide a button — `FORBIDDEN` is raised in
+persistence because a screen forgot to hide a button. `FORBIDDEN` is raised in
 the domain. The harness runs each service under all four roles.
 
 This is an interaction simulation, not a security boundary. Nothing is
@@ -182,7 +183,7 @@ does.
 domain event → job → rule evaluation → action → AutomationRun → notification
 ```
 
-Explicit processing. The job is enqueued and drained in the same breath — it
+Explicit processing. The job is enqueued and drained in the same breath: it
 exists so the deferred path is real rather than implied, not so work can sit
 around. A disabled rule still records a `Skipped` run, because silently doing
 nothing leaves a visitor who just switched a rule off with no evidence the
@@ -192,7 +193,7 @@ Rule 01's rotation is deterministic and resolves to `actor_0002`, the only
 seeded Sales Agent. Rule 02 sets the follow-up two days out (D-053). Rule 03
 appends a local System message with no recipient. Rules 04 and 05 raise
 notifications; vehicle state after a completed work order is recomputed by the
-domain rules, never by an automation action — automation must not become a
+domain rules, never by an automation action: automation must not become a
 second source of truth.
 
 ## QA
@@ -243,7 +244,7 @@ inheriting the subtree's `noindex, nofollow`; one client boundary sits beneath
 it, because everything below needs the browser.
 
 **Two independent questions.** A module the selected role cannot view is not
-rendered at all — the navigation never advertises data the role has no access
+rendered at all: the navigation never advertises data the role has no access
 to. A module that exists for the role but is unbuilt renders as a
 non-interactive label, because a link to a 404 is worse than one that is
 plainly not ready. The second is temporary build state carried by
@@ -254,14 +255,14 @@ plainly not ready. The second is temporary build state carried by
 for a module the role cannot open would make the Overview a hole in its own
 policy. Admin sees four, Sales Agent two, Fleet Coordinator two, Finance
 Analyst one. No filler card is invented to keep the row at four, and there are
-no trend badges — there is no previous period to compare against, and a "+12%"
+no trend badges: there is no previous period to compare against, and a "+12%"
 would be a fabricated metric.
 
 **Everything derived.** The screen computes nothing: it reads the collections
 once, hands them to `selectors/overview.ts` and renders the result. Nothing on
 it is written as a literal.
 
-Visuals are CSS and authored SVG — no chart library, no icon package. Where an
+Visuals are CSS and authored SVG: no chart library, no icon package. Where an
 SVG carries data it is `aria-hidden` and the same values appear in text beside
 it, so nothing depends on distinguishing four soft hues.
 
@@ -271,8 +272,8 @@ Four defects, all found by looking at the rendered product rather than at the
 code, and three of them present while the 09C2 suite was passing.
 
 **The role rule was half applied.** 09C2 filtered KPI cards and nothing else.
-`ui/overview-policy.ts` now maps every surface — KPI, panel, action-queue
-category, notification category — to the module whose data it summarises, and
+`ui/overview-policy.ts` now maps every surface (KPI, panel, action-queue
+category, notification category) to the module whose data it summarises, and
 asks `permissions.ts` whether the role can open it. Derived, not restated, so
 the two cannot drift. The visible symptom was a Finance notification badge
 reading 8 over a list of 3 (D-056).
@@ -292,7 +293,7 @@ trimmed to the artwork's bounds plus a 5% margin, keeping its aspect (D-059).
 
 Fixing the badge exposed a shared-runtime defect that mattered more than any of
 the above. `useDemoQuery` discarded its data on every revalidation, so marking
-eight notifications read — eight writes, eight revision bumps — cleared the
+eight notifications read (eight writes, eight revision bumps) cleared the
 badge and emptied the list after the first write, while seven were still
 outstanding. A reload then restored them, so the demo looked like it was losing
 data it had never saved.
@@ -301,7 +302,7 @@ The persistence layer was never at fault: the IndexedDB adapter awaits
 `tx.oncomplete`, so a resolved commit is durable. Reading the store directly at
 the moment the badge cleared showed six or seven still unread. The hook now
 keeps the previous answer while re-reading the same question, and drops it when
-the question changes — the distinction matters, because keeping stale data
+the question changes. The distinction matters, because keeping stale data
 across a role change would leak the previous role's records for a frame
 (D-058).
 
@@ -337,7 +338,9 @@ src/demos/operations/
   selectors/leads-list.ts      matching, ordering, owners, activity, dates
   ui/scroll-lock.ts            one counted page-scroll lock for every overlay
   ui/OpsSelect.tsx             the product's select: label inside the border,
-                               drawn chevron, quiet active state (09C3.1.1)
+                               drawn chevron, quiet active state (09C3.1.1);
+                               a thin wrapper over the shared DemoSelect
+                               primitive since 09C3.1.2
   ui/leads/
     LeadsScreen.tsx            state, selection, composition
     LeadsToolbar.tsx           search, filters, sort, the one primary action
@@ -361,7 +364,7 @@ put both screens back to their skeletons.
 The shell asks `usePathname()` which module it is showing rather than being
 told by the page, so one pathname decides the active navigation entry, the
 heading and the top bar's second line. Only `useSearchParams` needs a Suspense
-boundary — the pathname resolves at prerender because every route here is
+boundary: the pathname resolves at prerender because every route here is
 static with no dynamic segment.
 
 ### Automations actually run now
@@ -369,7 +372,7 @@ static with no dynamic segment.
 This is the substantial finding of the stage. `processEvents` had no caller
 outside its own module and the runtime's event bus had no subscribers, so
 creating a website lead never assigned it and qualifying a lead never scheduled
-a follow-up — both of which the frozen contract requires. The QA harness had
+a follow-up, both of which the frozen contract requires. The QA harness had
 been hand-writing the events and calling the engine directly, which tested the
 rules correctly while the production path did not exist. See D-063.
 
@@ -377,15 +380,15 @@ rules correctly while the production path did not exist. See D-063.
 
 `selectLeadList` filters through the shared `queryList` matcher, then sorts and
 pages itself. That split is not a preference: `QuerySpec.sort` takes `keyof T`,
-and three of the six sorts are not lead fields. Stage and Priority are ranks —
-sorting their strings gives Contacted, Lost, New, Proposal, Qualified, Won,
-which is alphabetical and meaningless — and Created lives on the record
+and three of the six sorts are not lead fields. Stage and Priority are ranks
+(sorting their strings gives Contacted, Lost, New, Proposal, Qualified, Won,
+which is alphabetical and meaningless), and Created lives on the record
 envelope. The default is last activity descending with an explicit id
 tie-break, written out rather than inherited from the adapters three layers
 down.
 
 Owner options are derived, not listed: an actor qualifies by being an active
-Sales Agent — the same test Rule 01 applies — or by already owning a lead. A
+Sales Agent (the same test Rule 01 applies) or by already owning a lead. A
 Fleet Coordinator does not become a CRM owner by existing in the seed.
 
 ### The id is on screen, quietly
@@ -393,7 +396,7 @@ Fleet Coordinator does not become a CRM owner by existing in the seed.
 `personName(i)` repeats every twenty leads, so three of the forty-eight are
 called "Alina Danforth". A drawer headed by the name alone cannot say which one
 is open, and "Archive Alina Danforth?" is ambiguous across three records. The
-id appears under the name in the detail and beside the name in confirmations —
+id appears under the name in the detail and beside the name in confirmations,
 never as a table column.
 
 ### QA
@@ -430,7 +433,7 @@ provenance   a 469px capsule with 608px of nothing beside it
 ```
 
 The controls are a real `<select>` with `appearance: none`. That removes the
-platform's arrow and nothing else — keyboard behaviour, screen-reader
+platform's arrow and nothing else: keyboard behaviour, screen-reader
 semantics and the native option list on a phone all remain, and none of them
 would have been free in a hand-built menu. Width is left to the browser, which
 sizes a select to its widest option, so a control does not resize when its
@@ -440,10 +443,33 @@ value changes.
 semantics, the pagination composition and both page sizes, and the band's
 width against the space actually available at six widths.
 
+### The select menu (09C3.1.2)
+
+`src/components/demos/DemoSelect.tsx` draws the menu the operating system used
+to. Eleven controls use it: the three Leads filters, the sort, the page size,
+the demo role, the create/edit form's three and the detail's two.
+
+The reason it exists is that a native `<select>` cannot be styled open. The
+element is the platform's, and its popup arrived with square corners, no option
+padding and a system-blue selection band whatever the closed control looked
+like (D-072).
+
+It is the ARIA select-only combobox: focus stays on the trigger and the active
+option is pointed at with `aria-activedescendant`, so there is one focused
+element to return to on Escape, on Tab and on an outside click. The menu is
+portalled into the nearest `<dialog>` when there is one, because a modal dialog
+is in the browser's top layer and a body-portalled menu would be painted behind
+the sheet that opened it. Placement is measured: below when there is room,
+above when there is not, capped at 320px with internal scrolling, clamped
+horizontally to the viewport.
+
+Stacking is stated rather than raced: 70 for menus, above the notification
+panel and mobile drawer at 60 and the chrome at 40.
+
 ## Remaining UI work
 
 Nine module screens: Customers, Reservations, Contracts, Fleet, Maintenance,
 Payments, Automations, Inbox and Reports. Every service and selector they need
 already exists, and Leads has established the interaction patterns they reuse.
 `#work` still renders its placeholder, and the demo is deployed but
-unadvertised — `noindex, nofollow`, linked from nowhere.
+unadvertised: `noindex, nofollow`, linked from nowhere.
