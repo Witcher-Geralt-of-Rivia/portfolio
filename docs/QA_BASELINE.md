@@ -1611,3 +1611,118 @@ One 09C2 assertion changed value rather than meaning. It lists the modules
 whose sidebar entries are interactive, which moves each time a module is built:
 `["Overview","Leads"]` became `["Overview","Leads","Customers"]`. That check and
 the `implemented` flag behind it are deleted once all eleven modules exist.
+
+---
+
+## Stage 09C3.3 - Operations Inbox and CRM Workflow
+
+PASS. Harness: `qa/stage09c33-inbox.mjs`, **367 checks** with the domain probe
+in place and 289 without it, which is what runs against production: the two
+domain sections skip themselves when the fixture route is absent.
+
+### What it covers
+
+```
+domain        the seeded distribution measured rather than asserted from
+              constants: 20 conversations, 64 messages, 11 lead and 9 customer
+              subjects, 12 Web chat and 8 In-app, 13 Open and 7 Closed, 6
+              unread, sixteen threads of three and four of four
+integrity     every conversation resolves its subject, every assignee is a real
+              actor or null, every thread holds at least two messages, every
+              message belongs to a conversation and names a resolvable actor,
+              and no thread's timestamps go backwards
+reply         trimmed body, Staff author, the current actor as author (Morgan
+              for Admin, Avery for Sales), the thread marked read, one audit
+              entry saying a reply was added, and the body absent from it
+refusals      a blank reply, a closed thread, Finance and Fleet
+triage        read and unread write no audit at all
+assignment    the assignable set derived from the matrix, the audit entry
+              naming both ends as people, and four refusals: a Fleet
+              Coordinator, a Finance Analyst, an unknown id, and a
+              reassignment to the value already stored
+lifecycle     close, reopen, and the double-close conflict
+rule 03       a reservation confirmed through the real service, its event
+              processed by the real engine, a System message appended to the
+              customer's conversation, the thread marked unread, a run
+              recorded
+selectors     three filters, their combination, search over subject names and
+              message bodies, trimming and case, the frozen order, and that
+              marking a thread read does not move it
+assist        a brief for a lead thread, one from the source lead for a
+              converted customer, none for an established one, and no
+              fabricated lead field anywhere near them
+reset         20 conversations, 64 messages, 6 unread, 13 open, 7 closed and
+              the canonical assignee, after four mutations
+product       the list and its three unread cues, closed threads still listed,
+              every filter and the clear, search, the empty state, the thread
+              header, the transcript, message authorship, URL selection with
+              Back and Forward, deep links valid and invalid
+W5            the whole workflow: an unread qualified lead thread, its brief,
+              a reply, the read state, the preview and count following, the
+              brief and recommended action both recomputing, and all of it
+              surviving a reload
+actions       read and unread with the count and filter following, assignment
+              with the list row following, close removing the composer, and
+              reopen restoring it
+roles         Admin and Sales both work the Inbox and reply as themselves;
+              Finance and Fleet get the contained unavailable state with no
+              thread, no message body, no composer and no list; returning to
+              Admin restores the URL-selected conversation
+crm           Inbox to lead, Inbox to customer, lead brief to conversation,
+              customer to conversation, customer to origin lead, lead to
+              customer, and a notification to its source
+mobile        390 and 360: the list alone, the thread alone once selected, the
+              filter sheet, the context disclosure, the assignment menu inside
+              a narrow thread, Back, and no overflow
+responsive    thirteen viewports from 1920 to 360, no horizontal overflow, and
+              the transcript the widest panel wherever it is shown
+a11y          rows as real buttons, Enter to open, focus to the thread heading,
+              a labelled composer, Enter inserting a newline rather than
+              sending, the assignment menu's ARIA, and one polite live region
+content       no email, telephone, messenger channel, delivery claim or em dash
+              on the rendered page, and no external or API request during a
+              reply
+```
+
+### What it found
+
+Two domain gaps, both fixed before any UI was written: `assignConversation`
+accepted an arbitrary actor id, and neither assignment nor replies wrote audit.
+See D-075 and D-076.
+
+One specification clause that could not be satisfied: the Lead Brief on every
+customer conversation. Seven of the nine seeded customer threads reach no lead.
+See D-078.
+
+One layout figure that did not survive measurement: three panels at 1180px gave
+the transcript 221 pixels, because the sidebar appears at exactly that width
+and takes 240. See D-082.
+
+One piece of dead code with a comment claiming otherwise: `addSystemMessage`,
+documented as used by Rule 03 and called from nowhere.
+
+### Regression
+
+```
+stage09a-runtime                76/76
+stage09a-shell                  85/85
+stage09b-operations-spec        96/96
+stage09c1-operations          211/211
+stage09c2-operations-ui       141/141
+stage09c21-hardening          111/111
+stage09c31-leads              407/407
+stage09c32-customers          174/174
+stage09c33-inbox              367/367
+public-repo-safety              19/19  (with --history)
+copy-style                        1/1
+qa:memory                       18/18
+tsc --noEmit                    clean
+eslint                          0 errors (1 pre-existing warning in qa/texture.mjs)
+                              ------
+                             1706 checks
+```
+
+The 09C2 interactive-module assertion changed value again, as it does each time
+a module is built: `["Overview","Leads","Customers"]` became
+`["Overview","Leads","Customers","Inbox"]`. That check and the `implemented`
+flag behind it are deleted once all eleven modules exist.

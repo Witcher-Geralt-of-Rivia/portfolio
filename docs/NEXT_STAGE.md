@@ -15,33 +15,34 @@ Stage 09                IN PROGRESS
     09C1 domain + seed  COMPLETE
     09C2 shell + Overview  COMPLETE
     09C2.1 shell hardening + review deployment  COMPLETE
-    09C3 Leads/Customers/Inbox  IN PROGRESS, one module per stage (D-062)
+    09C3 Leads/Customers/Inbox  COMPLETE, one module per stage (D-062)
       09C3.1 Leads     COMPLETE and deployed
       09C3.1.1 Leads visual hardening  COMPLETE and deployed
       09C3.1.2 Custom select system    COMPLETE and deployed
       09C3.2 Customers COMPLETE and deployed
-      09C3.3 Inbox + integrated CRM workflow  BLOCKED - awaiting external
-             live review of 09C3.2
+      09C3.3 Inbox + integrated CRM workflow  COMPLETE and deployed
+    09C4 Reservations/Contracts/Fleet/Maintenance/Payments  BLOCKED -
+         awaiting external live review of 09C3.3
 ```
 
 ## The block
 
-Next task: Stage 09C3.3 - Operations CRM: Inbox + integrated CRM workflow (BLOCKED UNTIL EXTERNAL LIVE REVIEW OF STAGE 09C3.2)
+Next task: Stage 09C4 - Rental Operations: Reservations + Contracts + Fleet + Maintenance + Payments (BLOCKED UNTIL EXTERNAL LIVE REVIEW OF INBOX / CRM INTEGRATION)
 
-Stage 09C3.3 does not start until a human has looked at
-`https://intelligent-systems-lab.duckdns.org/demos/operations/customers` on a
-real screen and said what they think of it, including switching the demo role
-and opening a customer.
+Stage 09C4 does not start until a human has looked at
+`https://intelligent-systems-lab.duckdns.org/demos/operations/inbox` on a real
+screen and said what they think of it: opening a thread, replying, switching
+the demo role, and walking the links out to Leads and Customers and back.
 
-This is deliberate, and the pattern has earned it three times. Every defect
-09C2.1 fixed was found by looking at rendered pixels, three of four while the
-QA suite passed. 09C3.1's review found two more the suite had no opinion about.
-09C3.1.1's review found four presentation faults, and 09C3.1.2 exists because a
-reviewer opened a dropdown, which no harness had thought to photograph.
+This is deliberate, and four reviews have now earned it. Every defect 09C2.1
+fixed was found by looking at rendered pixels, three of four while the QA suite
+passed. 09C3.1's review found two more. 09C3.1.1's found four presentation
+faults. 09C3.1.2 exists because a reviewer opened a dropdown, which no harness
+had thought to photograph.
 
-Customers is also where the role-composed interface first appears, and Inbox
-inherits it. A problem in that pattern, found after Inbox exists, is a problem
-fixed twice.
+Inbox is also the first module whose layout is not a table, and the first that
+links the others together. A problem in either, found after five more modules
+exist, is a problem fixed six times.
 
 Nothing about the block is technical. The build is deployed, the regression is
 green, and the work is ready to continue the moment the review comes back.
@@ -65,7 +66,8 @@ green, and the work is ready to continue the moment the review comes back.
 14. Stage 09C3.1.1 - Leads visual hardening     DONE
 15. Stage 09C3.1.2 - Custom select system       DONE
 16. Stage 09C3.2 - Customers                    DONE
-17. Stage 09C3.3 - Inbox + CRM workflow         BLOCKED on live review
+17. Stage 09C3.3 - Inbox + CRM workflow         DONE
+18. Stage 09C4 - Rental Operations modules      BLOCKED on live review
 18. Stage 09C4-C6 - modules, then QA/deploy     LATER
 13. Field and Learning specs, then builds       LATER
 14. Stage 09 - #work launcher integration       LATER

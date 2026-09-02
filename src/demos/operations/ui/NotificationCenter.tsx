@@ -8,24 +8,50 @@
  * closes on Escape or on a click outside, and returns focus to the trigger
  * when it does.
  *
- * Items do not link anywhere yet. Their `sourceEntityId` is stored and correct,
- * but the modules those ids point at do not exist until 09C3 onward, and a link
- * to a 404 would be worse than no link. Navigation arrives with the routes.
+ * An item links to its source when that module exists and this role can open
+ * it. Three do as of 09C3.3: a lead, a customer and a conversation. The rest
+ * stay plain text, because a link to a route that 404s is worse than no link,
+ * and each becomes navigable as its own stage builds it (D-085).
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 
 import { useDemoQuery } from "@/demo-runtime/react/hooks";
 import type { DemoRecord } from "@/demo-runtime/types";
 
 import * as notificationService from "../services/notifications";
-import type { Notification } from "../types";
+import type { Notification, Role } from "../types";
 import { IconBell } from "./icons";
 import { useOperations } from "./OperationsProvider";
+import { canViewModule } from "../permissions";
+import type { ModuleName } from "../types";
 import { canSeeNotification } from "./overview-policy";
 import { lockPageScroll } from "./scroll-lock";
 
 const PANEL_ID = "ops-notifications-panel";
+
+/**
+ * The source types that have a screen to open, and the module each belongs to.
+ *
+ * Keyed by the `sourceEntityType` the services already store. A type absent
+ * from this table is not a bug: it means that module is not built, so the item
+ * names its source without offering a way there.
+ */
+const SOURCE_ROUTES: Record<string, { module: ModuleName; href: (id: string) => string }> = {
+  lead: {
+    module: "Leads",
+    href: (id) => `/demos/operations/leads?selected=${encodeURIComponent(id)}`,
+  },
+  customer: {
+    module: "Customers",
+    href: (id) => `/demos/operations/customers?selected=${encodeURIComponent(id)}`,
+  },
+  conversation: {
+    module: "Inbox",
+    href: (id) => `/demos/operations/inbox?selected=${encodeURIComponent(id)}`,
+  },
+};
 
 export default function NotificationCenter() {
   const { ctx, role } = useOperations();
@@ -193,6 +219,7 @@ export default function NotificationCenter() {
                     <p className="ops-notify__category">{n.data.category}</p>
                     <p className="ops-notify__item-title">{n.data.title}</p>
                     <p className="ops-notify__item-text">{n.data.body}</p>
+                    <SourceLink notification={n.data} role={role} onNavigate={close} />
                   </div>
                   {!n.data.read && (
                     <button
@@ -213,5 +240,38 @@ export default function NotificationCenter() {
         </>
       )}
     </div>
+  );
+}
+
+/**
+ * The way to the record a notification is about, when there is one.
+ *
+ * Two conditions, both necessary: the module exists, and this role may open
+ * it. A Finance Analyst never sees a CRM notification at all, but the check is
+ * made here as well rather than trusted upstream, because a link is a way in
+ * and a way in is exactly the thing worth checking twice.
+ */
+function SourceLink({
+  notification,
+  role,
+  onNavigate,
+}: {
+  notification: Notification;
+  role: Role;
+  onNavigate: () => void;
+}) {
+  const { sourceEntityType, sourceEntityId } = notification;
+  if (!sourceEntityType || !sourceEntityId) return null;
+  const route = SOURCE_ROUTES[sourceEntityType];
+  if (!route || !canViewModule(role, route.module)) return null;
+
+  return (
+    <Link
+      className="ops-link-button ops-notify__source"
+      href={route.href(sourceEntityId)}
+      onClick={onNavigate}
+    >
+      Open {sourceEntityType}
+    </Link>
   );
 }

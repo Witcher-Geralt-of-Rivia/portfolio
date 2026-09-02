@@ -23,6 +23,7 @@ import Link from "next/link";
 import type { DemoRecord } from "@/demo-runtime/types";
 import { useDemoQuery } from "@/demo-runtime/react/hooks";
 
+import { canViewModule } from "../../permissions";
 import { formatCents } from "../../selectors/derive";
 import { absoluteDate, relativeDate } from "../../selectors/leads-list";
 import { selectCustomerRelations } from "../../selectors/customer-relations";
@@ -61,6 +62,10 @@ export default function CustomerDetail({
   const customerId = customer?.id ?? null;
 
   const sections = useMemo(() => relationSectionsFor(role), [role]);
+  /* A Finance Analyst reaches no conversation section at all, so this only
+     ever decides between a linked row and a plain count for the two roles
+     that do. */
+  const canOpenInbox = canViewModule(role, "Inbox");
   const wants = (section: RelationSection) => sections.includes(section);
 
   /**
@@ -323,21 +328,46 @@ export default function CustomerDetail({
                 <>
                   <p className="ops-relation__title">Conversations</p>
                   {data && data.conversations.total > 0 ? (
-                    /* A count, deliberately. Threads and replies are the Inbox
-                       module's job, and half-building it here would be worse
-                       than pointing at it. */
-                    <p className="ops-relation__line">
-                      <span className="ops-relation__count">
-                        {data.conversations.total}{" "}
-                        {data.conversations.total === 1 ? "conversation" : "conversations"}
-                      </span>
-                      <span className="ops-relation__count">{data.conversations.open} open</span>
-                      {data.conversations.unread > 0 && (
+                    /* Still a count: threads and replies are the Inbox
+                       module's job. What changed in 09C3.3 is that each row
+                       now opens the thread it counts, instead of naming a
+                       place the visitor had no way to reach (D-084). */
+                    <>
+                      <p className="ops-relation__line">
                         <span className="ops-relation__count">
-                          {data.conversations.unread} unread
+                          {data.conversations.total}{" "}
+                          {data.conversations.total === 1 ? "conversation" : "conversations"}
                         </span>
+                        <span className="ops-relation__count">
+                          {data.conversations.open} open
+                        </span>
+                        {data.conversations.unread > 0 && (
+                          <span className="ops-relation__count">
+                            {data.conversations.unread} unread
+                          </span>
+                        )}
+                      </p>
+                      {canOpenInbox && (
+                        <ul className="ops-relation__list">
+                          {data.conversations.threads.map((thread) => (
+                            <li className="ops-relation__row" key={thread.id}>
+                              <span className="ops-relation__status">{thread.status}</span>
+                              {thread.unread && (
+                                <span className="ops-relation__muted">Unread</span>
+                              )}
+                              <Link
+                                className="ops-link-button"
+                                href={`/demos/operations/inbox?selected=${encodeURIComponent(
+                                  thread.id
+                                )}`}
+                              >
+                                Open conversation
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
                       )}
-                    </p>
+                    </>
                   ) : (
                     <p className="ops-empty">No conversations.</p>
                   )}

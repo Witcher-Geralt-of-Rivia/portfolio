@@ -19,6 +19,7 @@
  */
 
 import { useEffect, useMemo, useRef } from "react";
+import Link from "next/link";
 
 import type { DemoRecord } from "@/demo-runtime/types";
 import { useDemoQuery } from "@/demo-runtime/react/hooks";
@@ -30,6 +31,8 @@ import {
   selectLeadActivity,
   type OwnerOption,
 } from "../../selectors/leads-list";
+import { canViewModule } from "../../permissions";
+import { read } from "../../services/context";
 import { assignLead } from "../../services/leads";
 import { getLeadBrief } from "../../services/inbox";
 import { changeLeadStageWorkflow } from "../../services/lead-workflows";
@@ -85,11 +88,20 @@ export default function LeadDetail({
 
   const { data } = useDemoQuery(async () => {
     if (!ctx || !leadId) return null;
-    const [brief, audit] = await Promise.all([
+    const [brief, audit, conversations] = await Promise.all([
       getLeadBrief(ctx, leadId),
       ctx.runtime.listAudit(),
+      /* Only for a role that works the Inbox. A Fleet Coordinator cannot open
+         a conversation, so the brief they read carries no way into one. */
+      canViewModule(role, "Inbox") ? read.conversations(ctx) : Promise.resolve([]),
     ]);
-    return { brief, activity: selectLeadActivity(audit, leadId) };
+    /* The most recently opened thread about this lead, if there is one. The
+       brief already speaks about the conversation; this is the way to it. */
+    const thread =
+      conversations
+        .filter((c) => c.data.subjectType === "Lead" && c.data.subjectId === leadId)
+        .sort((a, b) => b.id.localeCompare(a.id))[0] ?? null;
+    return { brief, activity: selectLeadActivity(audit, leadId), thread };
   }, [role, leadId]);
 
   /* The heading takes focus when a different record is opened, so a keyboard
@@ -246,10 +258,26 @@ export default function LeadDetail({
                 lead.data.nextFollowUpAt ? absoluteDate(lead.data.nextFollowUpAt) : undefined
               }
             />
-            {converted && (
-              /* Named, not linked. The Customers module does not exist yet and
-                 a link to a route that 404s is worse than a plain fact. */
-              <Fact label="Converted customer" value={lead.data.convertedCustomerId ?? ""} />
+            {converted && lead.data.convertedCustomerId && (
+              <div className="ops-facts__row">
+                <dt className="ops-facts__label">Converted customer</dt>
+                <dd className="ops-facts__value">
+                  {/* A link since 09C3.2 built the module it points at. It was
+                      a bare id while that route would have 404ed. */}
+                  {canViewModule(role, "Customers") ? (
+                    <Link
+                      className="ops-link-button"
+                      href={`/demos/operations/customers?selected=${encodeURIComponent(
+                        lead.data.convertedCustomerId
+                      )}`}
+                    >
+                      Open customer
+                    </Link>
+                  ) : (
+                    lead.data.convertedCustomerId
+                  )}
+                </dd>
+              </div>
             )}
           </dl>
         </section>
@@ -271,6 +299,22 @@ export default function LeadDetail({
                 <span className="ops-brief__action-label">Recommended next action</span>
                 <strong className="ops-brief__action-value">{data.brief.recommendedAction}</strong>
               </p>
+              {/* The brief talks about the conversation, so it is also the way
+                  into it. Added in 09C3.3 when the Inbox route existed to be
+                  opened; one link in the section that already mentions it,
+                  rather than a section of its own (D-084). */}
+              {data.thread && (
+                <p className="ops-brief__link">
+                  <Link
+                    className="ops-link-button"
+                    href={`/demos/operations/inbox?selected=${encodeURIComponent(
+                      data.thread.id
+                    )}`}
+                  >
+                    Open conversation
+                  </Link>
+                </p>
+              )}
             </>
           ) : (
             <p className="ops-brief__summary ops-skeleton ops-skeleton--line" aria-hidden="true" />

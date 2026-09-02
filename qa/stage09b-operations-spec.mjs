@@ -357,7 +357,12 @@ check(
    ===================================================================== */
 
 section("STAGE STATE");
-check("the spec records what is built", spec.includes("SPEC FROZEN / DOMAIN BUILT / UI NOT BUILT"));
+/* Build state, so it moves each time a stage lands: 09B froze the contract,
+   09C1 built the domain, and 09C3 finished the three CRM screens. */
+check(
+  "the spec records what is built",
+  spec.includes("SPEC FROZEN / DOMAIN BUILT / CRM SCREENS BUILT")
+);
 check("Stage 09C is named as next", spec.includes("Stage 09C - Build Operations / CRM / ERP SaaS Demo"));
 check(
   "the registry lifecycle is documented",

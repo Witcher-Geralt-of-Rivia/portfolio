@@ -8,13 +8,12 @@ How the Operations domain is built. The product contract it implements is
 the code beneath it.
 
 ```
-STATUS      domain complete / shell, Overview, Leads and Customers
-            complete / eight modules unbuilt
-STAGE       09C1, 09C2, 09C2.1, 09C3.1 and 09C3.2 complete
+STATUS      domain complete / shell, Overview and the three CRM modules
+            complete / seven modules unbuilt
+STAGE       09C1, 09C2, 09C2.1 and all of 09C3 complete
 REGISTRY    operations = building
-ROUTE       /demos/operations, /demos/operations/leads and
-            /demos/operations/customers DEPLOYED, noindex, for external
-            live review
+ROUTE       /demos/operations, /leads, /customers and /inbox DEPLOYED,
+            noindex, for external live review
 ```
 
 ## Stage 09C programme
@@ -550,11 +549,123 @@ all four roles' columns and drawer sections, the mobile cards and filter sheet,
 five viewports, contrast, focus, the keyboard path through the custom select,
 and the standing content rules on the rendered page.
 
+## Inbox and the CRM workflow (09C3.3)
+
+The third module that writes, and the one that joins the other two. A
+conversation is always about a lead or a customer, so this is where the CRM
+stops being three lists and becomes one product.
+
+```
+src/demos/operations/
+  selectors/inbox-list.ts           rows, filters, search, order, clock time
+  selectors/conversation-detail.ts  the thread, its subject, its brief
+  ui/inbox/
+    InboxScreen.tsx                 state, selection, actions, composition
+    InboxToolbar.tsx                search and three filters
+    ConversationList.tsx            the list, one button per thread
+    ConversationThread.tsx          header, actions, transcript, composer
+    ConversationContext.tsx         the lead or customer behind the thread
+    ReplyComposer.tsx               a textarea and a button, nothing else
+    inbox-view.ts                   the role policy, tones, filter options
+```
+
+### The shape is different because the work is
+
+Leads and Customers are tables: filter, open a record, page grows. An inbox is
+a list kept beside the thread being read, so both are on screen and each
+scrolls on its own. That means no drawer, no pagination, and a module that
+fills the height the shell leaves it rather than growing down the page
+(D-077).
+
+`.demo-shell:has(.ops-inbox)` is pinned to `100dvh` for that reason, scoped to
+this module alone. `min-height: 100dvh` is a floor, not a height, so without
+the pin every ancestor grows to its content and a panel told to scroll
+internally has nothing to scroll against.
+
+### Two domain gaps found before the UI
+
+**Assignment took any string.** Nothing stopped a conversation being assigned
+to the Fleet Coordinator, who cannot open the Inbox, or to an id belonging to
+nobody. It now accepts null or an active actor whose role writes Inbox, and
+refuses everything else through the typed error contract. The option list is
+derived from the same rule by `inboxAssignees`, but the rule lives in the
+service: an option list is a convenience, not an enforcement point (D-075).
+
+**Assignment and replies wrote no audit at all.** Close and reopen did. The
+frozen contract said a reply "writes audit where appropriate" and never said
+what was appropriate, so 09C3.3 settled it: replies and assignments are
+audited, read and unread are not, because marking a thread unread to come back
+to it is triage rather than history. The reply entry carries no part of the
+message body, and the assignment entry names both ends as people rather than
+ids (D-076).
+
+One piece of dead code went with them. `addSystemMessage` carried the comment
+"Used by Rule 03" and had no callers anywhere: Rule 03 does its own commit,
+atomically, and can also open a conversation when none exists, which that
+helper could not. A function nobody calls with a comment claiming otherwise is
+worse than no function.
+
+### The assist reconciliation
+
+The frozen contract said the Inbox shows the Lead Brief for lead and customer
+conversations. It cannot. A brief is composed from a lead's stage, priority,
+vehicle interest and follow-up, and twenty-six of the thirty-two seeded
+customers were never leads; seven of the nine seeded customer conversations
+reach no lead at all.
+
+So the rule is narrower and true (D-078):
+
+```
+Lead conversation                    brief from that lead
+Customer conversation, converted     brief from its source lead
+Customer conversation, established   no brief, and the absence is explained
+```
+
+Nothing is fabricated for an established customer: no stage, no priority, no
+vehicle interest, no recommended action. They get their own context and a line
+saying why there is no brief.
+
+The brief recomputes from current records on every read, over the lead's own
+threads **plus the thread being read**. That second clause is what
+`getLeadBrief` cannot express: without it, replying in a converted customer's
+thread would leave the recommended action unchanged, which W5 requires it not
+to do.
+
+### The three-panel width, measured
+
+A 1180 viewport does not give a three-panel inbox 1180 pixels. The sidebar
+appears at exactly that width and takes 240, padding takes 40, the scrollbar
+15, and the transcript came out 221 wide. Three panels start at 1400, where
+the thread clears 440; from 1180 down it is list and thread with the context
+behind a disclosure, and below 768 it is one thing at a time (D-082, D-083).
+
+### The CRM joins up
+
+```
+Inbox      Open lead / Open customer      by subject type
+Lead       Open conversation              in the brief that already mentions it
+Lead       Open customer                  a bare id until Customers existed
+Customer   Open conversation              one row per thread
+Customer   Open lead                      the origin, from 09C3.2
+```
+
+Notifications whose source is a lead, a customer or a conversation now open it;
+the other sixteen of the twenty-two stay unlinked until their modules are built
+(D-084, D-085).
+
+### QA
+
+`qa/stage09c33-inbox.mjs`. The domain half proves the seeded distribution by
+measurement, the audit policy, every assignment refusal, and Rule 03 end to end:
+confirming a reservation through the real service appends a System message to
+the customer's conversation and marks it unread, which proves the automation
+path without building Reservations early.
+
 ## Remaining UI work
 
-Eight module screens: Reservations, Contracts, Fleet, Maintenance, Payments,
-Automations, Inbox and Reports. Every service and selector they need already
-exists, and Leads and Customers have established the interaction patterns they
+Seven module screens: Reservations, Contracts, Fleet, Maintenance, Payments,
+Automations and Reports. Every service and selector they need already exists,
+and the three CRM modules have established the interaction patterns they
 reuse.
 `#work` still renders its placeholder, and the demo is deployed but
 unadvertised: `noindex, nofollow`, linked from nowhere.

@@ -49,7 +49,7 @@ export const MODULE_ROUTES: readonly ModuleRoute[] = [
   { id: "Payments", label: "Payments", href: `${ROOT}/payments`, group: "Operations", context: "Balances and settlement", implemented: false },
 
   { id: "Automations", label: "Automations", href: `${ROOT}/automations`, group: "System", context: "Rules and runs", implemented: false },
-  { id: "Inbox", label: "Inbox", href: `${ROOT}/inbox`, group: "System", context: "Conversations", implemented: false },
+  { id: "Inbox", label: "Inbox", href: `${ROOT}/inbox`, group: "System", context: "Conversations", implemented: true },
   { id: "Reports", label: "Reports", href: `${ROOT}/reports`, group: "System", context: "Derived figures", implemented: false },
 ];
 

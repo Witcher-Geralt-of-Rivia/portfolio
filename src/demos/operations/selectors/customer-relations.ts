@@ -57,6 +57,14 @@ export type CustomerConversationSummary = {
   total: number;
   open: number;
   unread: number;
+  /**
+   * The threads themselves, so each can be opened.
+   *
+   * Added in 09C3.3. The count was the whole answer while the Inbox did not
+   * exist; now that it does, a summary that could not be followed anywhere
+   * would be a dead end the product has no excuse for (D-084).
+   */
+  threads: { id: string; status: Conversation["status"]; unread: boolean }[];
 };
 
 export type CustomerRelations = {
@@ -154,6 +162,9 @@ export function selectCustomerRelations(world: CustomerWorld): CustomerRelations
     total: threads.length,
     open: threads.filter((c) => c.data.status === "Open").length,
     unread: threads.filter((c) => c.data.unread).length,
+    threads: [...threads]
+      .sort((a, b) => a.id.localeCompare(b.id))
+      .map((c) => ({ id: c.id, status: c.data.status, unread: c.data.unread })),
   };
 
   return {

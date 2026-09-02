@@ -944,8 +944,11 @@ section("CONVERT AND ARCHIVE");
   }));
   check("conversion moves the lead to Won", converted.stage === "Won", String(converted.stage));
   check("the converted customer is named", converted.labels.includes("Converted customer"));
-  check("the customer id is shown", /customer_\d{4}/.test(converted.customer), converted.customer);
-  check("no link is offered to the unbuilt Customers module", converted.links === 0);
+  /* Build state, and it moved in 09C3.3. While Customers did not exist this
+     was a bare id and a link would have gone to a 404; now the module is
+     built, so the pointer is a way there (D-084). */
+  check("the converted customer opens", converted.customer === "Open customer", converted.customer);
+  check("through a real link", converted.links === 1, String(converted.links));
   check("the convert action is withdrawn", converted.convertGone);
   check("the drawer states the converted position", converted.note.includes("Converted"), converted.note);
   check("the conversion is audited",

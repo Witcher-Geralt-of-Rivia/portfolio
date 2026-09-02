@@ -2133,3 +2133,437 @@ answer rather than showing it for a frame.
 Origin stays for every role. That a customer was converted from a lead is the
 customer's own fact; only the link through to the lead record depends on being
 able to open Leads.
+
+## D-075 - An Inbox assignee must be someone who can work the Inbox
+
+Status: Accepted
+Stage: 9C3.3
+
+### Decision
+`assignConversation` accepts null, or an actor who is active and whose role has
+write access to Inbox. Anything else is refused with the typed error contract:
+an unknown id is VALIDATION, an inactive or wrong-role actor is CONFLICT.
+
+`inboxAssignees(ctx)` derives the same set from the same matrix and is what the
+assignment control offers. In the canonical seed that is Morgan Reed and Avery
+Chen.
+
+### Reason
+The service took any string. Nothing stopped a conversation being assigned to
+the Fleet Coordinator, who cannot open the Inbox, or to an id belonging to no
+one. The record would then name an owner who could never act on it, and the
+list would show their name beside work they are unable to reach.
+
+Filtering the option list is not a fix. An option list is a convenience; the
+rule has to live where the write happens, or it holds only for as long as every
+future screen remembers to filter. That is the same argument `permissions.ts`
+makes for enforcing in the service rather than the sidebar, and this was the
+one Inbox write that had escaped it.
+
+The frozen contract does not define the assignable set. It lists `assign` among
+the Inbox operations and declares `assignedActorId`, and says nothing more, so
+this is a reconciliation rather than a change: the rule chosen is the one the
+permission matrix already implies.
+
+### Consequence
+Four refusals the domain now makes that it did not: an unknown actor, an
+inactive actor, an actor whose role cannot write Inbox, and a reassignment to
+the value already stored. The last is a conflict for the same reason closing an
+already-closed conversation is one.
+
+The audit entry names people rather than ids, which is what D-076 settles.
+
+---
+
+## D-076 - What the Inbox audits, and what it does not
+
+Status: Accepted
+Stage: 9C3.3
+
+### Decision
+```
+reply          audited   conversation.replied
+assignment     audited   conversation.assigned
+close, reopen  audited   conversation.closed / conversation.reopened
+read, unread   not audited
+```
+
+The reply entry says `Reply added to conversation` and carries no part of the
+message body. The assignment entry names both ends as people: `Conversation
+assigned to Avery Chen`, or `Conversation unassigned`, with the change recorded
+as display names rather than actor ids.
+
+### Reason
+The frozen contract says a reply "writes audit where appropriate" and never
+says what is appropriate. Its general rule is the one that decides this:
+meaningful business mutations are audited, and the things it lists as never
+audited are search, filter, drawer opened, chart hovered, page navigated, sort
+changed.
+
+Read state belongs with that second group. Marking a thread unread to come back
+to it is triage, not history: it records how someone is working their own list,
+not something that happened to the customer. Auditing it would bury the entries
+that matter under a stream of one person's housekeeping.
+
+Assignment is the opposite. It changes who owns the work, which is exactly the
+kind of thing someone asks about later, and it was writing nothing at all.
+
+A reply is audited because a message is a business record, but the body is not
+copied into the entry. The Message already holds the words; duplicating them
+would put a visitor's own typing into a second store, and an audit summary is
+meant to be read at a glance rather than to be a second transcript.
+
+Names rather than ids for the same reason: an audit line nobody can read is a
+line nobody reads.
+
+### Consequence
+Four `conversation.*` audit actions exist in code and none of them appear in
+the frozen spec, which names only the `conversation.message_added` domain
+event. The spec is amended to record the policy above rather than leaving four
+undocumented strings in the vocabulary.
+
+The seeded audit total stays 63. No seeded conversation carries an entry, so
+the Inbox's Activity is empty until someone acts, which is correct: nothing has
+happened to those threads yet.
+
+---
+
+## D-077 - The Inbox is a workspace, not a table
+
+Status: Accepted
+Stage: 9C3.3
+
+### Decision
+Inbox does not paginate, does not grow down the page, and does not reorder
+itself when a thread is read.
+
+- No pager. The canonical dataset is twenty conversations and the frozen
+  contract asks for none.
+- The module fills the height the shell leaves it, and the list, the transcript
+  and the context each scroll on their own.
+- The order is frozen: most recent message first, conversation id ascending to
+  break a tie.
+- The list preview is read from the latest Message, never stored on the
+  Conversation.
+
+### Reason
+Leads and Customers are tables: a person filters them, opens a record, and the
+page grows as the list does. An inbox is a list kept beside the thread being
+read, so both have to be on screen at once and neither can push the other off.
+That is a different layout problem, and solving it with the table pattern would
+have produced a page that scrolls the list away from the transcript it belongs
+to.
+
+A pager under a list that never fills one page is furniture. It costs a control,
+a row of chrome and a reader's attention, and it would never move.
+
+Unread does not sort first because a list that reorders on read moves the row
+out from under the person who just clicked it. Sorting by activity means the
+order answers "what moved most recently", which is stable under triage.
+
+The preview is derived rather than stored because a stored copy is a second
+source of truth for the same sentence, and the two drift the first time a
+message is added by a path that forgets to update it. Rule 03 is exactly such
+a path.
+
+### Consequence
+`.demo-shell:has(.ops-inbox)` is pinned to `100dvh` so the leftover height is
+definite. Every other module keeps `min-height` and grows as before; the rule
+is scoped to the one module that needs it.
+
+`selectInboxList` does its own filtering rather than using the shared
+`queryList` matcher, because search spans message bodies and that matcher tests
+fields of one record.
+
+---
+
+## D-078 - A lead brief only where one can honestly be composed
+
+Status: Accepted
+Stage: 9C3.3
+
+### Decision
+```
+Lead conversation                    brief composed from that lead
+Customer conversation, converted     brief composed from its source lead,
+                                     titled "Lead origin brief"
+Customer conversation, established   no brief, and the absence is explained
+```
+
+An established customer gets their own context instead: status, segment,
+origin, and a line saying that they were not converted from a lead, so there is
+no brief to compose.
+
+### Reason
+The frozen contract says the Inbox shows the Lead Brief "for lead and customer
+conversations". That cannot be true of every customer. The brief is composed by
+rule from a lead's stage, priority, vehicle interest, conversation state and
+next follow-up, and twenty-six of the thirty-two seeded customers were never
+leads. Seven of the nine seeded customer conversations reach no lead at all.
+
+There were three options. Compose a different brief for a customer, which the
+contract does not define and which would need a second rule set nobody asked
+for. Show a blank panel, which reads as something that failed to load. Or
+invent a stage and a vehicle interest for someone who never had either.
+
+The third is fabrication, and it is the specific kind this portfolio refuses:
+a synthetic demonstration may use synthetic data, but it must not present a
+derived claim it cannot derive. So the panel says nothing, and says why.
+
+### Consequence
+The frozen wording is amended rather than quietly reinterpreted.
+
+The brief recomputes from current records on every read, and the conversations
+it considers are the lead's own threads plus the thread being read. That second
+clause is what `getLeadBrief` cannot express and what a customer conversation
+needs: without it, replying in a converted customer's thread would leave the
+recommended action unchanged, which the frozen W5 workflow explicitly requires
+it not to do.
+
+Two threads can therefore describe the same lead: a converted customer's, and
+the lead's own. They read the same lead and differ only in which conversation
+each includes, which is correct rather than a collision.
+
+---
+
+## D-079 - Unread is said three ways
+
+Status: Accepted
+Stage: 9C3.3
+
+### Decision
+An unread conversation row carries heavier subject text, a small indicator dot,
+and the word "unread" in its accessible name. Status is a pill carrying its own
+label rather than a colour.
+
+### Reason
+Unread is the single most consequential piece of state in the list: it is what
+decides where someone looks first. A cue only one kind of reader receives is a
+cue the others work without.
+
+Weight survives greyscale, a dot survives a colour vision difference, and the
+word survives having no visual channel at all. None of the three is decorative
+and none is sufficient alone.
+
+### Consequence
+The list stays quiet: no accent colour, no badge, no count bubble. The dot is
+7px and the weight step is one, which is enough to scan and not enough to shout.
+
+Closed threads are marked the same restrained way and stay in the list. Hiding
+them by default would make the status filter's Closed option look broken and
+would lose a thread the moment someone finished with it.
+
+---
+
+## D-080 - The composer is a work surface, not a messenger
+
+Status: Accepted
+Stage: 9C3.3
+
+### Decision
+A labelled textarea and a Send reply button. Enter inserts a newline. There is
+no recipient field, no channel address, no attachment, no formatting, no emoji
+picker and no send-on-Enter shortcut. The textarea grows to a bounded maximum.
+
+### Reason
+Every one of those omissions is the same omission. A reply appends a record to
+a local store; nothing leaves the browser, so a recipient field would be asking
+for something the product has no use for, and an address field would be a
+contact route, which this portfolio does not have anywhere.
+
+Enter sends is a messenger convention that suits a fast back-and-forth. This is
+a work surface where an operational reply is composed, read back and then sent,
+and a reply dispatched by a stray Return keypress cannot be recalled. The
+explicit button is the whole affordance; a documented Ctrl+Enter would be one
+more thing to explain for no gain.
+
+The growth cap exists because a long reply on a phone would otherwise push Send
+below the fold, leaving the visitor with typing they cannot submit.
+
+### Consequence
+The draft is cleared when the selected conversation changes, so words typed for
+one thread do not follow the visitor into the next.
+
+The button says "Send reply" and nothing afterwards claims delivery. No sent
+receipt, no delivered marker, no provider status: none of them would be true.
+
+---
+
+## D-081 - The transcript is a record, not a feed
+
+Status: Accepted
+Stage: 9C3.3
+
+### Decision
+The message history is an ordered list, not a live region. A reply is announced
+once through the module's single polite status line. Every message names a
+person: a Customer message speaks as the conversation's subject, a Staff
+message resolves its actor id to that actor's name, and a System message is a
+neutral centred note with no author at all. The history is scrolled to the
+newest message outright, with no animation.
+
+### Reason
+Marking the transcript live would re-read the entire history to a screen reader
+every time anything in it changed, which is unusable the moment a thread has
+more than a few messages. One short announcement says what happened; the
+transcript stays a document the reader can navigate at their own pace.
+
+Displaying a raw `actor_0002` at a person is a storage detail leaking into the
+interface. Resolving it costs one lookup the selector already performs.
+
+A System message is not a participant. Rules are how the application works, and
+dressing one as a chat partner would misrepresent both the message and the
+system that wrote it. It gets a dashed neutral note instead of a bubble.
+
+The scroll is set rather than animated because a scroll that has to be told to
+respect reduced motion is a scroll that never needed to move smoothly.
+
+### Consequence
+Message bodies render as plain text with line breaks preserved. Nothing is
+linkified, no markup is interpreted, and `dangerouslySetInnerHTML` appears
+nowhere: what someone typed is displayed as typed, which is both the safe
+behaviour and the honest one.
+
+---
+
+## D-082 - The three-panel width, measured
+
+Status: Accepted
+Stage: 9C3.3
+
+### Decision
+Three panels from 1400px. Between 1180 and 1399, and on a tablet, the layout is
+the list and the thread with the context one tap away behind a disclosure.
+
+### Reason
+A 1180 viewport does not give a three-panel inbox 1180 pixels. The sidebar
+appears at exactly that width and takes 240 of them, the content padding takes
+40 more and the scrollbar another 15, so the module is handed 885. Measured, the
+transcript came out 221 pixels wide: narrower than a single message in it.
+
+The guidance for this stage named 1180 and said to tune from measured
+rendering. This is that tuning. The thread only clears 440 pixels once the
+sidebar is paid for, which happens at 1400.
+
+The context becomes a disclosure rather than a fourth overlay because the page
+already stacks a notification panel, a mobile navigation drawer, the filter
+sheet and the select menus. One more layer is one more stacking order to get
+wrong, and a disclosure needs none.
+
+### Consequence
+Measured at every viewport from 1920 down to 360, the transcript is the widest
+panel wherever it is on screen, and no viewport overflows horizontally.
+
+Below 900px the list gives ground first, dropping to 240-272px, because a
+preview line tolerates being short and a message does not.
+
+---
+
+## D-083 - On a phone the Inbox shows one thing at a time
+
+Status: Accepted
+Stage: 9C3.3
+
+### Decision
+Below 768px the conversation list is the whole screen. Selecting a conversation
+replaces it with the thread; there is no empty thread panel underneath the list
+and no third column. The selection lives in the URL, so browser Back closes the
+thread before it leaves the module.
+
+### Reason
+Three columns at 360px would be three unusable columns. A list and a thread
+side by side would be two.
+
+Putting the state in the URL rather than in a component means the platform's own
+Back gesture does the obvious thing without the module implementing a history
+stack, and it is the same contract Leads and Customers already use for their
+drawers. The on-screen Back control and the browser's agree because both go
+through the same navigation.
+
+### Consequence
+The thread carries its own Back control on a phone and none on a desktop, where
+the list never went away.
+
+The actions recompose into stacked rows rather than one horizontal strip, and
+the assignment menu keeps the approved portal behaviour, so it stays on screen
+inside a 360px thread.
+
+---
+
+## D-084 - The CRM modules link to each other
+
+Status: Accepted
+Stage: 9C3.3
+
+### Decision
+With Leads, Customers and Inbox all built, every relationship the domain holds
+is navigable:
+
+```
+Inbox thread        Open lead / Open customer      by subject type
+Lead brief          Open conversation              when the lead has a thread
+Lead overview       Open customer                  when the lead was converted
+Customer drawer     Open conversation              one row per thread
+Customer drawer     Open lead                      the origin, from 09C3.2
+Inbox context       Open lead                      a converted customer's origin
+```
+
+Each link is gated on the role being able to open the target module.
+
+### Reason
+Three modules that each know about the other two, and no way to walk between
+them, is three lists rather than a product. The relationships were already
+derived and displayed as counts and names; what was missing was the last step
+from naming a record to opening it.
+
+The additions are deliberately small and go where the relationship is already
+mentioned. The lead brief already talks about the conversation, so the link to
+it belongs there rather than in a new section. The customer drawer already
+counts conversations, so each counted thread becomes a row that opens.
+Neither approved drawer is redesigned.
+
+`Open customer` in the lead drawer replaces a bare id that carried a comment
+saying Customers did not exist yet. It does now, and the comment was the only
+thing keeping the id unlinked.
+
+### Consequence
+Every link is checked twice: the module must be built, and the role must be
+able to view it. A Fleet Coordinator reading a lead sees no way into a
+conversation, because they cannot open one.
+
+Links to unbuilt modules still do not exist. Reservations, Contracts, Fleet,
+Maintenance, Payments and Reports are named where they are relevant and are not
+clickable until their own stages build them.
+
+---
+
+## D-085 - A notification opens its source where the module exists
+
+Status: Accepted
+Stage: 9C3.3
+
+### Decision
+A notification carrying a `sourceEntityType` of `lead`, `customer` or
+`conversation` renders a link to that record, provided the current role can
+open the owning module. Every other source type renders as it did: named, not
+linked.
+
+### Reason
+The notification centre has stored a correct `sourceEntityId` since 09C2 and
+has never used it, because the modules those ids pointed at did not exist and a
+link to a 404 is worse than no link. Three of them exist now.
+
+The table is keyed by the type the services already store, so a type's absence
+from it is not a bug: it means that module is unbuilt, and adding the row is
+part of building it.
+
+The role check is made at the link rather than trusted from upstream. A role
+that cannot see a category never receives its notifications at all, so the
+check is redundant today; it is made anyway, because a link is a way in and a
+way in is the thing worth checking twice.
+
+### Consequence
+Six seeded CRM notifications point at leads and become navigable. The
+Reservation, Finance, Maintenance and Automation notifications stay unlinked,
+which is sixteen of the twenty-two, and each becomes navigable as its own stage
+lands.

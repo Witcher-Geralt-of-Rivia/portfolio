@@ -1305,3 +1305,83 @@ because Customers is now interactive. Full regression is green.
 Eight module screens. `#work` is untouched, the registry still reads
 `operations = building`, and `currentStage` stays 8. Stage 09C3.3 is blocked
 until the deployed screen has been reviewed live.
+
+---
+
+## Stage 09C3.3 - Operations Inbox and the CRM Workflow
+
+Status: **Complete**
+
+### Summary
+The third module that writes, and the one that joins the other two. A
+conversation is always about a lead or a customer, so the Inbox is where the
+CRM stops being three lists and becomes one product: 20 conversations, 64
+messages, search over subject names and message bodies, three filters, a
+transcript, a local reply, assignment, read state, close and reopen, and the
+subject's own context beside it.
+
+Stage 09C3 is complete. Leads, Customers and Inbox are all built.
+
+### The shape is different because the work is
+
+Leads and Customers are tables. An inbox is a list kept beside the thread being
+read, so both are on screen and each scrolls on its own. No drawer, no
+pagination, and a module that fills the height the shell leaves it rather than
+growing down the page (D-077).
+
+The three-panel width was measured rather than assumed. A 1180 viewport does
+not give a three-panel inbox 1180 pixels: the sidebar appears at exactly that
+width and takes 240, and the transcript came out 221 wide. Three panels start
+at 1400; from 1180 down it is list and thread with the context behind a
+disclosure; below 768 it is one thing at a time (D-082, D-083).
+
+### Two domain gaps, found before the UI
+
+Assignment took any string, so a conversation could be assigned to the Fleet
+Coordinator, who cannot open the Inbox, or to an id belonging to nobody. It now
+accepts null or an active actor whose role writes Inbox, and refuses the rest
+through the typed error contract (D-075).
+
+Assignment and replies wrote no audit at all. The frozen contract said a reply
+"writes audit where appropriate" and never said what was appropriate, so this
+stage settled it: replies and assignments are audited, read and unread are not,
+because marking a thread unread to come back to it is triage rather than
+history. The reply entry carries no part of the message body (D-076).
+
+`addSystemMessage` was deleted. Its comment claimed Rule 03 used it; Rule 03
+has always done its own commit, and the function had no callers anywhere.
+
+### The assist reconciliation
+
+The frozen contract said the Inbox shows the Lead Brief for lead and customer
+conversations. It cannot: a brief is composed from a lead's stage, priority,
+vehicle interest and follow-up, and twenty-six of the thirty-two seeded
+customers were never leads. Seven of the nine seeded customer conversations
+reach no lead at all.
+
+So a lead conversation gets a brief from its lead, a converted customer gets
+one from its source lead, and an established customer gets none, with a line
+saying why. Nothing is invented for someone who never had a stage (D-078). The
+frozen wording is amended rather than quietly reinterpreted.
+
+### The CRM joins up
+
+Inbox opens the lead or customer behind a thread. A lead brief opens the
+conversation it talks about. A converted lead opens its customer, which was a
+bare id until Customers existed. A customer drawer opens each of its
+conversations and its origin lead. Notifications whose source is a lead, a
+customer or a conversation now open it (D-084, D-085).
+
+### QA
+
+`qa/stage09c33-inbox.mjs`. The domain half measures the seeded distribution,
+proves the audit policy and every assignment refusal, and drives Rule 03 end to
+end: confirming a reservation through the real service appends a System message
+to the customer's conversation and marks it unread, which proves the automation
+without building Reservations early.
+
+### Not done
+
+Seven module screens. `#work` is untouched, the registry still reads
+`operations = building`, and `currentStage` stays 8. Stage 09C4 is blocked
+until the deployed screen has been reviewed live.

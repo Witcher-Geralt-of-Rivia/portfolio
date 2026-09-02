@@ -27,6 +27,7 @@ src/
         page.tsx            "/demos/operations"  Overview
         leads/page.tsx      "/demos/operations/leads"  CRM pipeline
         customers/page.tsx  "/demos/operations/customers"  customer records
+        inbox/page.tsx      "/demos/operations/inbox"  conversations
     specimen/
       page.tsx              "/specimen"  Stage 02 typography specimen
       page.css

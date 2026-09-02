@@ -2500,3 +2500,645 @@
   font-family: var(--font-mono);
   font-size: 11px;
 }
+
+/* =====================================================================
+   INBOX (Stage 09C3.3)
+   ===================================================================== */
+
+/**
+ * The one module that fills its pane instead of growing down the page.
+ *
+ * Leads and Customers are tables: they get longer, the page scrolls, and that
+ * is right. An inbox is a list you keep beside the thread you are reading, so
+ * the two have to be on screen together and each has to scroll on its own.
+ * That means the module owns the height the shell leaves it, which is what
+ * these first three rules arrange (D-077).
+ */
+/* `min-height: 100dvh` on the shell is a floor, not a height, so every
+   ancestor grows to its content and a panel told to scroll internally has
+   nothing to scroll against. Pinning the shell to the viewport for this one
+   module is what makes the leftover height definite; every other module keeps
+   the floor and grows down the page as before. */
+.demo-shell:has(.ops-inbox) {
+  height: 100dvh;
+}
+
+.demo-shell:has(.ops-inbox) .ops-app__main {
+  min-height: 0;
+}
+
+.ops-content:has(.ops-inbox) {
+  display: flex;
+  overflow: hidden;
+  padding-bottom: 20px;
+}
+
+.ops-content:has(.ops-inbox) .ops-content__inner {
+  display: flex;
+  width: 100%;
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
+.ops-inbox {
+  display: grid;
+  width: 100%;
+  min-height: 0;
+  gap: 14px;
+  /* Measured rather than assumed: the sidebar takes 240px, so a 1440 screen
+     leaves 1145 for the module. These bounds give the transcript the largest
+     share of it at every width from 1180 up, which is what makes the thread
+     the focus rather than the middle of three equal strips. */
+  grid-template-columns: minmax(300px, 330px) minmax(0, 1fr) minmax(280px, 306px);
+}
+
+.ops-inbox__panel {
+  display: flex;
+  min-height: 0;
+  min-width: 0;
+  flex-direction: column;
+  border: 1px solid var(--ops-line);
+  border-radius: 14px;
+  background: var(--ops-surface);
+  overflow: hidden;
+}
+
+.ops-inbox__panel--list {
+  gap: 0;
+}
+
+.ops-inbox__toolbar {
+  padding: 12px 12px 10px;
+  border-bottom: 1px solid var(--ops-line-soft);
+  background: var(--ops-surface-quiet);
+}
+
+/* --- the conversation list -------------------------------------------- */
+
+.ops-inbox__list {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  list-style: none;
+  margin: 0;
+  padding: 6px;
+  gap: 4px;
+  overflow-y: auto;
+}
+
+.ops-convo {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 5px;
+  padding: 10px 11px 11px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.ops-convo:hover {
+  background: var(--ops-surface-quiet);
+}
+
+.ops-convo:focus-visible {
+  outline: 2px solid var(--ops-sky);
+  outline-offset: -2px;
+}
+
+.ops-convo--selected {
+  border-color: var(--ops-line);
+  background: var(--ops-sky-soft);
+}
+
+.ops-convo__top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ops-convo__subject {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  color: var(--ops-ink);
+  font-size: 13.5px;
+  overflow-wrap: anywhere;
+}
+
+/* Unread says so three ways: weight here, the dot beside it, and the word in
+   the accessible name. Colour alone would reach neither a reader who cannot
+   see it nor one who cannot distinguish it (D-079). */
+.ops-convo--unread .ops-convo__subject {
+  font-weight: var(--weight-ui, 600);
+}
+
+.ops-convo__dot {
+  width: 7px;
+  height: 7px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--ops-sky-strong);
+}
+
+.ops-convo__time {
+  flex: none;
+  color: var(--ops-ink-3);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  white-space: nowrap;
+}
+
+.ops-convo__preview {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  color: var(--ops-ink-2);
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.ops-convo__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+}
+
+.ops-convo__facts,
+.ops-convo__owner {
+  color: var(--ops-ink-3);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+}
+
+.ops-convo__owner {
+  margin-left: auto;
+}
+
+/* --- the thread -------------------------------------------------------- */
+
+.ops-thread {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+
+.ops-thread--empty {
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 30px 24px;
+  text-align: center;
+}
+
+.ops-thread__placeholder {
+  max-width: 42ch;
+  color: var(--ops-ink-3);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.ops-thread__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px 14px;
+  padding: 13px 15px 12px;
+  border-bottom: 1px solid var(--ops-line-soft);
+  background: var(--ops-surface-quiet);
+}
+
+.ops-thread__identity {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 240px;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.ops-thread__back {
+  display: none;
+  align-items: center;
+  gap: 5px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ops-ink-2);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.ops-thread__back:focus-visible {
+  outline: 2px solid var(--ops-sky);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.ops-thread__title {
+  margin: 0;
+  color: var(--ops-ink);
+  font-size: 16px;
+  font-weight: var(--weight-ui, 600);
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.ops-thread__title:focus-visible {
+  outline: 2px solid var(--ops-sky);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.ops-thread__marks {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+}
+
+.ops-thread__fact {
+  color: var(--ops-ink-2);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.03em;
+}
+
+.ops-thread__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.ops-thread__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ops-thread__alert {
+  margin: 10px 15px 0;
+}
+
+/* --- the transcript ---------------------------------------------------- */
+
+.ops-thread__history {
+  min-height: 0;
+  flex: 1 1 auto;
+  padding: 14px 15px;
+  overflow-y: auto;
+}
+
+.ops-messages {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/**
+ * An operations transcript, not a messenger.
+ *
+ * Customer and staff are distinguished because who spoke changes what the
+ * line means. A System note is neither, so it is neutral and centred: a rule
+ * is not a person and should not be dressed as one (D-081).
+ */
+.ops-message {
+  display: flex;
+  max-width: 82%;
+  flex-direction: column;
+  gap: 4px;
+  padding: 9px 12px 10px;
+  border: 1px solid var(--ops-line-soft);
+  border-radius: 12px;
+}
+
+.ops-message--customer {
+  align-self: flex-start;
+  border-bottom-left-radius: 5px;
+  background: var(--ops-surface-quiet);
+}
+
+.ops-message--staff {
+  align-self: flex-end;
+  border-bottom-right-radius: 5px;
+  border-color: rgba(115, 168, 235, 0.28);
+  background: var(--ops-sky-soft);
+}
+
+.ops-message--system {
+  max-width: 100%;
+  align-self: center;
+  align-items: center;
+  border-style: dashed;
+  border-radius: 9px;
+  background: none;
+  text-align: center;
+}
+
+.ops-message__meta {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  color: var(--ops-ink-3);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.03em;
+}
+
+.ops-message__author {
+  color: var(--ops-ink-2);
+}
+
+.ops-message__body {
+  color: var(--ops-ink);
+  font-size: 13px;
+  line-height: 1.6;
+  /* Whatever was typed, shown as typed: line breaks kept, nothing linkified,
+     no markup interpreted. */
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* --- the composer ------------------------------------------------------ */
+
+.ops-composer {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 12px 15px 14px;
+  border-top: 1px solid var(--ops-line-soft);
+  background: var(--ops-surface-quiet);
+}
+
+.ops-composer__label {
+  color: var(--ops-ink-3);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Grows with the reply, then stops. A long message must never push Send off
+   the bottom of a phone (D-080). */
+.ops-composer__input {
+  max-height: 30vh;
+  min-height: 68px;
+}
+
+.ops-composer__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ops-composer__hint {
+  color: var(--ops-ink-3);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+}
+
+.ops-thread__closed {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 13px 15px 14px;
+  border-top: 1px solid var(--ops-line-soft);
+  background: var(--ops-surface-quiet);
+}
+
+.ops-thread__closed-text {
+  color: var(--ops-ink-2);
+  font-size: 12.5px;
+}
+
+/* --- the context panel -------------------------------------------------- */
+
+.ops-context {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 14px;
+  padding: 14px 15px 18px;
+  overflow-y: auto;
+}
+
+.ops-context--empty {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.ops-context__placeholder,
+.ops-context__note {
+  color: var(--ops-ink-3);
+  font-size: 12.5px;
+  line-height: 1.6;
+}
+
+.ops-context__section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ops-context__section + .ops-context__section {
+  padding-top: 13px;
+  border-top: 1px solid var(--ops-line-soft);
+}
+
+.ops-context__title {
+  margin: 0;
+  color: var(--ops-ink-3);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ops-context__name {
+  color: var(--ops-ink);
+  font-size: 14px;
+  font-weight: var(--weight-ui, 600);
+  overflow-wrap: anywhere;
+}
+
+.ops-context__origin {
+  color: var(--ops-ink-2);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.ops-context__brief .ops-brief__head {
+  margin-bottom: 0;
+}
+
+.ops-inbox__context-toggle {
+  display: none;
+  padding: 9px 14px;
+  border: 0;
+  border-top: 1px solid var(--ops-line-soft);
+  background: var(--ops-surface-quiet);
+  color: var(--ops-ink-2);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-align: left;
+}
+
+.ops-inbox__context-toggle:focus-visible {
+  outline: 2px solid var(--ops-sky);
+  outline-offset: -2px;
+}
+
+/* --- tablet: list and thread, context on request ------------------------ */
+
+/**
+ * The three-panel width, measured rather than assumed.
+ *
+ * A 1180 viewport does not give a three-panel inbox 1180 pixels. The sidebar
+ * appears at exactly that width and takes 240 of them, the content padding
+ * takes 40 more, and the scrollbar another 15, so the module is handed 885 and
+ * the transcript ends up 221 wide: narrower than a single message. Measured at
+ * every viewport, the thread only clears 440 once the sidebar is paid for,
+ * which happens at 1400.
+ *
+ * So three panels start at 1400 and the band from 1180 to 1399 gets the same
+ * list-and-thread layout as a tablet, with the context one tap away. The
+ * frozen guidance named 1180 and said to tune from measured rendering; this is
+ * that tuning (D-082).
+ */
+@media (max-width: 1399px) {
+  .ops-inbox {
+    grid-template-columns: minmax(280px, 320px) minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
+  }
+
+  /* Tablet portrait: 320 for the list leaves the transcript barely wider than
+     the list beside it. The list gives ground first, because a preview line
+     tolerates being short and a message does not. */
+  @media (max-width: 900px) {
+    .ops-inbox {
+      grid-template-columns: minmax(240px, 272px) minmax(0, 1fr);
+    }
+  }
+
+  .ops-inbox__panel--context {
+    display: none;
+  }
+
+  .ops-inbox--context-open .ops-inbox__panel--context {
+    display: flex;
+    max-height: 42vh;
+    grid-column: 1 / -1;
+  }
+
+  .ops-inbox--context-open {
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+
+  .ops-inbox__context-toggle {
+    display: block;
+  }
+}
+
+/* --- phone: one thing at a time ----------------------------------------- */
+
+@media (max-width: 767px) {
+  .ops-content:has(.ops-inbox) {
+    padding-bottom: 12px;
+  }
+
+  .ops-inbox {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* The list is the default view. Selecting a conversation replaces it with
+     the thread rather than squeezing both into 360 pixels, and the URL is
+     what decides, so browser Back closes the thread (D-083). */
+  .ops-inbox[data-selected="true"] .ops-inbox__panel--list {
+    display: none;
+  }
+
+  .ops-inbox:not([data-selected="true"]) .ops-inbox__panel--thread {
+    display: none;
+  }
+
+  .ops-inbox--context-open .ops-inbox__panel--context {
+    max-height: 50vh;
+  }
+
+  .ops-thread__back {
+    display: inline-flex;
+  }
+
+  .ops-thread__head {
+    padding: 11px 12px 12px;
+  }
+
+  .ops-thread__actions {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .ops-thread__buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .ops-thread__buttons .ops-button {
+    justify-content: center;
+  }
+
+  .ops-thread__history {
+    padding: 12px;
+  }
+
+  .ops-message {
+    max-width: 92%;
+  }
+
+  .ops-composer {
+    padding: 10px 12px 12px;
+  }
+
+  .ops-composer__input {
+    max-height: 26vh;
+  }
+
+  .ops-inbox__list {
+    padding: 5px;
+  }
+}
+
+/* The way into a notification's source record, added in 09C3.3. Quiet: the
+   item's own text is what a visitor reads first, and the link is what they
+   reach for second. */
+.ops-notify__source {
+  margin-top: 6px;
+  font-size: 11.5px;
+}

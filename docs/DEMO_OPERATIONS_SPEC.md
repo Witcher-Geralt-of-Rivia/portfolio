@@ -12,11 +12,17 @@ Platform-level architecture lives in `docs/DEMO_PLATFORM.md`. This document
 covers only what the Operations domain adds on top.
 
 ```
-STATUS          SPEC FROZEN / DOMAIN BUILT / UI NOT BUILT
-STAGE           09B froze this contract; 09C1 built the domain beneath it
+STATUS          SPEC FROZEN / DOMAIN BUILT / CRM SCREENS BUILT
+STAGE           09B froze this contract; 09C1 built the domain, 09C2 the shell
+                and Overview, 09C3 the three CRM modules
 REGISTRY        operations = building
-ROUTE           /demos/operations   not a public route yet
+ROUTE           /demos/operations, /leads, /customers and /inbox are deployed
+                for review; noindex, linked from nowhere
 ```
+
+Three clauses have been amended since freezing, each on an explicit
+instruction and each recorded in `docs/DECISIONS.md`. They are marked
+**AMENDED** where they appear.
 
 ## 1. Product identity
 
@@ -532,7 +538,24 @@ Failed    the action could not complete; the UI must explain why
 One provider-neutral deterministic assistance feature: **Lead Brief**. It is
 not a chatbot, has no input field, and makes no network request.
 
-Shown in Lead detail and in Inbox for lead and customer conversations, marked:
+**AMENDED (09C3.3, D-078).** Shown in Lead detail, and in Inbox wherever a
+lead can actually be reached:
+
+```
+Lead conversation                    brief composed from that lead
+Customer conversation, converted     brief composed from its source lead,
+                                     titled "Lead origin brief"
+Customer conversation, established   no brief
+```
+
+The original wording said "for lead and customer conversations", which cannot
+hold: a brief is composed from a lead's stage, priority, vehicle interest and
+follow-up, and twenty-six of the thirty-two seeded customers were never leads.
+Seven of the nine seeded customer conversations reach no lead at all. An
+established customer gets their own context and a line saying why there is no
+brief, rather than a blank panel or an invented stage.
+
+Where a brief is shown it is marked:
 
 ```
 ASSIST / LOCAL
@@ -714,10 +737,33 @@ open · mark read/unread · assign · send reply · close/reopen
 ```
 
 A reply creates a Message, updates the conversation, marks it read and writes
-audit where appropriate. There is no network call and no recipient address.
+audit. There is no network call and no recipient address.
 
-Lead and customer conversations show the Lead Brief and recommended next action
-from §9.
+**AMENDED (09C3.3, D-076).** "Where appropriate" is settled as:
+
+```
+reply          audited   conversation.replied     the summary carries no body
+assignment     audited   conversation.assigned    both ends named as people
+close, reopen  audited   conversation.closed / conversation.reopened
+read, unread   not audited
+```
+
+Read state is triage rather than business history, and belongs with the acts
+§7 already declines to audit. Assignment changes who owns the work and is
+audited for that reason. A reply is audited without copying the message body:
+the Message is the record of the words.
+
+**AMENDED (09C3.3, D-075).** An assignee must be null, or an active Actor whose
+role has write access to Inbox. In the canonical roster that is Morgan Reed and
+Avery Chen. Anything else is refused: an unknown id is VALIDATION, an inactive
+or wrong-role actor is CONFLICT. The frozen contract listed `assign` without
+defining the assignable set; this is the rule the permission matrix implies.
+
+There is no pagination. The dataset is twenty conversations and the list scrolls
+(D-077).
+
+Conversations show the Lead Brief and recommended next action from §9, on the
+terms §9 states.
 
 ### Reports
 

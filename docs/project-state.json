@@ -3,8 +3,8 @@
   "purpose": "Demonstrate engineering capability to freelance clients. Technical portfolio, not a personal site.",
   "currentStage": 8,
   "stage05Started": true,
-  "nextStage": "stage-09c3-3",
-  "nextStageTitle": "Stage 09C3.3 - Operations CRM: Inbox + integrated CRM workflow (BLOCKED UNTIL EXTERNAL LIVE REVIEW OF STAGE 09C3.2)",
+  "nextStage": "stage-09c4",
+  "nextStageTitle": "Stage 09C4 - Rental Operations: Reservations + Contracts + Fleet + Maintenance + Payments (BLOCKED UNTIL EXTERNAL LIVE REVIEW OF INBOX / CRM INTEGRATION)",
   "frozenStages": [
     1,
     2,
@@ -107,7 +107,13 @@
       "src/demos/operations/ui/customers/CustomersMobileList.tsx",
       "src/demos/operations/ui/customers/CustomerDetail.tsx",
       "src/demos/operations/ui/customers/CustomerForm.tsx",
-      "src/demos/operations/ui/customers/CustomerConfirm.tsx"
+      "src/demos/operations/ui/customers/CustomerConfirm.tsx",
+      "src/demos/operations/ui/inbox/InboxScreen.tsx",
+      "src/demos/operations/ui/inbox/InboxToolbar.tsx",
+      "src/demos/operations/ui/inbox/ConversationList.tsx",
+      "src/demos/operations/ui/inbox/ConversationThread.tsx",
+      "src/demos/operations/ui/inbox/ConversationContext.tsx",
+      "src/demos/operations/ui/inbox/ReplyComposer.tsx"
     ]
   },
   "routes": [
@@ -115,7 +121,8 @@
     "/specimen",
     "/demos/operations",
     "/demos/operations/leads",
-    "/demos/operations/customers"
+    "/demos/operations/customers",
+    "/demos/operations/inbox"
   ],
   "navigationDestinations": [
     "Systems",
@@ -210,7 +217,7 @@
   "stage08Started": true,
   "stage09aComplete": true,
   "demoPlatform": {
-    "status": "09A foundation + Operations domain, shell, Overview, Leads and Customers; eight modules unbuilt",
+    "status": "09A foundation + Operations domain, shell, Overview and the three CRM modules; seven modules unbuilt",
     "routes": [
       "/demos/operations",
       "/demos/field",
@@ -238,7 +245,7 @@
     "disclosure": "INTERACTIVE ENGINEERING DEMO / SYNTHETIC DATA - FRONTEND ONLY",
     "operationsSpec": "frozen; docs/DEMO_OPERATIONS_SPEC.md",
     "operationsDomain": "built; docs/DEMO_OPERATIONS_IMPLEMENTATION.md",
-    "operationsReview": "Customers deployed for external live review; 09C3.3 blocked until reviewed"
+    "operationsReview": "Inbox and the integrated CRM workflow deployed for external live review; 09C4 blocked until reviewed"
   },
   "stage09bComplete": true,
   "stage09c1Complete": true,
@@ -260,5 +267,7 @@
     "emDash": "banned in all project-authored content",
     "guard": "npm run qa:style"
   },
-  "stage09c32Complete": true
+  "stage09c32Complete": true,
+  "stage09c33Complete": true,
+  "stage09c3Complete": true
 }

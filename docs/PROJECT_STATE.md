@@ -11,16 +11,16 @@ Everything below was read from the repository, not recalled from conversation.
 ```
 Stages 01-08   COMPLETE and FROZEN
 Deployment     LIVE at https://intelligent-systems-lab.duckdns.org
-Stage 09       IN PROGRESS - through 09C3.2, 0 of 3 demos built
-Demo 01        Overview + Leads + Customers DEPLOYED; 09C3.3 blocked on live review
+Stage 09       IN PROGRESS - through 09C3, 0 of 3 demos built
+Demo 01        Overview + the three CRM modules DEPLOYED; 09C4 blocked on review
 ```
 
 Stage 09 changed direction: `#work` becomes a launcher into three interactive
 frontend-only product demos, not case studies. 09A froze the shared runtime;
 09B froze Demo 01's contract; 09C1 built its domain; 09C2 built the shell and
-Overview; 09C2.1 hardened both; 09C3.1 built Leads, 09C3.1.1/09C3.1.2
-hardened its controls, and 09C3.2 built Customers. Eight modules remain,
-`#work` is a placeholder,
+Overview; 09C2.1 hardened both; 09C3 built the three CRM modules, Leads,
+Customers and Inbox, with 09C3.1.1/09C3.1.2 hardening their controls. Seven
+modules remain, `#work` is a placeholder,
 and `currentStage` stays 8. See `docs/DEMO_OPERATIONS_IMPLEMENTATION.md` and
 `docs/NEXT_STAGE.md`. The case-study framework and its one verified internal
 case are preserved, unpublished; see `docs/CASE_STUDY_SOURCE_AUDIT.md`.
@@ -80,6 +80,7 @@ runs on a timer at rest.
 | `/demos/operations` | Demo 01 shell + Overview, `noindex`, unlinked | Static page, client subtree |
 | `/demos/operations/leads` | Demo 01 CRM pipeline, `noindex`, unlinked | Static page, client subtree |
 | `/demos/operations/customers` | Demo 01 customer records, `noindex`, unlinked | Static page, client subtree |
+| `/demos/operations/inbox` | Demo 01 conversations, `noindex`, unlinked | Static page, client subtree |
 
 Section ids on `/`: `hero`, `systems`, `products`, `ai-learning`, `lab`, `work`.
 `#systems` (05), `#products` (06), `#ai-learning` (07) and `#lab` (08) are real
@@ -102,8 +103,7 @@ src/
     layout/SiteShell.tsx
     visual/{AuroraBackground,PrismLight,GrainOverlay}.tsx
     navigation/SiteNavigation.tsx      "use client"
-    navigation/{DesktopNavigation,MobileNavigation,SystemMarkImage}.tsx
-    navigation/nav-items.ts
+    navigation/{DesktopNavigation,MobileNavigation,SystemMarkImage}.tsx, items
     hero/{Hero,IntelligenceConstellation,CapabilityRail}.tsx, geometry
     (each capability section below has the same shape: a server section
      shell, one "use client" lab holding the state, one "use client" ARIA
@@ -122,8 +122,8 @@ src/
   content/case-studies.ts   typed case-study model + render-safety filter
   demos/operations/         Stage 09C1 domain (21 modules) + ui/ (shell,
                 sidebar, top bar, Overview panels, notifications, icons,
-                module routes, leads/, customers/). Overview, Leads and
-                Customers are built; eight modules unbuilt.
+                module routes, leads/, customers/, inbox/). Overview and the
+                three CRM modules are built; seven modules unbuilt.
   demo-runtime/             Stage 09A - shared demo platform (18 modules):
                 types, config, demo-registry, clock, ids, repository,
                 async-service, events, audit, jobs, session, connectivity,

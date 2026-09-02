@@ -13,8 +13,9 @@
 import type { DemoRecord } from "@/demo-runtime/types";
 
 import { C, P } from "../constants";
-import { requireWrite } from "../permissions";
+import { canWriteModule, requireWrite } from "../permissions";
 import type {
+  Actor,
   Conversation,
   Lead,
   LeadBrief,
@@ -60,6 +61,20 @@ export async function addMessage(
       ops: [
         { kind: "put", record: message },
         { kind: "put", record: updated },
+        {
+          kind: "audit",
+          entry: {
+            actor: m.actor,
+            action: "conversation.replied",
+            collection: C.conversations,
+            entityId: conversationId,
+            /* That a reply happened, not what it said. The Message is the
+               record of the words; copying them into the audit trail would
+               duplicate the content and put a visitor's own typing into a
+               second store for no benefit (D-076). */
+            summary: "Reply added to conversation",
+          },
+        },
       ],
       events: [
         {
@@ -76,38 +91,14 @@ export async function addMessage(
   return result.data;
 }
 
-/** Used by Rule 03. Appends a System message without a staff actor. */
-export async function addSystemMessage(
-  ctx: OperationsContext,
-  conversationId: string,
-  body: string
-): Promise<DemoRecord<Message>> {
-  const conversation = await must.conversation(ctx, conversationId);
-  const result = await ctx.runtime.commit<DemoRecord<Message>>((m) => {
-    const id = m.nextId(C.messages, P.message);
-    const message = m.record<Message>(C.messages, id, {
-      conversationId,
-      authorType: "System",
-      body,
-      sentAt: m.now(),
-    });
-    const updated = m.record<Conversation>(
-      C.conversations,
-      conversationId,
-      { ...conversation.data, unread: true },
-      conversation
-    );
-    return {
-      ops: [
-        { kind: "put", record: message },
-        { kind: "put", record: updated },
-      ],
-      data: message,
-    };
-  });
-  return result.data;
-}
-
+/**
+ * Read and unread, deliberately unaudited.
+ *
+ * Triage state rather than business history: marking a thread unread to come
+ * back to it is the same class of act as opening a drawer, which the frozen
+ * contract lists among the things never audited. Assignment and replies are
+ * audited because they change who owns the work and what was said (D-076).
+ */
 async function setUnread(
   ctx: OperationsContext,
   conversationId: string,
@@ -132,6 +123,28 @@ export const markConversationRead = (ctx: OperationsContext, id: string) =>
 export const markConversationUnread = (ctx: OperationsContext, id: string) =>
   setUnread(ctx, id, true);
 
+/**
+ * The actors a conversation may be assigned to.
+ *
+ * Derived from the permission matrix rather than listed: an assignee owns
+ * Inbox work, so the only people who can hold it are active actors whose role
+ * writes Inbox. In the canonical seed that is Morgan Reed and Avery Chen; a
+ * Fleet Coordinator cannot be handed a conversation they are unable to open.
+ *
+ * Exported because the assignment control needs the same answer, but the rule
+ * lives in the service: an option list is a convenience, not an enforcement
+ * point, and a screen that forgot to filter must not be able to write an
+ * impossible owner (D-075).
+ */
+export async function inboxAssignees(
+  ctx: OperationsContext
+): Promise<DemoRecord<Actor>[]> {
+  const actors = await read.actors(ctx);
+  return actors
+    .filter((a) => a.data.active && canWriteModule(a.data.role, "Inbox"))
+    .sort((a, b) => a.id.localeCompare(b.id));
+}
+
 export async function assignConversation(
   ctx: OperationsContext,
   conversationId: string,
@@ -139,6 +152,36 @@ export async function assignConversation(
 ): Promise<DemoRecord<Conversation>> {
   requireWrite(ctx.session, "Inbox");
   const conversation = await must.conversation(ctx, conversationId);
+
+  /* Both ends of the change are resolved before anything is written, because
+     the audit entry names people rather than ids and an unknown id must be
+     refused rather than recorded. */
+  const actors = await read.actors(ctx);
+  const current = conversation.data.assignedActorId;
+  const previous = actors.find((a) => a.id === current) ?? null;
+
+  let next: DemoRecord<Actor> | null = null;
+  if (actorId !== null) {
+    next = actors.find((a) => a.id === actorId) ?? null;
+    if (!next) throw invalid("That person is not in this demo.", "assignedActorId");
+    if (!next.data.active) {
+      throw conflict("That person is no longer active and cannot take a conversation.", actorId);
+    }
+    if (!canWriteModule(next.data.role, "Inbox")) {
+      throw conflict(
+        `The ${next.data.role} role does not work in the Inbox and cannot be assigned a conversation.`,
+        actorId
+      );
+    }
+  }
+
+  if (current === actorId) {
+    throw conflict(
+      next ? `This conversation is already assigned to ${next.data.displayName}.` : "This conversation is already unassigned.",
+      conversationId
+    );
+  }
+
   const result = await ctx.runtime.commit<DemoRecord<Conversation>>((m) => {
     const record = m.record<Conversation>(
       C.conversations,
@@ -146,7 +189,34 @@ export async function assignConversation(
       { ...conversation.data, assignedActorId: actorId },
       conversation
     );
-    return { ops: [{ kind: "put", record }], data: record };
+    return {
+      ops: [
+        { kind: "put", record },
+        {
+          kind: "audit",
+          entry: {
+            actor: m.actor,
+            action: "conversation.assigned",
+            collection: C.conversations,
+            entityId: conversationId,
+            /* Ownership of operational work moved, which is the kind of
+               change someone later asks about. Names, not ids: an audit line
+               nobody can read is a line nobody reads (D-076). */
+            summary: next
+              ? `Conversation assigned to ${next.data.displayName}`
+              : "Conversation unassigned",
+            changes: [
+              {
+                field: "assignedActorId",
+                from: previous ? previous.data.displayName : null,
+                to: next ? next.data.displayName : null,
+              },
+            ],
+          },
+        },
+      ],
+      data: record,
+    };
   });
   return result.data;
 }
