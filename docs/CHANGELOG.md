@@ -1385,3 +1385,65 @@ without building Reservations early.
 Seven module screens. `#work` is untouched, the registry still reads
 `operations = building`, and `currentStage` stays 8. Stage 09C4 is blocked
 until the deployed screen has been reviewed live.
+
+---
+
+## Stage 09C3.3.1 - Inbox Viewport Containment
+
+Status: **Complete**
+
+### Summary
+The first external review of the Inbox rejected it. The application sat at the
+top of the page with a very large band of portfolio background beneath it: a
+1430x2751 document holding an 800px product.
+
+The suspected cause was the `height: 100dvh` the module puts on the demo shell
+so its panels can scroll internally. Measurement cleared that rule. The shell
+was 800 tall with a scrollHeight of 800, and every box beneath it was contained.
+
+The real cause is that `overflow` clips a descendant only when the descendant's
+containing block is inside the clipping box. `.visually-hidden` is
+`position: absolute`, nothing between a conversation row and `.site-main` was
+positioned, so twenty-four of those spans, including the ", unread" and ", read"
+text that gives the list its non-colour unread cue, resolved their containing
+block to `.site-main` and escaped every clip. They laid out at their static
+offsets, the last at y=2750, giving `body` 2751px of overflow (D-086).
+
+Nothing was visible there, and the document did not scroll. That is exactly why
+the suite missed it: it had no assertion on the height of the document and took
+only viewport screenshots, which cannot show a region below the viewport.
+
+### The fix
+
+`position: relative` on the five boxes that clip. No layout cost, no repaint,
+no `body { overflow: hidden }`, no clipping to shrink a number, no hard-coded
+heights.
+
+One regression came with it and the mobile section caught it: a positioned
+transcript paints above the static context toggle, so the button stopped taking
+clicks on a phone. Positioning the toggle restores DOM order as the tiebreak.
+
+### QA
+
+The Inbox suite now measures the document, captures a full page at eight
+viewports, samples the bottom of each capture for backdrop pixels, and asserts
+that no absolutely positioned descendant of the module resolves its containing
+block outside it. That last check states the rule rather than the symptom.
+
+```
+                    before      after
+body.scrollHeight     2751        800
+full-page capture 1430x2751  1430x800
+backdrop below      1951px        0px
+```
+
+Overview, Leads and Customers keep their page-growth behaviour, measured
+unchanged.
+
+### The second finding
+
+The review's screenshot also showed conversation previews reading "asdf". A
+fresh profile against production returns the canonical 20 conversations, 64
+messages, 6 unread, 13 Open and 7 Closed with none of that text, a test reply
+reproduces it, and Reset demo data clears it exactly. Browser-local mutations
+from the review session, not a persistence defect. No product logic changed.

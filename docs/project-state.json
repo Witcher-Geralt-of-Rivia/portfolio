@@ -245,7 +245,7 @@
     "disclosure": "INTERACTIVE ENGINEERING DEMO / SYNTHETIC DATA - FRONTEND ONLY",
     "operationsSpec": "frozen; docs/DEMO_OPERATIONS_SPEC.md",
     "operationsDomain": "built; docs/DEMO_OPERATIONS_IMPLEMENTATION.md",
-    "operationsReview": "Inbox and the integrated CRM workflow deployed for external live review; 09C4 blocked until reviewed"
+    "operationsReview": "Inbox viewport containment corrected after external review; 09C4 blocked until Inbox is reviewed again"
   },
   "stage09bComplete": true,
   "stage09c1Complete": true,
@@ -269,5 +269,6 @@
   },
   "stage09c32Complete": true,
   "stage09c33Complete": true,
-  "stage09c3Complete": true
+  "stage09c3Complete": true,
+  "stage09c331Complete": true
 }

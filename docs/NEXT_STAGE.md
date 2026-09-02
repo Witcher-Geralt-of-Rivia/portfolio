@@ -21,6 +21,7 @@ Stage 09                IN PROGRESS
       09C3.1.2 Custom select system    COMPLETE and deployed
       09C3.2 Customers COMPLETE and deployed
       09C3.3 Inbox + integrated CRM workflow  COMPLETE and deployed
+      09C3.3.1 Inbox viewport containment     COMPLETE and deployed
     09C4 Reservations/Contracts/Fleet/Maintenance/Payments  BLOCKED -
          awaiting external live review of 09C3.3
 ```
@@ -34,7 +35,10 @@ Stage 09C4 does not start until a human has looked at
 screen and said what they think of it: opening a thread, replying, switching
 the demo role, and walking the links out to Leads and Customers and back.
 
-This is deliberate, and four reviews have now earned it. Every defect 09C2.1
+This is deliberate, and five reviews have now earned it. The fifth rejected
+the Inbox outright: it rendered above 1951 pixels of portfolio background, and
+every one of the suite's checks passed while it did, because none of them
+measured the height of the document and none captured a full page. Every defect 09C2.1
 fixed was found by looking at rendered pixels, three of four while the QA suite
 passed. 09C3.1's review found two more. 09C3.1.1's found four presentation
 faults. 09C3.1.2 exists because a reviewer opened a dropdown, which no harness
@@ -67,7 +71,8 @@ green, and the work is ready to continue the moment the review comes back.
 15. Stage 09C3.1.2 - Custom select system       DONE
 16. Stage 09C3.2 - Customers                    DONE
 17. Stage 09C3.3 - Inbox + CRM workflow         DONE
-18. Stage 09C4 - Rental Operations modules      BLOCKED on live review
+18. Stage 09C3.3.1 - Inbox viewport containment DONE
+19. Stage 09C4 - Rental Operations modules      BLOCKED on live review
 18. Stage 09C4-C6 - modules, then QA/deploy     LATER
 13. Field and Learning specs, then builds       LATER
 14. Stage 09 - #work launcher integration       LATER

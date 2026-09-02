@@ -2567,3 +2567,70 @@ Six seeded CRM notifications point at leads and become navigable. The
 Reservation, Finance, Maintenance and Automation notifications stay unlinked,
 which is sixteen of the twenty-two, and each becomes navigable as its own stage
 lands.
+
+---
+
+## D-086 - A box that clips its overflow is also a containing block
+
+Status: Accepted
+Stage: 9C3.3.1
+
+### Decision
+Every box in the Inbox that clips its own overflow carries `position: relative`:
+the three panels, the conversation list, the transcript, the context column and
+the content wrapper. The module's QA measures the rendered document and a
+full-page capture, not a CSS string.
+
+### Reason
+The first external review of the Inbox rejected it: the application sat at the
+top of the page with a very large band of portfolio background beneath it. The
+suspected cause was `height: 100dvh` on the demo shell, added so the Inbox could
+scroll internally.
+
+Measurement cleared that rule. At an 800px viewport the shell was 800 tall with
+a `scrollHeight` of 800, and every box beneath it was correctly contained: demo
+surface 765, content 699 clipped, inbox 657. The break was one level higher,
+between `.demo-shell` at 800 and `.site-main` at 2751, its only child.
+
+`overflow` clips a descendant only when that descendant's containing block is
+inside the clipping box. `.visually-hidden` is `position: absolute`. Nothing
+between a conversation row and `.site-main` was positioned, so all twenty-four
+of those spans, including the `", unread"` and `", read"` text that gives the
+list its non-colour unread cue, resolved their containing block to `.site-main`
+and escaped every clip between. They laid out at their static offsets, the last
+at y=2750, which gave `body` 2751px of overflow the application never had.
+
+Nothing was visible there. The document did not scroll: `window.scrollTo(0,
+5000)` left `scrollY` at zero, and every row was clipped. That is exactly why
+nine hundred passing checks missed it. A full-page capture honours that
+overflow, so the review's screenshot was 1430x2751 with 1951 rows of flat
+`--background-base` under the product.
+
+Proven in the live DOM in both directions: setting `position: relative` on the
+scrolling list took `body.scrollHeight` from 2751 to 800, and reverting it put
+2751 back.
+
+### Consequence
+The fix is `position: relative` on five boxes. It costs no layout and no
+repaint; it makes the clip mean what it says.
+
+The Inbox suite now measures `body.scrollHeight` against
+`documentElement.clientHeight`, asserts a full-page capture equals the viewport,
+samples the bottom of that capture for backdrop pixels, and asserts that no
+absolutely positioned descendant of the module resolves its containing block
+outside it. That last one states the rule rather than the symptom, so a future
+escape fails on the cause.
+
+One regression came with the correction and was caught by the mobile section:
+making the transcript a positioned box put it above the context toggle, which
+is a static later sibling, and the button stopped taking clicks on a phone.
+Positioning the toggle as well restores DOM order as the tiebreak.
+
+The approved modules keep growing down the page. The correction is scoped by
+`:has(.ops-inbox)` to the one module that clips, and Overview, Leads and
+Customers were measured unchanged.
+
+The wider lesson is worth stating: a visually hidden element is still a laid-out
+box. The technique this project uses parks it one pixel wide at an absolute
+position, and an absolute position is only harmless while something nearby is
+its containing block.

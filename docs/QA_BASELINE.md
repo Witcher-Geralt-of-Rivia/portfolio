@@ -1726,3 +1726,68 @@ The 09C2 interactive-module assertion changed value again, as it does each time
 a module is built: `["Overview","Leads","Customers"]` became
 `["Overview","Leads","Customers","Inbox"]`. That check and the `implemented`
 flag behind it are deleted once all eleven modules exist.
+
+---
+
+## Stage 09C3.3.1 - Inbox Viewport Containment
+
+PASS. Harness: `qa/stage09c33-inbox.mjs`, extended with a CONTAINMENT section.
+
+### What the external review caught that the suite did not
+
+The Inbox rendered at the top of a 2751px document with 1951px of portfolio
+background beneath it. Every existing check passed while it did, because the
+document never scrolled and nothing was visible in that band: the suite had no
+assertion that measured the height of the document itself, and captured only
+viewport screenshots, which by definition cannot show a region below the
+viewport.
+
+### Root cause
+
+Not the suspected `height: 100dvh` on the demo shell. Measured, the shell was
+800 tall with a scrollHeight of 800 at an 800px viewport, and everything under
+it was contained. The break was between `.demo-shell` (800) and `.site-main`
+(2751), its only child.
+
+`overflow` clips a descendant only when the descendant's containing block is
+inside the clipping box. The twenty-four `position: absolute` `.visually-hidden`
+spans in the module resolved their containing block to `.site-main` and escaped
+every clip, laying out at their static offsets down to y=2750. See D-086.
+
+### New assertions
+
+```
+document        body.scrollHeight equals documentElement.clientHeight within 2px
+frame           site-main.scrollHeight equals it too
+application     the demo shell's bottom edge reaches the viewport bottom
+capture         a full-page screenshot equals the viewport, at eight viewports
+pixels          the bottom of that capture holds no run of backdrop colour
+scrolling       the conversation list still scrolls internally, so containment
+                was not bought by clipping the list
+rule            no absolutely positioned descendant of the Inbox resolves its
+                containing block outside the module
+states          no selection, lead thread, customer thread, closed thread
+scoping         Leads and Customers still grow with their content
+```
+
+Measured at 1920x1080, 1430x800, 1440x900, 1366x768, 1024x768, 768x1024,
+390x844 and 360x800.
+
+### What the correction itself broke, and the suite caught
+
+Making the transcript a positioned box put it above the context toggle, a
+static later sibling, and the button stopped accepting clicks at 390px. The
+mobile section failed on it. Positioning the toggle restores DOM order as the
+tiebreak.
+
+### Document metrics
+
+```
+                         before        after
+body.scrollHeight        2751          800
+documentElement.client    800          800
+overflow below viewport  1951            0
+full-page capture    1430x2751    1430x800
+backdrop pixels below     1951px         0px
+list height / content   414 / 2500   414 / 2500
+```

@@ -2528,6 +2528,7 @@
 }
 
 .ops-content:has(.ops-inbox) {
+  position: relative;
   display: flex;
   overflow: hidden;
   padding-bottom: 20px;
@@ -2540,7 +2541,14 @@
   flex: 1 1 auto;
 }
 
+/* The module is its own containing block, so its heading and its live region
+   resolve inside it rather than against the content wrapper. Both are
+   `.visually-hidden`, so both are absolutely positioned, and both are
+   currently harmless: they sit at the top and the wrapper clips. Containing
+   them anyway is what makes "nothing escapes this module" a rule the suite
+   can assert rather than a coincidence of where they happen to sit (D-086). */
 .ops-inbox {
+  position: relative;
   display: grid;
   width: 100%;
   min-height: 0;
@@ -2552,7 +2560,27 @@
   grid-template-columns: minmax(300px, 330px) minmax(0, 1fr) minmax(280px, 306px);
 }
 
+/**
+ * Every box that clips its overflow is also a containing block.
+ *
+ * `overflow` only clips a descendant whose containing block is inside the
+ * clipping box. `.visually-hidden` is `position: absolute`, and nothing
+ * between a conversation row and `.site-main` was positioned, so the twenty
+ * spans carrying ", unread" and ", read" resolved their containing block to
+ * `.site-main` and escaped the scroll box entirely. They laid out at their
+ * static offsets, the last at y=2750, which gave `body` 2751px of overflow
+ * that the application itself never had.
+ *
+ * Nothing was visible there: the document did not scroll and every row was
+ * clipped. But a full-page capture honours that overflow, so the external
+ * review's screenshot showed the product at the top of a 2751px page with
+ * 1951px of bare portfolio background beneath it.
+ *
+ * `position: relative` on each clipping box is the whole fix. It costs no
+ * layout and makes the clip mean what it says (D-086).
+ */
 .ops-inbox__panel {
+  position: relative;
   display: flex;
   min-height: 0;
   min-width: 0;
@@ -2576,6 +2604,7 @@
 /* --- the conversation list -------------------------------------------- */
 
 .ops-inbox__list {
+  position: relative;
   display: flex;
   min-height: 0;
   flex: 1 1 auto;
@@ -2796,6 +2825,7 @@
 /* --- the transcript ---------------------------------------------------- */
 
 .ops-thread__history {
+  position: relative;
   min-height: 0;
   flex: 1 1 auto;
   padding: 14px 15px;
@@ -2934,6 +2964,7 @@
 /* --- the context panel -------------------------------------------------- */
 
 .ops-context {
+  position: relative;
   display: flex;
   min-height: 0;
   flex: 1 1 auto;
@@ -2994,7 +3025,13 @@
   margin-bottom: 0;
 }
 
+/* Positioned so paint order follows the DOM again. The transcript above it
+   became a positioned box when the containing-block correction landed, which
+   put it over this button and made it unclickable on a phone. Both positioned
+   with an automatic z-index, the later sibling wins, which is the order the
+   markup already states. */
 .ops-inbox__context-toggle {
+  position: relative;
   display: none;
   padding: 9px 14px;
   border: 0;

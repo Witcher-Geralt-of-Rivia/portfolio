@@ -1823,6 +1823,202 @@ section("ACCESSIBILITY - OPERABLE WITHOUT A MOUSE");
   await ctx.close();
 }
 
+/* =====================================================================
+   11. VIEWPORT CONTAINMENT (09C3.3.1)
+
+   The regression the external review caught, asserted by measurement.
+
+   The Inbox is the first module that clips its own overflow, and clipping
+   turned out to be conditional: `overflow` only clips a descendant whose
+   containing block sits inside the clipping box. Twenty `.visually-hidden`
+   spans are `position: absolute`, nothing between them and `.site-main` was
+   positioned, so they escaped the scroll box, laid out at their static
+   offsets and gave `body` 2751px of overflow the application never had.
+
+   Nothing was visible there and the document did not scroll, which is why
+   every earlier check passed. A full-page capture honours that overflow, so
+   the review's screenshot showed the product above 1951px of bare portfolio
+   background.
+
+   These checks measure the rendered document and the captured image, never
+   a CSS string.
+   ===================================================================== */
+
+section("CONTAINMENT - THE APPLICATION OWNS EXACTLY ONE VIEWPORT");
+{
+  /* A full-page capture is the whole point: a viewport screenshot cannot
+     show a region below the viewport, which is where the defect lived. */
+  const { PNG } = await import("pngjs");
+  const fs = await import("node:fs");
+  const shotDir = "qa/shots/stage09c331";
+  fs.mkdirSync(shotDir, { recursive: true });
+
+  /** The portfolio's flat foundation colour, which must not appear. */
+  const BACKDROP = [247, 247, 251];
+  const isBackdrop = (r, g, b) =>
+    Math.abs(r - BACKDROP[0]) <= 2 && Math.abs(g - BACKDROP[1]) <= 2 && Math.abs(b - BACKDROP[2]) <= 2;
+
+  const measure = async (page) =>
+    page.evaluate(() => ({
+      innerHeight: window.innerHeight,
+      clientHeight: document.documentElement.clientHeight,
+      docScroll: document.documentElement.scrollHeight,
+      bodyScroll: document.body.scrollHeight,
+      mainScroll: document.querySelector(".site-main")?.scrollHeight ?? -1,
+      shellBottom: Math.round(
+        document.querySelector(".demo-shell")?.getBoundingClientRect().bottom ?? -1
+      ),
+      listHeight: Math.round(
+        document.querySelector(".ops-inbox__list")?.getBoundingClientRect().height ?? -1
+      ),
+      listScroll: document.querySelector(".ops-inbox__list")?.scrollHeight ?? -1,
+    }));
+
+  /**
+   * A full-page capture, and how much of its bottom is bare backdrop.
+   *
+   * Sampled down the middle column: the application paints a surface there at
+   * every height it occupies, so a run of backdrop pixels means the document
+   * extends past the product.
+   */
+  const capture = async (page, name) => {
+    const file = `${shotDir}/${name}.png`;
+    await page.screenshot({ path: file, fullPage: true });
+    const png = PNG.sync.read(fs.readFileSync(file));
+    let trailing = 0;
+    for (let y = png.height - 1; y >= 0; y--) {
+      const i = (png.width * y + (png.width >> 1)) << 2;
+      if (!isBackdrop(png.data[i], png.data[i + 1], png.data[i + 2])) break;
+      trailing += 1;
+    }
+    return { height: png.height, width: png.width, trailing, file };
+  };
+
+  for (const [w, h] of [
+    [1920, 1080],
+    [1430, 800],
+    [1440, 900],
+    [1366, 768],
+    [1024, 768],
+    [768, 1024],
+    [390, 844],
+    [360, 800],
+  ]) {
+    const { ctx, page } = await freshInbox({ width: w, height: h });
+    const m = await measure(page);
+    const shot = await capture(page, `contained-${w}x${h}`);
+
+    /* One viewport, to the pixel. A tolerance of 2 covers subpixel rounding
+       on a fractional device pixel ratio and nothing else. */
+    check(
+      `${w}x${h}: the document is one viewport tall`,
+      Math.abs(m.bodyScroll - m.clientHeight) <= 2,
+      `body ${m.bodyScroll} vs client ${m.clientHeight}`
+    );
+    check(
+      `${w}x${h}: and so is the frame it sits in`,
+      Math.abs(m.mainScroll - m.clientHeight) <= 2,
+      `site-main ${m.mainScroll}`
+    );
+    check(
+      `${w}x${h}: the application reaches the viewport bottom`,
+      Math.abs(m.shellBottom - m.innerHeight) <= 2,
+      `shell bottom ${m.shellBottom} vs ${m.innerHeight}`
+    );
+    /* The capture is the assertion the earlier suite was missing. */
+    check(
+      `${w}x${h}: a full-page capture is one viewport`,
+      Math.abs(shot.height - h) <= 2,
+      `${shot.width}x${shot.height}`
+    );
+    check(
+      `${w}x${h}: no portfolio background below the product`,
+      shot.trailing <= 2,
+      `${shot.trailing}px of backdrop`
+    );
+    /* Containment must not have been bought by clipping the list. */
+    check(
+      `${w}x${h}: the list still scrolls internally`,
+      m.listScroll > m.listHeight + 50,
+      `${m.listHeight} of ${m.listScroll}`
+    );
+
+    await ctx.close();
+  }
+
+  /* The states an escaped absolute could reappear in. */
+  const states = [
+    ["no-selection", INBOX],
+    ["lead-thread", `${INBOX}?selected=${FIXED.lead}`],
+    ["customer-thread", `${INBOX}?selected=${FIXED.converted}`],
+    ["closed-thread", `${INBOX}?selected=${FIXED.closed}`],
+  ];
+  for (const [name, url] of states) {
+    const { ctx, page } = await freshInbox({ width: 1430, height: 800 }, url);
+    await waitForThread(page).catch(() => {});
+    await page.waitForTimeout(400);
+    const m = await measure(page);
+    const shot = await capture(page, `state-${name}`);
+    check(
+      `${name}: stays inside one viewport`,
+      Math.abs(m.bodyScroll - m.clientHeight) <= 2 && Math.abs(shot.height - 800) <= 2,
+      `body ${m.bodyScroll}, capture ${shot.height}`
+    );
+    await ctx.close();
+  }
+
+  /* No absolutely positioned descendant of the Inbox may resolve its
+     containing block outside the module: that is the defect itself, stated
+     as a rule rather than as a symptom. */
+  {
+    const { ctx, page } = await freshInbox({ width: 1430, height: 800 });
+    const escaped = await page.evaluate(() => {
+      const inbox = document.querySelector(".ops-inbox");
+      let count = 0;
+      for (const el of document.querySelectorAll(".ops-inbox *")) {
+        if (getComputedStyle(el).position !== "absolute") continue;
+        let p = el.parentElement;
+        while (p && getComputedStyle(p).position === "static") p = p.parentElement;
+        if (p && !inbox.contains(p)) count += 1;
+      }
+      return count;
+    });
+    check(
+      "no absolute descendant escapes the module",
+      escaped === 0,
+      `${escaped} escaped`
+    );
+    await ctx.close();
+  }
+
+  /* The approved modules keep growing down the page: the correction is
+     scoped to the module that clips, and must not have become global. */
+  for (const [path, label] of [
+    ["/demos/operations/leads", "Leads"],
+    ["/demos/operations/customers", "Customers"],
+  ]) {
+    const ctx = await browser.newContext({ viewport: { width: 1430, height: 800 } });
+    const page = await ctx.newPage();
+    await page.goto(`${BASE}${path}`, { waitUntil: "networkidle" });
+    await page.waitForSelector(".ops-leads__row", POLL).catch(() => {});
+    await page.waitForTimeout(500);
+    const grows = await page.evaluate(() => {
+      const shell = document.querySelector(".demo-shell");
+      return {
+        shellHeight: Math.round(shell.getBoundingClientRect().height),
+        client: document.documentElement.clientHeight,
+        contentOverflow: getComputedStyle(document.querySelector(".ops-content")).overflowY,
+      };
+    });
+    check(
+      `${label} still grows with its content`,
+      grows.shellHeight >= grows.client && grows.contentOverflow === "auto",
+      `shell ${grows.shellHeight}, content overflow-y ${grows.contentOverflow}`
+    );
+    await ctx.close();
+  }
+}
+
 await browser.close();
 
 console.log(

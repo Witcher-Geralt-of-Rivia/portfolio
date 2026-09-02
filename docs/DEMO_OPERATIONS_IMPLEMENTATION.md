@@ -653,6 +653,33 @@ Notifications whose source is a lead, a customer or a conversation now open it;
 the other sixteen of the twenty-two stay unlinked until their modules are built
 (D-084, D-085).
 
+### Viewport containment (09C3.3.1)
+
+The first external review rejected the Inbox: the application sat at the top of
+a 2751px document with 1951px of portfolio background beneath it.
+
+The suspect was the `height: 100dvh` this module puts on the demo shell.
+Measurement cleared it. At an 800px viewport the shell was 800 tall with a
+scrollHeight of 800, and every box beneath it was contained. The break was one
+level higher, between `.demo-shell` at 800 and `.site-main` at 2751, its only
+child.
+
+`overflow` clips a descendant only when the descendant's containing block is
+inside the clipping box. `.visually-hidden` is `position: absolute`, and
+nothing between a conversation row and `.site-main` was positioned, so
+twenty-four of those spans escaped every clip and laid out at their static
+offsets, the last at y=2750 (D-086).
+
+The document never scrolled and none of it was visible, which is why the suite
+passed. A full-page capture honours that overflow, and the reviewer took one.
+
+The fix is `position: relative` on the module and on every box inside it that
+clips. It costs no layout. Two regressions came out of the correction itself
+and both were caught by the module's own suite: a positioned transcript paints
+above the static context toggle, which made that button unclickable on a phone,
+and the module's heading and live region were still resolving against the
+content wrapper rather than the module.
+
 ### QA
 
 `qa/stage09c33-inbox.mjs`. The domain half proves the seeded distribution by
