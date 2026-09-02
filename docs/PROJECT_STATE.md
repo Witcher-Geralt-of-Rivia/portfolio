@@ -11,12 +11,12 @@ Everything below was read from the repository, not recalled from conversation.
 ```
 Stages 01-08   COMPLETE and FROZEN
 Deployment     LIVE at https://intelligent-systems-lab.duckdns.org
-Stage 09       IN PROGRESS - through 09C4.0, 0 of 3 demos built
-Demo 01        Overview + the three CRM modules DEPLOYED; rental core ready
+Stage 09       IN PROGRESS - through 09C4.1, 0 of 3 demos built
+Demo 01        Overview, the CRM group and Reservations DEPLOYED for review
 ```
 
 Stage 09 changed direction: `#work` becomes a launcher into three
-frontend-only product demos, not case studies. 09A froze the shared runtime;
+frontend-only product demos rather than case studies. 09A froze the shared runtime;
 09B froze Demo 01's contract; 09C1 built its domain; 09C2 built the shell and
 Overview; 09C2.1 hardened both; 09C3 built the three CRM modules, Leads,
 Customers and Inbox, with 09C3.1.1/09C3.1.2 hardening their controls. Seven
@@ -81,6 +81,7 @@ runs on a timer at rest.
 | `/demos/operations/leads` | Demo 01 CRM pipeline, `noindex`, unlinked | Static page, client subtree |
 | `/demos/operations/customers` | Demo 01 customer records, `noindex`, unlinked | Static page, client subtree |
 | `/demos/operations/inbox` | Demo 01 conversations, `noindex`, unlinked | Static page, client subtree |
+| `/demos/operations/reservations` | Demo 01 bookings, `noindex`, unlinked | Static page, client subtree |
 
 Section ids on `/`: `hero`, `systems`, `products`, `ai-learning`, `lab`, `work`.
 `#systems` (05), `#products` (06), `#ai-learning` (07) and `#lab` (08) are real
@@ -117,13 +118,12 @@ src/
     lab/        Stage 08 - LabWorkspace; flow, experiment views, observation,
                 controls, pattern rail; lab-experiments.ts (5 experiments)
     work/       Stage 09 - case-study renderers; built, never wired in
-    demos/      Stage 09A - DemoShell, DemoDisclosure, DemoResetControl,
-                DemoSelect
+    demos/      Stage 09A - DemoShell, DemoDisclosure, DemoResetControl, DemoSelect
   content/case-studies.ts   typed case-study model + render-safety filter
   demos/operations/         Stage 09C1 domain (21 modules) + ui/ (shell,
                 sidebar, top bar, Overview panels, notifications, icons,
-                module routes, leads/, customers/, inbox/). Overview and the
-                three CRM modules are built; seven modules unbuilt.
+                module routes, leads/, customers/, inbox/, reservations/).
+                Overview, the CRM group and Reservations built; six unbuilt.
   demo-runtime/             Stage 09A - shared demo platform (18 modules):
                 types, config, demo-registry, clock, ids, repository,
                 async-service, events, audit, jobs, session, connectivity,
@@ -393,7 +393,7 @@ serves `.next-release-a` / `-b`; `.next` is development only. Update with
 
 ## Known Gaps
 
-- LCP timing: UNVERIFIED in the headless QA environment (see QA_BASELINE.md)
+- LCP timing: UNVERIFIED in headless QA (see QA_BASELINE.md)
 - Reboot survival relies on PM2 logon-time resurrection, firing at Administrator
   logon rather than at boot. Not reboot-tested: another domain shares this box.
 - A `next dev` tree on port 3000 rewrites `AGENTS.md` on restart; qa:style catches it.

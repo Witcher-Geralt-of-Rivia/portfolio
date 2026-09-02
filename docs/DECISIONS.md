@@ -2882,3 +2882,106 @@ implied by frozen data rather than invented: `modelLabel` must belong to the
 chosen `vehicleClass` under `MODELS_BY_CLASS`, which nothing currently
 enforces because the two are independent string unions, and `odometerKm` must
 be a non-negative integer.
+
+---
+
+## D-091 - A draft reservation does not choose a vehicle
+
+Status: Accepted
+Stage: 9C4.1
+
+### Decision
+The new-reservation form asks for exactly five things:
+
+```
+Customer   Vehicle class   Start   End   Notes
+```
+
+There is no vehicle selector on it. A vehicle is chosen during **Confirm
+reservation**, from the eligible set, and that is the only place the product
+offers the choice.
+
+`createReservation` keeps its optional `vehicleId`. The service is not changed;
+the first-party interface simply does not use that parameter.
+
+### Reason
+A draft does not hold fleet capacity. Confirming is what holds it, and
+`confirmReservation` is where eligibility is evaluated.
+
+So a vehicle picked at draft time would be a choice the product cannot honour.
+Between drafting and confirming, that vehicle can be reserved by someone else,
+rented, or taken into the workshop, and nothing would have stopped any of it.
+The field would have shown an allocation that was never made: worse than asking
+later, because it reads as a commitment.
+
+Deferring it also puts the decision where the information is. Eligibility
+depends on the dates and the class, and at confirmation the product can offer
+the vehicles that are actually free for that window rather than the whole fleet
+with a validation error waiting behind it.
+
+The service keeps the parameter because the domain is a layer with more than
+one possible caller, and validating an optional reference costs nothing now
+that 09C4.0 made it check existence and class (D-089). A first-party interface
+is not obliged to expose every optional parameter a service accepts.
+
+### Consequence
+The confirmation surface carries the weight of the module: it states the
+customer, the period and the requested class, and offers only vehicles the
+eligibility selector returned. When that set is empty, confirmation cannot
+proceed and the screen says why rather than offering an override.
+
+The frozen lifecycle is untouched: Draft, Confirmed, Converted, Cancelled.
+Draft capacity semantics are untouched. This decision is about which of two
+already-legal service calls the interface makes.
+
+---
+
+## D-092 - A module links where the destination exists, and names it where it does not
+
+Status: Accepted
+Stage: 9C4.1
+
+### Decision
+Reservations shows every relationship it holds, and turns one into navigation
+only when two things are true: the destination module is built, and the current
+role can open it.
+
+```
+customer            link       for Admin and Sales Agent
+customer            name only  for the Fleet Coordinator
+assigned vehicle    fact       Fleet is not built
+converted contract  fact       Contracts is not built
+conversation        link       for roles that work the Inbox
+```
+
+The withheld thing is always the link, never the information.
+
+### Reason
+This is the rule the product has followed since the first module, written down
+now because Reservations is the first screen where all three cases appear at
+once.
+
+A link to a route that 404s is worse than a plain fact, so the vehicle and the
+converted contract are rendered as data. The contract reference is styled as
+data too, in a monospace chip rather than as a control, because a thing that
+looks clickable and is not is its own small betrayal.
+
+The role case is the interesting one. A Fleet Coordinator works reservations
+and cannot open Customers, and it would be easy to read that as "hide the
+customer". That would be wrong: they cannot do the job without knowing whose
+booking it is. What they are denied is the account record, not the person's
+name, so the name renders and the link does not.
+
+Sequencing follows from this rather than driving it. Each module becomes
+navigable from the others as it is built, which is why 09C3.3 turned the
+customer's conversation count into rows that open and turned a lead's bare
+customer id into a link.
+
+### Consequence
+Every cross-link in the module is guarded twice: the module must exist and the
+role must be able to view it. The suite asserts both directions, including that
+a Fleet Coordinator's page contains the customer's name and contains no anchor
+into Customers or the Inbox at all.
+
+When Fleet and Contracts are built, two facts become links and this decision is
+the record of why they were not before.

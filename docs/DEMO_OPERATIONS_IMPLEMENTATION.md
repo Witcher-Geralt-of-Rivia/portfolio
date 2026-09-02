@@ -10,7 +10,7 @@ the code beneath it.
 ```
 STATUS      domain complete / shell, Overview and the three CRM modules
             complete / seven modules unbuilt
-STAGE       09C1, 09C2, 09C2.1, all of 09C3 and 09C4.0 complete
+STAGE       09C1, 09C2, 09C2.1, all of 09C3, 09C4.0 and 09C4.1 complete
 REGISTRY    operations = building
 ROUTE       /demos/operations, /leads, /customers and /inbox DEPLOYED,
             noindex, for external live review
@@ -754,11 +754,90 @@ document describes the seeded twenty-four asset codes and never says who
 supplies the twenty-fifth. Reported with a recommendation rather than decided
 in passing (D-090).
 
+## Reservations (09C4.1)
+
+The first module of the rental group, and the first whose central action is a
+decision rather than an edit.
+
+```
+src/demos/operations/
+  selectors/reservations-list.ts    rows, filters, search, order, paging
+  ui/reservations/
+    ReservationsScreen.tsx          state, selection, composition
+    ReservationsToolbar.tsx         search, two filters, eight sorts
+    ReservationsTable.tsx           the desktop table
+    ReservationsMobileList.tsx      the same records as cards below 768px
+    ReservationDetail.tsx           booking, vehicle, notes, related, activity
+    ReservationForm.tsx             create and edit, one form
+    ConfirmReservation.tsx          the vehicle decision
+    ReservationConfirmAction.tsx    cancel and convert
+    reservations-view.ts            the role policy, tones, sorts, actions
+```
+
+### Confirmation is the module
+
+Everything else here is the CRM pattern applied again. Confirmation is not: it
+is where a booking stops being an intention and takes a real vehicle off the
+fleet.
+
+So it is deliberately not a status toggle. The surface states the customer, the
+period and the requested class, then offers the vehicles `getEligibleVehicles`
+returned for those dates, as a radio group rather than a select: there are
+rarely more than a handful, each needs two lines to identify itself, and seeing
+all of them at once tells the visitor how much choice they have.
+
+The screen never filters the fleet itself. Eligibility spans contracts,
+reservations and work orders across an interval, and a second implementation in
+a component would be a second thing to keep in step.
+
+When the set is empty, confirmation cannot proceed and the surface says which
+class is unavailable and why. There is no override, no substitute class and no
+automatic date change.
+
+### One click, and the rule runs
+
+The action calls `confirmReservationWorkflow`, never the bare service. That is
+the whole point of the workflow layer 09C4.0 extracted: a Reservations screen
+calling `confirmReservation` directly would have left Rule 03 asleep, and the
+QA would have gone on passing because both older suites did the join by hand
+(D-088).
+
+The suite proves it from the product side, reading the store the screen wrote
+to: one click produces an AutomationRun, a System message with the canonical
+body, and an unread conversation. No second control, and nothing in the
+component knows what a rule is.
+
+### A draft chooses no vehicle
+
+The create form asks for customer, class, start, end and notes. There is no
+vehicle field, because a draft does not hold capacity: a vehicle picked then
+could be rented, reserved or in the workshop by the time anyone confirms, and
+the field would have shown an allocation that was never made (D-091).
+
+The seed already worked this way. None of its four drafts holds a vehicle.
+
+### What is a link, and what is a fact
+
+Customers is built, so the customer is a link for the roles that can open it.
+The Fleet Coordinator works reservations but not accounts, so they get the name
+and no link: withholding the name would leave them unable to do their own job.
+
+Fleet and Contracts are not built, so the assigned vehicle and the converted
+contract are facts. The contract reference is styled as data rather than as a
+control, so nothing suggests it can be opened (D-092).
+
+### QA
+
+`qa/stage09c41-reservations.mjs`. The seed is measured rather than asserted
+from constants, the zero-eligibility case is built by taking a whole class into
+the workshop through the real service, and the containment section captures
+full pages at eight viewports because a viewport screenshot could not have
+caught what the Inbox review caught.
+
 ## Remaining UI work
 
-Seven module screens: Reservations, Contracts, Fleet, Maintenance, Payments,
-Automations and Reports. Every service and selector they need already exists,
-and the three CRM modules have established the interaction patterns they
-reuse.
+Six module screens: Contracts, Fleet, Maintenance, Payments, Automations and
+Reports. Every service and selector they need exists apart from a Fleet write
+service, which is blocked on the asset-code contract (D-090).
 `#work` still renders its placeholder, and the demo is deployed but
 unadvertised: `noindex, nofollow`, linked from nowhere.

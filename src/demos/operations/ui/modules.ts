@@ -41,7 +41,7 @@ export const MODULE_ROUTES: readonly ModuleRoute[] = [
 
   { id: "Leads", label: "Leads", href: `${ROOT}/leads`, group: "Customer operations", context: "CRM pipeline", implemented: true },
   { id: "Customers", label: "Customers", href: `${ROOT}/customers`, group: "Customer operations", context: "Accounts and history", implemented: true },
-  { id: "Reservations", label: "Reservations", href: `${ROOT}/reservations`, group: "Customer operations", context: "Bookings and availability", implemented: false },
+  { id: "Reservations", label: "Reservations", href: `${ROOT}/reservations`, group: "Customer operations", context: "Bookings and availability", implemented: true },
   { id: "Contracts", label: "Contracts", href: `${ROOT}/contracts`, group: "Customer operations", context: "Active and closed agreements", implemented: false },
 
   { id: "Fleet", label: "Fleet", href: `${ROOT}/fleet`, group: "Operations", context: "Vehicles and status", implemented: false },

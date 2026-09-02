@@ -3179,3 +3179,205 @@
   margin-top: 6px;
   font-size: 11.5px;
 }
+
+/* =====================================================================
+   RESERVATIONS (Stage 09C4.1)
+   ===================================================================== */
+
+/**
+ * A page-growth module, like Leads and Customers.
+ *
+ * Nothing here reaches for the Inbox's fixed-viewport treatment: that module
+ * owns it because a conversation list has to sit beside the transcript it
+ * belongs to, and a reservations table has no such requirement. The page grows
+ * with the list and the document scrolls, which is what the other two do
+ * (D-077).
+ */
+/**
+ * The module is its own containing block.
+ *
+ * Five `.visually-hidden` elements live in here: the page heading, the search
+ * label, the table caption, the announcement region and an unread cue. All are
+ * `position: absolute`, and without this they resolve against `.site-main` and
+ * lay out wherever their static position falls.
+ *
+ * Nothing clips in this module, so nothing was escaping anywhere visible, and
+ * the full-page captures show no stray background. But that is a property of
+ * this layout rather than of the markup, and it is the exact hazard that put
+ * an application above 1951 pixels of portfolio background last time. One line
+ * makes it a rule instead of a coincidence (D-086).
+ */
+.ops-reservations {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* The period reads as one fact, so the two dates and the word between them
+   stay on one line and wrap together rather than breaking mid-range. */
+.ops-reservations__period {
+  color: var(--ops-ink-2);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  white-space: nowrap;
+}
+
+.ops-reservations__to {
+  padding: 0 5px;
+  color: var(--ops-ink-3);
+}
+
+.ops-reservations__class {
+  color: var(--ops-ink-2);
+}
+
+.ops-reservations__vehicle {
+  color: var(--ops-ink-2);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+}
+
+.ops-reservations__card-period {
+  color: var(--ops-ink-2);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+/* A reference the product names but cannot open yet: styled as data rather
+   than as a control, so nothing suggests it is clickable. */
+.ops-detail__ref {
+  padding: 2px 6px;
+  border-radius: 5px;
+  background: var(--ops-surface-quiet);
+  color: var(--ops-ink-2);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+}
+
+/* A value the domain does not let a form change, shown as the fact it is. */
+.ops-field__static {
+  padding: 8px 0 2px;
+  color: var(--ops-ink);
+  font-size: 13.5px;
+}
+
+.ops-field__error {
+  color: #8a3324;
+  font-size: 11.5px;
+  line-height: 1.5;
+}
+
+/* --- confirmation ------------------------------------------------------ */
+
+.ops-confirm-res__facts {
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--ops-line-soft);
+}
+
+.ops-confirm-res__none {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 13px 14px;
+  border: 1px dashed var(--ops-line);
+  border-radius: 11px;
+  background: var(--ops-surface-quiet);
+}
+
+.ops-confirm-res__none-title {
+  color: var(--ops-ink);
+  font-size: 13px;
+  font-weight: var(--weight-ui, 600);
+}
+
+.ops-confirm-res__none-text {
+  color: var(--ops-ink-2);
+  font-size: 12.5px;
+  line-height: 1.6;
+}
+
+/**
+ * The vehicle choice.
+ *
+ * A radio group rather than a select: there are rarely more than a handful,
+ * each needs two lines to identify itself, and showing them all at once tells
+ * the visitor how much choice they have without opening anything (D-092).
+ */
+.ops-vehicle-choice {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.ops-vehicle-choice__count {
+  margin-left: 8px;
+  color: var(--ops-ink-3);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.03em;
+  text-transform: none;
+}
+
+.ops-vehicle-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--ops-line);
+  border-radius: 10px;
+  background: var(--ops-surface);
+  cursor: pointer;
+}
+
+.ops-vehicle-option:hover {
+  background: var(--ops-surface-quiet);
+}
+
+/* The whole row reads as selected, not just the dot. */
+.ops-vehicle-option:has(.ops-vehicle-option__input:checked) {
+  border-color: rgba(115, 168, 235, 0.45);
+  background: var(--ops-sky-soft);
+}
+
+.ops-vehicle-option:has(.ops-vehicle-option__input:focus-visible) {
+  outline: 2px solid var(--ops-sky);
+  outline-offset: 1px;
+}
+
+.ops-vehicle-option__input {
+  margin-top: 3px;
+  accent-color: var(--ops-sky-strong);
+}
+
+.ops-vehicle-option__body {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ops-vehicle-option__name {
+  color: var(--ops-ink);
+  font-size: 13px;
+  font-weight: var(--weight-ui, 600);
+}
+
+.ops-vehicle-option__meta {
+  color: var(--ops-ink-3);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+}
+
+@media (max-width: 767px) {
+  .ops-reservations__period {
+    white-space: normal;
+  }
+
+  .ops-vehicle-option {
+    padding: 11px 12px;
+  }
+}

@@ -25,20 +25,20 @@ Stage 09                IN PROGRESS
       09C3.3.2 Message timestamp reconciliation  COMPLETE
     09C4 Rental Operations Core  IN PROGRESS (D-090)
       09C4.0 core domain readiness  COMPLETE
-      09C4.1 Reservations           NOT STARTED
-      09C4.2 Contracts              NOT STARTED
+      09C4.1 Reservations           COMPLETE and deployed
+      09C4.2 Contracts              BLOCKED on external review of Reservations
       09C4.3 Fleet + Maintenance    BLOCKED on the Fleet create contract
       09C4.4 Payments + workflow    NOT STARTED
 ```
 
 ## The block
 
-Next task: Stage 09C4.1 - Reservations
+Next task: Stage 09C4.2 - Contracts (BLOCKED UNTIL EXTERNAL LIVE REVIEW OF RESERVATIONS)
 
-09C4.0 found and fixed three unenforced clauses in the frozen contract before
-any of the five screens could depend on them: reservations never woke Rule 03
-in production, and two services left a vehicle disagreeing with its own
-derivation. Reservations can now be built against a contract that holds.
+Reservations is built and deployed for review. Its central action, confirming a
+booking onto a real vehicle, is the first place the workflow layer 09C4.0
+extracted earns its keep: one click assigns the vehicle and wakes Rule 03, with
+no second control.
 
 One thing is genuinely open. There is no Fleet write service, and the frozen
 document does not say where a new vehicle's asset code comes from, so 09C4.3
@@ -75,11 +75,12 @@ Stage 09C3 is complete and approved: Leads, Customers and Inbox.
 18. Stage 09C3.3.1 - Inbox viewport containment DONE
 19. Stage 09C3.3.2 - Message timestamp contract DONE
 20. Stage 09C4.0 - Core domain readiness        DONE
-21. Stage 09C4.1 - Reservations                 NEXT
-22. Stage 09C4.2-C4.4 - the rest of the group   LATER
-23. Stage 09C5-C6 - remaining modules, QA       LATER
-24. Field and Learning specs, then builds       LATER
-25. Stage 09 - #work launcher integration       LATER
+21. Stage 09C4.1 - Reservations                 DONE
+22. Stage 09C4.2 - Contracts                    BLOCKED on live review
+23. Stage 09C4.3-C4.4 - the rest of the group   LATER
+24. Stage 09C5-C6 - remaining modules, QA       LATER
+25. Field and Learning specs, then builds       LATER
+26. Stage 09 - #work launcher integration       LATER
 ```
 
 ## What changed about Stage 09
@@ -129,9 +130,9 @@ production is untouched.
 
 ## NEXT TASK
 
-**Stage 09C4.1 - Reservations.**
+**Stage 09C4.2 - Contracts.**
 
-The first of five, in the sequence D-090 froze:
+The second of five, in the sequence D-090 froze:
 
 ```
 09C4.0  core domain readiness

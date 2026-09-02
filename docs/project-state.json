@@ -3,8 +3,8 @@
   "purpose": "Demonstrate engineering capability to freelance clients. Technical portfolio, not a personal site.",
   "currentStage": 8,
   "stage05Started": true,
-  "nextStage": "stage-09c4-1",
-  "nextStageTitle": "Stage 09C4.1 - Reservations",
+  "nextStage": "stage-09c4-2",
+  "nextStageTitle": "Stage 09C4.2 - Contracts (BLOCKED UNTIL EXTERNAL LIVE REVIEW OF RESERVATIONS)",
   "frozenStages": [
     1,
     2,
@@ -113,7 +113,15 @@
       "src/demos/operations/ui/inbox/ConversationList.tsx",
       "src/demos/operations/ui/inbox/ConversationThread.tsx",
       "src/demos/operations/ui/inbox/ConversationContext.tsx",
-      "src/demos/operations/ui/inbox/ReplyComposer.tsx"
+      "src/demos/operations/ui/inbox/ReplyComposer.tsx",
+      "src/demos/operations/ui/reservations/ReservationsScreen.tsx",
+      "src/demos/operations/ui/reservations/ReservationsToolbar.tsx",
+      "src/demos/operations/ui/reservations/ReservationsTable.tsx",
+      "src/demos/operations/ui/reservations/ReservationsMobileList.tsx",
+      "src/demos/operations/ui/reservations/ReservationDetail.tsx",
+      "src/demos/operations/ui/reservations/ReservationForm.tsx",
+      "src/demos/operations/ui/reservations/ConfirmReservation.tsx",
+      "src/demos/operations/ui/reservations/ReservationConfirmAction.tsx"
     ]
   },
   "routes": [
@@ -122,7 +130,8 @@
     "/demos/operations",
     "/demos/operations/leads",
     "/demos/operations/customers",
-    "/demos/operations/inbox"
+    "/demos/operations/inbox",
+    "/demos/operations/reservations"
   ],
   "navigationDestinations": [
     "Systems",
@@ -217,7 +226,7 @@
   "stage08Started": true,
   "stage09aComplete": true,
   "demoPlatform": {
-    "status": "09A foundation + Operations domain, shell, Overview and the three CRM modules; rental core domain ready, seven modules unbuilt",
+    "status": "09A foundation + Operations domain, shell, Overview, the three CRM modules and Reservations; six modules unbuilt",
     "routes": [
       "/demos/operations",
       "/demos/field",
@@ -245,7 +254,7 @@
     "disclosure": "INTERACTIVE ENGINEERING DEMO / SYNTHETIC DATA - FRONTEND ONLY",
     "operationsSpec": "frozen; docs/DEMO_OPERATIONS_SPEC.md",
     "operationsDomain": "built; docs/DEMO_OPERATIONS_IMPLEMENTATION.md",
-    "operationsReview": "CRM group externally approved; 09C4.0 domain readiness complete; 09C4.1 Reservations next"
+    "operationsReview": "Reservations deployed for external live review; 09C4.2 blocked until reviewed"
   },
   "stage09bComplete": true,
   "stage09c1Complete": true,
@@ -275,5 +284,6 @@
   "environmentNotes": {
     "staleDevServer": "A `next dev` tree for this repository is running and serving the documented preview on port 3000 (supervisor PID 13232, listening child PID 14568). It rewrites AGENTS.md with prohibited punctuation on each restart, which qa:style catches. Not terminated: it is not stale, and termination needs explicit approval."
   },
-  "stage09c40Complete": true
+  "stage09c40Complete": true,
+  "stage09c41Complete": true
 }

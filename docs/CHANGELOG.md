@@ -1509,3 +1509,64 @@ order above a rental, while starting that work order is still refused because
 the contract puts that conflict at start. The tension predates this stage: the
 derivation always said Maintenance and the stored record disagreed in silence.
 Resolving it would be a specification change and is not taken here.
+
+---
+
+## Stage 09C4.1 - Operations Reservations
+
+Status: **Complete**
+
+### Summary
+The first module of the rental group: 18 reservations with search, two filters,
+eight sorts, pagination, a detail drawer, create and edit, and the three
+lifecycle actions that matter. Everything except confirmation is the CRM
+pattern applied again.
+
+### Confirmation is the module
+
+A booking becomes a hold on a real vehicle, so confirmation is not a status
+toggle. The surface states the customer, the period and the requested class,
+then offers the vehicles the eligibility selector returned for those dates, as
+a radio group. The screen never filters the fleet itself.
+
+When nothing is free, confirmation cannot proceed and the surface says which
+class is unavailable. No override, no substitute class, no automatic date
+change.
+
+### One click, and Rule 03 runs
+
+The action goes through `confirmReservationWorkflow`. A screen calling the bare
+service would have left Rule 03 asleep, which is exactly the defect 09C4.0
+found and fixed at the workflow layer. The suite proves it from the product
+side by reading the store the screen wrote to: one click produces an
+AutomationRun, a System message and an unread conversation.
+
+### A draft chooses no vehicle
+
+The create form asks for customer, class, start, end and notes. A draft does
+not hold capacity, so a vehicle picked then could be gone by the time anyone
+confirms and the field would have shown an allocation that was never made
+(D-091). The seed already worked this way.
+
+### Links and facts
+
+Customers is built, so the customer is a link for roles that can open it. The
+Fleet Coordinator gets the name without the link, because withholding the name
+would stop them doing their own job. Fleet and Contracts are not built, so the
+vehicle and the converted contract are facts rather than links (D-092).
+
+### The containment rule, written down
+
+`.ops-reservations` is now `position: relative`. Five `.visually-hidden`
+elements in the module are absolutely positioned, and with no positioned
+ancestor inside it they resolved against `.site-main`. Nothing clips here so
+nothing escaped anywhere visible, but that was a property of this layout rather
+than of the markup, and it is the arrangement that produced the Inbox defect
+(D-086).
+
+### Not done
+
+Six module screens. `#work` is untouched, the registry still reads
+`operations = building`, and `currentStage` stays 8. 09C4.2 Contracts is
+blocked until Reservations has been reviewed live, and 09C4.3 stays blocked on
+the Fleet asset-code contract.

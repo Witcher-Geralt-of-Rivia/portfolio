@@ -87,6 +87,7 @@ export * as queries from "./selectors/queries";
 export * as leadsList from "./selectors/leads-list";
 export * as customersList from "./selectors/customers-list";
 export * as customerRelations from "./selectors/customer-relations";
+export * as reservationsList from "./selectors/reservations-list";
 export * as inboxList from "./selectors/inbox-list";
 export * as conversationDetail from "./selectors/conversation-detail";
 

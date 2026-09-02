@@ -1856,3 +1856,118 @@ passing. In particular `stage09c1-operations` passes 211/211 untouched,
 including its W2 and W4 vehicle-status assertions and its "maintenance on a
 rented vehicle is a CONFLICT" case, which still holds because the conflict
 lives at start.
+
+---
+
+## Stage 09C4.1 - Operations Reservations
+
+PASS. Harness: `qa/stage09c41-reservations.mjs`.
+
+### The assertion this module exists to make
+
+Confirming through the product runs Rule 03. 09C4.0 proved the bare service
+wakes nothing and the workflow wakes the rule; this proves the screen uses the
+workflow, and it proves it the only way that cannot be faked: by opening a
+second page on the domain probe in the same browser context, building a runtime
+on the same IndexedDB the screen persists to, and reading what one click left
+behind.
+
+```
+AutomationRun        18 to 19, Rule 03 count 4 to 5, status Success
+System message        0 to 1, body "Reservation confirmed. Vehicle assigned."
+unread conversations  6 to 7
+messages             64 to 65
+fleet invariant      every vehicle still equals its derivation
+```
+
+No hand-written events, no manual `processEvents`, no second control in the
+interface.
+
+### What else it covers
+
+```
+seed          18 reservations measured from the store: 4 Draft, 4 Confirmed,
+              7 Converted, 3 Cancelled, 14 holding a vehicle and 4 not, and
+              no draft holding one, which is D-091 already true in the seed
+list          six columns, both filters, eight sorts, search over customer,
+              vehicle, notes and id, pagination at 10 and 20, empty states
+detail        selection, the URL contract, Back and Forward, deep links valid
+              and invalid, focus return, the four sections
+lifecycle     create through the five-field form, the end-before-start guard,
+              edit with the customer shown as a fact, confirm, convert
+confirm       the eligible set, the disabled action until a choice is made,
+              the operational identity on each option
+zero          a whole class taken into the workshop through the real service,
+              then: no choice offered, the state explained, confirmation
+              impossible, no override, and the reservation left untouched
+cancel        the dialog, backing out, the transition, and a converted
+              reservation offering no actions at all
+roles         Admin, Sales and Fleet all work the module; the Fleet
+              Coordinator sees the customer's name with no link into Customers
+              and none into the Inbox; Finance gets the contained state with no
+              data behind it, including by direct link
+mobile        390 and 360: cards, the filter sheet, the drawer, browser Back,
+              and the confirmation sheet fitting with its action reachable
+containment   eight viewports, full-page captures, zero backdrop pixels, and
+              no absolute descendant escaping the module
+content       no contact data, no payment or document fields, no booking CTA,
+              no em dash, and no request leaving the origin
+reset         18 reservations, 14 contracts, 24 vehicles, 20 conversations,
+              64 messages, 18 automation runs and 6 unread all return, with
+              the fleet invariant intact
+```
+
+### What it found
+
+One latent hazard in the product, and two faults of my own in the harness.
+
+The product one is the rule that D-086 came out of, stated rather than tested
+by symptom: five `.visually-hidden` elements in this module are
+`position: absolute`, and with no positioned ancestor inside the module they
+were resolving their containing block against `.site-main`. Nothing clips here,
+so nothing escaped anywhere visible and every capture was clean. But that was a
+property of this layout rather than of the markup, and it is the exact
+arrangement that put the Inbox above 1951 pixels of portfolio background.
+`position: relative` on `.ops-reservations` makes it a rule instead of a
+coincidence.
+
+The two of mine: the role section tried to switch roles with the detail drawer
+open, which a visitor cannot do because the drawer is a modal dialog and the
+chrome behind it is inert, so the section now closes it first and asserts that
+inertness. And the containment section asserted that the document ends near its
+content, which is wrong on a tall viewport with a short list: the shell keeps
+`min-height: 100dvh`, so app surface legitimately fills the rest. The assertion
+now says what it means, and the capture check is what proves no portfolio
+background appears there.
+
+### Regression
+
+```
+stage09-render-safety           pass
+stage09a-runtime                76/76
+stage09a-shell                  85/85
+stage09b-operations-spec        96/96
+stage09c1-operations          211/211
+stage09c2-operations-ui       141/141
+stage09c21-hardening          111/111
+stage09c31-leads              407/407
+stage09c32-customers          174/174
+stage09c33-inbox              422/422
+stage09c40-readiness            62/62
+stage09c41-reservations       218/218
+public-repo-safety              19/19  (with --history)
+copy-style, qa:memory           pass
+tsc, eslint                     clean
+```
+
+One assertion moved, by design. `stage09c2-operations-ui` carries a check
+called "only the built modules are interactive" whose expected list is the
+build state itself, and whose comment says so: it moved when Leads, Customers
+and Inbox were built, and it moves here to
+`["Overview","Leads","Customers","Reservations","Inbox"]`. Nothing was
+weakened; the list is one longer because one more module is real. Every other
+assertion in every suite passed unchanged.
+
+The two 09A suites need their fixture routes installed before they will run
+(`qa/fixtures/demos-qa-probe.page.tsx` and `demos-qa-shell.page.tsx`), and both
+routes were removed again afterwards. A QA route must not exist in production.
