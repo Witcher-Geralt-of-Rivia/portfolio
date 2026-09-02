@@ -1731,7 +1731,8 @@ flag behind it are deleted once all eleven modules exist.
 
 ## Stage 09C3.3.1 - Inbox Viewport Containment
 
-PASS. Harness: `qa/stage09c33-inbox.mjs`, extended with a CONTAINMENT section.
+PASS. Harness: `qa/stage09c33-inbox.mjs`, extended with a CONTAINMENT section:
+**422 checks** with the domain probe in place and 329 against production.
 
 ### What the external review caught that the suite did not
 
