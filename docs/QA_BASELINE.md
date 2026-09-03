@@ -2334,3 +2334,82 @@ And one assertion of my own was simply wrong: the final suite expected three
 Rule 04 runs in total, when the canonical seed already carries three of its own.
 Counting `reconcile_*` source events rather than rule ids is the fix, and it is
 a better assertion than the one it replaced.
+
+### Public production review pass, Demo 01 complete
+
+Run against `https://intelligent-systems-lab.duckdns.org` after the batch
+deployment, so there is no probe route and everything is observed through the
+interface. 395 checks, all passing, 82 captures in `qa/shots/stage09c4b/`.
+
+```
+eleven modules  every route renders exactly one visible module root, offers
+                eleven sidebar links, and carries no build-state marker
+content         all eleven checked for mailto, email, telephone, messenger,
+                card or IBAN fields, booking CTAs and em dashes, with the
+                synthetic-data disclosure present and the console clean
+visual          seven widths across all eleven modules, full-page captures at
+                every one, no horizontal overflow anywhere, no portfolio
+                backdrop below the product, and the Inbox still exactly one
+                viewport tall at every width
+payments        26 records, the outstanding total naming its denominator, the
+                overdue reconciliation announced on entry, three fields and no
+                terminal vocabulary, the balance shown before anything is
+                typed, and the sheet still sized to its content (D-093)
+automations     five rules with their trigger events shown, enabled state as a
+                word, the run history beside them, and View runs narrowing it
+reports         the four frozen groups in order, every share carrying its
+                denominator, the period select as the only control, and the
+                fleet staying a snapshot under a 30 day filter
+mobile          Payments, Automations and Reports at 390, no overflow, cards
+                replacing the table, consoles clean
+roles           all four roles across all eleven routes against the frozen
+                matrix, with the sidebar link count matching and every refusal
+                naming the role
+```
+
+### The public mutation sequence
+
+One integrated workflow, driven through the live interface: create a
+reservation, confirm it onto a vehicle, convert it, follow the contract link,
+activate, record a payment against it, open a work order, start it, complete it,
+and read Reports moving with all of it. Then Reset.
+
+```
+reset restores  18 reservations, 14 contracts, 24 vehicles, 10 work orders,
+                26 payments
+no residue      the review text appears nowhere in Reservations, Maintenance
+                or Payments afterwards
+reports         back to 12/10/9/7/6 on the funnel and 18/5/3 on payments
+```
+
+### What the public pass found
+
+One assertion of mine, not a product fault. The suite banned the phrase
+"previous period" as comparison language, and the Reports page contains it in
+the sentence that promises the opposite: "Nothing is compared against a previous
+period: the dataset does not contain one." A fabricated comparison is a claim
+rather than a vocabulary, so the check now bans a signed percentage and an
+actual comparison to an earlier window, and additionally asserts that the denial
+is present.
+
+### A deployment that reported SUCCESS while PM2 said errored
+
+Worth recording because the deploy script's own summary did not catch it.
+
+Step 8 of `deploy:safe` switched production to `.next-release-b` and the switch
+took 19 seconds rather than the usual 7 to 13. In that window PM2 spawned a
+replacement before the previous instance released port 3100, the replacement
+died with `EADDRINUSE`, and PM2 retried until it marked the app `errored`. One
+earlier child had bound successfully and kept serving, so every health check in
+steps 9 and 11 passed and the run finished SUCCESS.
+
+The result was production served correctly by a process PM2 had lost track of:
+no pid file, status `errored`, and every subsequent `pm2 restart` spawning a new
+child that could not bind. A supervisor that cannot restart the thing it is
+supervising is a live site with no recovery path.
+
+Resolved by stopping the orphan so the port freed, starting the app under PM2,
+and verifying one listener, all thirteen public routes 200, the three QA routes
+404, the neighbouring domain untouched and the http redirect intact, then
+`pm2 save`. The deployment itself was correct throughout: the served build was
+`.next-release-b` with all eleven modules, which is what the switch intended.
