@@ -179,6 +179,38 @@ section("FEATURED WORK - THE FLAGSHIP");
   check("and they are the right ten", expected.every((m) => modules.includes(m)), modules.join(","));
   check("with Overview as the entry point", text.includes("Overview"), "");
 
+  /* Every list in the section is semantic markup used for grouping, never for
+     bullets. `display: flex` blockifies children but `list-item` survives
+     blockification, so a flex row of `li` keeps its markers unless the reset is
+     explicit. The capability strip shipped to production with bullets on it
+     exactly once, which is why this is measured on every list rather than
+     assumed from the stylesheet. */
+  /* A marker is drawn only when both hold: the child is still a `list-item`,
+     and its `list-style-type` is not `none`. Either alone is harmless, which is
+     why the pair is what gets measured. */
+  const markers = await page.$$eval("#work li", (items) =>
+    items
+      .map((li) => {
+        const cs = getComputedStyle(li);
+        return {
+          cls: li.parentElement ? li.parentElement.className : "?",
+          display: cs.display,
+          type: cs.listStyleType,
+          image: cs.listStyleImage,
+        };
+      })
+      .filter(
+        (r) =>
+          r.display === "list-item" &&
+          (r.type !== "none" || r.image !== "none")
+      )
+  );
+  check(
+    "no list in the section renders a marker",
+    markers.length === 0,
+    markers.map((m) => `${m.cls}:${m.type}`).join(" | ")
+  );
+
   /* The preview is a composition, not an embedded application. */
   check("the preview is present", (await page.$(".fpv")) !== null);
   check("it is labelled for assistive technology", (await page.$eval(".fpv", (e) => e.getAttribute("aria-label") ?? "")).length > 30);

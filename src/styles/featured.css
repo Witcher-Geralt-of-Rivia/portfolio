@@ -66,10 +66,16 @@
   line-height: var(--leading-body);
 }
 
+/* The list reset is load-bearing, not habit. `display: flex` blockifies the
+   children but `list-item` survives blockification, so the markers stay and a
+   technical strip acquires bullets. This shipped once. */
 .featured__capabilities {
   display: flex;
   flex-wrap: wrap;
   gap: 2px 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
   color: var(--text-annotation);
   font-family: var(--font-mono);
   font-size: var(--type-eyebrow);

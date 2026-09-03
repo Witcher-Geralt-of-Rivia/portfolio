@@ -1916,6 +1916,15 @@ the four notes wrapped three and one
 the footer's mark was a stray dot floating above the name
   it sits on the name's line.
 
+the capability strip grew bullets, and this one reached production
+  turning it from a paragraph into a list to fix the wrap introduced a
+  second defect. `display: flex` blockifies children, but `list-item`
+  survives blockification, so the markers stayed. The reset was missing and
+  no screenshot was taken between that edit and the deployment. The landing
+  suite now measures every `li` in the section for the pair that actually
+  draws a marker, and that check fails against the deployed build and passes
+  against the fix.
+
 the group notes lost their shared baseline
   Customer operations holds four modules and wraps to a second row of chips.
   `grid-template-rows: auto 1fr auto` keeps every note on the same line.
