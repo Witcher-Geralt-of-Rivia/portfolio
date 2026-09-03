@@ -1746,3 +1746,74 @@ redesign of an approved module rather than a cross-link.
 do not exist. `currentStage` stays 8. The registry now reads
 `operations = verified`, which turns nothing on:
 `workSectionIsPublishable()` needs all three demos and has no callers yet.
+
+---
+
+## Stage 09D0 - Deployment supervision hardening
+
+Status: **Complete**
+
+Infrastructure only. No product behaviour changed and Demo 01 was not touched.
+
+### The defect
+
+On 2026-09-03 `deploy:safe` printed SUCCESS while PM2 sat at `errored`.
+
+The slot switch took 19 seconds rather than the usual 7 to 13. PM2 spawned the
+replacement before the previous process had released port 3100, the replacement
+died with `EADDRINUSE`, and PM2 retried until it gave up. One earlier child had
+bound successfully and went on serving every request correctly, so the public
+health check passed and the script concluded SUCCESS.
+
+Production was then a live site owned by a process PM2 had lost: no pid file,
+status errored, every `pm2 restart` spawning a child that could not bind. Up,
+and with no recovery path, and nothing saying so.
+
+### The invariant
+
+```
+A production deployment is successful only when the public service is healthy
+AND the service is owned by the intended online PM2-managed portfolio process.
+```
+
+Ownership is five conditions at once, held for three consecutive samples inside
+a thirty second bound: PM2 knows the process, it is online, its
+`PORTFOLIO_DIST_DIR` is the intended slot, something is listening on 3100, and
+that listener is the managed pid or a descendant of it (D-097).
+
+The last one is what separates a deployment from an accident, and it is the only
+one the incident would have failed on its own.
+
+### What changed in the script
+
+```
+step  9   new: supervision check, gating everything after it
+step 11   rollback is held to the same proof before it is persisted
+step 12   pm2 save runs only after supervision and public health both pass
+step 13   final verification asserts and throws, instead of printing OK
+```
+
+Every line of the old final verification ended in a hard-coded `OK`, including
+the one that printed the PM2 status. That is how a deployment reported success
+while the status it printed said errored.
+
+A supervision failure now enters the existing rollback path rather than throwing
+past it. A rollback that cannot prove itself supervised is deliberately not
+saved: a broken process definition must never reach the resurrect file merely
+because something is answering.
+
+### Where the rule lives
+
+`deploy/supervision.mjs`, a pure function with no PM2, no sockets and no
+processes in it. PowerShell gathers the facts and asks it what they mean, which
+is what lets `qa/stage09d0-deploy-supervision.mjs` test the rule against the
+incident and against each failure mode separately, with no deployment involved.
+
+`deploy/pm2-status.mjs` gained `pid` and `uptime_ms`, still printing environment
+key names only and never a value.
+
+### Not changed
+
+The A/B release system, the slot names, the smoke test, Caddy, DuckDNS, TLS,
+port 3200 and the neighbouring application. What changed is what counts as proof
+that a switch worked.

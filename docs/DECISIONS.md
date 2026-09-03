@@ -3207,3 +3207,83 @@ The period filter is the frozen one, 30 days / 90 days / All demo data, and it
 applies where a report is genuinely time-based. The fleet panel is a snapshot of
 the register as it stands, so the filter does not touch it, and the page states
 that rather than leaving a reader to wonder why one number never moves.
+
+---
+
+## D-097 - A deployment is not successful until the service is supervised
+
+Status: Accepted
+Stage: 9D0
+
+### Decision
+`deploy:safe` may report SUCCESS only when both of these hold:
+
+```
+the public service is healthy
+AND
+the service is owned by the intended online PM2-managed portfolio process
+```
+
+Ownership means five things at once, held true for three consecutive samples
+inside a thirty second bound:
+
+```
+PM2 has a process named portfolio
+its status is online
+its PORTFOLIO_DIST_DIR is the slot this deployment intended
+something is listening on 3100
+that listener is the managed pid, or a descendant of it
+```
+
+The same proof gates a rollback, and `pm2 save` runs only after it passes.
+Final verification asserts and throws rather than printing OK.
+
+### Reason
+HTTP cannot tell you who is answering, and on 2026-09-03 that mattered.
+
+The slot switch took 19 seconds instead of the usual 7 to 13. PM2 spawned the
+replacement before the previous process had released port 3100, the replacement
+died with `EADDRINUSE`, and PM2 retried until it marked the app errored. One
+earlier child had bound successfully and kept serving every request correctly.
+Every HTTP check in the script passed, and it printed SUCCESS.
+
+The result was a live site owned by a process PM2 had lost: no pid file, status
+errored, and every `pm2 restart` spawning a child that could not bind. The site
+was up and had no recovery path, which is a worse state than being down, because
+nothing was signalling it.
+
+Three properties of the fix are deliberate.
+
+**Ownership rather than existence.** Checking that PM2 says online and that
+something answers on 3100 would still have passed the incident, because both
+were true of different processes. The only question that separates a deployment
+from an accident is whether the process PM2 manages is the one holding the port.
+
+**A descendant counts.** On this host PM2 spawns the Next server directly and it
+binds in process, so the listener pid equals the reported pid; this was measured
+rather than assumed. The check walks the parent chain anyway, so a future Next
+or PM2 that forks a worker does not turn a correct deployment into a failure.
+
+**Three samples, not one.** PM2 reports `online` for a moment before a process
+that cannot bind dies, so a single reading can catch the good half of a crash
+loop. Polling for a short bounded window costs a healthy deployment about a
+second and refuses a flapping one.
+
+### Consequence
+The rule lives in `deploy/supervision.mjs` as a pure function: no PM2, no
+sockets, no processes, no I/O. PowerShell gathers the facts and asks it what
+they mean. That is what lets `qa/stage09d0-deploy-supervision.mjs` test the rule
+against the incident itself, and against each failure mode on its own, without
+running a deployment.
+
+`deploy/pm2-status.mjs` gained `pid` and `uptime_ms`. It still prints
+environment key names only and never a value.
+
+A supervision failure now enters the existing rollback path rather than throwing
+past it, and a rollback that cannot prove itself supervised is deliberately not
+persisted with `pm2 save`. Leaving the previous resurrect state alone is the
+right answer when the current one cannot be trusted.
+
+Nothing about the A/B release system changed. The slots, their names, the smoke
+test and the rollback path are all as they were; what changed is what counts as
+proof that the switch worked.

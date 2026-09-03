@@ -115,6 +115,115 @@ function Get-ActiveSlot {
     return $slot.Trim()
 }
 
+# --- Supervision -------------------------------------------------------------
+#
+# The invariant this whole block exists for:
+#
+#   A production deployment is successful only when the public service is
+#   healthy AND the service is owned by the intended online PM2-managed
+#   portfolio process.
+#
+# On 2026-09-03 a deployment printed SUCCESS while PM2 sat at `errored`. The
+# slot switch was slow, PM2 spawned the replacement before port 3100 was
+# released, the replacement died with EADDRINUSE, PM2 retried until it gave up,
+# and an earlier child kept serving. Every HTTP check passed, because HTTP
+# cannot tell you who is answering.
+
+function Get-ListenerPid([int]$Port) {
+    $conn = Get-NetTCPConnection -State Listen -LocalPort $Port -ErrorAction SilentlyContinue |
+        Select-Object -First 1
+    if (-not $conn) { return 0 }
+    return [int]$conn.OwningProcess
+}
+
+# The listener and each of its parents, so a managed process that forks a worker
+# still counts as owning its own socket. Bounded, because a cycle in the table
+# would otherwise spin forever.
+function Get-ProcessAncestry([int]$LeafPid, [int]$MaxDepth = 8) {
+    $chain = @()
+    $current = $LeafPid
+    for ($d = 0; $d -lt $MaxDepth -and $current -gt 0; $d++) {
+        $chain += $current
+        $proc = Get-CimInstance Win32_Process -Filter "ProcessId=$current" -ErrorAction SilentlyContinue
+        if (-not $proc) { break }
+        $current = [int]$proc.ParentProcessId
+    }
+    return $chain
+}
+
+# The verdict lives in deploy/supervision.mjs, which touches nothing and is unit
+# tested. This gathers the facts and asks what they mean.
+function Test-Supervised([string]$ExpectedSlot) {
+    $p = Get-Pm2Portfolio
+    $listener = Get-ListenerPid $ProdPort
+    $ancestry = if ($listener -gt 0) { Get-ProcessAncestry $listener } else { @() }
+
+    $exists = if ($p) { "yes" } else { "no" }
+    $status = if ($p) { [string]$p["status"] } else { "" }
+    $slot   = if ($p) { [string]$p["slot"] } else { "" }
+    $mpid   = 0
+    if ($p -and $p.ContainsKey("pid")) { [void][int]::TryParse([string]$p["pid"], [ref]$mpid) }
+
+    $ancestryArg = if ($ancestry.Count -gt 0) { $ancestry -join "," } else { "0" }
+    $slotArg     = if ([string]::IsNullOrWhiteSpace($slot)) { "(unset)" } else { $slot }
+    $statusArg   = if ([string]::IsNullOrWhiteSpace($status)) { "unknown" } else { $status }
+
+    $lines = & node (Join-Path $PSScriptRoot "supervision.mjs") `
+        $ExpectedSlot $exists $statusArg $slotArg $mpid $listener $ancestryArg 2>$null
+
+    $ok = $false
+    $reasons = @()
+    foreach ($line in $lines) {
+        if ($line -eq "ok=yes") { $ok = $true }
+        elseif ($line -like "reason=*") { $reasons += $line.Substring(7) }
+    }
+    if (-not $lines) { $reasons += "the supervision check could not be run" }
+
+    return [pscustomobject]@{
+        Ok          = $ok
+        Reasons     = $reasons
+        Status      = $statusArg
+        Slot        = $slot
+        ManagedPid  = $mpid
+        ListenerPid = $listener
+    }
+}
+
+# One healthy sample is not enough: PM2 reports `online` for a moment before a
+# process that cannot bind dies. Poll for a short bounded window and require a
+# few consecutive agreements rather than sleeping blindly.
+function Wait-Supervised(
+    [string]$ExpectedSlot,
+    [int]$TimeoutMs = 30000,
+    [int]$Consecutive = 3,
+    [int]$PollMs = 500
+) {
+    $deadline = (Get-Date).AddMilliseconds($TimeoutMs)
+    $streak = 0
+    $last = $null
+    while ($true) {
+        $last = Test-Supervised -ExpectedSlot $ExpectedSlot
+        if ($last.Ok) {
+            $streak++
+            if ($streak -ge $Consecutive) { return $last }
+        } else {
+            $streak = 0
+        }
+        if ((Get-Date) -ge $deadline) { break }
+        Start-Sleep -Milliseconds $PollMs
+    }
+    return $last
+}
+
+function Write-SupervisionResult($Result, [string]$Label) {
+    Write-Step ("{0}: pm2 {1}, slot {2}, pid {3}, listener {4}" -f `
+        $Label, $Result.Status, $(if ($Result.Slot) { $Result.Slot } else { "(unset)" }), `
+        $Result.ManagedPid, $Result.ListenerPid) $(if ($Result.Ok) { "OK" } else { "FAIL" })
+    if (-not $Result.Ok) {
+        foreach ($r in $Result.Reasons) { Write-Fail $r }
+    }
+}
+
 # PM2 --update-env re-reads this shell's environment into the managed process.
 # Strip tooling variables first so they cannot leak into a long-lived
 # production process, as happened during the first deployment.
@@ -389,7 +498,9 @@ try {
     Set-ProductionSlot -Slot $target
     $script:SwitchedToTarget = $true
 
-    # Downtime is the window until the new process answers on 3100.
+    # Downtime is the window until something answers on 3100. Measured, and
+    # deliberately not trusted: an orphan answers exactly as well as the process
+    # this deployment intended, which is the whole reason step 12 exists.
     $localUp = $false
     for ($i = 1; $i -le 40; $i++) {
         if ((Get-HttpStatus "http://127.0.0.1:$ProdPort/" 6) -eq 200) { $localUp = $true; break }
@@ -397,23 +508,32 @@ try {
     }
     $downtimeMs = [int]((Get-Date) - $switchStart).TotalMilliseconds
     Write-Step "production answered on 127.0.0.1:$ProdPort after ${downtimeMs}ms" $(if ($localUp) { "OK" } else { "FAIL" })
-    if (-not $localUp) { throw "New release did not start listening on $ProdPort." }
 
-    $nowActive = Get-ActiveSlot
-    Write-Step "PM2 PORTFOLIO_DIST_DIR now: $nowActive" $(if ($nowActive -eq $target) { "OK" } else { "MISMATCH" })
+    # ---- 12. Supervision check ----------------------------------------------
+    # The gate the old script did not have. Not "is the site up" but "is the
+    # site the process PM2 manages", held true for several consecutive samples
+    # so a process that is about to die cannot pass on one lucky reading.
+    Write-Phase "Supervision check"
+    $supervised = Wait-Supervised -ExpectedSlot $target -TimeoutMs 30000 -Consecutive 3 -PollMs 500
+    Write-SupervisionResult $supervised "managed process"
+    $switchOk = $localUp -and $supervised.Ok
 
-    # ---- 12. Public health check --------------------------------------------
+    # ---- 13. Public health check --------------------------------------------
     Write-Phase "Public health check"
     if ($FailAfterSwitchForTest) {
         Write-Step "-FailAfterSwitchForTest set: forcing health check failure" "TEST"
+        $healthy = $false
+    } elseif (-not $switchOk) {
+        Write-Step "skipped: the managed process is not healthy, so there is nothing to confirm" "SKIP"
         $healthy = $false
     } else {
         $healthy = Test-PublicHealth -Attempts 10 -DelayMs 800
     }
 
-    if (-not $healthy) {
-        # ---- 13. Automatic rollback -----------------------------------------
-        Write-Phase "Health check FAILED - rolling back to $($script:PreviousSlot)"
+    if (-not ($switchOk -and $healthy)) {
+        # ---- 14. Automatic rollback -----------------------------------------
+        $why = if (-not $switchOk) { "Supervision" } else { "Health check" }
+        Write-Phase "$why FAILED - rolling back to $($script:PreviousSlot)"
         if ($script:PreviousSlot -eq $LegacySlot) {
             Restore-LegacyProduction
         } else {
@@ -427,29 +547,57 @@ try {
             Start-Sleep -Milliseconds 400
         }
         Write-Step "rollback: production listening again" $(if ($restored) { "OK" } else { "FAIL" })
+
+        # A rollback earns the same proof a deployment does. Restoring a release
+        # that PM2 cannot manage would leave the site in the state this whole
+        # change exists to make impossible.
+        $restoreSupervised = Wait-Supervised -ExpectedSlot $script:PreviousSlot `
+            -TimeoutMs 30000 -Consecutive 3 -PollMs 500
+        Write-SupervisionResult $restoreSupervised "rollback managed process"
+
         $publicAfter = Test-PublicHealth -Attempts 10 -DelayMs 800
         Write-Step "rollback: public site healthy" $(if ($publicAfter) { "OK" } else { "FAIL" })
-        Write-Step "PM2 slot after rollback: $(Get-ActiveSlot)"
 
-        # Persist the restored state so a reboot resurrects the working release.
-        & pm2 save 2>&1 | Out-Null
-        Write-Step "pm2 save (restored state persisted)" "OK"
+        # Persist only a restored state that is genuinely supervised. A broken
+        # process definition must never be written to the resurrect file merely
+        # because something is answering on the port.
+        if ($restoreSupervised.Ok -and $publicAfter) {
+            & pm2 save 2>&1 | Out-Null
+            Write-Step "pm2 save (restored state persisted)" "OK"
+        } else {
+            Write-Fail "pm2 save SKIPPED: the restored release is not supervised and healthy"
+            Write-Fail "the previous resurrect state is left in place; this host needs a look"
+        }
 
         throw "DEPLOYMENT FAILED - ROLLED BACK to $($script:PreviousSlot)"
     }
 
-    # ---- 14. Persist only after success -------------------------------------
+    # ---- 15. Persist only after success -------------------------------------
+    # Reached only when the managed process is proven and the public site is
+    # healthy, which are now both required rather than the second alone.
     Write-Phase "Persist PM2 state"
     & pm2 save 2>&1 | Out-Null
     Write-Step "pm2 save" "OK"
 
-    # ---- 15. Final verification ---------------------------------------------
+    # ---- 16. Final verification ---------------------------------------------
+    # Assertions, not a printout. Every line here used to end in a hard-coded
+    # OK, which is how a deployment reported success while PM2 sat at errored.
     Write-Phase "Final verification"
-    $final = Get-Pm2Portfolio
-    Write-Step "pm2 status: $($final['status']), restarts $($final['restarts'])" "OK"
-    Write-Step "active slot: $(Get-ActiveSlot)" "OK"
+    $finalSupervised = Test-Supervised -ExpectedSlot $target
+    Write-SupervisionResult $finalSupervised "final"
+    if (-not $finalSupervised.Ok) {
+        throw "Final verification failed: $($finalSupervised.Reasons -join '; ')"
+    }
+
+    $finalPm2 = Get-Pm2Portfolio
+    Write-Step "pm2 status: $($finalPm2['status']), restarts $($finalPm2['restarts'])" "OK"
+    Write-Step "active slot: $($finalSupervised.Slot)" "OK"
     Write-Step "previous slot retained for rollback: $($script:PreviousSlot)" "OK"
-    Write-Step "public site: $(Get-HttpStatus $PublicUrl)" "OK"
+
+    $finalPublic = Get-HttpStatus $PublicUrl
+    Write-Step "public site: $finalPublic" $(if ($finalPublic -eq 200) { "OK" } else { "FAIL" })
+    if ($finalPublic -ne 200) { throw "Final verification failed: public site returned $finalPublic." }
+
     $deployOk = $true
 }
 catch {

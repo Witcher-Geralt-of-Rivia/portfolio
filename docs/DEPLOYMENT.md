@@ -156,13 +156,71 @@ continuously. All 255 requests returned 200 (page, CSS chunk and JS chunk).
                         Stage 06, 07 and 08 headings. The heading is the
                         load-bearing half: a placeholder emits the id too
  8 switch               PM2 re-pointed at the target slot
- 9 public health        up to 10 attempts, page + CSS + JS must all be 200
-10 rollback on failure  previous slot restored automatically, then re-verified
-11 pm2 save             only after the new release is proven healthy
+ 9 supervision          the managed process must be online, on the target slot,
+                        and must OWN the listener on 3100, held true for three
+                        consecutive samples inside a 30s bound
+10 public health        up to 10 attempts, page + CSS + JS must all be 200
+11 rollback on failure  previous slot restored automatically, then held to the
+                        same supervision and health proof before it is saved
+12 pm2 save             only after supervision and public health both pass
+13 final verification   re-asserts supervision and the public site, and throws
+                        rather than printing OK
 ```
 
 Exit code is 0 only on full success. A successful rollback still exits non-zero,
 because the intended deployment did not happen.
+
+### The supervision invariant
+
+```
+A production deployment is successful only when the public service is healthy
+AND the service is owned by the intended online PM2-managed portfolio process.
+```
+
+Availability is not the test, because HTTP cannot tell you who is answering.
+
+On 2026-09-03 a deployment printed SUCCESS while PM2 sat at `errored`. The slot
+switch took 19 seconds rather than the usual 7 to 13; PM2 spawned the
+replacement before the previous process had released port 3100, the replacement
+died with `EADDRINUSE`, and PM2 retried until it marked the app errored. One
+earlier child had bound successfully and went on serving every request
+correctly, so the public health check passed and the script concluded SUCCESS.
+
+What that left was a live site owned by a process PM2 had lost: no pid file,
+status errored, and every `pm2 restart` spawning a child that could not bind. A
+supervisor that cannot restart the thing it supervises is a site with no
+recovery path, and the script called it a success.
+
+Five things are now required, all of them, and all of them stable:
+
+```
+PM2 has a process named portfolio
+its status is online
+its PORTFOLIO_DIST_DIR is the slot this deployment intended
+something is listening on 3100
+that listener is the managed pid, or a descendant of it
+```
+
+The last line is the one the incident turned on. On this host PM2 spawns the
+Next server directly and it binds in process, so the listener pid equals the pid
+PM2 reports. The check walks the listener's parent chain anyway, so a future
+Next or PM2 that forks a worker does not turn a correct deployment into a
+failure; anything outside that chain is an orphan, whatever it happens to be
+serving.
+
+One healthy sample is not accepted, because PM2 reports `online` for a moment
+before a process that cannot bind dies. The check polls every 500ms and requires
+three consecutive agreements, giving up after 30 seconds. That is a bound, not a
+sleep: a healthy deployment passes in about a second.
+
+The rule itself is `deploy/supervision.mjs`, a pure function with no PM2, no
+sockets and no processes in it. PowerShell gathers the facts and asks it what
+they mean, which is what makes `qa/stage09d0-deploy-supervision.mjs` able to
+test the rule without running a deployment.
+
+`deploy/pm2-status.mjs` gained `pid` and `uptime_ms` for this. It still prints
+environment key names only, never a value, and still reports names that look
+like credentials.
 
 Useful flags:
 
@@ -178,6 +236,19 @@ Deployment is serialised by a named mutex, so two runs cannot pick the same
 
 The previous slot is kept intact for fast rollback. Only the inactive slot is
 cleaned, and only after the active slot has been confirmed.
+
+### If a deployment reports a supervision failure
+
+It has already rolled back, and the rollback is held to the same proof. If the
+restored release is not supervised and healthy either, `pm2 save` is skipped
+deliberately: a broken process definition must never be written to the resurrect
+file merely because something is answering on the port. That leaves the previous
+saved state in place and the host needs a look.
+
+The recovery that worked on 2026-09-03: stop whatever holds 3100, confirm the
+port is free, `pm2 start portfolio`, then verify one listener owned by the
+managed pid before `pm2 save`. Never repair it by restarting PM2 on top of an
+orphan; that is what produced the crash loop.
 
 ## Caddy
 

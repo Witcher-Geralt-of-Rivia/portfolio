@@ -388,8 +388,8 @@ delay", "simulated step 6 of 6") are sequence positions, not latency.
 Live at `https://intelligent-systems-lab.duckdns.org`. PM2 app "portfolio" on
 127.0.0.1:3100, behind a Caddy shared with another project on 3200. Production
 serves `.next-release-a` / `-b`; `.next` is development only. Update with
-`npm run deploy:safe`; host rules in `docs/DEPLOYMENT.md`. Source is public at
-`github.com/Witcher-Geralt-of-Rivia/portfolio`.
+`npm run deploy:safe`, which since 09D0 succeeds only when the intended online PM2
+process owns the listener on 3100, not merely when the site answers (D-097). Host rules in `docs/DEPLOYMENT.md`.
 
 ## Known Gaps
 
