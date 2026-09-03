@@ -250,16 +250,14 @@ const readOverview = async (p = page) =>
   check("the default actor is Morgan Reed, Admin", o.actor === "Morgan Reed" && o.role === "Admin",
     `${o.actor} / ${o.role}`);
   check("all eleven modules are listed for Admin", o.modules.length === 11, String(o.modules.length));
-  /* This asserts temporary build state, and it moves each time a module is
-     built: 09C2 shipped Overview alone, 09C3 added Leads, Customers and Inbox
-     in turn, 09C4.1 added Reservations, and 09C4.A added Contracts, Fleet and
-     Maintenance together. Three are left. When Payments, Automations and
-     Reports arrive, every module is interactive and the `implemented` flag
-     that drives this, and this check with it, is deleted. */
-  check("only the built modules are interactive",
-    JSON.stringify(o.interactive) ===
-      '["Overview","Leads","Customers","Reservations","Contracts","Fleet","Maintenance","Inbox"]',
-    JSON.stringify(o.interactive));
+  /* This used to assert temporary build state: which modules were interactive
+     yet, moving each time a stage shipped one, with a comment saying it would
+     be deleted along with the `implemented` flag when the eleventh landed.
+     09C4.B landed it. What is left is the permanent claim, which is that every
+     module a role can see is a link and none of them is a dead label. */
+  check("and every one of them is a link",
+    JSON.stringify(o.interactive) === JSON.stringify(o.modules),
+    `${o.interactive.length} of ${o.modules.length}`);
 }
 
 /* =====================================================================

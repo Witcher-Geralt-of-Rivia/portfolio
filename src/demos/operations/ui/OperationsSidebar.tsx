@@ -3,17 +3,14 @@
 /**
  * Operations demo: the product sidebar.
  *
- * Role and build state are two independent questions, and the sidebar answers
- * them separately:
+ * One question now: a module the selected role cannot view is not rendered at
+ * all, so the navigation never advertises data that role has no access to.
  *
- *   - a module the selected role cannot view is **not rendered at all**, so
- *     the navigation never advertises data that role has no access to;
- *   - a module that exists for the role but has not been built yet renders as
- *     a non-interactive item, because a link to a 404 is worse than a label
- *     that is plainly not ready.
- *
- * The second state is temporary. It disappears module by module through 09C3
- * to 09C5, and with it the `implemented` flag and these styles.
+ * There used to be a second. While the product was being built, a module that
+ * existed for the role but had no screen yet rendered as a non-interactive
+ * label, because a link to a 404 is worse than one that plainly says it is not
+ * ready. All eleven exist as of 09C4.B, so that branch, the `implemented` flag
+ * behind it and its two styles are gone.
  */
 
 import Link from "next/link";
@@ -57,21 +54,6 @@ export default function OperationsSidebar({
                 {items.map((item) => {
                   const Icon = MODULE_ICONS[item.id];
                   const active = item.id === activeModule;
-
-                  if (!item.implemented) {
-                    return (
-                      <li key={item.id}>
-                        <span className="ops-sidebar__item ops-sidebar__item--pending">
-                          <Icon />
-                          <span className="ops-sidebar__label">{item.label}</span>
-                          {/* Temporary build-state marker, removed as each
-                              module lands. Not product language. */}
-                          <span className="ops-sidebar__pending" aria-hidden="true" />
-                          <span className="visually-hidden">not built yet</span>
-                        </span>
-                      </li>
-                    );
-                  }
 
                   return (
                     <li key={item.id}>

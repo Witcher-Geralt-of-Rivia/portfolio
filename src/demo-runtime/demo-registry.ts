@@ -48,9 +48,12 @@ export const DEMOS: readonly DemoDefinition[] = [
   {
     id: "operations",
     route: "/demos/operations",
-    /* Stage 09C1 built the domain, seed and services. The product has no
-       route yet, so it is under construction rather than publishable. */
-    status: "building",
+    /* Complete as of 09C4.B: all eleven modules of the frozen specification
+       exist, are deployed, and are covered by their own suites plus one
+       whole-product integration suite. `verified` records that, and turns
+       nothing on by itself: `workSectionIsPublishable` needs all three demos
+       and the Work launcher does not exist yet. */
+    status: "verified",
     capabilityArea: "Operations / CRM / ERP SaaS",
     disclosure: DEMO_DISCLOSURE_PRIMARY,
   },

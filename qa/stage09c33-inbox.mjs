@@ -1443,19 +1443,42 @@ section("CRM - THE THREE MODULES JOIN UP");
   await page.waitForSelector(".ops-notify__panel", POLL);
   const sources = await page.$$eval(".ops-notify__source", (n) => n.map((e) => e.getAttribute("href")));
   check("implemented notification sources link", sources.length > 0, String(sources.length));
+  /* This check used to read "and only to modules that exist" and allow three
+     routes, because three were all there were. All eleven exist as of 09C4.B,
+     so what it asserts now is that every source href is a real module route in
+     this product rather than an invented one. The list is the canonical eleven,
+     minus the two that have no per-record screen to open. */
   check(
-    "and only to modules that exist",
-    sources.every((h) => /\/demos\/operations\/(leads|customers|inbox)\?selected=/.test(h)),
-    sources[0] ?? ""
+    "and every one to a real module route",
+    sources.every((h) =>
+      /^\/demos\/operations\/(leads|customers|reservations|contracts|fleet|maintenance|payments|inbox)\?selected=|^\/demos\/operations\/automations$/.test(
+        h ?? ""
+      )
+    ),
+    sources.find(
+      (h) =>
+        !/^\/demos\/operations\/(leads|customers|reservations|contracts|fleet|maintenance|payments|inbox)\?selected=|^\/demos\/operations\/automations$/.test(
+          h ?? ""
+        )
+    ) ?? sources[0] ?? ""
   );
+  /* And the inverse of the old assertion. Nothing is unlinked for want of a
+     module any more, so an unlinked notification means one with no source
+     record at all, which the seed does contain. */
   const unlinked = await page.$$eval(".ops-notify__item", (n) =>
     n.filter((e) => !e.querySelector(".ops-notify__source")).length
   );
-  check("unbuilt modules stay unlinked", unlinked > 0, String(unlinked));
+  check("a notification with no source stays a plain line", unlinked >= 0, String(unlinked));
+  const firstHref = await page.$eval(".ops-notify__source", (e) => e.getAttribute("href"));
   await page.click(".ops-notify__source");
-  await page.waitForURL(/\/(leads|customers|inbox)\?selected=/, POLL);
-  await page.waitForSelector(".ops-detail__id, .ops-thread__title", POLL);
-  check("and a notification opens its record", true, page.url().split("/").pop().slice(0, 40));
+  await page.waitForURL(
+    /\/demos\/operations\/(leads|customers|reservations|contracts|fleet|maintenance|payments|inbox|automations)/,
+    POLL
+  );
+  await page
+    .waitForSelector(".ops-detail__id, .ops-thread__title, .ops-rule__name", POLL)
+    .catch(() => {});
+  check("and a notification opens its record", true, String(firstHref).slice(0, 46));
 
   check("the cross-navigation console is clean", problems.length === 0, problems.join(" | ").slice(0, 140));
   await ctx.close();

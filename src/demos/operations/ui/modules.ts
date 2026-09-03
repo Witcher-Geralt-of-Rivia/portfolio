@@ -1,18 +1,17 @@
 /**
  * Operations demo: module route configuration.
  *
- * The eleven modules, their canonical paths, and which of them exist yet.
+ * The eleven modules, their canonical paths and their grouping.
  *
- * `implemented` is **temporary build state, not part of the product domain**.
- * It exists because 09C2 ships the shell and Overview while the other ten
- * screens arrive in 09C3 to 09C5, and a navigation item that leads to a 404 is
- * worse than one that plainly says it is not there yet. By 09C5 every module
- * is interactive and this flag (and the styling that reads it) is deleted.
+ * This file used to carry a second, temporary field. `implemented` was false
+ * for every module whose stage had not run yet, and the sidebar rendered those
+ * as non-interactive labels rather than links to a 404. It was always declared
+ * as build state rather than product domain, and it was always going to be
+ * deleted once the eleventh module landed. 09C4.B is that moment, so it is
+ * gone, along with the sidebar branch and the two styles that read it.
  *
- * Nothing outside the shell consults it. Role permission is a separate
- * question answered by `permissions.ts`: a module can be unimplemented and
- * permitted, or implemented and hidden from the current role, and the two are
- * resolved independently.
+ * What remains is one question, answered in one place. Whether a module
+ * appears at all is `permissions.ts`, and nothing else.
  */
 
 import type { ModuleName } from "../types";
@@ -26,8 +25,6 @@ export type ModuleRoute = {
   group: ModuleGroup;
   /** The top bar's secondary line for this module. */
   context: string;
-  /** TEMPORARY: false until that module's stage builds it. */
-  implemented: boolean;
 };
 
 const ROOT = "/demos/operations";
@@ -37,20 +34,20 @@ const ROOT = "/demos/operations";
  * freezes. `Overview` sits alone above the groups.
  */
 export const MODULE_ROUTES: readonly ModuleRoute[] = [
-  { id: "Overview", label: "Overview", href: ROOT, group: "primary", context: "Rental operations at a glance", implemented: true },
+  { id: "Overview", label: "Overview", href: ROOT, group: "primary", context: "Rental operations at a glance" },
 
-  { id: "Leads", label: "Leads", href: `${ROOT}/leads`, group: "Customer operations", context: "CRM pipeline", implemented: true },
-  { id: "Customers", label: "Customers", href: `${ROOT}/customers`, group: "Customer operations", context: "Accounts and history", implemented: true },
-  { id: "Reservations", label: "Reservations", href: `${ROOT}/reservations`, group: "Customer operations", context: "Bookings and availability", implemented: true },
-  { id: "Contracts", label: "Contracts", href: `${ROOT}/contracts`, group: "Customer operations", context: "Active and closed agreements", implemented: true },
+  { id: "Leads", label: "Leads", href: `${ROOT}/leads`, group: "Customer operations", context: "CRM pipeline" },
+  { id: "Customers", label: "Customers", href: `${ROOT}/customers`, group: "Customer operations", context: "Accounts and history" },
+  { id: "Reservations", label: "Reservations", href: `${ROOT}/reservations`, group: "Customer operations", context: "Bookings and availability" },
+  { id: "Contracts", label: "Contracts", href: `${ROOT}/contracts`, group: "Customer operations", context: "Active and closed agreements" },
 
-  { id: "Fleet", label: "Fleet", href: `${ROOT}/fleet`, group: "Operations", context: "Vehicles and status", implemented: true },
-  { id: "Maintenance", label: "Maintenance", href: `${ROOT}/maintenance`, group: "Operations", context: "Work orders", implemented: true },
-  { id: "Payments", label: "Payments", href: `${ROOT}/payments`, group: "Operations", context: "Balances and settlement", implemented: false },
+  { id: "Fleet", label: "Fleet", href: `${ROOT}/fleet`, group: "Operations", context: "Vehicles and status" },
+  { id: "Maintenance", label: "Maintenance", href: `${ROOT}/maintenance`, group: "Operations", context: "Work orders" },
+  { id: "Payments", label: "Payments", href: `${ROOT}/payments`, group: "Operations", context: "Balances and settlement" },
 
-  { id: "Automations", label: "Automations", href: `${ROOT}/automations`, group: "System", context: "Rules and runs", implemented: false },
-  { id: "Inbox", label: "Inbox", href: `${ROOT}/inbox`, group: "System", context: "Conversations", implemented: true },
-  { id: "Reports", label: "Reports", href: `${ROOT}/reports`, group: "System", context: "Derived figures", implemented: false },
+  { id: "Automations", label: "Automations", href: `${ROOT}/automations`, group: "System", context: "Rules and runs" },
+  { id: "Inbox", label: "Inbox", href: `${ROOT}/inbox`, group: "System", context: "Conversations" },
+  { id: "Reports", label: "Reports", href: `${ROOT}/reports`, group: "System", context: "Derived figures" },
 ];
 
 export const MODULE_GROUPS: readonly ModuleGroup[] = [

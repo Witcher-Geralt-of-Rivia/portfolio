@@ -12,10 +12,12 @@
  * conveyed by colour or shape alone.
  */
 
+import Link from "next/link";
+
 import type { DemoRecord } from "@/demo-runtime/types";
 
 import { formatCents } from "../selectors/derive";
-import type { OverviewData } from "../selectors/overview";
+import type { ActionQueueItem, OverviewData } from "../selectors/overview";
 import type { Customer, Reservation, Vehicle } from "../types";
 
 /* =====================================================================
@@ -384,6 +386,19 @@ export function UpcomingReservations({
    ACTION QUEUE
    ===================================================================== */
 
+/**
+ * Where each queue row leads.
+ *
+ * A notification is about something rather than being a record with a screen,
+ * so it has no entry and stays a plain line. The other three name a record in
+ * a module that now exists.
+ */
+const QUEUE_HREF: Partial<Record<ActionQueueItem["kind"], (id: string) => string>> = {
+  lead: (id) => `/demos/operations/leads?selected=${encodeURIComponent(id)}`,
+  payment: (id) => `/demos/operations/payments?selected=${encodeURIComponent(id)}`,
+  maintenance: (id) => `/demos/operations/maintenance?selected=${encodeURIComponent(id)}`,
+};
+
 const QUEUE_META: Record<string, { label: string; tone: string }> = {
   payment: { label: "Payment", tone: "peach" },
   maintenance: { label: "Maintenance", tone: "peach" },
@@ -413,13 +428,24 @@ export function ActionQueue({ items }: { items: OverviewData["actionQueue"] }) {
         <ul className="ops-queue">
           {shown.map((item) => {
             const meta = QUEUE_META[item.kind] ?? { label: item.kind, tone: "sky" };
+            const href = QUEUE_HREF[item.kind]?.(item.id) ?? null;
             return (
-              /* The entity id stays in the data (a later stage links these
-                 rows to their records), but it is internal plumbing and does
-                 not belong on the visitor's screen. */
+              /* The id is plumbing and stays off the screen; what it buys is
+                 the link. A queue that tells you what needs attention and then
+                 leaves you to go and find it is half a control.
+
+                 No role check here: `actionCategories` in `overview-policy.ts`
+                 already drops any category whose module the role cannot open,
+                 so a row that renders is a row its reader can follow. */
               <li className="ops-queue__row" key={`${item.kind}-${item.id}`}>
                 <span className={`ops-pill ops-pill--${meta.tone}`}>{meta.label}</span>
-                <span className="ops-queue__label">{item.label}</span>
+                {href ? (
+                  <Link className="ops-queue__label ops-queue__link" href={href}>
+                    {item.label}
+                  </Link>
+                ) : (
+                  <span className="ops-queue__label">{item.label}</span>
+                )}
               </li>
             );
           })}

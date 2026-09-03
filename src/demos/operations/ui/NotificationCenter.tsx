@@ -34,9 +34,14 @@ const PANEL_ID = "ops-notifications-panel";
 /**
  * The source types that have a screen to open, and the module each belongs to.
  *
- * Keyed by the `sourceEntityType` the services already store. A type absent
- * from this table is not a bug: it means that module is not built, so the item
- * names its source without offering a way there.
+ * Keyed by the `sourceEntityType` the services already store. This table was
+ * three entries long while most of the product was unbuilt: a type absent from
+ * it named its source without offering a way there, which is better than a
+ * link to a 404.
+ *
+ * All eleven modules exist now, so every type a service or the seed actually
+ * writes is here. The role check downstream still applies: a notification is
+ * only a link for someone who can open the module it points into (D-092).
  */
 const SOURCE_ROUTES: Record<string, { module: ModuleName; href: (id: string) => string }> = {
   lead: {
@@ -47,9 +52,31 @@ const SOURCE_ROUTES: Record<string, { module: ModuleName; href: (id: string) => 
     module: "Customers",
     href: (id) => `/demos/operations/customers?selected=${encodeURIComponent(id)}`,
   },
+  reservation: {
+    module: "Reservations",
+    href: (id) => `/demos/operations/reservations?selected=${encodeURIComponent(id)}`,
+  },
+  payment: {
+    module: "Payments",
+    href: (id) => `/demos/operations/payments?selected=${encodeURIComponent(id)}`,
+  },
+  maintenance: {
+    module: "Maintenance",
+    href: (id) => `/demos/operations/maintenance?selected=${encodeURIComponent(id)}`,
+  },
   conversation: {
     module: "Inbox",
     href: (id) => `/demos/operations/inbox?selected=${encodeURIComponent(id)}`,
+  },
+  /* Automations has no per-record route: it is one screen showing five rules
+     and their history, so both automation types land on the module itself. */
+  automation_rule: {
+    module: "Automations",
+    href: () => "/demos/operations/automations",
+  },
+  automation_run: {
+    module: "Automations",
+    href: () => "/demos/operations/automations",
   },
 };
 

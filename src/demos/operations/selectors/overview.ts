@@ -194,6 +194,14 @@ export type ReportsData = {
     rentedShare: number;
   };
   contractStatus: { status: ContractStatus; count: number }[];
+  /** Integer cents, by contract status, so a count has a value beside it. */
+  contractValue: { status: ContractStatus; totalCents: number }[];
+  contractTotals: {
+    /** Integer cents. Every contract in the period. */
+    totalCents: number;
+    paidCents: number;
+    outstandingCents: number;
+  };
   paymentStatus: {
     byStatus: { status: PaymentEffectiveStatus; count: number }[];
     /** Integer cents. */
@@ -242,9 +250,27 @@ export function selectReports(input: ReportsInput): ReportsData {
           ? 0
           : Math.round((rented / input.vehicles.length) * 100),
     },
-    contractStatus: (["Pending", "Active", "Completed", "Cancelled"] as ContractStatus[]).map(
-      (status) => ({ status, count: contracts.filter((c) => c.data.status === status).length })
-    ),
+    contractStatus: CONTRACT_ORDER.map((status) => ({
+      status,
+      count: contracts.filter((c) => c.data.status === status).length,
+    })),
+    /* Value beside count, because four Pending contracts worth 165.00 each and
+       four worth 3,000.00 are different situations and the count alone cannot
+       tell them apart. */
+    contractValue: CONTRACT_ORDER.map((status) => ({
+      status,
+      totalCents: contracts
+        .filter((c) => c.data.status === status)
+        .reduce((sum, c) => sum + c.data.totalAmount, 0),
+    })),
+    contractTotals: {
+      totalCents: contracts.reduce((sum, c) => sum + c.data.totalAmount, 0),
+      paidCents: contracts.reduce((sum, c) => sum + c.data.paidAmount, 0),
+      outstandingCents: contracts.reduce(
+        (sum, c) => sum + (c.data.totalAmount - c.data.paidAmount),
+        0
+      ),
+    },
     paymentStatus: {
       byStatus: (["Paid", "Pending", "Overdue"] as PaymentEffectiveStatus[]).map((status) => ({
         status,
@@ -256,3 +282,6 @@ export function selectReports(input: ReportsInput): ReportsData {
     },
   };
 }
+
+const CONTRACT_ORDER: ContractStatus[] = ["Pending", "Active", "Completed", "Cancelled"];
+
