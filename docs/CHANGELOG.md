@@ -1941,3 +1941,69 @@ comment explaining the invariant as a violation of it.
 `qa/stage09e-landing.mjs` is new: 87 checks over identity, navigation, the
 flagship's content and disclosure, the truth boundary, the ending, eight
 viewport widths and reduced motion.
+
+---
+
+## Stage 09D1 - Orphan recovery
+
+Status: **Complete**
+
+### Summary
+09D0 taught `deploy:safe` to detect an orphaned listener and refuse to call it a
+success. It could not do anything about one, and deploying the landing page is
+where that gap stopped being theoretical.
+
+```
+the slot switch took 14.6 seconds
+PM2 spawned the replacement before 3100 was released
+the replacement died with EADDRINUSE, PM2 gave up at errored with no pid
+the orphan kept the socket and kept serving
+```
+
+From there `deploy:safe` could not succeed and could not recover: every start
+died on the occupied port, and three consecutive runs produced identical output.
+The sanctioned path had no way out of a state the sanctioned path could create.
+
+### Two things the incident exposed
+
+The rollback reported `rolled back to .next-release-a` while the orphan carried
+on serving `.next-release-b`. The restart never bound, and the rollback's own
+health check only ever proved that something answered on the port, which is the
+exact blind spot D-097 was written about. The supervision check did catch it and
+correctly skipped `pm2 save`, so nothing wrong was persisted, but the summary
+line was not true.
+
+Preflight printed `pm2 portfolio process present (status errored)  OK`. It
+checked presence and printed the status without gating on it, so a host that
+could not possibly pass the supervision gate was allowed into a five minute
+build. Recovery now runs there, which resolves it in the right direction:
+repair, then build.
+
+### What may be killed, and what may not
+
+`deploy/orphan-recovery.mjs`, pure and unit tested like `supervision.mjs`.
+Occupying the port is explicitly not evidence. Five proofs, all required:
+
+```
+the image is node
+the command line names THIS repository root
+the command line names the Next server and the production port
+the command line names none of ce-staging, ce-staging-proxy,
+  appclubedaeconomia or 3200
+it descends from the PM2 daemon that is running now
+```
+
+Any one missing and the deployment fails closed without touching anything. A
+failed deployment is recoverable by a person; a killed neighbour is an outage in
+somebody else's product.
+
+The fifth proof looks like the strongest and is the weakest, which was measured
+rather than assumed: the neighbouring application is also `node.exe` and also a
+child of the same PM2 daemon 2432. Ancestry does not separate the two products
+on this host at all. See D-100 and `qa/stage09d1-orphan-recovery.mjs`.
+
+### Where it runs
+
+Preflight, the supervision gate, and the rollback, each followed by the
+unchanged D-097 proof. Recovery persists nothing by itself: `pm2 save` still
+runs only after supervision and public health both pass.

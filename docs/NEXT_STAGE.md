@@ -29,7 +29,8 @@ Stage 09                IN PROGRESS
       09C4.A Contracts + Fleet + Maintenance  COMPLETE and deployed
       09C4.B Payments + Automations + Reports COMPLETE and deployed
   09D0 Deployment supervision hardening   COMPLETE
-  Landing page finalization               COMPLETE
+  09D1 Orphan recovery in deploy:safe     COMPLETE
+  Landing page finalization               COMPLETE and deployed
   Demo 01 Rental Operations Platform  ALL ELEVEN MODULES, registry verified
   Demo 02 Field Operations            NOT STARTED
   Demo 03 Adaptive Learning           NOT STARTED
@@ -95,9 +96,10 @@ background while 367 checks passed.
 22. Stage 09C4.A - Contracts, Fleet, Maintenance DONE
 23. Stage 09C4.B - Payments, Automations, Reports DONE
 24. Stage 09D0 - Deployment supervision         DONE
-25. Portfolio landing page finalization         DONE
-26. Field and Learning specs, then builds       NEXT
-27. Stage 09 - #work becomes a three-demo launcher  LATER
+25. Stage 09D1 - Orphan recovery                DONE
+26. Portfolio landing page finalization         DONE
+27. Field and Learning specs, then builds       NEXT
+28. Stage 09 - #work becomes a three-demo launcher  LATER
 ```
 
 ## What changed about Stage 09

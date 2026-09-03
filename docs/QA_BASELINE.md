@@ -2476,3 +2476,69 @@ check that compared their `top` values reported a 21px mismatch at 768px, which
 was the three-line note in System sitting one line higher than the two-line
 notes beside it. The bottoms are flush, which is the intent. Recorded because
 the same measurement will look like a regression again next time.
+
+---
+
+## Stage 09D1 - Orphan recovery
+
+PASS. One new harness:
+
+```
+qa/stage09d1-orphan-recovery.mjs        47 checks
+```
+
+Deterministic: a pure function, no PM2, no sockets, no deployment.
+
+### Why this one is mostly refusals
+
+`deploy:safe` may now kill a process. The failure mode of getting that wrong is
+not a failed deployment, it is taking down a different product that shares the
+host. So one scenario authorises recovery and a dozen do not, each differing
+from the authorised case in exactly one way: a Next server from another
+directory, a node process that is not Next, a non-node process, an unreadable
+command line, the PM2 daemon itself, a process that is not a PM2 descendant, a
+host where the daemon cannot be identified, an empty port, an already-supervised
+production, a supervision failure that is not an orphan, and a worker forked by
+the managed process.
+
+Two more assert that no verdict ever authorises without naming the pid it just
+examined, and that bad input fails closed rather than open.
+
+### The measurement that decided the design
+
+Daemon ancestry reads like the strongest available proof of ownership. Run
+against the real neighbouring application on this host it turns out to prove
+nothing:
+
+```
+ours    11216 < 2432 < 6728
+theirs  15004 < 2432 < 6728
+```
+
+One PM2 daemon, 2432, manages both products. The two processes are both
+`node.exe`, both Next servers, both PM2 children. What separates them is whose
+repository the command line names, and the check refuses the neighbour three
+times over with no reason mentioning ancestry.
+
+That case is in the suite with the real pids, because the obvious simplification
+of this feature is "is it a PM2 child", and that simplification would kill the
+neighbour.
+
+### Verified on the first live run
+
+The recovery ran at preflight against the real orphan, and the deployment then
+completed normally:
+
+```
+before deployment  pm2 errored, slot .next-release-a, pid 0, listener 11216
+recovery           proved pid 11216 is ours, stopped it, port released
+after recovery     pm2 online, slot .next-release-a, pid 16056 = listener
+supervision        pm2 online, slot .next-release-b, pid 15548 = listener
+```
+
+Verified independently afterwards rather than read from the script's summary:
+exactly one listener on 3100, PM2 online holding that same pid, slot
+`.next-release-b`, suspicious environment names empty, all thirteen public
+routes 200, the three QA routes 404, the http redirect 308, the neighbouring
+domain 200, and both neighbouring PM2 processes still at zero restarts, which is
+what proves they were never touched.

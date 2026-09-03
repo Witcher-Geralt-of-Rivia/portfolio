@@ -3427,3 +3427,95 @@ licence to read one frozen configuration file rather than duplicate it.
 this change. It is left as literal data on purpose: it is a composed picture at
 a fixed size, tuned to four state cards and eleven rail items, and it should
 break visibly if the product's shape changes rather than silently reflow.
+
+---
+
+## D-100 - The deployment system recovers the orphan it can create
+
+Status: Accepted
+Stage: 9D1
+
+### Decision
+`deploy:safe` may reclaim port 3100 from an orphaned listener, and only after
+proving the listener belongs to this deployment on five independent counts.
+
+### Why this was needed
+D-097 taught the script to detect an orphaned listener and refuse to call it a
+success. It could not do anything about one. On 2026-09-03 that gap became a
+blocker:
+
+```
+an orphan held 3100
+  -> every pm2 start died with EADDRINUSE
+  -> PM2 stayed errored with no pid
+  -> the supervision gate refused, correctly
+  -> rollback restarted into the same occupied port and also could not bind
+  -> three consecutive runs produced identical output
+```
+
+The sanctioned path had no way out of a state the sanctioned path could create.
+Worse, the rollback reported "rolled back to `.next-release-a`" while the orphan
+carried on serving `.next-release-b`: the restart never bound, and only the
+supervision check noticed that the summary line was wrong.
+
+### The proof required before anything is killed
+Occupying the port is explicitly not evidence. All five, or the answer is no:
+
+```
+the image is node
+the command line names THIS repository root
+the command line names the Next server and the production port
+the command line names none of the fenced neighbours
+it descends from the PM2 daemon that is running now
+```
+
+Fenced: `ce-staging`, `ce-staging-proxy`, `appclubedaeconomia`, `3200`.
+
+Any one missing and the deployment fails closed without touching the process.
+That is the correct trade: a failed deployment is recoverable by a person, and a
+killed neighbour is an outage in somebody else's product.
+
+### The measurement that decided the design
+Daemon ancestry reads like the strongest available proof. It is not, and this
+was measured rather than assumed. Run against the real neighbouring application
+on this host:
+
+```
+ours    11216 < 2432 < 6728
+theirs  15004 < 2432 < 6728
+```
+
+One PM2 daemon, 2432, manages both products. Ancestry does not separate them at
+all. What separates them is whose repository the command line names, and run
+against that real process the check refuses it three times over, none of the
+three reasons being ancestry.
+
+Ancestry is kept because it is necessary: it distinguishes a server this
+deployment system started from any other server pointed at the same directory.
+It is nowhere near sufficient, and anyone tempted to simplify the check to "is
+it a PM2 child" should read `qa/stage09d1-orphan-recovery.mjs` first.
+
+### Where it runs
+Three points, each followed by the unchanged D-097 proof:
+
+```
+preflight          a host that cannot pass the gate is repaired before a five
+                   minute build rather than after it
+supervision gate   the slot switch is what orphans the port
+rollback           a restart that cannot bind still leaves the port answering
+```
+
+Recovery never persists anything by itself. `pm2 save` still runs only after
+supervision and the public health checks both pass, exactly as D-097 left it.
+
+### Scope
+One pid, proved first, and the port must actually free before PM2 is asked to
+start anything. Nothing here touches Caddy, port 3200, the neighbouring
+application, the release-slot names or the A/B system. `pm2 stop portfolio`
+precedes the kill so PM2 is not racing to respawn into the port being freed.
+
+Verified after the first live run: one listener on 3100, PM2 online with that
+same pid, slot `.next-release-b`, suspicious environment names empty, all
+thirteen public routes 200, the three QA routes 404, the http redirect intact,
+and both neighbouring PM2 processes still at zero restarts, which is what proves
+they were never touched.

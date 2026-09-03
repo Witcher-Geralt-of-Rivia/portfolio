@@ -15,14 +15,11 @@ Stage 09       IN PROGRESS - Demo 01 complete, 1 of 3 demos built
 Demo 01        ALL 11 modules DEPLOYED, registry verified
 ```
 
-Stage 09 changed direction: `#work` becomes a launcher into three
-frontend-only product demos rather than case studies. 09A froze the shared runtime;
-09B froze Demo 01's contract; 09C1 built its domain; 09C2 built the shell and
-Overview; 09C2.1 hardened both; 09C3 built Leads, Customers and Inbox; 09C4.0
-made the rental domain ready, 09C4.1 built Reservations, 09C4.A built Contracts,
-Fleet and Maintenance, and 09C4.B built Payments, Automations and Reports.
-Demo 01 is complete. Demo 02 and Demo 03 are unbuilt, and `currentStage` stays
-8. See `docs/DEMO_OPERATIONS_IMPLEMENTATION.md` and `docs/NEXT_STAGE.md`.
+Stage 09 changed direction: `#work` presents frontend-only product demos rather
+than case studies. 09A froze the shared runtime; 09B froze Demo 01's contract;
+09C1 to 09C4.B built all eleven of its modules. Demo 02 and Demo 03 are unbuilt
+and `currentStage` stays 8. See `docs/DEMO_OPERATIONS_IMPLEMENTATION.md` and
+`docs/NEXT_STAGE.md`.
 
 `#work` is no longer a placeholder: `FeaturedDemoSection` publishes Demo 01 as a
 disclosed engineering demo, deliberately a different publication system from
@@ -131,8 +128,9 @@ src/
   styles/
     tokens.css            all design tokens - the source of truth for values
     typography.css, motion.css, layers.css, surfaces.css   foundations
-    navigation.css, hero.css, systems.css, products.css, learning.css, lab.css
-    work.css  written, not imported   demo-shell.css, operations.css  demo only
+    navigation.css, hero.css, systems.css, products.css, learning.css,
+    lab.css, featured.css (#work + the footer)
+    work.css  written, never imported   demo-shell.css, operations.css  demo only
 
 public/
   textures/micro-grain.svg    locally generated SVG turbulence tile
@@ -141,8 +139,8 @@ qa/                            Playwright QA harness (see QA_BASELINE.md)
 docs/                          canonical project memory (this directory)
 ```
 
-Stylesheet import order in `globals.css`: tokens, typography, motion, layers,
-surfaces, navigation, hero, systems, products, learning, lab.
+Import order in `globals.css`: tokens, typography, motion, layers, surfaces,
+navigation, hero, systems, products, learning, lab, featured.
 
 ## Stage 01 - Background (FROZEN)
 
@@ -387,9 +385,11 @@ delay", "simulated step 6 of 6") are sequence positions, not latency.
 
 Live at `https://intelligent-systems-lab.duckdns.org`. PM2 app "portfolio" on
 127.0.0.1:3100, behind a Caddy shared with another project on 3200. Production
-serves `.next-release-a` / `-b`; `.next` is development only. Update with
-`npm run deploy:safe`, which since 09D0 succeeds only when the intended online PM2
-process owns the listener on 3100, not merely when the site answers (D-097). Host rules in `docs/DEPLOYMENT.md`.
+serves `.next-release-a` / `-b`; `.next` is development only. `npm run
+deploy:safe` succeeds only when the intended online PM2 process owns the
+listener, not merely when the site answers (D-097), and can reclaim that port
+from an orphan after proving on five counts that it is ours (D-100). Host rules
+in `docs/DEPLOYMENT.md`.
 
 ## Known Gaps
 
