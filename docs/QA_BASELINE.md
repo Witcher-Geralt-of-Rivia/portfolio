@@ -1968,6 +1968,12 @@ and Inbox were built, and it moves here to
 weakened; the list is one longer because one more module is real. Every other
 assertion in every suite passed unchanged.
 
+The regression was then re-run for every suite that opens a sheet, after
+D-093 changed `.ops-overlay--sheet` to `height: fit-content`:
+`stage09c2` 141/141, `stage09c21` 111/111, `stage09c31` 407/407, `stage09c32`
+174/174, `stage09c33` 422/422, `stage09c40` 62/62 and `stage09c41` 218/218, all
+unchanged, including every mobile sheet-geometry assertion.
+
 The two 09A suites need their fixture routes installed before they will run
 (`qa/fixtures/demos-qa-probe.page.tsx` and `demos-qa-shell.page.tsx`), and both
 routes were removed again afterwards. A QA route must not exist in production.

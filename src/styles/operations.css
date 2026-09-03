@@ -1766,11 +1766,23 @@
   border-radius: 0;
 }
 
+/* `height: fit-content`, not `auto`.
+ *
+ * A dialog is `position: fixed` with `inset: 0`, and an inset-filling box whose
+ * height is `auto` stretches to its containing block. So `auto` here meant "as
+ * tall as the cap allows" rather than "as tall as the content", and every sheet
+ * on this shell rendered at a flat 720px: 220px of empty panel under the Leads
+ * form, 193px under the Customers form, 188px under the Reservations one.
+ *
+ * `fit-content` is what `auto` reads as. The cap still applies, so a sheet with
+ * more content than fits is unchanged and its body scrolls. Below the sheet
+ * breakpoint the full-surface rule further down restates `height: 100dvh` and
+ * still wins, so phones keep the full-screen treatment. */
 .ops-overlay--sheet {
   margin: auto;
   width: min(560px, calc(100vw - 32px));
   max-height: min(86dvh, 720px);
-  height: auto;
+  height: fit-content;
 }
 
 .ops-overlay--dialog {

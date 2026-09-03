@@ -2985,3 +2985,54 @@ into Customers or the Inbox at all.
 
 When Fleet and Contracts are built, two facts become links and this decision is
 the record of why they were not before.
+
+---
+
+## D-093 - A sheet is as tall as its content, because `auto` never meant that
+
+Status: Accepted
+Stage: 9C4.1
+
+### Decision
+`.ops-overlay--sheet` is `height: fit-content`, not `height: auto`.
+
+The `max-height: min(86dvh, 720px)` cap is unchanged, and so is the
+full-surface rule below the sheet breakpoint, which restates `height: 100dvh`
+later in the stylesheet and still wins.
+
+### Reason
+A `<dialog>` is `position: fixed` with `inset: 0`. An inset-filling box whose
+height is `auto` stretches to its containing block rather than to its content,
+so `auto` here resolved to the viewport and the cap then clamped it. Every
+sheet on the shell rendered at a flat 720px whatever it held.
+
+Measured on the live production build before the change:
+
+```
+Leads         New lead            content 500   dead space 220px
+Customers     New customer        content 527   dead space 193px
+Reservations  New reservation     content 532   dead space 188px
+Reservations  Confirm reservation content 532   dead space 188px
+```
+
+The dead space is panel, not backdrop, so it read as a surface that had failed
+to fill rather than as a dialog sized to its job. `fit-content` is what `auto`
+was written to mean.
+
+This was found by looking at the public Reservations build rather than by
+reading CSS, and confirmed by injecting the one rule into the live page and
+measuring before and after, at 1440x900, at 1024x620 where the cap does not
+bind, and at 390x844 where the full-surface rule takes over.
+
+### Consequence
+The defect arrived with the shell in 09C3.1, so this changes Leads and
+Customers as well as Reservations. Both are externally approved modules and
+both now show a dialog sized to its content instead of one padded with 200px of
+empty panel. Nothing else about them moves.
+
+A sheet whose content exceeds the cap is unaffected: it still stops at the cap
+and its body still scrolls. Phones still get the full-screen treatment.
+
+`stage09c2`, `stage09c21`, `stage09c31`, `stage09c32`, `stage09c33`,
+`stage09c40` and `stage09c41` all pass unchanged with the rule in place,
+including every mobile sheet-geometry assertion.

@@ -1564,6 +1564,19 @@ nothing escaped anywhere visible, but that was a property of this layout rather
 than of the markup, and it is the arrangement that produced the Inbox defect
 (D-086).
 
+### A shell defect the public build showed
+
+Every sheet on the operations shell was rendering at a flat 720px whatever it
+held: 220px of empty panel under the Leads form, 193px under the Customers
+form, 188px under Confirm reservation. A dialog is `position: fixed` with
+`inset: 0`, and an inset-filling box with `height: auto` stretches to its
+containing block rather than to its content, so `auto` resolved to the viewport
+and the cap clamped it. `.ops-overlay--sheet` is now `height: fit-content`,
+which is what `auto` was written to mean (D-093).
+
+The defect arrived with the shell in 09C3.1, so this changes Leads and
+Customers too. Every sheet-touching suite passes unchanged.
+
 ### Not done
 
 Six module screens. `#work` is untouched, the registry still reads
