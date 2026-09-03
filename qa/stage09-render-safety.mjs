@@ -134,13 +134,34 @@ check("a case with no metrics is fine", publishableMetrics(complete).length === 
 check("sourceNote is never part of the rendered metric",
   m.every((x) => !("sourceNote" in x) || x.sourceNote === undefined));
 
-console.log("\n--- the section is not wired in ---");
+/* These three checks used to read: the case-study section is not imported,
+   `#work` is still a navigation placeholder, and its stylesheet is not loaded.
+   Together they described a page that had no work section at all, and the
+   landing stage gave it one.
+
+   The invariant underneath never changed, and it is what is tested here now.
+   `#work` on the homepage belongs to the featured engineering demo. The
+   case-study section is a separate thing behind its own publication gate, and
+   it stays unrendered until that gate is met, so nothing on the public page
+   can present a placeholder case as published work.
+
+   Usage rather than mention. page.tsx explains in a comment which component
+   owns the anchor and why it is deliberately not this one, and a substring
+   test read that explanation as the violation it was describing. */
+console.log("\n--- the case-study section is still not published ---");
 const { readFileSync } = await import("node:fs");
 const page = readFileSync(new URL("../src/app/page.tsx", import.meta.url), "utf8");
 const globals = readFileSync(new URL("../src/app/globals.css", import.meta.url), "utf8");
-check("page.tsx does not import the work section", !page.includes("SelectedWorkSection"));
-check("page.tsx keeps #work in the placeholder list", !/BUILT[^)]*"work"/.test(page));
+check(
+  "page.tsx does not import the case-study section",
+  !/^\s*import[^;]*SelectedWorkSection/m.test(page)
+);
+check("page.tsx does not render it", !/<\s*SelectedWorkSection[\s/>]/.test(page));
 check("globals.css does not import work.css", !globals.includes("work.css"));
+check(
+  "the featured demo section owns #work instead",
+  /<\s*FeaturedDemoSection[\s/>]/.test(page)
+);
 
 console.log(`\n=== stage09 render safety: ${failures === 0 ? "ALL PASS" : failures + " FAILURE(S)"} ===`);
 process.exit(failures === 0 ? 0 : 1);
