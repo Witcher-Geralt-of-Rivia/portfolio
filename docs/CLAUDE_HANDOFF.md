@@ -61,11 +61,10 @@ Both rules hold until the user explicitly changes them. See
 | Backend | None. No database, API route or server action |
 | QA | Playwright + pngjs (devDependencies), scripts in `qa/` |
 
-Rendering is almost entirely server-side. Thirteen `"use client"` modules
-exist: nine on the site - `navigation/SiteNavigation.tsx`, plus one lab and one
-tablist for each of the four built capability sections - and four in the demo
-platform, which nothing imports yet. Everything else is server-rendered markup
-and CSS. `docs/project-state.json` holds the authoritative list.
+Rendering is almost entirely server-side. Thirty-nine `"use client"` modules
+exist: nine on the site, five in the demo platform and twenty-five in the
+Operations interface. Everything else is server-rendered markup and CSS.
+`docs/project-state.json` holds the authoritative list.
 
 ## Current Runtime
 
@@ -120,13 +119,12 @@ generic glassmorphism, gaming UI, crypto UI. Full anti-pattern list in
 
 Two routes:
 
-- **`/`**: hero (`#hero`), then the four built capability sections
-  `#systems` (05), `#products` (06), `#ai-learning` (07) and `#lab` (08),
-  then `#work`, the last anchor section.
-  `#work` is a **QA placeholder only**: an eyebrow label and the words
-  "Navigation specimen section". Stage 09 replaces it.
+- **`/`**: hero (`#hero`), the four capability sections `#systems` (05),
+  `#products` (06), `#ai-learning` (07), `#lab` (08), then `#work`, which is
+  `FeaturedDemoSection`: it publishes Demo 01 as a disclosed engineering demo
+  and is **not** the gated case-study section (D-098). Ends in `SiteFooter`.
 - **`/specimen`**: Stage 02 typography specimen, unlinked, kept verifiable.
-`/demos/operations` and its `/leads`, `/customers` and `/inbox` modules are the Operations demo, deployed for review; `noindex, nofollow`, linked from nowhere. `/demos` is a 404.
+`/demos/operations` and its ten module routes are the Operations demo: `noindex, nofollow`, linked from `#work`. `/demos` is a 404.
 
 Source is public at `github.com/Witcher-Geralt-of-Rivia/portfolio`, branch `main`. Push every verified commit and tag after its stage's QA and verify the remote SHA; run `node qa/public-repo-safety.mjs --history` first. Never let a secret enter history, and do not rewrite it.
 
@@ -148,7 +146,8 @@ src/components/
   systems/   05 - ArchitectureLab; canvas, trace, principles; four modes
   products/  06 - ProductStudio; web/mobile/assist surfaces, event rail
   lab/       08 - LabWorkspace; flow, experiment views, observation, controls
-  work/      09 - case-study renderers, built but never wired in
+  work/      FeaturedDemoSection + FeaturedPreview own #work; the 09
+             case-study renderers are here too, built and still not wired in
   demos/     09A - DemoShell, DemoDisclosure, DemoResetControl
 src/demo-runtime/   09A - shared demo platform; see docs/DEMO_PLATFORM.md
 ```
@@ -179,8 +178,9 @@ measurements showing the original approach is better. Reasons in
 - No navigation item is active while the hero owns the viewport.
 - Architecture gradients use `userSpaceOnUse` (the default degenerates on
   horizontal paths); the trace drops below the canvas at 1149px, not 999px.
-- The demo runtime hand-rolls IndexedDB (D-047); `#work` waits for all three
-  demos (D-050); the action queue leads with the most urgent item (D-055).
+- The demo runtime hand-rolls IndexedDB (D-047); a three-demo launcher waits
+  for all three (D-050), which is why `#work` publishes one flagship instead
+  (D-098); the action queue leads with the most urgent item (D-055).
 
 Each is an entry in `docs/DECISIONS.md` with its measured reason.
 
@@ -224,17 +224,17 @@ Raw design values live in `src/styles/tokens.css`. Docs must not duplicate it.
 ## Current Task Status
 
 Stages 01-08 complete and frozen; the site is live over HTTPS. Stage 09 is **in
-progress**: 09A froze the shared runtime, 09B froze Demo 01's contract, 09C1
-built its domain, 09C2 built the shell and Overview, 09C2.1 hardened them,
-and 09C3 built the three CRM modules: Leads, Customers, and Inbox, which links
-them. Seven module screens remain; `#work` is still a placeholder.
+progress**: 09A froze the shared runtime, 09B froze Demo 01's contract, and 09C
+built all eleven Operations modules. 09D0 hardened the deployment gate so a run
+cannot report SUCCESS unless the intended PM2 process owns the listener (D-097).
+The landing page finalization then gave `#work` its flagship section and the
+page an ending. Demo 02 and 03 are unbuilt; `currentStage` stays 8.
 
 ## Next Allowed Task
 
-**Stage 09C4 - Rental Operations: Reservations, Contracts, Fleet, Maintenance
-and Payments.** See `docs/NEXT_STAGE.md`. **BLOCKED UNTIL EXTERNAL LIVE REVIEW
-OF INBOX**: every review so far found defects the suite had no opinion about
-(D-062, D-067).
+**Demo 02 - Field Operations.** Its product specification must be frozen first,
+the way 09B froze Demo 01's. See `docs/NEXT_STAGE.md`. Every external review so
+far has found defects the suite had no opinion about (D-062, D-067, D-099).
 
 Do not begin it automatically.
 

@@ -2413,3 +2413,66 @@ and verifying one listener, all thirteen public routes 200, the three QA routes
 404, the neighbouring domain untouched and the http redirect intact, then
 `pm2 save`. The deployment itself was correct throughout: the served build was
 `.next-release-b` with all eleven modules, which is what the switch intended.
+
+---
+
+## Portfolio landing page finalization
+
+PASS. One new harness:
+
+```
+qa/stage09e-landing.mjs                87 checks
+```
+
+`qa/stage09-render-safety.mjs` was rewritten in one section and still passes.
+
+### What the new harness is actually guarding
+
+Two things, and neither is visible in a screenshot.
+
+**The truth boundary.** The homepage now publishes a demonstration in the place
+a portfolio usually publishes client work, so the suite reads the whole rendered
+body and asserts the absence of "case study", "client work", "selected client",
+"commissioned", "production client" and "our client", plus the absence of the
+case-study section and its verified mark in the DOM. It then asserts the
+canonical disclosure is present, exact, and has client rects, because a
+disclosure that is in the markup but not on the screen is not a disclosure.
+
+The standing contact rules are checked against the raw HTML rather than the
+visible text: no `mailto:`, no `tel:`, no email shape, no telephone shape, no
+messenger or social host, no form control, no hire-me phrasing.
+
+**One anchor.** Five navigation ids, each existing exactly once, `#work`
+carrying the featured class, no `.nav-specimen` surviving anywhere, and the nav
+link actually scrolling to within 160px of the section top. The anchor existing
+and the link reaching it are different claims and both are made.
+
+### The suite that had to be repointed
+
+`qa/stage09-render-safety.mjs` asserted that the work section was not imported,
+that `#work` was still a placeholder, and that its stylesheet was not loaded.
+That described the page this stage replaced, so two of the three could only ever
+fail or pass vacuously once the section existed.
+
+They now assert the invariant that absence was standing in for: the case-study
+section is neither imported nor rendered, its stylesheet is still not loaded,
+and the featured section owns the anchor instead.
+
+The old import check was a substring test for `SelectedWorkSection`, and
+`page.tsx` carries a comment explaining which component owns `#work` and why it
+is deliberately not that one. The test read the explanation as the violation it
+was describing. Written as usage now: an import statement or a JSX element.
+
+### The footer count
+
+The rendered page contains six `<footer>` elements. Five are inside the demo
+panels of earlier sections and pre-date this stage. Every footer assertion is
+scoped to `.site-footer`, and there is exactly one of those.
+
+### Measurement note
+
+Group notes in the breadth band are bottom-aligned, not top-aligned. An ad-hoc
+check that compared their `top` values reported a 21px mismatch at 768px, which
+was the three-line note in System sitting one line higher than the two-line
+notes beside it. The bottoms are flush, which is the intent. Recorded because
+the same measurement will look like a regression again next time.

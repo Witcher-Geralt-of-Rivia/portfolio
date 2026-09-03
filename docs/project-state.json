@@ -3,8 +3,8 @@
   "purpose": "Demonstrate engineering capability to freelance clients. Technical portfolio, not a personal site.",
   "currentStage": 8,
   "stage05Started": true,
-  "nextStage": "portfolio-landing-page-finalization",
-  "nextStageTitle": "PORTFOLIO LANDING PAGE FINALIZATION (NOT STARTED)",
+  "nextStage": "demo-02-field-operations",
+  "nextStageTitle": "DEMO 02 - FIELD OPERATIONS (NOT STARTED)",
   "frozenStages": [
     1,
     2,
@@ -323,5 +323,6 @@
     "staleDevServer": "A `next dev` tree for this repository is running and serving the documented preview on port 3000 (supervisor PID 13232, listening child PID 14568). It rewrites AGENTS.md with prohibited punctuation on each restart, which qa:style catches. Not terminated: it is not stale, and termination needs explicit approval."
   },
   "stage09c40Complete": true,
-  "stage09c41Complete": true
+  "stage09c41Complete": true,
+  "landingPageComplete": true
 }

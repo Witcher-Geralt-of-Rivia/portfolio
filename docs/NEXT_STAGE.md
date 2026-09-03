@@ -28,6 +28,8 @@ Stage 09                IN PROGRESS
       09C4.1 Reservations           COMPLETE, deployed and APPROVED
       09C4.A Contracts + Fleet + Maintenance  COMPLETE and deployed
       09C4.B Payments + Automations + Reports COMPLETE and deployed
+  09D0 Deployment supervision hardening   COMPLETE
+  Landing page finalization               COMPLETE
   Demo 01 Rental Operations Platform  ALL ELEVEN MODULES, registry verified
   Demo 02 Field Operations            NOT STARTED
   Demo 03 Adaptive Learning           NOT STARTED
@@ -41,16 +43,23 @@ instruction and recorded as D-094.
 
 ## The block
 
-Next task: PORTFOLIO LANDING PAGE FINALIZATION (NOT STARTED)
+Next task: DEMO 02 - FIELD OPERATIONS (NOT STARTED)
 
-Demo 01 is finished. All eleven modules exist, the registry reads
-`operations = verified`, and the product is deployed for review with the
-Rental Operations Platform as the flagship engineering showcase.
+Demo 01 is finished and the landing page now presents it. All eleven modules
+exist, the registry reads `operations = verified`, and `#work` is
+`FeaturedDemoSection`, which publishes the Rental Operations Platform as an
+interactive engineering demo and discloses it as one (D-098).
 
-Nothing about Stage 09 is complete, and the registry flip changes nothing
-visible: `workSectionIsPublishable()` requires all three demos and has no
-callers, because `#work` has not been built. The demo stays unadvertised,
-`noindex, nofollow`, linked from nowhere, and `currentStage` stays 8.
+Nothing about Stage 09 is complete. `workSectionIsPublishable()` still requires
+all three demos and still has no callers: the landing page did not go through
+it, because the case-study gate it guards is a different question from whether
+a demonstration may be shown. `SelectedWorkSection` is still not imported and
+not rendered, and `currentStage` stays 8.
+
+The demo keeps `index: false, follow: false`. It is no longer linked from
+nowhere, which is the one sentence of this block that the landing stage
+changed: a demonstration should be reachable by a person and ignored by a
+crawler, and now it is both.
 
 Demo 02 (Field Operations) and Demo 03 (Adaptive Learning) have specifications
 to freeze before either can be built, and neither starts without an explicit
@@ -85,9 +94,10 @@ background while 367 checks passed.
 21. Stage 09C4.1 - Reservations                 DONE
 22. Stage 09C4.A - Contracts, Fleet, Maintenance DONE
 23. Stage 09C4.B - Payments, Automations, Reports DONE
-24. Portfolio landing page finalization         NEXT
-25. Field and Learning specs, then builds       LATER
-26. Stage 09 - #work launcher integration       LATER
+24. Stage 09D0 - Deployment supervision         DONE
+25. Portfolio landing page finalization         DONE
+26. Field and Learning specs, then builds       NEXT
+27. Stage 09 - #work becomes a three-demo launcher  LATER
 ```
 
 ## What changed about Stage 09
@@ -132,41 +142,30 @@ qa/stage09a-runtime.mjs    76 checks   qa/stage09a-shell.mjs   85 checks
 docs/DEMO_PLATFORM.md      canonical for the demo architecture
 ```
 
-Nothing is wired into `src/app/page.tsx`, `globals.css` is unchanged, and
-production is untouched.
+`src/app/page.tsx` renders the five sections and `SiteFooter`. The demo runtime
+is reached from `#work` through `FeaturedDemoSection`, which reads the route
+from `findDemo("operations")` rather than a literal.
 
 ## NEXT TASK
 
-**Stage 09C4.2 - Contracts.**
+**Demo 02 - Field Operations. Not started, and not to be started without an
+explicit instruction.**
 
-The second of five, in the sequence D-090 froze:
+Its product specification has to be frozen first, the way 09B froze Demo 01's,
+before any of it is built. The same applies to Demo 03.
 
-```
-09C4.0  core domain readiness
-09C4.1  Reservations
-09C4.2  Contracts
-09C4.3  Fleet + Maintenance
-09C4.4  Payments + the integrated rental workflow
-```
-
-The CRM group is done and approved, and it established everything these
-reuse: the table and drawer grammar, the approved select, the URL contract
-for selection, the role gate and the single polite announcement.
-
-Each module that landed flipped its `implemented` flag in
-`src/demos/operations/ui/modules.ts`, which turned its sidebar entry from a
-non-interactive label into a link. That flag and the styling that read it were
-temporary build state and were deleted in 09C4.B, when the eleventh module
-landed, exactly as planned.
-
-Do not begin it until instructed.
+That rule has earned its keep. Every external review of this product so far has
+found something the suite had no opinion about: most recently an application
+rendering above 1951 pixels of portfolio background while 367 checks passed,
+and, in the landing stage, a page that stated one module architecture while the
+picture directly above it drew a different one (D-099).
 
 ## Finishing Stage 09
 
 ```
 1  freeze each product spec, then build that demo
 2  set that demo's status to "verified" in src/demo-runtime/demo-registry.ts
-3  only when all three are verified, build the #work launcher
+3  when all three are verified, widen #work from one flagship to a launcher
 4  add a Stage 09 heading assertion to deploy/safe-deploy.ps1 (D-039)
 5  QA #work at all eight viewports
 6  npm run deploy:safe
@@ -174,7 +173,10 @@ Do not begin it until instructed.
 ```
 
 `workSectionIsPublishable()` returns false until all three demos are verified,
-so the launcher cannot advertise a demo that is not finished (D-050).
+so a launcher cannot advertise a demo that is not finished (D-050). It has no
+callers: `FeaturedDemoSection` presents one verified demo and does not claim to
+be that launcher, so step 3 widens what `#work` already holds rather than
+building it from nothing.
 
-Once `#work` is built, `.nav-specimen` in `src/app/page.css` and the
-`PLACEHOLDERS` loop in `src/app/page.tsx` become dead and can be removed.
+`.nav-specimen` and the `PLACEHOLDERS` loop were the scaffolding that stood in
+for `#work`. Both were deleted when the featured section replaced them.

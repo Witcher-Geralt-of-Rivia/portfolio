@@ -21,24 +21,22 @@ frontend-only product demos rather than case studies. 09A froze the shared runti
 Overview; 09C2.1 hardened both; 09C3 built Leads, Customers and Inbox; 09C4.0
 made the rental domain ready, 09C4.1 built Reservations, 09C4.A built Contracts,
 Fleet and Maintenance, and 09C4.B built Payments, Automations and Reports.
-Demo 01 is complete. Demo 02 and Demo 03 are unbuilt, `#work` is a placeholder,
-`currentStage` stays 8. See `docs/DEMO_OPERATIONS_IMPLEMENTATION.md` and
-`docs/NEXT_STAGE.md`. The case-study framework and its one verified internal
-case are preserved, unpublished; see `docs/CASE_STUDY_SOURCE_AUDIT.md`.
+Demo 01 is complete. Demo 02 and Demo 03 are unbuilt, and `currentStage` stays
+8. See `docs/DEMO_OPERATIONS_IMPLEMENTATION.md` and `docs/NEXT_STAGE.md`.
+
+`#work` is no longer a placeholder: `FeaturedDemoSection` publishes Demo 01 as a
+disclosed engineering demo, deliberately a different publication system from
+the case-study section, which is still not imported, not rendered and still
+behind `MINIMUM_PUBLIC_CASES` (D-098, D-099, `docs/CASE_STUDY_SOURCE_AUDIT.md`).
 
 ## Toolchain
 
-| Item | Value |
-|---|---|
-| Framework | Next.js 16.3.3 |
-| Router | App Router (`src/app`) |
-| Bundler | Turbopack (Next default) |
-| React / ReactDOM | 19.2.8 |
-| Node | v24.19.0 |
-| npm | 11.17.0 |
-| TypeScript | ^5, `--noEmit` clean |
-| ESLint | ^9 with `eslint-config-next` 16.3.3, clean |
-| Platform | Windows Server 2022 |
+```
+Next.js 16.3.3, App Router (src/app), Turbopack. React / ReactDOM 19.2.8.
+Node v24.19.0, npm 11.17.0, Windows Server 2022.
+TypeScript ^5 (--noEmit clean). ESLint ^9 with eslint-config-next 16.3.3,
+zero errors; one pre-existing unused-variable warning in qa/texture.mjs.
+```
 
 ## Dependencies
 
@@ -78,15 +76,14 @@ runs on a timer at rest.
 |---|---|---|
 | `/` | Hero + five navigation anchor sections | Static (prerendered) |
 | `/specimen` | Stage 02 typography specimen, unlinked | Static (prerendered) |
-| `/demos/operations` | Demo 01 shell + Overview, `noindex`, unlinked | Static page, client subtree |
-| `/demos/operations/leads` | Demo 01 CRM pipeline, `noindex`, unlinked | Static page, client subtree |
-| `/demos/operations/customers` | Demo 01 customer records, `noindex`, unlinked | Static page, client subtree |
-| `/demos/operations/inbox` | Demo 01 conversations, `noindex`, unlinked | Static page, client subtree |
-| `/demos/operations/reservations` | Demo 01 bookings, `noindex`, unlinked | Static page, client subtree |
+| `/demos/operations` | Demo 01 shell + Overview, `noindex`, linked from `#work` | Static page, client subtree |
+| `/demos/operations/{leads,customers,reservations,contracts,fleet,maintenance,payments,automations,inbox,reports}` | Demo 01's ten module routes, `noindex`, reached from inside the console | Static page, client subtree |
 
 Section ids on `/`: `hero`, `systems`, `products`, `ai-learning`, `lab`, `work`.
-`#systems` (05), `#products` (06), `#ai-learning` (07) and `#lab` (08) are real
-sections. `#work` is the last Stage 03 QA placeholder. `/demos` is itself a
+All five navigation targets are now real sections; no Stage 03 QA placeholder
+remains, `.nav-specimen` is gone, and the page ends in `SiteFooter`. `#work`
+links to `/demos/operations`, which still carries `index: false, follow: false`:
+reachable by a person, ignored by a crawler, as intended. `/demos` is itself a
 404 - the layout there has no page of its own.
 
 ## Source Tree
@@ -118,7 +115,10 @@ src/
                 panels, journey; learning-{scenarios,geometry}.ts
     lab/        Stage 08 - LabWorkspace; flow, experiment views, observation,
                 controls, pattern rail; lab-experiments.ts (5 experiments)
-    work/       Stage 09 - case-study renderers; built, never wired in
+    work/       FeaturedDemoSection owns #work, publishing Demo 01 as a
+                disclosed demo; FeaturedPreview composes its picture. Also
+                the case-study renderers, built and still not wired in (D-098)
+    layout/SiteFooter.tsx   the page's ending; carries no contact route
     demos/      Stage 09A - DemoShell, DemoDisclosure, DemoResetControl, DemoSelect
   content/case-studies.ts   typed case-study model + render-safety filter
   demos/operations/         Stage 09C1 domain (28 modules) + ui/ (shell,

@@ -3287,3 +3287,143 @@ right answer when the current one cannot be trusted.
 Nothing about the A/B release system changed. The slots, their names, the smoke
 test and the rollback path are all as they were; what changed is what counts as
 proof that the switch worked.
+
+---
+
+## D-098 - `#work` publishes a demonstration, and says which one it is
+
+Status: Accepted
+Stage: Landing page finalization
+
+### Decision
+The homepage's `#work` anchor belongs to `FeaturedDemoSection`, a new component
+that publishes the Rental Operations Platform as an interactive engineering
+demo. `SelectedWorkSection` is untouched: not imported, not rendered, and still
+behind `MINIMUM_PUBLIC_CASES`.
+
+### Why not one component
+The obvious shortcut was to reuse the existing work section and feed the demo
+into it. It already had an anchor, a heading, a card grammar and a verified
+mark. Two ways to take that shortcut, and both are the same lie:
+
+```
+lower the case-study gate so the demo qualifies
+  -> a placeholder case can now publish itself as client work
+
+dress the demo in case-study clothing
+  -> a synthetic demonstration is presented as an engagement
+```
+
+The gate exists because `docs/CASE_STUDY_SOURCE_AUDIT.md` records an exhaustive
+search that found no verified client engagement in this repository. A section
+that publishes client work must keep refusing until there is some. A section
+that publishes a demonstration has nothing to refuse, because a demonstration
+built for this portfolio is exactly what it claims to be.
+
+So there are two publication systems with two different standards of proof, and
+one anchor, which the honest one of the two currently owns.
+
+### What makes it honest
+The canonical disclosure is rendered in the product frame's masthead, above the
+preview, from `DEMO_DISCLOSURE_PRIMARY` and `DEMO_DISCLOSURE_SECONDARY`:
+
+```
+INTERACTIVE ENGINEERING DEMO
+SYNTHETIC DATA - FRONTEND ONLY
+```
+
+Not a tooltip, not a footnote, not `aria-label` text, and not metadata. It is
+the second thing in the frame after the product name.
+
+The four facts are the ones a reader can check by opening the demo and counting:
+eleven connected modules, thirteen domain entities, four simulated roles, five
+automation rules. No assertion counts, no uptime, no invented adoption figure,
+and nothing derived from a number this portfolio cannot show.
+
+The route comes from `findDemo("operations")` rather than a string literal, so a
+demo the registry does not mark verified cannot be linked from the homepage by
+editing a href.
+
+### Consequences
+`workSectionIsPublishable()` still requires all three demos and still has no
+callers. `#work` no longer waits on it, which was the change; the case-study
+gate did not move.
+
+The demo carries `index: false, follow: false` from `src/app/demos/layout.tsx`
+and still does. It is now linked from an indexable page, which is the intended
+end state for a demonstration: reachable by a person, ignored by a crawler.
+`docs/NEXT_STAGE.md` said the demo was "linked from nowhere"; that sentence
+described the previous stage and has been corrected rather than preserved.
+
+`qa/stage09-render-safety.mjs` used to assert the absence of a work section.
+It now asserts the invariant that absence was standing in for: the case-study
+section is neither imported nor rendered, and the featured section owns the
+anchor instead.
+
+---
+
+## D-099 - The landing page reads the product's configuration, it does not restate it
+
+Status: Accepted
+Stage: Landing page finalization
+
+### Decision
+`FeaturedDemoSection` derives its module breadth from `MODULE_GROUPS` and
+`routesInGroup()` in `src/demos/operations/ui/modules.ts`, the same
+configuration the console's own sidebar renders from. Only the one-line
+description of each group is written in the landing page, keyed by the group
+names the product owns.
+
+### The defect this fixes
+The section was first written with a hand-typed grouping that read well:
+
+```
+Customer operations     Leads, Customers, Reservations, Inbox
+Rental operations       Contracts, Fleet, Maintenance
+Finance and intelligence Payments, Automations, Reports
+```
+
+The product's actual grouping is:
+
+```
+Customer operations     Leads, Customers, Reservations, Contracts
+Operations              Fleet, Maintenance, Payments
+System                  Automations, Inbox, Reports
+```
+
+Directly above the hand-typed list sat the preview, which draws the real
+sidebar. One page therefore showed a visitor two different architectures for
+one product, disagreeing about where Contracts and Inbox live, and invited them
+to click through and discover a third. Every individual claim was defensible.
+The page as a whole was not.
+
+Prose is written once and never re-checked. A list of eleven module names in
+three groups is not prose, it is a copy of a data structure, and a copy drifts.
+This one drifted before it ever shipped.
+
+### What is still written by hand
+The group notes, because they are prose and belong to the page:
+
+```
+Customer operations  A lead becomes a customer, then a booking, then a
+                     signed agreement.
+Operations           Where an agreement becomes a vehicle out on hire, and
+                     comes back.
+System               The rules that watch the work, the messages it sends,
+                     the figures it derives.
+```
+
+Keyed by group name, so a renamed group loses its note visibly rather than
+attaching it to the wrong list.
+
+### Scope
+`modules.ts` holds one type import and no runtime dependency, so importing it
+into a server component pulls no client code onto the landing page. The same
+reasoning does not extend to the demo's screens, services or stores, and this is
+not a licence to import demo internals into the portfolio generally: it is a
+licence to read one frozen configuration file rather than duplicate it.
+
+`FeaturedPreview` already drew the canonical grouping and was correct before
+this change. It is left as literal data on purpose: it is a composed picture at
+a fixed size, tuned to four state cards and eleven rail items, and it should
+break visibly if the product's shape changes rather than silently reflow.

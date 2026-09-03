@@ -1817,3 +1817,118 @@ key names only and never a value.
 The A/B release system, the slot names, the smoke test, Caddy, DuckDNS, TLS,
 port 3200 and the neighbouring application. What changed is what counts as proof
 that a switch worked.
+
+---
+
+## Portfolio landing page finalization - the flagship showcase
+
+Status: **Complete**
+
+### Summary
+The homepage was a sequence of five capability sections that stopped. Four of
+them presented finished work; the fifth, `#work`, was a Stage 03 navigation
+specimen standing in for a section nobody had built yet, and after it the
+document simply ended.
+
+It now culminates and it now closes.
+
+```
+FeaturedDemoSection   owns #work. Publishes the Rental Operations Platform
+                      as an interactive engineering demo, disclosed as one.
+FeaturedPreview       a composed picture of the console: eleven module rail,
+                      the fleet split, the reservation to payment flow, a
+                      rule firing, the payment report.
+SiteFooter            an ending. Identity, statement, the way back into the
+                      page, a build note. No contact route of any kind.
+```
+
+The four frozen section headings are untouched, as is the H1.
+
+### Two publication systems, one anchor
+
+`SelectedWorkSection` publishes real client work and refuses to render until
+`MINIMUM_PUBLIC_CASES` is satisfied. It is not imported, not rendered and not
+weakened. The demo is published by a different component to a different
+standard, and the page says which is which: `INTERACTIVE ENGINEERING DEMO` and
+`SYNTHETIC DATA - FRONTEND ONLY` are rendered in the product frame's masthead,
+above the preview, from the registry constants (D-098).
+
+The four facts are countable by opening the demo: eleven connected modules,
+thirteen domain entities, four simulated roles, five automation rules.
+
+### The page disagreed with the product
+
+The breadth band listed the eleven modules in three hand-typed groups. Directly
+above it, the preview drew the console's real sidebar. They did not match:
+the typed list put Contracts under "Rental operations" and Inbox under
+"Customer operations", while the product puts Contracts under Customer
+operations and Inbox under System.
+
+One page, two architectures for one product, and a third waiting behind the
+link. The band now derives from `MODULE_GROUPS` and `routesInGroup()`, the
+configuration the sidebar itself renders from, and only the group descriptions
+are written here (D-099).
+
+### The preview is composed, not screenshotted
+
+A miniature of the real console at this size is a picture of unreadable tables.
+The preview is built to work at the size it occupies: hierarchy carries the
+meaning before any text matters. Every figure in it is a canonical seed figure,
+so the numbers on the landing page are the numbers on the screen.
+
+```
+fleet     24 vehicles: 10 available, 4 reserved, 7 rented, 3 maintenance
+payments  26 records:  18 paid, 5 pending, 3 overdue
+```
+
+No iframe, no chart library, no external image, no duplicated module code.
+Static and inert, `role="img"` with a descriptive label, contents hidden from
+assistive technology.
+
+### Visual defects found by looking at it
+
+Tests passing is not the same as the page looking finished, and these were
+found in screenshots rather than assertions:
+
+```
+the flagship headline rendered at default leading over four loose lines
+  five invented token names. --leading-display, --tracking-display,
+  --weight-display, --leading-relaxed and --motion-quick do not exist, so
+  the browser used its defaults. Now matched to the frozen section grammar,
+  and every var() in featured.css and page.css audited against tokens.css.
+
+a 230px void in the middle of the preview
+  the eleven item rail is taller than the main column's content, and
+  `margin-top: auto` on the lower band collected all of the slack into one
+  hole. Distributed instead, with the flow given the larger share.
+
+the flow connector drifted off its nodes
+  the line's `top` was a constant tuned to a padding that later changed.
+  Both now read one custom property.
+
+"/ AUTOMATION" opened the second line of the capability strip
+  written as one string it wrapped wherever it fitted. It is a list now, and
+  each separator trails its own item, so a wrap can only follow one.
+
+the four notes wrapped three and one
+  a two by two grid instead of a ragged flex wrap.
+
+the footer's mark was a stray dot floating above the name
+  it sits on the name's line.
+
+the group notes lost their shared baseline
+  Customer operations holds four modules and wraps to a second row of chips.
+  `grid-template-rows: auto 1fr auto` keeps every note on the same line.
+```
+
+### Regression
+
+`qa/stage09-render-safety.mjs` asserted that no work section was wired in, which
+described the page this stage was asked to replace. It now asserts what that
+absence stood for: the case-study section is neither imported nor rendered, and
+the featured section owns the anchor. Its old substring test also read page.tsx's
+comment explaining the invariant as a violation of it.
+
+`qa/stage09e-landing.mjs` is new: 87 checks over identity, navigation, the
+flagship's content and disclosure, the truth boundary, the ending, eight
+viewport widths and reduced motion.
