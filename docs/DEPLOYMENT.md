@@ -218,6 +218,12 @@ sockets and no processes in it. PowerShell gathers the facts and asks it what
 they mean, which is what makes `qa/stage09d0-deploy-supervision.mjs` able to
 test the rule without running a deployment.
 
+Verified live on 2026-09-03. The deployment switched to `.next-release-a` and
+step 9 read `pm2 online, slot .next-release-a, pid 17136, listener 17136`, which
+is the ownership assertion passing on real facts rather than on a fixture. One
+clean restart, no crash loop, and SUCCESS printed only after step 12 re-asserted
+it.
+
 `deploy/pm2-status.mjs` gained `pid` and `uptime_ms` for this. It still prints
 environment key names only, never a value, and still reports names that look
 like credentials.
