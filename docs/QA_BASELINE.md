@@ -1977,3 +1977,31 @@ unchanged, including every mobile sheet-geometry assertion.
 The two 09A suites need their fixture routes installed before they will run
 (`qa/fixtures/demos-qa-probe.page.tsx` and `demos-qa-shell.page.tsx`), and both
 routes were removed again afterwards. A QA route must not exist in production.
+
+### Public production review pass
+
+Run against `https://intelligent-systems-lab.duckdns.org` after deployment, so
+there is no probe route and everything below is observed through the interface.
+49 checks, all passing.
+
+```
+routes        all five demo routes and /specimen answer 200; the three QA
+              fixture routes 404; the neighbouring domain still answers 200;
+              http still 308s to https
+visual        1920x1080, 1440x900, 1366x768, 1024x768, 768x1024, 430x932 and
+              390x844, viewport and full-page captures at each, zero pixels of
+              portfolio background below the product in any of them
+sheets        Leads, Customers and Reservations forms each sized to their
+              content, 0px of dead panel (D-093)
+sequence      create, confirm from four eligible vehicles, the Inbox showing
+              7 unread where the seed has 6, convert to contract_0015 as a
+              fact rather than a link, then Reset returning 18 reservations
+              and 6 unread
+content       no contact data of any kind, no booking CTA, no em dash
+console       no error on a plain visit and none through the sequence
+```
+
+Three browser warnings appear during the sequence, all the same Chrome preload
+resource hint: this script moves between routes with full page loads rather
+than through the in-app links a visitor uses. They are reported rather than
+asserted on, and a plain visit raises none.
