@@ -3519,3 +3519,269 @@ same pid, slot `.next-release-b`, suspicious environment names empty, all
 thirteen public routes 200, the three QA routes 404, the http redirect intact,
 and both neighbouring PM2 processes still at zero restarts, which is what proves
 they were never touched.
+
+---
+
+## D-101 - The Certifications section is built, mounted, and renders nothing
+
+Status: Accepted
+Stage: Certifications architecture
+
+### Decision
+`src/content/certifications.ts` exports an empty array. `CertificationsSection`
+is imported by `src/app/page.tsx` and sits in its eventual position between the
+Engineering Lab and the featured build. It returns null, so the public page is
+byte-for-byte what it was before this existed.
+
+No certification has been issued to this portfolio's author. The entire section
+was built anyway, so that the day one arrives, adding one record is the whole
+activation step.
+
+### Mounted and empty, rather than written and unimported
+
+`SelectedWorkSection` took the other option: complete, correct, and not imported
+at all, waiting for someone to remember to wire it in. Both are honest. Only one
+of them activates on data.
+
+```
+unimported   content arrives -> edit page.tsx, edit globals.css, add the
+                                rhythm rule, hope the person who does it
+                                knows all three are needed
+mounted      content arrives -> add the record
+```
+
+The cost of mounting is one component call that returns null and three CSS rules
+that match nothing. The cost of not mounting is that the wiring is a thing to be
+remembered rather than a thing that works, and the brief asked specifically for
+the version where adding data is sufficient.
+
+Nothing is reserved on the page while it is empty. No heading, no frame, no gap:
+a section with no content renders no content, which is why the eyebrow numbering
+had to become derived rather than written.
+
+### The gate
+
+The same two-gate shape as the case-study framework, for the same reason. Status
+says somebody confirmed the credential exists; completeness says it carries what
+a public credential must carry. Both, or nothing renders.
+
+The completeness rule refuses more than emptiness:
+
+```
+issuedAt      must be a real calendar date in YYYY-MM-DD
+              "2025-02-30" parses and is not a day, so it is refused
+credentialUrl must parse and must be https
+              which is also what stops a javascript: URL reaching an href
+expiresAt     absent is fine, malformed is not
+              a wrong expiry renders, an absent one does not
+```
+
+`MINIMUM_PUBLIC_CERTIFICATIONS` is 1, deliberately unlike the case-study
+minimum of 3. A section called Selected Work implies a body of work and needs
+enough of it to be true. A section called Certifications with one certification
+in it is simply accurate.
+
+### What may never go in the file
+
+No example credentials, not even commented out. No issuer names as placeholders.
+No invented credential ids or verification URLs. No "coming soon" entry, which is
+a claim about the future dressed as data. The synthetic credentials used to
+develop and test the component live in `qa/fixtures/`, create no route, and are
+asserted absent from the production page.
+
+### Consequence: the first external link in the project
+
+There is currently no external link anywhere in `src/`. Zero `target`, zero
+`rel`, zero `http`. A credential that cannot be verified is an assertion, so the
+title and the modal action both link to the issuer's own verification page, and
+the convention established here is `target="_blank" rel="noopener noreferrer"`.
+
+That is a new convention rather than an existing one being followed, and it is
+recorded here as such. It does not conflict with the contact-information ban:
+`docs/PRIVACY_AND_SECURITY.md` prohibits contact routes and social accounts, and
+an issuer's verification page is neither. Nor does it conflict with
+`externalFontRequests: false` or `externalImageAssets: false`, which are about
+loading external resources rather than linking to them.
+
+With the collection empty, no external link renders today. The first one appears
+with the first credential.
+
+---
+
+## D-102 - The deck's arithmetic is a pure module, and the scroll path never touches React
+
+Status: Accepted
+Stage: Certifications architecture
+
+### Decision
+`src/components/certifications/deck-geometry.ts` holds every calculation the
+sticky deck performs and has no React, no DOM and no measurement in it. The
+controller measures once, schedules one animation frame per scroll burst, and
+writes CSS custom properties straight onto elements. React state changes only
+when an integer changes.
+
+This is the first `requestAnimationFrame` in the project. `docs/PROJECT_STATE.md`
+previously recorded that none ran anywhere, and that sentence has been corrected
+rather than left.
+
+### Why the arithmetic is separable
+
+A scroll animation whose maths lives inline is one that can only be examined by
+scrolling, on whatever viewport happens to be open. Pulled out, the same
+functions run at every card count and every width in milliseconds, and the four
+defects below were found that way or fixed under a test that now holds them
+shut.
+
+### The four defects the split caught
+
+**The sticky offset was missing from the progress fraction.** The stage is
+pinned at `top: var(--nav-scroll-margin)` for navigation clearance, and a sticky
+box with a top offset releases that many pixels earlier than one pinned at zero.
+Left out of both the range height and the denominator, the last two cards were
+still at 0.86 and 0.38 when the section released. The deck never finished, and
+it failed short by exactly the height of the offset.
+
+**The rail moved in whole slots while the cards moved smoothly.** `activeIndex`
+is an integer that flips at a threshold; the cards it was carrying travel
+continuously. Mid-reveal the rail had jumped a full slot while the card it was
+following was two thirds of the way there, and on a 390px phone that put the
+active credential two hundred pixels off the left edge.
+
+**Summing progress over-runs.** The obvious continuous replacement was "how many
+cards have resolved", the sum of their progresses. It leads, because the reveal
+windows deliberately overlap and cards further back contribute their partial
+progress to the total. It led by 0.44 of a slot, cutting nearly half the active
+card off a phone screen. The rail follows the position of the frontmost card
+instead, `max(progress_i * i)`, which is continuous and monotonic for the same
+reason each term is.
+
+**The deck's origin did not follow the rail.** Anchored at the rail's zero, the
+stack of cards still waiting stayed behind at the start of the rail and slid off
+the left of the screen the moment the rail moved, taking the next credential
+with it. The origin is now `shift + depth`, so unresolved cards stack where the
+visitor is looking.
+
+### Capacity is measured, not tabulated
+
+The first version declared five cards at 1200px and above. The content frame is
+1200px, a card is 306px and the gap is 20px, so five cards need 1610px: the last
+two rendered outside the clip, invisible and still focusable, on the widest
+viewport tested.
+
+Capacity is now `floor((available + gap) / (card + gap))` against the deck's
+measured width, so the card width, the gap and the gutter can all change at
+breakpoints without anything here being kept in sync. The card width is read off
+a card rather than from `--cert-card-w`, because `getPropertyValue` returns a
+custom property's SPECIFIED value: on a phone the token is
+`min(300px, calc(100vw - 2 * var(--gutter)))` and parsing it yields NaN.
+
+### What the choreography does not promise
+
+The rail slides continuously rather than snapping slot to slot, so mid-transition
+two adjacent cards share the window, each about half in. That is deliberate and
+it is what the snapping alternative was traded for. The invariant that is
+asserted instead is contiguity: the rail may leave the deck compact at entry and
+may sit between slots while it moves, but it never opens a gap between two
+credentials, and it ends fully unfolded and slot aligned.
+
+### The scroll path
+
+```
+scroll event -> store window.scrollY        (no work)
+             -> schedule one frame          (coalesced)
+frame        -> read cached geometry        (no layout read)
+             -> write --cert-p, --cert-shift, --cert-cp, --cert-depth, inert
+             -> setActive only if the integer changed
+```
+
+No `getBoundingClientRect` runs inside the frame, per card or otherwise, so the
+scroll path contains no forced reflow. Geometry is re-measured on resize and by
+a `ResizeObserver` on the stage, the range and the deck, because a font swap or
+a reflow above the section moves it without a resize event.
+
+---
+
+## D-103 - A credential card is an article with two controls, not a button
+
+Status: Accepted
+Stage: Certifications architecture
+
+### Decision
+`CertificationCard` renders an `<article>` that is not focusable. Inside it are
+two real controls: the certification title as an `<a>` to the issuer's
+verification page, and an explicit "View details" `<button>` that opens the
+modal. The article's own click handler is a convenience for a mouse and defers
+to whichever control was actually clicked.
+
+### The requirement that pulls against itself
+
+Three things were asked for at once:
+
+```
+clicking the card body opens the detail modal
+clicking the certification title goes to the issuer
+the markup stays valid and the whole thing works from a keyboard
+```
+
+A `<button>` wrapping the card with an `<a>` inside it satisfies the first two
+and is invalid HTML: interactive content may not nest, and browsers disagree
+about what to do with it. A `<div onClick tabIndex={0}>` with a key handler is
+valid and is a button reimplemented badly, and it makes the entire card one
+enormous unlabelled tab stop that a screen reader announces as a wall of text.
+
+So the card is not the control. Two controls sit inside it, each labelled, each
+doing something a mouse user can also do, and a keyboard visitor gets exactly
+two tab stops per credential instead of one useless one.
+
+### Deferring to descendants without coordinates
+
+```js
+if (event.target.closest("a, button")) return;
+```
+
+A DOM ancestry test rather than a pointer-coordinate test. It stays correct when
+the layout changes, when a control moves, and when the click arrives from a
+keyboard's Enter on a nested control, which reports that control as its target.
+Nothing in it depends on where the card happens to be on screen.
+
+### Focus return had to be written by hand
+
+The native `<dialog>` returns focus to whatever opened it when `close()` runs,
+but only while the dialog is still in the document. React's passive effect
+cleanup runs AFTER the commit that removed the element, so by the time `close()`
+is reached the dialog is detached and the restore is a no-op.
+
+Measured, not assumed: pressing Escape left `document.activeElement` on `<body>`,
+dropping a keyboard visitor at the top of the page having lost the credential
+they were reading. The opener is now captured before `showModal()` (which moves
+focus into the dialog, so afterwards there is nothing left to remember) and
+refocused in the cleanup if it is still connected.
+
+### Off-screen cards are inert
+
+When the rail has more credentials than fit, the ones outside the window are
+translated out of an `overflow: hidden` clip. They are invisible and, without
+intervention, still in the tab order: tabbing to one makes the browser try to
+scroll a clipped container to chase it, which fights the transform that put it
+there. It bites hardest at capacity 1, where a phone showing five credentials
+one at a time has four off-screen cards at any moment, each holding a link and a
+button.
+
+`inert` is applied from the animation frame rather than from a React prop,
+because visibility depends on the continuously sliding rail position, and
+re-rendering to express a continuous value is what the whole component is
+arranged to avoid. Visibility is judged from the rendered position rather than
+an index window, because an index window and a sliding rail disagree exactly on
+the card that is half in.
+
+### Reduced motion and no JavaScript
+
+The readable layout is the default and the choreography is the upgrade. The
+server renders a plain grid with no transforms and no opacity tricks; on mount,
+and only if motion is allowed, the enhancement turns on. A visitor whose
+JavaScript failed, or who asked for reduced motion, gets every credential in a
+readable grid rather than a column of invisible cards waiting for a scroll
+handler that will never run.
+
+There is no state in which a card sits at `opacity: 0`, and leaving enhanced
+mode removes the tall scroll range with it.

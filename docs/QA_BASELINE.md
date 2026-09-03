@@ -2542,3 +2542,85 @@ exactly one listener on 3100, PM2 online holding that same pid, slot
 routes 200, the three QA routes 404, the http redirect 308, the neighbouring
 domain 200, and both neighbouring PM2 processes still at zero restarts, which is
 what proves they were never touched.
+
+---
+
+## Certifications
+
+PASS. One new harness:
+
+```
+qa/stage09f-certifications.mjs   161 checks with the fixture routed
+                                  94 checks without it, the specimen half skipped
+```
+
+### Two halves, and only one needs a browser
+
+`deck-geometry.ts` is pure, so the choreography's arithmetic is exercised at
+every card count and every width in milliseconds rather than by scrolling. That
+is where four real defects were found, each of which is now an assertion:
+
+```
+every card is fully resolved at progress 1, at every count
+nothing is resolved at progress 0, so there is a deck to unfold
+the rail is monotonic and never jumps a whole slot
+cards stay contiguous: the rail never opens a gap between two credentials
+the deck ends fully unfolded and slot aligned
+travel is capped, so fifty credentials do not make a tunnel
+capacity is computed from measured width, exact at the boundary
+```
+
+The second half drives the real component through synthetic fixtures on a route
+that does not exist in the committed tree. That is the house convention: the
+credentials live under `qa/`, creating the route is a deliberate act, and the
+production page is checked separately for their absence.
+
+### The check that matters most is the cheapest
+
+With an empty collection the homepage must contain no certifications section, no
+card, no modal, and none of the fixture strings. Asserted by element, by every
+invented issuer name, by URL, by credential id, and by the absence of a reserved
+gap. The brief calls a leak here a hard failure condition, so it is checked six
+ways rather than one.
+
+The numbering is checked too: inserting a section that renders nothing must
+leave no hole in the eyebrow sequence, and 05 must still be the featured build
+rather than a Certifications section that failed to appear.
+
+### The trap that made the animation look broken
+
+Headless Chromium does not necessarily paint a page nobody is looking at, and
+`requestAnimationFrame` does not fire without a frame. The deck's whole
+choreography is RAF-scheduled, so the first run reported every card stuck at
+`--cert-cp: 0` and a completely dead animation that worked correctly in a real
+browser. A throwaway screenshot forces the compositor to produce a frame; the
+`settle()` helper does that before every measurement.
+
+This is the same trap recorded for Stage 05's intersection timings. It will be
+the same trap next time.
+
+### Two assertions that were wrong rather than the code
+
+Worth recording, because both looked like defects and neither was.
+
+**"a phone advances one slot per card"** sampled progress at the five quarters
+and expected 0,1,2,3,4. The reveal windows overlap, so the active card changes at
+0.335, 0.5, 0.665 and 0.83, and the quarters miss one. Walking the whole range
+and collecting the transitions tests the property the sampling was reaching for.
+
+**"the active card is always inside the window"** forbids the arrival animation
+the section is built around: `activeIndex` calls a card active once it is half
+resolved, which happens while it is still sliding in. Replaced with contiguity,
+which is the property that actually has to hold.
+
+A third was over-claiming rather than wrong: "no credential is skipped at any
+capacity" looped over three capacities and passed none of them to the function
+under test, running the identical assertion three times. ESLint found it as an
+unused variable.
+
+### Scroll positions in a suite that measures a sticky section
+
+The stage is pinned at a top offset for navigation clearance, so it releases
+that many pixels before the range's own end. Scrolling to the range end
+overshoots and captures a section that has already begun to scroll away, which
+looked like a clipped heading and was not.

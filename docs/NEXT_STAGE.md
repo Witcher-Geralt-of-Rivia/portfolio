@@ -31,6 +31,7 @@ Stage 09                IN PROGRESS
   09D0 Deployment supervision hardening   COMPLETE
   09D1 Orphan recovery in deploy:safe     COMPLETE
   Landing page finalization               COMPLETE and deployed
+  Certifications architecture             COMPLETE, renders nothing (empty)
   Demo 01 Rental Operations Platform  ALL ELEVEN MODULES, registry verified
   Demo 02 Field Operations            NOT STARTED
   Demo 03 Adaptive Learning           NOT STARTED
@@ -98,8 +99,9 @@ background while 367 checks passed.
 24. Stage 09D0 - Deployment supervision         DONE
 25. Stage 09D1 - Orphan recovery                DONE
 26. Portfolio landing page finalization         DONE
-27. Field and Learning specs, then builds       NEXT
-28. Stage 09 - #work becomes a three-demo launcher  LATER
+27. Certifications architecture, built empty    DONE
+28. Field and Learning specs, then builds       NEXT
+29. Stage 09 - #work becomes a three-demo launcher  LATER
 ```
 
 ## What changed about Stage 09
@@ -144,9 +146,15 @@ qa/stage09a-runtime.mjs    76 checks   qa/stage09a-shell.mjs   85 checks
 docs/DEMO_PLATFORM.md      canonical for the demo architecture
 ```
 
-`src/app/page.tsx` renders the five sections and `SiteFooter`. The demo runtime
-is reached from `#work` through `FeaturedDemoSection`, which reads the route
-from `findDemo("operations")` rather than a literal.
+`src/app/page.tsx` renders the five sections, a mounted `CertificationsSection`
+that renders nothing, and `SiteFooter`. The demo runtime is reached from `#work`
+through `FeaturedDemoSection`, which reads the route from `findDemo("operations")`
+rather than a literal.
+
+Certifications is complete and empty. Adding one verified record to
+`src/content/certifications.ts` publishes the section, moves the featured build's
+eyebrow from 05 to 06 on its own, and needs no other change. Nothing about it
+may be populated speculatively: see D-101 and the header of that file.
 
 ## NEXT TASK
 

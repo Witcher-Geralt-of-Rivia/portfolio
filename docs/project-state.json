@@ -153,7 +153,10 @@
       "src/demos/operations/ui/automations/RuleConfirmAction.tsx",
       "src/demos/operations/ui/reports/ReportsScreen.tsx",
       "src/demos/operations/ui/reports/ReportPanels.tsx",
-      "src/demos/operations/ui/reports/StatBars.tsx"
+      "src/demos/operations/ui/reports/StatBars.tsx",
+      "src/components/certifications/CertificationDeck.tsx",
+      "src/components/certifications/CertificationCard.tsx",
+      "src/components/certifications/CertificationModal.tsx"
     ]
   },
   "routes": [
@@ -324,5 +327,6 @@
   },
   "stage09c40Complete": true,
   "stage09c41Complete": true,
-  "landingPageComplete": true
+  "landingPageComplete": true,
+  "certificationsArchitectureComplete": true
 }

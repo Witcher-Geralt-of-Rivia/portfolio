@@ -2007,3 +2007,133 @@ on this host at all. See D-100 and `qa/stage09d1-orphan-recovery.mjs`.
 Preflight, the supervision gate, and the rollback, each followed by the
 unchanged D-097 proof. Recovery persists nothing by itself: `pm2 save` still
 runs only after supervision and public health both pass.
+
+---
+
+## Certifications - the architecture, built empty
+
+Status: **Complete**
+
+### Summary
+A complete Certifications system: data model, truth gate, sticky scroll
+choreography, credential cards, detail modal, responsive behaviour and QA. It
+renders nothing, because no certification has been issued.
+
+```
+src/content/certifications.ts              the canonical source. []
+src/components/certifications/
+  deck-geometry.ts                         pure arithmetic, no React, no DOM
+  CertificationsSection.tsx                server shell, gate, returns null
+  CertificationDeck.tsx                    the sticky choreography
+  CertificationCard.tsx                    one credential
+  CertificationModal.tsx                   native <dialog>
+  certification-format.ts                  dates and hosts, in one place
+src/styles/certifications.css
+src/lib/scroll-lock.ts                     site-level counted page lock
+qa/fixtures/certifications-specimen.page.tsx   synthetic, never routed
+qa/stage09f-certifications.mjs             161 checks
+```
+
+The section is mounted in `page.tsx` between the Lab and the featured build and
+returns null, so adding one verified record to `certifications.ts` activates it
+with no wiring (D-101). The public page today is what it was before this
+existed: no heading, no frame, no reserved gap.
+
+### Nothing may be invented here
+
+No example credentials, not even commented out. No issuer names as placeholders,
+no invented credential ids, no "coming soon" entry. The completeness gate
+refuses more than emptiness: a date that parses but is not a day, a
+`credentialUrl` that is not https, a malformed expiry. That last one matters
+because a wrong expiry renders and an absent one does not.
+
+The synthetic credentials used to build and test this live in `qa/fixtures/`,
+create no route while they live there, and the suite asserts their absence from
+the production page by name, by URL and by credential id.
+
+### The first external link in the project
+
+There is no `target`, no `rel` and no `http` anywhere else in `src/`. A
+credential that cannot be verified is an assertion, so the title and the modal
+action link to the issuer's own verification page and the convention established
+is `target="_blank" rel="noopener noreferrer"`. It is a new convention rather
+than an existing one being followed, and D-101 records it as such. With the
+collection empty, no external link renders today.
+
+### The scroll choreography, and four defects the pure module caught
+
+`deck-geometry.ts` has no React, no DOM and no measurement, so the arithmetic
+runs at every card count and width in milliseconds instead of by scrolling.
+
+```
+the sticky offset was missing from the progress fraction
+  the stage pins at var(--nav-scroll-margin) and so releases that many
+  pixels early. The last two cards were at 0.86 and 0.38 when the section
+  released: the deck failed short by exactly the height of the offset.
+
+the rail moved in whole slots while the cards moved smoothly
+  activeIndex flips at a threshold. On a 390px phone the rail had jumped a
+  full slot while the card it was following was two thirds there, putting
+  the active credential two hundred pixels off the left edge.
+
+summing progress over-runs
+  "how many cards have resolved" leads, because the reveal windows overlap
+  on purpose and cards further back add their partial progress. It led by
+  0.44 of a slot. The rail follows max(progress_i * i) instead.
+
+the deck's origin did not follow the rail
+  anchored at the rail's zero, the waiting stack stayed behind at the start
+  of the rail and slid off the phone the moment the rail moved.
+```
+
+Capacity is measured rather than tabulated. The first version declared five
+cards above 1200px; the frame is 1200px and five cards need 1610px, so two
+rendered outside the clip, invisible and still focusable, on the widest viewport
+tested (D-102).
+
+### Interaction
+
+The card is an `<article>` that is not focusable, holding two real controls: the
+title as a link to the issuer, and an explicit "View details" button for the
+modal. A button wrapping an anchor is invalid HTML and a focusable div is a
+button reimplemented badly; two labelled controls give a keyboard visitor two
+useful tab stops instead of one useless one. The card's own click handler defers
+via `event.target.closest("a, button")`, a DOM ancestry test rather than a
+pointer-coordinate one (D-103).
+
+Focus return had to be written by hand. The native dialog restores focus on
+`close()`, but React's passive cleanup runs after the element is detached, so
+Escape left `document.activeElement` on `<body>`.
+
+Cards the rail has pushed outside the clip are marked `inert` from the animation
+frame. Invisible and focusable is the worst combination there is, and it bites
+hardest on a phone, where four of five credentials are off screen at any moment.
+
+### Visual work found by looking at it
+
+```
+five translucent cards stacked into an illegible smear
+  element opacity fades an element's own background, so a front card at 0.62
+  is a window onto the four behind it. Opacity is driven by stack depth now,
+  so the front card is opaque and occludes, and the deck reads as a deck.
+
+the heading scrolled away while the deck was still pinned
+  the intro was outside the sticky stage. It is inside it.
+
+titles clipped mid-glyph
+  a flex item may shrink below its content height, and a shrunken box with
+  hidden overflow clips its own text. `flex: none` and a card tall enough
+  for the worst case the fixtures carry.
+
+the modal repeated its own title
+  the no-image plate carried the title and issuer directly beneath the
+  heading that already said both. The metadata takes that space instead,
+  framed, which is what a deliberate metadata presentation means.
+```
+
+### Reduced motion and no JavaScript
+
+The readable grid is the default and the choreography is the upgrade, so a
+visitor with JavaScript disabled or reduced motion requested gets every
+credential in a plain readable grid. No card is ever at `opacity: 0`, and
+leaving enhanced mode removes the tall scroll range with it.

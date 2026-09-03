@@ -21,10 +21,13 @@ than case studies. 09A froze the shared runtime; 09B froze Demo 01's contract;
 and `currentStage` stays 8. See `docs/DEMO_OPERATIONS_IMPLEMENTATION.md` and
 `docs/NEXT_STAGE.md`.
 
-`#work` is no longer a placeholder: `FeaturedDemoSection` publishes Demo 01 as a
-disclosed engineering demo, deliberately a different publication system from
-the case-study section, which is still not imported, not rendered and still
-behind `MINIMUM_PUBLIC_CASES` (D-098, D-099, `docs/CASE_STUDY_SOURCE_AUDIT.md`).
+`#work` is `FeaturedDemoSection`, publishing Demo 01 as a disclosed engineering
+demo: deliberately a different publication system from the case-study section,
+which is still not imported and still behind `MINIMUM_PUBLIC_CASES` (D-098,
+D-099). A third gate is also unmet: `CertificationsSection` is built and mounted
+between the Lab and `#work` but renders null, because no certification has been
+issued and `src/content/certifications.ts` is `[]`. Adding one verified record
+activates it with no wiring (D-101, D-102, D-103).
 
 ## Toolchain
 
@@ -56,14 +59,18 @@ and never the default `.next`, so `npm run build` cannot disturb the live site.
 
 ## Rendering Architecture
 
-Server-first. The hero, the background system and both navigation presentations
-are server components. Thirty-nine `"use client"` modules exist: nine on the
-site, five in the demo platform and twenty-five in the Operations interface.
-`project-state.json` holds the authoritative list.
+Server-first: the hero, the background system and both navigation presentations
+are server components. 88 `"use client"` modules exist, most in the Operations
+interface; `project-state.json` holds the list. (This said thirty-nine until the
+certifications work counted them.)
 
-No `requestAnimationFrame` loop and no pointer tracking runs anywhere. Timers
-exist only inside the three user-triggered sequences - the Stage 06 flow, the
-Stage 07 adaptation and the Stage 08 experiments - each torn down by effect
+No `requestAnimationFrame` LOOP runs anywhere, and the distinction now matters:
+the certifications deck schedules one self-cancelling frame per scroll burst,
+schedules nothing at rest, and tears down on unmount (D-102). It is the only RAF
+in the project. No pointer tracking runs anywhere.
+
+Timers exist only inside the three user-triggered sequences - the Stage 06 flow,
+the Stage 07 adaptation and the Stage 08 experiments - each torn down by effect
 cleanup on scenario change, restart and unmount (D-035, D-042, D-044). Nothing
 runs on a timer at rest.
 
@@ -104,32 +111,25 @@ src/
     (each capability section below has the same shape: a server section
      shell, one "use client" lab holding the state, one "use client" ARIA
      tablist holding none, presentational renderers, and a data module)
-    systems/    Stage 05 - ArchitectureLab; canvas, trace, principles;
-                architecture-{data,geometry}.ts (4 modes)
-    products/   Stage 06 - ProductStudio; web/mobile/assist surfaces, event
-                rail, capability rail; product-scenarios.ts (three scenarios)
-    learning/   Stage 07 - LearningLab; knowledge map, learner and tutor
-                panels, journey; learning-{scenarios,geometry}.ts
-    lab/        Stage 08 - LabWorkspace; flow, experiment views, observation,
-                controls, pattern rail; lab-experiments.ts (5 experiments)
+    systems/ products/ learning/ lab/   Stages 05-08, each the shape above
     work/       FeaturedDemoSection owns #work, publishing Demo 01 as a
                 disclosed demo; FeaturedPreview composes its picture. Also
                 the case-study renderers, built and still not wired in (D-098)
-    layout/SiteFooter.tsx   the page's ending; carries no contact route
+    certifications/  shell + gate, sticky deck, card, dialog modal, and
+                deck-geometry.ts: the choreography's maths, pure (D-102)
+    layout/SiteFooter.tsx   the page's ending; no contact route
     demos/      Stage 09A - DemoShell, DemoDisclosure, DemoResetControl, DemoSelect
-  content/case-studies.ts   typed case-study model + render-safety filter
+  content/{case-studies,certifications}.ts   typed models + their gates;
+                certifications is EMPTY.   lib/scroll-lock.ts   page lock
   demos/operations/         Stage 09C1 domain (28 modules) + ui/ (shell,
                 sidebar, top bar, Overview panels, notifications, icons,
                 module routes, and one directory per module). All 11 built.
-  demo-runtime/             Stage 09A - shared demo platform (18 modules):
-                types, config, demo-registry, clock, ids, repository,
-                async-service, events, audit, jobs, session, connectivity,
-                broadcast, runtime, persistence/*, react/*
+  demo-runtime/             Stage 09A platform, 18 modules; see DEMO_PLATFORM.md
   styles/
     tokens.css            all design tokens - the source of truth for values
     typography.css, motion.css, layers.css, surfaces.css   foundations
     navigation.css, hero.css, systems.css, products.css, learning.css,
-    lab.css, featured.css (#work + the footer)
+    lab.css, featured.css (#work + the footer), certifications.css
     work.css  written, never imported   demo-shell.css, operations.css  demo only
 
 public/
@@ -140,7 +140,7 @@ docs/                          canonical project memory (this directory)
 ```
 
 Import order in `globals.css`: tokens, typography, motion, layers, surfaces,
-navigation, hero, systems, products, learning, lab, featured.
+navigation, hero, systems, products, learning, lab, certifications, featured.
 
 ## Stage 01 - Background (FROZEN)
 

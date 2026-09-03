@@ -61,10 +61,9 @@ Both rules hold until the user explicitly changes them. See
 | Backend | None. No database, API route or server action |
 | QA | Playwright + pngjs (devDependencies), scripts in `qa/` |
 
-Rendering is almost entirely server-side. Thirty-nine `"use client"` modules
-exist: nine on the site, five in the demo platform and twenty-five in the
-Operations interface. Everything else is server-rendered markup and CSS.
-`docs/project-state.json` holds the authoritative list.
+Rendering is almost entirely server-side; 88 `"use client"` modules exist, most
+of them in the Operations interface, and `docs/project-state.json` holds the
+list. Everything else is server-rendered markup and CSS.
 
 ## Current Runtime
 
@@ -148,6 +147,7 @@ src/components/
   lab/       08 - LabWorkspace; flow, experiment views, observation, controls
   work/      FeaturedDemoSection + FeaturedPreview own #work; the 09
              case-study renderers are here too, built and still not wired in
+  certifications/  built, mounted, renders nothing: no credential exists
   demos/     09A - DemoShell, DemoDisclosure, DemoResetControl
 src/demo-runtime/   09A - shared demo platform; see docs/DEMO_PLATFORM.md
 ```
