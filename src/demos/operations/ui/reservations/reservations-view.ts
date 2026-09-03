@@ -39,6 +39,23 @@ export function canOpenInbox(role: Role): boolean {
   return canViewModule(role, "Inbox");
 }
 
+/**
+ * Fleet and Contracts exist now.
+ *
+ * When this module shipped, both were unbuilt, so the assigned vehicle and the
+ * converted contract were rendered as plain facts and D-092 recorded that they
+ * would become links once there was somewhere for them to go. This is that
+ * change, and nothing else about the rule moved: the Sales Agent cannot open
+ * Fleet, so they still read the vehicle as a fact.
+ */
+export function canOpenFleet(role: Role): boolean {
+  return canViewModule(role, "Fleet");
+}
+
+export function canOpenContracts(role: Role): boolean {
+  return canViewModule(role, "Contracts");
+}
+
 /* =====================================================================
    PRESENTATION
    ===================================================================== */
@@ -147,3 +164,6 @@ export const customerHref = (id: string) =>
   `${ROOT}/customers?selected=${encodeURIComponent(id)}`;
 export const conversationHref = (id: string) =>
   `${ROOT}/inbox?selected=${encodeURIComponent(id)}`;
+export const vehicleHref = (id: string) => `${ROOT}/fleet?selected=${encodeURIComponent(id)}`;
+export const contractHref = (id: string) =>
+  `${ROOT}/contracts?selected=${encodeURIComponent(id)}`;

@@ -7,7 +7,14 @@
  */
 
 import { runQuery } from "@/demo-runtime/repository";
-import type { DemoRecord, QueryResult, QuerySpec, SortDirection } from "@/demo-runtime/types";
+import type {
+  AuditEntry,
+  CollectionName,
+  DemoRecord,
+  QueryResult,
+  QuerySpec,
+  SortDirection,
+} from "@/demo-runtime/types";
 
 import { DEFAULT_PAGE_SIZE } from "../constants";
 
@@ -75,4 +82,34 @@ export function groupBy<T, K extends string>(
     else groups.set(k, [record]);
   }
   return groups;
+}
+
+/* =====================================================================
+   ACTIVITY
+   ===================================================================== */
+
+/**
+ * One record's audit trail, newest first.
+ *
+ * `runtime.listAudit()` returns every entry in the demo, so the narrowing has
+ * to happen somewhere; it happens here so a drawer can render a list rather
+ * than compute one.
+ *
+ * The collection is a parameter rather than a constant. `selectLeadActivity`
+ * hard-codes `leads`, which is right for a lead and silently wrong for
+ * anything else: a drawer passing a reservation, contract, vehicle or work
+ * order id to it matches nothing at all and renders an empty feed that looks
+ * like an entity with no history.
+ *
+ * Sequence is monotonic within a demo, so it orders the feed exactly and needs
+ * no tie-break: two entries cannot share one.
+ */
+export function selectActivity(
+  entries: AuditEntry[],
+  collection: CollectionName,
+  entityId: string
+): AuditEntry[] {
+  return entries
+    .filter((e) => e.collection === collection && e.entityId === entityId)
+    .sort((a, b) => b.sequence - a.sequence);
 }

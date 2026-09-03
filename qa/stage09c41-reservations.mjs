@@ -492,10 +492,20 @@ section("LIFECYCLE - CREATE, EDIT, CONFIRM, CONVERT");
   await page.waitForTimeout(900);
 
   check("the reservation becomes Converted", (await marksOf(page)).includes("Converted"), (await marksOf(page)).join(" "));
-  check("the contract is referenced", /contract_\d{4}/.test(await textOf(page, ".ops-detail__ref", "")), await textOf(page, ".ops-detail__ref", ""));
+  /* Contracts is built now, so the converted contract is a link rather than the
+     plain fact it was when this module shipped. D-092 said this would happen
+     and this is the assertion moving with it. The Admin driving this section
+     can open Contracts; the fact-only branch is covered in the role section. */
+  const converted = await page.$('.ops-facts__value a[href*="/contracts?selected="]');
+  check("the contract is referenced", converted !== null);
   check(
-    "and it is not a link, because Contracts is not built",
-    (await page.$$eval(".ops-detail__ref", (n) => n.map((e) => e.tagName))).every((t) => t !== "A")
+    "and named by its id",
+    /contract_\d{4}/.test(converted ? ((await converted.textContent()) ?? "") : ""),
+    converted ? ((await converted.textContent()) ?? "").trim() : "no link"
+  );
+  check(
+    "and it is a link now that Contracts exists",
+    (await page.$$eval('.ops-facts__value a[href*="/contracts?selected="]', (n) => n.length)) === 1
   );
   check("no lifecycle action remains", (await page.$(".ops-detail__buttons")) === null);
 

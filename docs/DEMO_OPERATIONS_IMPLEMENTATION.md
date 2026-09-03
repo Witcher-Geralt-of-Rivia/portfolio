@@ -822,9 +822,12 @@ Customers is built, so the customer is a link for the roles that can open it.
 The Fleet Coordinator works reservations but not accounts, so they get the name
 and no link: withholding the name would leave them unable to do their own job.
 
-Fleet and Contracts are not built, so the assigned vehicle and the converted
-contract are facts. The contract reference is styled as data rather than as a
-control, so nothing suggests it can be opened (D-092).
+Fleet and Contracts were not built when this module shipped, so the assigned
+vehicle and the converted contract were facts, and D-092 recorded that they
+would become links once there was somewhere for them to go. 09C4.A built both,
+and both are links now: the vehicle for the roles that can open Fleet, which is
+not the Sales Agent, and the contract for all three roles that work
+reservations.
 
 ### QA
 
@@ -834,10 +837,110 @@ the workshop through the real service, and the containment section captures
 full pages at eight viewports because a viewport screenshot could not have
 caught what the Inbox review caught.
 
+## Rental operations core (09C4.A)
+
+Three modules in one batch, because they share a subject. A contract is about a
+vehicle, a work order is about a vehicle, and the vehicle's status is the
+visible effect of both. Building them apart would have meant three reviews of
+the same join.
+
+```
+/demos/operations/contracts     14 contracts, Admin writes, three roles read
+/demos/operations/fleet         24 vehicles, Admin and Fleet Coordinator write
+/demos/operations/maintenance   10 work orders, same two roles write
+```
+
+### The eleventh service
+
+`services/vehicles.ts` is the first service in this demo that allocates a
+domain identity. `createVehicle` issues the next asset code, `updateVehicle`
+changes the three fields a person knows about a machine, and neither lets a
+caller near the four derived ones (D-094).
+
+`nextAssetCode` reads the highest numeric suffix among the vehicles that exist
+and then checks its candidate against the codes in use. Not the collection
+length: the store is a local database a visitor can mutate, and after one
+deletion the count and the highest code disagree.
+
+### Two more workflow wrappers
+
+`contract-workflows.ts` and `maintenance-workflows.ts`, wrapping the seven
+existing mutations in `withAutomations`.
+
+Maintenance is the one that had to exist. `completeMaintenance` emits
+`maintenance.completed` and Rule 05 listens for it, but the bus is
+fire-and-forget: a screen calling the bare service would have left the canonical
+fleet notification unwritten while every domain assertion still passed. That is
+the third appearance of the defect D-063 named for leads and D-088 named for
+reservations, and the answer is the same each time.
+
+Contracts has no rule behind any of its three events, and is wrapped anyway, so
+that a screen calls one kind of thing for every mutation and a rule added later
+needs no change at the call site.
+
+### What holds a vehicle, and what does not
+
+The batch's QA states the capacity ladder end to end, because it is the part of
+the domain a reader is most likely to guess wrong:
+
+```
+Draft reservation      holds nothing
+Confirmed reservation  holds the vehicle          Reserved
+Converted reservation  releases it again
+Pending contract       holds nothing              Available
+Active contract        holds the vehicle          Rented
+Open or In Progress
+work order             outranks everything        Maintenance
+```
+
+A pending contract holding no vehicle is deliberate and is the same reasoning
+D-091 gave for drafts: capacity is held by the deliberate act, which is
+activation, not by the paperwork that precedes it.
+
+### The tension that stays
+
+09C4.0 recorded it and this batch preserves it rather than resolving it. A work
+order may be opened on a vehicle that is out on an active rental, and the
+vehicle then reads Maintenance while the contract stays Active, because only
+`status` is a precedence: `deriveVehicleLinks` sets all three pointers
+independently, so the vehicle carries both and tells the whole truth about
+itself. Starting the work is refused while the contract is active.
+
+The Maintenance drawer states this in words when it applies, in the ordinary
+note treatment. No new status was invented and no alarm language was used.
+
+### Naming
+
+The Fleet module's root class is `.ops-vehicles`, not `.ops-fleet`. `.ops-fleet`
+and eight `.ops-fleet__*` classes have belonged to the Overview's fleet donut
+since 09C2, including `.ops-fleet__row` for a legend line, and reusing the
+prefix would have given every table row the legend's layout.
+
+### A dead activity feed, fixed
+
+`selectLeadActivity` filters audit entries by `collection === leads`.
+`ReservationDetail` was calling it with a reservation id, so the Reservations
+Activity section could never populate: reservation audit entries carry
+`collection: reservations`. Three new drawers needed the same thing, so the
+narrowing moved to `selectActivity(entries, collection, entityId)` in
+`selectors/queries.ts` and the Reservations call site was corrected with it.
+
+### QA
+
+```
+qa/stage09c4a-core.mjs               domain: asset codes, vehicle rules,
+                                     Rule 05, the frozen tension, and one
+                                     end-to-end sequence from draft to
+                                     finished work order
+qa/stage09c42-contracts.mjs          the Contracts module
+qa/stage09c43-fleet-maintenance.mjs  Fleet and Maintenance together, because
+                                     the interesting assertions cross between
+                                     them
+```
+
 ## Remaining UI work
 
-Six module screens: Contracts, Fleet, Maintenance, Payments, Automations and
-Reports. Every service and selector they need exists apart from a Fleet write
-service, which is blocked on the asset-code contract (D-090).
-`#work` still renders its placeholder, and the demo is deployed but
-unadvertised: `noindex, nofollow`, linked from nowhere.
+Three module screens: Payments, Automations and Reports. Every service and
+selector they need already exists. `#work` still renders its placeholder, and
+the demo is deployed but unadvertised: `noindex, nofollow`, linked from
+nowhere.

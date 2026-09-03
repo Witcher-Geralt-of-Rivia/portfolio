@@ -3393,3 +3393,224 @@
     padding: 11px 12px;
   }
 }
+
+/* =====================================================================
+   RENTAL OPERATIONS CORE (Stage 09C4.A)
+   Contracts, Fleet and Maintenance
+   ===================================================================== */
+
+/**
+ * Three page-growth modules, built out of the grammar the earlier ones
+ * established. Almost everything below is a cell treatment: the toolbar, the
+ * table frame, the cards, the pager, the drawer, the sheets and the pills are
+ * all reused unchanged, because three modules arriving at once is exactly when
+ * a codebase grows three parallel design systems.
+ *
+ * Each root is `position: relative` for the reason D-086 gives: the
+ * `visually-hidden` heading, search label, table caption and live region are
+ * absolutely positioned, and without a local containing block they resolve
+ * against `.site-main`.
+ */
+
+.ops-contracts,
+.ops-vehicles,
+.ops-maintenance {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* --- contracts --------------------------------------------------------- */
+
+/* A rental period reads as one fact, so it never breaks mid-range. */
+.ops-contracts__period {
+  color: var(--ops-ink-2);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  white-space: nowrap;
+}
+
+.ops-contracts__to {
+  padding: 0 5px;
+  color: var(--ops-ink-3);
+}
+
+.ops-contracts__vehicle {
+  color: var(--ops-ink-2);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+}
+
+/* Money is right-aligned and tabular so columns of figures line up on the
+   decimal point, which is the whole reason a person scans a money column. */
+.ops-contracts__money {
+  color: var(--ops-ink-2);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* An unpaid balance is stated, not flagged. It is a number a finance analyst
+   reads, not an alarm, so it gets weight rather than colour. */
+.ops-contracts__balance {
+  color: var(--ops-ink);
+  font-weight: 500;
+}
+
+.ops-contracts__balance--settled {
+  color: var(--ops-ink-3);
+  font-weight: 400;
+}
+
+.ops-contracts__card-period {
+  color: var(--ops-ink-2);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.ops-contracts__card-money {
+  color: var(--ops-ink-2);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* The read-only note three of the four roles see above an inert record. */
+.ops-contracts__readonly {
+  color: var(--ops-ink-3);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+/* --- fleet ------------------------------------------------------------- */
+
+/**
+ * The module root is `.ops-vehicles`, not `.ops-fleet`.
+ *
+ * `.ops-fleet` and eight `.ops-fleet__*` classes have belonged to the
+ * Overview's fleet donut since 09C2, including `.ops-fleet__row` for a legend
+ * line. Reusing the prefix here would have given every table row the legend's
+ * layout, which is the kind of collision that is invisible until one of the
+ * two screens is edited.
+ */
+.ops-vehicles__asset {
+  color: var(--ops-ink);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.ops-vehicles__model {
+  color: var(--ops-ink-2);
+}
+
+.ops-vehicles__odo {
+  color: var(--ops-ink-2);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* Why the machine is not on the forecourt. Truncated rather than wrapped, so
+   one long customer name cannot double the height of every row. */
+.ops-vehicles__assignment {
+  overflow: hidden;
+  max-width: 240px;
+  color: var(--ops-ink-2);
+  font-size: 12.5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ops-vehicles__card-meta {
+  color: var(--ops-ink-2);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+/* The generated asset code, shown in the create form once it exists. */
+.ops-vehicles__code {
+  padding: 2px 6px;
+  border-radius: 5px;
+  background: var(--ops-surface-quiet);
+  color: var(--ops-ink);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+/* --- maintenance ------------------------------------------------------- */
+
+.ops-maintenance__vehicle {
+  color: var(--ops-ink-2);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  white-space: nowrap;
+}
+
+.ops-maintenance__type {
+  color: var(--ops-ink-2);
+}
+
+/* The line someone wrote about what is wrong. It is the most useful cell in
+   the row, so it gets the space, and it truncates rather than wrapping. */
+.ops-maintenance__summary {
+  overflow: hidden;
+  max-width: 320px;
+  color: var(--ops-ink-2);
+  font-size: 12.5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ops-maintenance__card-summary {
+  overflow: hidden;
+  color: var(--ops-ink-2);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The full summary in the drawer, where it may wrap as far as it needs. */
+.ops-maintenance__body {
+  color: var(--ops-ink);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/**
+ * The conflict a visitor can reach on purpose.
+ *
+ * Starting work on a vehicle that is out on an active rental is refused by the
+ * domain. The refusal is shown in the ordinary `.ops-alert`, and this note is
+ * what the drawer says before anyone tries: a statement of the rule, not a
+ * warning about a fault.
+ */
+.ops-maintenance__note {
+  padding: 10px 12px;
+  border: 1px dashed var(--ops-line);
+  border-radius: 10px;
+  background: var(--ops-surface-quiet);
+  color: var(--ops-ink-2);
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+
+/* --- narrow columns ---------------------------------------------------- */
+
+/* Below 1180px the tables are already scrolling horizontally inside their
+   wrapper; these two columns are the ones a person can most afford to lose. */
+@media (max-width: 1179px) {
+  .ops-vehicles__assignment {
+    max-width: 160px;
+  }
+
+  .ops-maintenance__summary {
+    max-width: 200px;
+  }
+}

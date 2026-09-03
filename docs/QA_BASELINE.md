@@ -2005,3 +2005,166 @@ Three browser warnings appear during the sequence, all the same Chrome preload
 resource hint: this script moves between routes with full page loads rather
 than through the in-app links a visitor uses. They are reported rather than
 asserted on, and a plain visit raises none.
+
+---
+
+## Stage 09C4.A - Contracts, Fleet and Maintenance
+
+PASS. Three harnesses:
+
+```
+qa/stage09c4a-core.mjs               domain, 112 checks
+qa/stage09c42-contracts.mjs          the Contracts module
+qa/stage09c43-fleet-maintenance.mjs  Fleet and Maintenance together
+```
+
+Fleet and Maintenance share one suite because the interesting assertions cross
+between them: opening a work order changes what the fleet register says about a
+vehicle, and completing one is what raises the notification.
+
+### The two assertions this batch exists to make
+
+**An asset code is issued, not typed.** The canonical seed ends at `MTR-024`,
+the first vehicle a visitor creates is `MTR-025` and the second `MTR-026`, and
+the domain suite also drives the pure allocator over four worlds the seed cannot
+produce:
+
+```
+empty fleet                      MTR-001
+a gap in the middle              MTR-010, not MTR-003
+a deleted top record             MTR-025, the suffix is not reissued
+a padded twin, MTR-0025          MTR-026, the collision guard earns its keep
+an unparseable code alongside    ignored, not crashed on
+```
+
+**Rule 05 runs because the screen calls the workflow.** Both paths are driven,
+in the same suite, against the same seed:
+
+```
+completeMaintenance          0 automation runs, 0 notifications
+completeMaintenanceWorkflow  1 run (automation_rule_0005, Success),
+                             1 notification (Maintenance, Fleet Coordinator,
+                             pointing at the work order)
+```
+
+and the UI suite then does it again through the product, reading the store from
+a probe page in the same browser context, so what is measured is what one click
+left behind.
+
+### The capacity ladder, stated
+
+The domain suite walks one booking the whole way and asserts the four records at
+every step. The part worth writing down is what holds a vehicle:
+
+```
+Draft reservation      holds nothing
+Confirmed reservation  holds it                    Reserved
+Converted reservation  releases it
+Pending contract       holds nothing               Available
+Active contract        holds it                    Rented
+Open or In Progress
+work order             outranks everything above   Maintenance
+```
+
+A pending contract holding nothing is deliberate, and is the same rule D-091
+gave for drafts: capacity is taken by the deliberate act.
+
+### The frozen tension, asserted rather than resolved
+
+A work order opened on a rented vehicle leaves the vehicle reading Maintenance
+while its contract stays Active, and both pointers are set, because only
+`status` is a precedence and `deriveVehicleLinks` fills the three
+independently. Starting the work is refused with the service's own sentence.
+The suites assert all of that, from the domain and from the screen, and nothing
+about it was changed.
+
+### What else the three suites cover
+
+```
+contracts     14 records, six columns, live status counts, both filters, ten
+              sort choices, search over customer, asset code and contract id,
+              pagination, the money grammar (every Total and Balance reads
+              USD n.nn and the balance is the domain's own subtraction),
+              activate, complete and cancel through the product, and the
+              vehicle following each transition read from the store
+fleet         24 vehicles, the derived status shown and never written, the
+              assignment sentence, create (MTR-025 then MTR-026), edit, the
+              class/model re-homing, and the three odometer refusals
+maintenance   10 work orders, the priority chip carrying its own word with no
+              saturated red and no alarm vocabulary anywhere on the page,
+              create, start, complete, cancel, and the active-rental refusal
+              shown in the dialog rather than hidden
+roles         Contracts opens for all four and mutates for one, with the
+              read-only note naming the role; Fleet and Maintenance are closed
+              to Sales and Finance with no data left behind; and every
+              cross-link appears only where the role can follow it
+mobile        390 and 360 for all three: cards, filter sheets, drawers,
+              browser Back, and the create sheet reachable
+containment   eight viewports each, full-page captures, zero backdrop below the
+              product, and no absolute descendant escaping any module root
+reset         the canonical world returns, including the vehicles this batch
+              created being gone
+```
+
+### What the suites found
+
+Two harness faults of mine and no product defect in the three new modules.
+
+The priority assertions counted `.ops-prio` unscoped, which matches the desktop
+table and the mobile card list both, since the cards are `display: none` at that
+width but still in the document. Ten work orders read as twenty. The selector is
+scoped to the table now.
+
+Two assertions in the domain suite stated the domain wrongly and were corrected
+to what it actually does, which is better than what I had assumed: a rented
+vehicle with an open work order keeps its contract pointer rather than losing
+it, and a converted reservation leaves its vehicle Available rather than
+Reserved.
+
+Separately, building on Reservations surfaced a real defect in it:
+`ReservationDetail` called `selectLeadActivity`, which filters audit entries by
+`collection === leads`, with a reservation id, so its Activity section could
+never populate. The narrowing is now `selectActivity(entries, collection,
+entityId)` and the call site is fixed.
+
+### Batch regression
+
+Run once, after all three modules were complete, not three times.
+
+```
+stage09-render-safety           pass
+stage09a-runtime                76/76
+stage09a-shell                  85/85
+stage09b-operations-spec        96/96
+stage09c1-operations          211/211
+stage09c2-operations-ui       141/141
+stage09c21-hardening          111/111
+stage09c31-leads              407/407
+stage09c32-customers          174/174
+stage09c33-inbox              422/422
+stage09c40-readiness           62/62
+stage09c41-reservations       219/219
+stage09c4a-core               112/112
+stage09c42-contracts          231/231
+stage09c43-fleet-maintenance  422/422
+public-repo-safety             19/19  (with --history)
+copy-style, qa:memory          pass
+tsc, eslint                    clean
+```
+
+Two assertions moved, both because a module that did not exist now does, and
+neither was weakened.
+
+`stage09c2-operations-ui` carries a check whose expected value is the build
+state itself, and whose comment says it moves each time a module ships. It is
+now the eight-module list.
+
+`stage09c41-reservations` asserted that the converted contract was named and
+not linked "because Contracts is not built". D-092 recorded that this would
+change when Contracts arrived, and it has: the reference is a link now, and the
+suite asserts the link. The old pair had a second problem worth naming, since
+it is a trap rather than a typo: the companion check read `.ops-detail__ref`
+elements and asserted none of them was an anchor, which passed vacuously the
+moment the element stopped being rendered at all. The replacement asserts the
+presence of the link rather than the absence of a tag name, and the suite gained
+one check.

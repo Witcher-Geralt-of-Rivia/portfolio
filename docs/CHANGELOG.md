@@ -1583,3 +1583,86 @@ Six module screens. `#work` is untouched, the registry still reads
 `operations = building`, and `currentStage` stays 8. 09C4.2 Contracts is
 blocked until Reservations has been reviewed live, and 09C4.3 stays blocked on
 the Fleet asset-code contract.
+
+---
+
+## Stage 09C4.A - Rental Operations Core: Contracts, Fleet and Maintenance
+
+Status: **Complete**
+
+### Summary
+Three modules in one batch. Demo 01 now has eight of its eleven screens, and
+the three that remain are Payments, Automations and Reports.
+
+```
+Contracts     14 agreements. Admin activates, completes and cancels;
+              Sales, Fleet and Finance read a complete and inert record.
+Fleet         24 vehicles. Admin and the Fleet Coordinator add and edit;
+              status and every relationship pointer stay derived.
+Maintenance   10 work orders. Same two roles open, start, complete and
+              cancel; completing raises the fleet notification.
+```
+
+### An asset code is issued, never typed
+
+The open half of D-090 is closed. `services/vehicles.ts` is the eleventh
+service and the first that allocates a domain identity: the canonical seed ends
+at `MTR-024`, so the first created vehicle is `MTR-025` and the next
+`MTR-026`.
+
+The allocation reads the highest suffix among the vehicles that exist rather
+than the size of the collection, then checks its candidate against the codes in
+use. Length would be wrong the moment anyone deleted a record, and the check on
+top covers the padded twin that parses to the same number. A suffix is never
+reissued (D-094).
+
+### Rule 05, and the third appearance of one defect
+
+`completeMaintenance` emits `maintenance.completed` and Rule 05 listens for it,
+but the event bus is fire-and-forget. A Maintenance screen calling the bare
+service would have left the canonical notification unwritten while every domain
+assertion still passed.
+
+That is the defect D-063 found for leads and D-088 found for reservations,
+arriving a third time in the same shape. `maintenance-workflows.ts` and
+`contract-workflows.ts` are the answer, and the suite proves the difference by
+running both paths: the bare service produces no automation run and no
+notification, the workflow produces exactly one of each.
+
+### What holds a vehicle
+
+The batch's QA writes the capacity ladder down, because it is the part of this
+domain most likely to be guessed wrong: a draft holds nothing, a confirmed
+reservation holds, converting releases, a **pending contract holds nothing**,
+activating holds, and an open work order outranks all of it. Capacity is taken
+by the deliberate act, not by the paperwork before it.
+
+### The tension is preserved, and stated
+
+A work order may be opened on a vehicle that is out on a rental. The vehicle
+then reads Maintenance while the contract stays Active, because only `status`
+is a precedence and the three relationship pointers are set independently. The
+work cannot be started until the contract completes.
+
+Nothing about that was redesigned. The Maintenance drawer says it in words when
+it applies, and the service's own refusal is what a visitor sees if they try.
+
+### Reservations gains two links
+
+D-092 said the assigned vehicle and the converted contract were facts because
+Fleet and Contracts did not exist, and that they would become links when they
+did. They do now. The Sales Agent still reads the vehicle as a fact, because the
+Sales Agent cannot open Fleet.
+
+### A dead activity feed
+
+`ReservationDetail` was calling `selectLeadActivity`, which filters audit
+entries by `collection === leads`, with a reservation id. The Reservations
+Activity section could therefore never populate. Three new drawers needed the
+same narrowing, so it became `selectActivity(entries, collection, entityId)` and
+the Reservations call site was corrected with it.
+
+### Not done
+
+Payments, Automations and Reports. `#work` is untouched, the registry still
+reads `operations = building`, and `currentStage` stays 8.

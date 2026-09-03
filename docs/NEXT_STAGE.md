@@ -25,32 +25,34 @@ Stage 09                IN PROGRESS
       09C3.3.2 Message timestamp reconciliation  COMPLETE
     09C4 Rental Operations Core  IN PROGRESS (D-090)
       09C4.0 core domain readiness  COMPLETE
-      09C4.1 Reservations           COMPLETE and deployed
-      09C4.2 Contracts              BLOCKED on external review of Reservations
-      09C4.3 Fleet + Maintenance    BLOCKED on the Fleet create contract
-      09C4.4 Payments + workflow    NOT STARTED
+      09C4.1 Reservations           COMPLETE, deployed and APPROVED
+      09C4.A Contracts + Fleet + Maintenance  COMPLETE and deployed
+      09C4.4 Payments + Automations + Reports  NOT STARTED
 ```
+
+09C4.2 and 09C4.3 were merged into one batch, 09C4.A, on an explicit
+instruction to complete Demo 01 quickly while preserving domain correctness,
+persistence, role policy, accessibility, responsive behaviour and deployment
+safety. The asset-code question that blocked 09C4.3 was answered in the same
+instruction and recorded as D-094.
 
 ## The block
 
-Next task: Stage 09C4.2 - Contracts (BLOCKED UNTIL EXTERNAL LIVE REVIEW OF RESERVATIONS)
+Next task: Stage 09C4.4 - Payments, Automations and Reports (NOT STARTED)
 
-Reservations is built and deployed for review. Its central action, confirming a
-booking onto a real vehicle, is the first place the workflow layer 09C4.0
-extracted earns its keep: one click assigns the vehicle and wakes Rule 03, with
-no second control.
+Eight of Demo 01's eleven modules are built and deployed. The three that remain
+are the last batch, and it has not been started and does not start without an
+explicit instruction. That rule has not changed and is worth keeping: six
+reviews of this product have each found something the suite had no opinion
+about, most recently an application rendering above 1951 pixels of portfolio
+background while 367 checks passed.
 
-One thing is genuinely open. There is no Fleet write service, and the frozen
-document does not say where a new vehicle's asset code comes from, so 09C4.3
-is blocked until that contract is decided (D-090).
+Nothing is blocked. Every service and selector the last three modules need
+already exists, `payments.ts` included, and the asset-code question that once
+blocked the fleet work is closed (D-094).
 
-It has not been started, and it does not start without an explicit
-instruction. That rule has not changed and is worth keeping: five reviews of
-this product have each found something the suite had no opinion about, most
-recently an application rendering above 1951 pixels of portfolio background
-while 367 checks passed.
-
-Stage 09C3 is complete and approved: Leads, Customers and Inbox.
+Stage 09C3 is complete and approved. 09C4.1 Reservations is approved. 09C4.A is
+built, deployed and awaiting its own review.
 
 ## Ordered plan
 
@@ -76,9 +78,9 @@ Stage 09C3 is complete and approved: Leads, Customers and Inbox.
 19. Stage 09C3.3.2 - Message timestamp contract DONE
 20. Stage 09C4.0 - Core domain readiness        DONE
 21. Stage 09C4.1 - Reservations                 DONE
-22. Stage 09C4.2 - Contracts                    BLOCKED on live review
-23. Stage 09C4.3-C4.4 - the rest of the group   LATER
-24. Stage 09C5-C6 - remaining modules, QA       LATER
+22. Stage 09C4.A - Contracts, Fleet, Maintenance DONE
+23. Stage 09C4.4 - Payments, Automations, Reports  NEXT
+24. Stage 09C5-C6 - integration and full QA     LATER
 25. Field and Learning specs, then builds       LATER
 26. Stage 09 - #work launcher integration       LATER
 ```

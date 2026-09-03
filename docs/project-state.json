@@ -3,8 +3,8 @@
   "purpose": "Demonstrate engineering capability to freelance clients. Technical portfolio, not a personal site.",
   "currentStage": 8,
   "stage05Started": true,
-  "nextStage": "stage-09c4-2",
-  "nextStageTitle": "Stage 09C4.2 - Contracts (BLOCKED UNTIL EXTERNAL LIVE REVIEW OF RESERVATIONS)",
+  "nextStage": "stage-09c4-4",
+  "nextStageTitle": "Stage 09C4.4 - Payments, Automations and Reports (NOT STARTED)",
   "frozenStages": [
     1,
     2,
@@ -121,7 +121,26 @@
       "src/demos/operations/ui/reservations/ReservationDetail.tsx",
       "src/demos/operations/ui/reservations/ReservationForm.tsx",
       "src/demos/operations/ui/reservations/ConfirmReservation.tsx",
-      "src/demos/operations/ui/reservations/ReservationConfirmAction.tsx"
+      "src/demos/operations/ui/reservations/ReservationConfirmAction.tsx",
+      "src/demos/operations/ui/contracts/ContractsScreen.tsx",
+      "src/demos/operations/ui/contracts/ContractsToolbar.tsx",
+      "src/demos/operations/ui/contracts/ContractsTable.tsx",
+      "src/demos/operations/ui/contracts/ContractsMobileList.tsx",
+      "src/demos/operations/ui/contracts/ContractDetail.tsx",
+      "src/demos/operations/ui/contracts/ContractConfirmAction.tsx",
+      "src/demos/operations/ui/fleet/FleetScreen.tsx",
+      "src/demos/operations/ui/fleet/FleetToolbar.tsx",
+      "src/demos/operations/ui/fleet/FleetTable.tsx",
+      "src/demos/operations/ui/fleet/FleetMobileList.tsx",
+      "src/demos/operations/ui/fleet/VehicleDetail.tsx",
+      "src/demos/operations/ui/fleet/VehicleForm.tsx",
+      "src/demos/operations/ui/maintenance/MaintenanceScreen.tsx",
+      "src/demos/operations/ui/maintenance/MaintenanceToolbar.tsx",
+      "src/demos/operations/ui/maintenance/MaintenanceTable.tsx",
+      "src/demos/operations/ui/maintenance/MaintenanceMobileList.tsx",
+      "src/demos/operations/ui/maintenance/MaintenanceDetail.tsx",
+      "src/demos/operations/ui/maintenance/MaintenanceForm.tsx",
+      "src/demos/operations/ui/maintenance/MaintenanceConfirmAction.tsx"
     ]
   },
   "routes": [
@@ -131,7 +150,10 @@
     "/demos/operations/leads",
     "/demos/operations/customers",
     "/demos/operations/inbox",
-    "/demos/operations/reservations"
+    "/demos/operations/reservations",
+    "/demos/operations/contracts",
+    "/demos/operations/fleet",
+    "/demos/operations/maintenance"
   ],
   "navigationDestinations": [
     "Systems",

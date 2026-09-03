@@ -6,12 +6,10 @@
  * The Leads and Customers drawer geometry and focus behaviour. Four sections:
  * the booking, the vehicle, the notes, and what it became.
  *
- * Where a visitor may go from here depends on what is built. Customers exists,
- * so the customer is a link for the roles that can open it and a plain name
- * for the Fleet Coordinator, who works reservations but not accounts. Fleet
- * and Contracts do not exist, so the vehicle and the converted contract are
- * facts rather than links: a link to a route that 404s is worse than no link,
- * which is the rule this product has followed since the first module (D-092).
+ * Where a visitor may go from here depends on what is built, and on what the
+ * role may open (D-092). Customers, Fleet and Contracts all exist now, so the
+ * customer, the assigned vehicle and the converted contract are each a link
+ * for a role that can reach them and a plain fact for one that cannot.
  */
 
 import { useEffect, useMemo, useRef } from "react";
@@ -20,7 +18,10 @@ import Link from "next/link";
 import type { DemoRecord } from "@/demo-runtime/types";
 import { useDemoQuery } from "@/demo-runtime/react/hooks";
 
-import { absoluteDate, relativeDate, selectLeadActivity } from "../../selectors/leads-list";
+import { C } from "../../constants";
+
+import { absoluteDate, relativeDate } from "../../selectors/leads-list";
+import { selectActivity } from "../../selectors/queries";
 import { vehicleLabelOf } from "../../selectors/reservations-list";
 import { read } from "../../services/context";
 import type { Reservation, Vehicle } from "../../types";
@@ -29,10 +30,14 @@ import OpsOverlay from "../leads/OpsOverlay";
 import {
   STATUS_TONE,
   actionsFor,
+  canOpenContracts,
   canOpenCustomer,
+  canOpenFleet,
   canOpenInbox,
+  contractHref,
   conversationHref,
   customerHref,
+  vehicleHref,
 } from "./reservations-view";
 
 type Props = {
@@ -86,7 +91,7 @@ export default function ReservationDetail({
         conversations.find(
           (c) => c.data.subjectType === "Customer" && c.data.subjectId === customerId
         ) ?? null,
-      activity: selectLeadActivity(audit, reservationId),
+      activity: selectActivity(audit, C.reservations, reservationId),
     };
   }, [role, reservationId, vehicleId, customerId]);
 
@@ -221,7 +226,21 @@ export default function ReservationDetail({
           {r.vehicleId ? (
             data?.vehicle ? (
               <dl className="ops-facts">
-                <Fact label="Assigned" value={vehicleLabelOf(data.vehicle)} />
+                <div className="ops-facts__row">
+                  <dt className="ops-facts__label">Assigned</dt>
+                  <dd className="ops-facts__value">
+                    {canOpenFleet(role) ? (
+                      <Link className="ops-link-button" href={vehicleHref(data.vehicle.id)}>
+                        {vehicleLabelOf(data.vehicle)}
+                      </Link>
+                    ) : (
+                      /* The Sales Agent works reservations and not the fleet
+                         register, so they get the machine's name and not the
+                         way into it (D-092). */
+                      vehicleLabelOf(data.vehicle)
+                    )}
+                  </dd>
+                </div>
                 <Fact label="Class" value={data.vehicle.data.vehicleClass} />
                 <Fact label="Fleet status" value={data.vehicle.data.status} />
               </dl>
@@ -256,10 +275,17 @@ export default function ReservationDetail({
               {r.convertedContractId && (
                 <div className="ops-facts__row">
                   <dt className="ops-facts__label">Converted contract</dt>
-                  {/* Named, not linked. Contracts is not built, and a link to
-                      a route that 404s is worse than a plain fact. */}
                   <dd className="ops-facts__value">
-                    <code className="ops-detail__ref">{r.convertedContractId}</code>
+                    {canOpenContracts(role) ? (
+                      <Link
+                        className="ops-link-button"
+                        href={contractHref(r.convertedContractId)}
+                      >
+                        {r.convertedContractId}
+                      </Link>
+                    ) : (
+                      <code className="ops-detail__ref">{r.convertedContractId}</code>
+                    )}
                   </dd>
                 </div>
               )}
