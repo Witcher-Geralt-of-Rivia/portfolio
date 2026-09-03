@@ -2168,3 +2168,39 @@ elements and asserted none of them was an anchor, which passed vacuously the
 moment the element stopped being rendered at all. The replacement asserts the
 presence of the link rather than the absence of a tag name, and the suite gained
 one check.
+
+### Public production review pass
+
+Run against `https://intelligent-systems-lab.duckdns.org` after the batch
+deployment, so there is no probe route and everything is observed through the
+interface. 142 checks, all passing.
+
+```
+routes      all eight demo routes plus /specimen answer 200; the three QA
+            fixture routes 404; the neighbouring domain still answers 200
+sidebar     eight modules navigable, three still marked pending, and the
+            three that are pending are exactly Payments, Automations and
+            Reports
+visual      seven widths for each of the three modules, viewport and
+            full-page captures at every one, zero pixels of portfolio
+            background below the product in any of the 42 captures
+states      a selected contract with its activation dialog, a selected
+            vehicle with both form modes, a selected work order with its
+            create sheet, and the three mobile lists with their drawers
+sheets      D-093 still holds on the public build: the create sheet is
+            sized to its content
+sequence    create a reservation, confirm it onto a real vehicle, convert
+            it, follow the contract link, activate, read the fleet register
+            and find the vehicle Rented and named with its hirer, complete,
+            open a work order, start it, complete it, then Reset
+reset       14 contracts, 24 vehicles, 10 work orders and 18 reservations
+            all return
+console     no error on any of the three modules and none through the
+            sequence
+```
+
+The sequence is the one a reviewer would run by hand, and it crosses all four
+modules of the rental group on purpose: the assertion worth making about this
+batch is not that three screens render, it is that a booking becomes a rental
+becomes a returned vehicle becomes a job in the workshop, and that every screen
+agrees about where the machine is at each step.
