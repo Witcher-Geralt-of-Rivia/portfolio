@@ -215,6 +215,116 @@ function Wait-Supervised(
     return $last
 }
 
+# --- Orphan recovery ---------------------------------------------------------
+#
+# 09D0 taught the script to detect an orphaned listener and refuse to call it a
+# success. It could not do anything about one, and on 2026-09-03 that became the
+# blocker: an orphan held 3100, so every `pm2 start` died with EADDRINUSE, PM2
+# stayed errored with no pid, and three consecutive `deploy:safe` runs failed at
+# the supervision gate with identical output. The sanctioned path had no way out
+# of a state the sanctioned path could create.
+#
+# The rule is in deploy/orphan-recovery.mjs, which touches nothing and is unit
+# tested by qa/stage09d1-orphan-recovery.mjs. Occupying the port is explicitly
+# not evidence: the listener must prove it is this deployment's before anything
+# here is allowed to touch it. Everything below gathers that proof.
+
+function Get-Pm2DaemonPid {
+    $daemon = Get-CimInstance Win32_Process -ErrorAction SilentlyContinue |
+        Where-Object { $_.CommandLine -and $_.CommandLine -match "pm2[\\/]lib[\\/]Daemon\.js" } |
+        Select-Object -First 1
+    if (-not $daemon) { return 0 }
+    return [int]$daemon.ProcessId
+}
+
+function Get-ProcessFacts([int]$ProcessId) {
+    $p = Get-CimInstance Win32_Process -Filter "ProcessId=$ProcessId" -ErrorAction SilentlyContinue
+    if (-not $p) { return @{ Name = ""; CommandLine = "" } }
+    return @{ Name = [string]$p.Name; CommandLine = [string]$p.CommandLine }
+}
+
+function Test-OrphanRecovery($Supervision) {
+    $listener = $Supervision.ListenerPid
+    if ($listener -le 0) {
+        return [pscustomobject]@{ Recover = $false; Reasons = @("nothing is listening on the production port"); TargetPid = 0 }
+    }
+
+    $facts    = Get-ProcessFacts $listener
+    $ancestry = Get-ProcessAncestry $listener
+    $daemon   = Get-Pm2DaemonPid
+
+    $ancestryArg = if ($ancestry.Count -gt 0) { $ancestry -join "," } else { "0" }
+    $cmdArg      = if ($facts.CommandLine) { $facts.CommandLine } else { "" }
+    $nameArg     = if ($facts.Name) { $facts.Name } else { "(unknown)" }
+
+    # The command line is passed last and unquoted on purpose: it contains
+    # spaces, and the module rejoins the remaining argv rather than requiring
+    # this to invent an escaping scheme.
+    $lines = & node (Join-Path $PSScriptRoot "orphan-recovery.mjs") `
+        $RepoRoot $ProdPort $listener $(if ($Supervision.Ok) { "yes" } else { "no" }) `
+        $Supervision.Status $Supervision.ManagedPid $daemon $ancestryArg $nameArg $cmdArg 2>$null
+
+    $recover = $false
+    $target  = 0
+    $reasons = @()
+    foreach ($line in $lines) {
+        if ($line -eq "recover=yes") { $recover = $true }
+        elseif ($line -like "target=*") { $target = [int]$line.Substring(7) }
+        elseif ($line -like "reason=*") { $reasons += $line.Substring(7) }
+    }
+    if (-not $lines) { $reasons += "the orphan recovery check could not be run" }
+
+    # Belt and braces. The module decides, but this refuses to act on a verdict
+    # that does not name the pid it just examined.
+    if ($recover -and $target -ne $listener) {
+        $recover = $false
+        $reasons += "the recovery verdict named pid $target, not the listener $listener"
+    }
+
+    return [pscustomobject]@{
+        Recover   = $recover
+        Reasons   = $reasons
+        TargetPid = $target
+        Daemon    = $daemon
+        Image     = $nameArg
+    }
+}
+
+# Narrow by construction: one pid, proved first, and the port has to actually
+# free before PM2 is asked to start anything. Returns $true only when the port
+# is clear afterwards.
+function Invoke-OrphanRecovery([string]$Slot, $Verdict) {
+    Write-Step "recovering port $ProdPort from orphaned pid $($Verdict.TargetPid) ($($Verdict.Image), PM2 daemon $($Verdict.Daemon) descendant)" "PROVED"
+
+    # Stop first, so PM2 is not racing to respawn into the port being freed.
+    & pm2 stop portfolio 2>&1 | Out-Null
+    Write-Step "pm2 stop portfolio" "OK"
+
+    try {
+        Stop-Process -Id $Verdict.TargetPid -Force -ErrorAction Stop
+        Write-Step "stopped orphaned pid $($Verdict.TargetPid)" "OK"
+    } catch {
+        Write-Fail "could not stop pid $($Verdict.TargetPid): $($_.Exception.Message)"
+        return $false
+    }
+
+    $deadline = (Get-Date).AddMilliseconds(15000)
+    while ((Get-Date) -lt $deadline) {
+        if ((Get-ListenerPid $ProdPort) -eq 0) { break }
+        Start-Sleep -Milliseconds 250
+    }
+    $stillHeld = Get-ListenerPid $ProdPort
+    if ($stillHeld -ne 0) {
+        Write-Fail "port $ProdPort is still held by pid $stillHeld after the orphan was stopped"
+        return $false
+    }
+    Write-Step "port $ProdPort released" "OK"
+
+    Set-ProductionSlot $Slot
+    Write-Step "pm2 start on slot $Slot" "OK"
+    return $true
+}
+
 function Write-SupervisionResult($Result, [string]$Label) {
     Write-Step ("{0}: pm2 {1}, slot {2}, pid {3}, listener {4}" -f `
         $Label, $Result.Status, $(if ($Result.Slot) { $Result.Slot } else { "(unset)" }), `
@@ -340,6 +450,34 @@ try {
 
     $publicBefore = Get-HttpStatus $PublicUrl
     Write-Step "public site before deployment: $publicBefore" $(if ($publicBefore -eq 200) { "OK" } else { "WARN" })
+
+    # A host that is already orphaned cannot pass the supervision gate no matter
+    # what gets built, so it is repaired here rather than after a five minute
+    # build. The slot recovered is the one PM2 is already meant to be serving:
+    # this restores supervision, it does not deploy anything.
+    $preSlot = Get-ActiveSlot
+    if ($preSlot) {
+        $preSup = Test-Supervised -ExpectedSlot $preSlot
+        if (-not $preSup.Ok) {
+            Write-SupervisionResult $preSup "before deployment"
+            $verdict = Test-OrphanRecovery $preSup
+            if ($verdict.Recover) {
+                if (-not (Invoke-OrphanRecovery $preSlot $verdict)) {
+                    throw "Orphan recovery could not free port $ProdPort. Production was not touched."
+                }
+                $preSup = Wait-Supervised -ExpectedSlot $preSlot -TimeoutMs 30000 -Consecutive 3 -PollMs 500
+                Write-SupervisionResult $preSup "after recovery"
+                if (-not $preSup.Ok) {
+                    throw "Orphan recovery ran but supervision is still broken. Production was not touched."
+                }
+            } else {
+                foreach ($r in $verdict.Reasons) { Write-Fail $r }
+                throw "Production is not supervised and recovery is not authorised. Nothing was changed."
+            }
+        } else {
+            Write-Step "production supervised on $preSlot before deployment" "OK"
+        }
+    }
 
     # ---- 2/3. Determine active slot, select the inactive one -----------------
     Write-Phase "Determine release slots"
@@ -516,6 +654,23 @@ try {
     Write-Phase "Supervision check"
     $supervised = Wait-Supervised -ExpectedSlot $target -TimeoutMs 30000 -Consecutive 3 -PollMs 500
     Write-SupervisionResult $supervised "managed process"
+
+    # The switch itself can orphan the port: that is exactly how the 09D0
+    # incident happened, PM2 spawning a replacement before the previous process
+    # released 3100. One recovery attempt, then the same gate decides again. If
+    # it still fails, the rollback path runs as before.
+    if (-not $supervised.Ok) {
+        $verdict = Test-OrphanRecovery $supervised
+        if ($verdict.Recover) {
+            if (Invoke-OrphanRecovery $target $verdict) {
+                $supervised = Wait-Supervised -ExpectedSlot $target -TimeoutMs 30000 -Consecutive 3 -PollMs 500
+                Write-SupervisionResult $supervised "after recovery"
+            }
+        } else {
+            foreach ($r in $verdict.Reasons) { Write-Fail $r }
+        }
+    }
+
     $switchOk = $localUp -and $supervised.Ok
 
     # ---- 13. Public health check --------------------------------------------
@@ -554,6 +709,24 @@ try {
         $restoreSupervised = Wait-Supervised -ExpectedSlot $script:PreviousSlot `
             -TimeoutMs 30000 -Consecutive 3 -PollMs 500
         Write-SupervisionResult $restoreSupervised "rollback managed process"
+
+        # A rollback into an occupied port is not a rollback. On 2026-09-03 this
+        # path reported "rolled back to .next-release-a" while the orphan carried
+        # on serving .next-release-b: the restart could not bind, and only the
+        # supervision check noticed. Recovery gets one attempt here too, so the
+        # restored release is the one actually being served.
+        if (-not $restoreSupervised.Ok) {
+            $rollbackVerdict = Test-OrphanRecovery $restoreSupervised
+            if ($rollbackVerdict.Recover) {
+                if (Invoke-OrphanRecovery $script:PreviousSlot $rollbackVerdict) {
+                    $restoreSupervised = Wait-Supervised -ExpectedSlot $script:PreviousSlot `
+                        -TimeoutMs 30000 -Consecutive 3 -PollMs 500
+                    Write-SupervisionResult $restoreSupervised "rollback after recovery"
+                }
+            } else {
+                foreach ($r in $rollbackVerdict.Reasons) { Write-Fail $r }
+            }
+        }
 
         $publicAfter = Test-PublicHealth -Attempts 10 -DelayMs 800
         Write-Step "rollback: public site healthy" $(if ($publicAfter) { "OK" } else { "FAIL" })
