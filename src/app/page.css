@@ -1,19 +1,70 @@
 /* ---------------------------------------------------------------------
-   NAVIGATION SPECIMEN
-   Stage 03 ships navigation, not a homepage. These zones give the
-   navigation something to scroll through and observe. Deletable whole
-   once real sections arrive.
+   HOMEPAGE RHYTHM
+
+   Every section owns its own internal design. What the page owns is the
+   pacing between them, and until now there was none: all four capability
+   sections carried an identical 168px top and bottom, so every seam was
+   the same 336px gap and the page read at one speed from the hero to the
+   end.
+
+   These are the only rules here, and they set tempo rather than layout.
+   Each section's own stylesheet is untouched.
    --------------------------------------------------------------------- */
 
-.nav-specimen {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: var(--space-2xs);
-  min-height: 85vh;
-  border-top: 1px solid var(--line-subtle);
+/* Systems follows the hero and introduces the idea, so it opens closer to
+   what came before it than the sections that follow. */
+.content-frame > .systems {
+  padding-block: clamp(96px, 9vw, 132px) clamp(104px, 10vw, 148px);
 }
 
-.nav-specimen:first-child {
-  border-top: 0;
+/* Products is the most structural section on the page and is given room to
+   be, on both sides. */
+.content-frame > .products {
+  padding-block: clamp(112px, 11vw, 164px);
+}
+
+/* AI Learning is the narrative variation between two dense neighbours: a
+   lighter entry, so the page breathes before the Lab. */
+.content-frame > .learning {
+  padding-block: clamp(104px, 10vw, 148px) clamp(96px, 9vw, 132px);
+}
+
+/* The Lab is compact evidence. It is the tightest section on the page, which
+   is what makes the Featured Work opening below it feel like a change of
+   register rather than one more section. */
+.content-frame > .lab {
+  padding-block: clamp(88px, 8.5vw, 124px) clamp(80px, 8vw, 112px);
+}
+
+/* ---------------------------------------------------------------------
+   SEAMS
+
+   A hairline where the page changes subject, drawn on the section rather
+   than inserted between them so nothing is added to the document. Not on
+   Systems: the hero already ends in one composition and a rule under it
+   would cut the page in half above the fold.
+   --------------------------------------------------------------------- */
+
+.content-frame > .products,
+.content-frame > .learning,
+.content-frame > .lab {
+  position: relative;
+}
+
+.content-frame > .products::before,
+.content-frame > .learning::before,
+.content-frame > .lab::before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    rgba(61, 68, 88, 0) 0%,
+    rgba(61, 68, 88, 0.1) 18%,
+    rgba(61, 68, 88, 0.1) 82%,
+    rgba(61, 68, 88, 0) 100%
+  );
+  content: "";
 }

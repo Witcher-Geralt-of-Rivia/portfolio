@@ -3,38 +3,46 @@ import IntelligentSystemsSection from "@/components/systems/IntelligentSystemsSe
 import ProductEngineeringSection from "@/components/products/ProductEngineeringSection";
 import AILearningSection from "@/components/learning/AILearningSection";
 import EngineeringLabSection from "@/components/lab/EngineeringLabSection";
-import { NAV_ITEMS } from "@/components/navigation/nav-items";
+import FeaturedDemoSection from "@/components/work/FeaturedDemoSection";
+import SiteFooter from "@/components/layout/SiteFooter";
 
 import "./page.css";
 
-/* The homepage: the Stage 04 hero, then the built capability sections, then
-   the remaining navigation anchor zones. Those remaining zones are still
-   Stage 03 QA placeholders and are replaced one per stage. */
-
-const BUILT = new Set(["systems", "products", "ai-learning", "lab"]);
-const PLACEHOLDERS = NAV_ITEMS.filter((item) => !BUILT.has(item.id));
+/**
+ * The homepage, and now a finished one.
+ *
+ * Five sections and an ending. The first four demonstrate a capability each;
+ * the fifth is one finished system the visitor can open, which is why it sits
+ * last and is built heavier than the others.
+ *
+ * The navigation-specimen placeholders are gone. They existed from Stage 03 so
+ * the navigation had somewhere to scroll to while the real sections were being
+ * built, and the last of them, `#work`, is replaced here. `.nav-specimen` in
+ * page.css goes with them.
+ *
+ * `FeaturedDemoSection` owns `id="work"`, and it is deliberately not
+ * `SelectedWorkSection`: that component publishes real client work and refuses
+ * to render until its own invariant is met. Nothing here changes that gate.
+ */
 
 export default function Home() {
   return (
-    <div className="content-frame">
-      <Hero />
+    <>
+      <div className="content-frame">
+        <Hero />
 
-      <IntelligentSystemsSection />
+        <IntelligentSystemsSection />
 
-      <ProductEngineeringSection />
+        <ProductEngineeringSection />
 
-      <AILearningSection />
+        <AILearningSection />
 
-      <EngineeringLabSection />
+        <EngineeringLabSection />
 
-      {PLACEHOLDERS.map((item) => (
-        <section key={item.id} id={item.id} className="nav-specimen">
-          <p className="eyebrow">
-            {item.index} / {item.label.toUpperCase()}
-          </p>
-          <p className="type-caption">Navigation specimen section</p>
-        </section>
-      ))}
-    </div>
+        <FeaturedDemoSection />
+      </div>
+
+      <SiteFooter />
+    </>
   );
 }
