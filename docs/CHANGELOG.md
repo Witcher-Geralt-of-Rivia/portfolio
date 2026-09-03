@@ -1666,3 +1666,83 @@ the Reservations call site was corrected with it.
 
 Payments, Automations and Reports. `#work` is untouched, the registry still
 reads `operations = building`, and `currentStage` stays 8.
+
+---
+
+## Stage 09C4.B - Payments, Automations, Reports, and the finished Demo 01
+
+Status: **Complete**
+
+### Summary
+The last three modules. The Rental Operations Platform now has all eleven
+screens the specification names, and the temporary scaffolding that carried it
+there is gone.
+
+```
+Payments      26 records. Admin and the Finance Analyst record against a
+              contract; Sales and Fleet never see the module.
+Automations   the five frozen rules. Admin enables, disables, tests and reads
+              their history. No rule builder, and there will not be one.
+Reports       the four frozen groups, read-only, for Admin and Finance.
+```
+
+### Overdue reaches Rule 04 by being asked, not by a clock
+
+A payment becomes overdue because time passed, and no mutation accompanies
+that. `reconcileTimeDerivedState` existed to raise `payment.overdue` and had no
+call sites at all: the same shape of gap D-063 found for leads and D-088 for
+reservations, a third time.
+
+`reconcileOverdueWorkflow` is now called when the Payments module opens and
+after a payment is recorded. No timer, no poll, no wall clock. The pass skips
+any payment that already carries a Finance notification, so a second entry
+raises nothing, and calls are serialised so a payment recorded mid-pass cannot
+duplicate an alert (D-095).
+
+On the canonical seed the first entry raises three: `payment_0016`,
+`payment_0018` and `payment_0019`. The screen says so, once, politely.
+
+### Money at the edge, cents underneath
+
+The record form takes dollars because that is what a person writing down a
+payment writes, and `centsFromInput` converts once, in one place, rejecting
+anything that is not a whole number of cents. `Math.round(48.5 * 100)` is right
+and the two obvious alternatives are not.
+
+Nothing in the module says charge, process, card or bank. It is accounting
+state, and the wording is load-bearing.
+
+### Reports is four groups, because the specification says four
+
+The build was briefed toward five report families. The frozen contract says
+"Exactly four groups" and names them, so four is what shipped, and the two
+selector families written for the others were removed rather than left unused
+(D-096). Every share on the page is printed with the denominator it was taken
+over, and the component cannot render one without it.
+
+### The build-state mechanism is deleted
+
+`implemented` in `ui/modules.ts` was always declared as temporary build state
+rather than product domain, and both `ARCHITECTURE.md` and the file's own header
+said it would be deleted once the eleventh module landed. This is that moment.
+The flag, the sidebar branch that read it, its two styles and the QA check that
+tracked it are all gone. Whether a module appears is one question now, answered
+in `permissions.ts` and nowhere else.
+
+### Cross-links finished
+
+The notification centre had three source types and now has eight: a reservation,
+payment, maintenance, automation rule and automation run notification all lead
+somewhere. The Overview action queue rows became links, which the file's own
+comment had been reserving for "a later stage".
+
+`CustomerDetail` was deliberately left alone. Its relation panel is a compact
+summary approved in 09C3.2, and turning it into a navigation surface would be a
+redesign of an approved module rather than a cross-link.
+
+### Not done
+
+`#work` is still a placeholder and Stage 09 is not complete: Demo 02 and Demo 03
+do not exist. `currentStage` stays 8. The registry now reads
+`operations = verified`, which turns nothing on:
+`workSectionIsPublishable()` needs all three demos and has no callers yet.

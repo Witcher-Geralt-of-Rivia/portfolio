@@ -3102,3 +3102,108 @@ Odometer validation is stated three times over: the input constrains it, the
 form refuses it with a sentence, and the service raises a VALIDATION error. The
 service is the authority; the other two exist so the visitor learns before a
 round trip.
+
+---
+
+## D-095 - Overdue is raised by walking into Payments, not by a timer
+
+Status: Accepted
+Stage: 9C4.B
+
+### Decision
+`reconcileOverdueWorkflow` runs when the Payments module opens for a role that
+can write, and again after a payment is recorded. Nothing else calls it, and
+there is no timer anywhere in this product.
+
+The pass is idempotent by construction: `reconcileTimeDerivedState` skips any
+payment that already carries a Finance notification, so entering the module a
+second time raises nothing. Calls are also serialised behind one another, so a
+payment recorded while the first pass is still committing cannot produce a
+second copy of the same alert.
+
+### Reason
+A payment does not become overdue because anything happened to it. It becomes
+overdue because the clock passed its due date, and no mutation accompanies that.
+Rule 04 listens for `payment.overdue` and nothing in the product raised it: the
+service existed with no call sites at all, which is the same shape of gap D-063
+found for leads and D-088 for reservations.
+
+The three alternatives were all worse. A poll would make a demo that is
+deliberately idle at rest run forever. An interval would be a timer, and the
+specification says the transition is raised by "an explicit reconciliation pass
+over time-derived state, not by a polling loop". Reading the wall clock would
+break the logical clock the whole demo is built on (D-053).
+
+Module entry is the honest trigger because it is the moment a person asks the
+question. A finance analyst opening the ledger is exactly when "what has fallen
+due" needs to be true, and it is the only moment in this product when anyone
+cares.
+
+Serialising rather than dropping a concurrent call matters for one case:
+every mutation advances the logical clock, so recording a payment can itself
+tip another payment past its due date, and that transition deserves the pass it
+would otherwise lose.
+
+### Consequence
+The canonical seed has three payments the base clock has already passed:
+`payment_0016`, `payment_0018` and `payment_0019`. Opening Payments as Admin or
+as the Finance Analyst therefore writes three AutomationRuns and three Finance
+notifications, once, and the screen says so politely.
+
+That makes the seeded counts move on first entry: 18 automation runs become 21
+and 22 notifications become 25. Reset restores both. Any suite counting runs
+must count the delta, and must count `reconcile_*` source events rather than
+rule ids, because the seed carries three Rule 04 runs of its own.
+
+`payment-workflows.ts` exists so the screen never reaches into
+`automations.ts`. The screen asks for a business outcome; where the rules live
+is not its business.
+
+---
+
+## D-096 - Reports is the four groups the specification names, and no more
+
+Status: Accepted
+Stage: 9C4.B
+
+### Decision
+The Reports module renders exactly four panels:
+
+```
+CRM Funnel    Fleet Utilization    Contract Status    Payment Status
+```
+
+Every role that can open Reports sees all four, the Finance Analyst included.
+
+Enrichment happens inside a group rather than as a new group: Contract Status
+carries total, paid and outstanding value beside its counts, and Fleet
+Utilization carries the rented share with its denominator printed.
+
+### Reason
+`docs/DEMO_OPERATIONS_SPEC.md` section 10 says "Exactly four groups" and then
+names them. The list is closed.
+
+This was worth writing down because the build was briefed toward five families,
+including a reservation pipeline and a maintenance workload, both of which are
+perfectly reportable and neither of which is a frozen group. Building them would
+have been adjusting the contract to fit an idea rather than the other way round,
+which is the one thing the specification's own header forbids. The two selector
+families written for them were removed rather than left unused.
+
+Finance seeing the CRM funnel follows from the same place. The specification
+names four groups for anyone who can open the module, and D-092 settles the
+rest: what is withheld from a role is the link, never the information. So the
+Finance Analyst reads the funnel and is given no way into Leads from it, exactly
+as the Fleet Coordinator reads a customer's name with no way into Customers.
+
+### Consequence
+Every headline figure on the page is a count or a sum of records the visitor can
+go and open, and every share is printed with the total it was taken over: the
+`StatBars` component cannot render a share without being handed a denominator.
+Nothing is compared to a previous period, and the page says so, because the demo
+runs on one logical clock and has no previous period to compare against.
+
+The period filter is the frozen one, 30 days / 90 days / All demo data, and it
+applies where a report is genuinely time-based. The fleet panel is a snapshot of
+the register as it stands, so the filter does not touch it, and the page states
+that rather than leaving a reader to wonder why one number never moves.

@@ -11,7 +11,7 @@ the code beneath it.
 STATUS      domain complete / shell, Overview and the three CRM modules
             complete / seven modules unbuilt
 STAGE       09C1, 09C2, 09C2.1, all of 09C3, 09C4.0 and 09C4.1 complete
-REGISTRY    operations = building
+REGISTRY    operations = verified
 ROUTE       /demos/operations, /leads, /customers and /inbox DEPLOYED,
             noindex, for external live review
 ```
@@ -938,9 +938,88 @@ qa/stage09c43-fleet-maintenance.mjs  Fleet and Maintenance together, because
                                      them
 ```
 
-## Remaining UI work
+## Payments, Automations and Reports (09C4.B)
 
-Three module screens: Payments, Automations and Reports. Every service and
-selector they need already exists. `#work` still renders its placeholder, and
-the demo is deployed but unadvertised: `noindex, nofollow`, linked from
-nowhere.
+The last three, and the end of Demo 01.
+
+```
+/demos/operations/payments      26 records, Admin and Finance write
+/demos/operations/automations   the five frozen rules, Admin only
+/demos/operations/reports       four frozen groups, Admin and Finance read
+```
+
+### The transition nothing announces
+
+A payment becomes overdue because the clock passed its due date. No mutation
+accompanies that, so nothing raises `payment.overdue`, so Rule 04 never ran:
+`reconcileTimeDerivedState` had been sitting in `automations.ts` with no call
+sites at all since 09C1.
+
+`payment-workflows.ts` is the boundary the screen talks to.
+`reconcileOverdueWorkflow` is called when the module opens and after a payment
+is recorded, never on a timer, and it is idempotent because the pass skips a
+payment that already carries a Finance notification (D-095). Calls are
+serialised, so a payment recorded while the first pass is still committing
+cannot raise the same alert twice.
+
+First entry on the canonical seed raises three, for `payment_0016`,
+`payment_0018` and `payment_0019`, and moves the seeded counts: 18 automation
+runs to 21, 22 notifications to 25. Reset restores both.
+
+### Money at the edge
+
+`centsFromInput` is the only place a typed amount becomes cents, and it refuses
+anything that is not a whole number of them. The form shows the contract's
+total, what is already paid and what remains before anything is typed, because a
+payment against a balance you cannot see is a number typed into the dark.
+
+No provider, no card field, no bank detail, and none of the vocabulary: the
+module says record, never charge or process.
+
+### Five rules, and nothing else
+
+Automations is not a list module and not a rule builder. Five cards and a run
+history, in one grid. A card shows what wakes the rule in plain words and the
+raw event type beside it, because an engineering demonstration that hid its own
+wiring would be missing the point.
+
+Test runs the real service and shows the real `AutomationRun` it wrote,
+including the run id, rather than closing on a toast. Disable is proved by
+consequence in the QA: the rule is switched off, a reservation is confirmed, and
+a Skipped run appears where the System message would have been.
+
+### Four report groups
+
+Exactly the four the specification names, for every role that can open the
+module (D-096). Every share carries the denominator it was taken over, and the
+`StatBars` component cannot render one without being handed the total. The
+donut is the Overview's donut, arc arithmetic included, because it is the same
+instrument.
+
+### The scaffolding is gone
+
+`implemented` in `ui/modules.ts` was temporary build state from the first day it
+existed, and both `ARCHITECTURE.md` and its own header said it would be deleted
+when the eleventh module landed. It is: the flag, the sidebar branch, its two
+styles and the QA check that tracked it. Whether a module appears is now one
+question with one answer, in `permissions.ts`.
+
+### QA
+
+```
+qa/stage09c44-payments.mjs             the ledger, and Rule 04 on entry
+qa/stage09c45-automations-reports.mjs  the rules, their consequences, and the
+                                       four groups
+qa/stage09-operations-final.mjs        Demo 01 as one product: eleven routes,
+                                       one business sequence end to end, all
+                                       five rules through real paths, the world
+                                       invariants, the role walkthrough, seven
+                                       widths and reset
+```
+
+## Remaining work
+
+Demo 01 is complete: eleven modules, deployed and verified in the registry.
+`#work` still renders its placeholder and Stage 09 is not finished, because Demo
+02 and Demo 03 do not exist. The demo stays unadvertised: `noindex, nofollow`,
+linked from nowhere.

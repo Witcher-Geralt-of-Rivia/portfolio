@@ -11,17 +11,18 @@ Everything below was read from the repository, not recalled from conversation.
 ```
 Stages 01-08   COMPLETE and FROZEN
 Deployment     LIVE at https://intelligent-systems-lab.duckdns.org
-Stage 09       IN PROGRESS - through 09C4.A, 0 of 3 demos built
-Demo 01        8 of 11 modules DEPLOYED for review
+Stage 09       IN PROGRESS - Demo 01 complete, 1 of 3 demos built
+Demo 01        ALL 11 modules DEPLOYED, registry verified
 ```
 
 Stage 09 changed direction: `#work` becomes a launcher into three
 frontend-only product demos rather than case studies. 09A froze the shared runtime;
 09B froze Demo 01's contract; 09C1 built its domain; 09C2 built the shell and
-Overview; 09C2.1 hardened both; 09C3 built Leads, Customers and Inbox, with
-09C3.1.1/09C3.1.2 hardening their controls; 09C4.0 made the rental domain ready,
-09C4.1 built Reservations, and 09C4.A built Contracts, Fleet and Maintenance.
-Payments, Automations and Reports remain, `#work` is a placeholder, `currentStage` stays 8. See `docs/DEMO_OPERATIONS_IMPLEMENTATION.md` and
+Overview; 09C2.1 hardened both; 09C3 built Leads, Customers and Inbox; 09C4.0
+made the rental domain ready, 09C4.1 built Reservations, 09C4.A built Contracts,
+Fleet and Maintenance, and 09C4.B built Payments, Automations and Reports.
+Demo 01 is complete. Demo 02 and Demo 03 are unbuilt, `#work` is a placeholder,
+`currentStage` stays 8. See `docs/DEMO_OPERATIONS_IMPLEMENTATION.md` and
 `docs/NEXT_STAGE.md`. The case-study framework and its one verified internal
 case are preserved, unpublished; see `docs/CASE_STUDY_SOURCE_AUDIT.md`.
 
@@ -120,10 +121,9 @@ src/
     work/       Stage 09 - case-study renderers; built, never wired in
     demos/      Stage 09A - DemoShell, DemoDisclosure, DemoResetControl, DemoSelect
   content/case-studies.ts   typed case-study model + render-safety filter
-  demos/operations/         Stage 09C1 domain (25 modules) + ui/ (shell,
+  demos/operations/         Stage 09C1 domain (28 modules) + ui/ (shell,
                 sidebar, top bar, Overview panels, notifications, icons,
-                module routes, and one directory per built module). 8 of 11
-                built; Payments, Automations and Reports unbuilt.
+                module routes, and one directory per module). All 11 built.
   demo-runtime/             Stage 09A - shared demo platform (18 modules):
                 types, config, demo-registry, clock, ids, repository,
                 async-service, events, audit, jobs, session, connectivity,

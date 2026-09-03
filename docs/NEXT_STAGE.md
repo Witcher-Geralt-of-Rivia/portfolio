@@ -23,11 +23,14 @@ Stage 09                IN PROGRESS
       09C3.3 Inbox + integrated CRM workflow  COMPLETE and deployed
       09C3.3.1 Inbox viewport containment     COMPLETE and deployed
       09C3.3.2 Message timestamp reconciliation  COMPLETE
-    09C4 Rental Operations Core  IN PROGRESS (D-090)
+    09C4 Rental Operations Core  COMPLETE (D-090)
       09C4.0 core domain readiness  COMPLETE
       09C4.1 Reservations           COMPLETE, deployed and APPROVED
       09C4.A Contracts + Fleet + Maintenance  COMPLETE and deployed
-      09C4.4 Payments + Automations + Reports  NOT STARTED
+      09C4.B Payments + Automations + Reports COMPLETE and deployed
+  Demo 01 Rental Operations Platform  ALL ELEVEN MODULES, registry verified
+  Demo 02 Field Operations            NOT STARTED
+  Demo 03 Adaptive Learning           NOT STARTED
 ```
 
 09C4.2 and 09C4.3 were merged into one batch, 09C4.A, on an explicit
@@ -38,21 +41,23 @@ instruction and recorded as D-094.
 
 ## The block
 
-Next task: Stage 09C4.4 - Payments, Automations and Reports (NOT STARTED)
+Next task: PORTFOLIO LANDING PAGE FINALIZATION (NOT STARTED)
 
-Eight of Demo 01's eleven modules are built and deployed. The three that remain
-are the last batch, and it has not been started and does not start without an
-explicit instruction. That rule has not changed and is worth keeping: six
-reviews of this product have each found something the suite had no opinion
+Demo 01 is finished. All eleven modules exist, the registry reads
+`operations = verified`, and the product is deployed for review with the
+Rental Operations Platform as the flagship engineering showcase.
+
+Nothing about Stage 09 is complete, and the registry flip changes nothing
+visible: `workSectionIsPublishable()` requires all three demos and has no
+callers, because `#work` has not been built. The demo stays unadvertised,
+`noindex, nofollow`, linked from nowhere, and `currentStage` stays 8.
+
+Demo 02 (Field Operations) and Demo 03 (Adaptive Learning) have specifications
+to freeze before either can be built, and neither starts without an explicit
+instruction. That rule has not changed and is worth keeping: every external
+review of this product so far has found something the suite had no opinion
 about, most recently an application rendering above 1951 pixels of portfolio
 background while 367 checks passed.
-
-Nothing is blocked. Every service and selector the last three modules need
-already exists, `payments.ts` included, and the asset-code question that once
-blocked the fleet work is closed (D-094).
-
-Stage 09C3 is complete and approved. 09C4.1 Reservations is approved. 09C4.A is
-built, deployed and awaiting its own review.
 
 ## Ordered plan
 
@@ -79,8 +84,8 @@ built, deployed and awaiting its own review.
 20. Stage 09C4.0 - Core domain readiness        DONE
 21. Stage 09C4.1 - Reservations                 DONE
 22. Stage 09C4.A - Contracts, Fleet, Maintenance DONE
-23. Stage 09C4.4 - Payments, Automations, Reports  NEXT
-24. Stage 09C5-C6 - integration and full QA     LATER
+23. Stage 09C4.B - Payments, Automations, Reports DONE
+24. Portfolio landing page finalization         NEXT
 25. Field and Learning specs, then builds       LATER
 26. Stage 09 - #work launcher integration       LATER
 ```
@@ -148,11 +153,11 @@ The CRM group is done and approved, and it established everything these
 reuse: the table and drawer grammar, the approved select, the URL contract
 for selection, the role gate and the single polite announcement.
 
-Each module that lands must flip its `implemented` flag in
-`src/demos/operations/ui/modules.ts` from false to true, which turns its
-sidebar entry from a non-interactive label into a link. That flag and the
-styling that reads it are temporary build state and disappear entirely once all
-eleven modules exist.
+Each module that landed flipped its `implemented` flag in
+`src/demos/operations/ui/modules.ts`, which turned its sidebar entry from a
+non-interactive label into a link. That flag and the styling that read it were
+temporary build state and were deleted in 09C4.B, when the eleventh module
+landed, exactly as planned.
 
 Do not begin it until instructed.
 

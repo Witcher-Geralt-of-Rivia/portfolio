@@ -3,8 +3,8 @@
   "purpose": "Demonstrate engineering capability to freelance clients. Technical portfolio, not a personal site.",
   "currentStage": 8,
   "stage05Started": true,
-  "nextStage": "stage-09c4-4",
-  "nextStageTitle": "Stage 09C4.4 - Payments, Automations and Reports (NOT STARTED)",
+  "nextStage": "portfolio-landing-page-finalization",
+  "nextStageTitle": "PORTFOLIO LANDING PAGE FINALIZATION (NOT STARTED)",
   "frozenStages": [
     1,
     2,
@@ -140,7 +140,20 @@
       "src/demos/operations/ui/maintenance/MaintenanceMobileList.tsx",
       "src/demos/operations/ui/maintenance/MaintenanceDetail.tsx",
       "src/demos/operations/ui/maintenance/MaintenanceForm.tsx",
-      "src/demos/operations/ui/maintenance/MaintenanceConfirmAction.tsx"
+      "src/demos/operations/ui/maintenance/MaintenanceConfirmAction.tsx",
+      "src/demos/operations/ui/payments/PaymentsScreen.tsx",
+      "src/demos/operations/ui/payments/PaymentsToolbar.tsx",
+      "src/demos/operations/ui/payments/PaymentsTable.tsx",
+      "src/demos/operations/ui/payments/PaymentsMobileList.tsx",
+      "src/demos/operations/ui/payments/PaymentDetail.tsx",
+      "src/demos/operations/ui/payments/RecordPaymentForm.tsx",
+      "src/demos/operations/ui/automations/AutomationsScreen.tsx",
+      "src/demos/operations/ui/automations/RuleCard.tsx",
+      "src/demos/operations/ui/automations/RunHistory.tsx",
+      "src/demos/operations/ui/automations/RuleConfirmAction.tsx",
+      "src/demos/operations/ui/reports/ReportsScreen.tsx",
+      "src/demos/operations/ui/reports/ReportPanels.tsx",
+      "src/demos/operations/ui/reports/StatBars.tsx"
     ]
   },
   "routes": [
@@ -153,7 +166,10 @@
     "/demos/operations/reservations",
     "/demos/operations/contracts",
     "/demos/operations/fleet",
-    "/demos/operations/maintenance"
+    "/demos/operations/maintenance",
+    "/demos/operations/payments",
+    "/demos/operations/automations",
+    "/demos/operations/reports"
   ],
   "navigationDestinations": [
     "Systems",

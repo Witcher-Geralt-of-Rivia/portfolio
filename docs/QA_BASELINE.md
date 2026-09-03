@@ -2204,3 +2204,133 @@ modules of the rental group on purpose: the assertion worth making about this
 batch is not that three screens render, it is that a booking becomes a rental
 becomes a returned vehicle becomes a job in the workshop, and that every screen
 agrees about where the machine is at each step.
+
+---
+
+## Stage 09C4.B - Payments, Automations, Reports, and Demo 01 complete
+
+PASS. Three new harnesses:
+
+```
+qa/stage09c44-payments.mjs             294 checks
+qa/stage09c45-automations-reports.mjs  418 checks
+qa/stage09-operations-final.mjs        403 checks
+```
+
+### The two assertions Payments exists to make
+
+**Overdue is derived on read and absent from the store.** Read from both sides
+in the same section: no stored payment carries the status Overdue, because the
+stored union is only Pending and Paid, while the screen shows three rows with
+an Overdue pill. That is D-053 stated rather than assumed.
+
+**Rule 04 fires because someone walked in.** The suite opens the reader on the
+canonical seed, opens the Payments module in the product, and reads back:
+
+```
+automation_runs   18 to 21, all three new ones automation_rule_0004, Success
+notifications     22 to 25, all three Finance, pointing at payment_0016,
+                  payment_0018 and payment_0019
+announcement      "3 payments passed their due date and Finance was notified"
+```
+
+Then it reloads the module and asserts nothing further is written, because the
+pass skips a payment that already has its notification. Idempotence matters as
+much as firing: a module that raised the alert every time it opened would be
+worse than one that never raised it.
+
+### The two assertions Automations exists to make
+
+**Disabling actually disables.** The suite switches Rule 03 off through the
+dialog, then goes to Reservations and confirms a booking, then reads the store:
+a Skipped run was recorded for Rule 03 and no System message was appended. A
+screen that greyed the card and left the engine running would pass every other
+check in the file and fail that one.
+
+**Test writes a real run and moves nothing.** The dialog does not close on
+success: it shows the status, the summary and the run id that were actually
+written. The suite then asserts that no work order, vehicle, contract,
+reservation, message or unread conversation moved. A Test button that quietly
+reassigned a real lead would be a trap, and this is the check that says it
+is not one.
+
+### All five rules, through real product paths
+
+One fresh context per rule, so each starts from the canonical seed, and not one
+of them calls `processEvents`:
+
+```
+Rule 01  create a Website lead in Leads         assigned actor + CRM notification
+Rule 02  move a lead to Qualified               follow-up date + CRM notification
+Rule 03  confirm a reservation onto a vehicle   System message + unread thread
+Rule 04  open Payments as Admin                 3 Finance notifications
+Rule 05  complete the In Progress work order    Maintenance notification
+```
+
+### Reports
+
+Exactly four panel titles in the frozen order, and the suite asserts there is no
+fifth. The only control on the page is the period select: no primary button, no
+form, no detail actions. Every `.ops-statbar__share` matches `/\d+% of \d+ /`,
+so a share cannot appear without its denominator, and no percentage figure lacks
+a note naming what it was taken over. The page is also asserted free of
+comparison language: no "vs last", no "previous period", no bare "+12%".
+
+The figures are checked against the canonical seed: funnel 44, fleet 24 split
+10/4/7/3, contracts 14 split 3/7/3/1, payments 26 split 18/5/3. That last one
+can only be produced by the effective status, which is the point.
+
+### The final suite
+
+`qa/stage09-operations-final.mjs` asks what no module suite can.
+
+```
+eleven routes    every module root renders for Admin, the sidebar offers
+                 eleven links, and .ops-sidebar__item--pending matches nothing
+                 anywhere: the build-state mechanism is gone
+one sequence     lead to qualified to customer to reservation to confirmed to
+                 contract to active to paid to completed to fleet to work order
+                 to started to completed, driven through the real UI, with the
+                 store read after every step
+five rules       all proven by that sequence plus the Payments entry
+invariants       every vehicle equals its derivation; every contract total
+                 equals contractTotalCents; every paidAmount equals the sum of
+                 its Paid payments; no contract overpaid; no stored Overdue;
+                 reservation and contract point at each other both ways;
+                 message timelines ordered; every run names a real rule; every
+                 notification names a record that exists
+roles            all four roles across all eleven routes against the frozen
+                 matrix, with no name from a previous role left on the page
+widths           eight modules at seven widths, the Inbox on its own
+                 viewport-locked thresholds
+content          all eleven modules checked for contact data, payment fields,
+                 booking CTAs and em dashes, with zero external requests
+reset            the whole canonical seed returns
+```
+
+### What it found, and what it did not
+
+One real defect, in code written the same day: `reconcile()` in
+`PaymentsScreen` had no in-flight guard, so a payment recorded while the first
+pass was still committing could raise the same alert twice. Calls are serialised
+now. The double-raise was reasoned about rather than observed, and the guard is
+cheap enough that waiting for a reproduction would have been the wrong trade.
+
+Three stale assertions, all of them the product outgrowing its own scaffolding
+rather than breaking:
+
+`stage09c2-operations-ui` carried "only the built modules are interactive",
+whose expected value was the build state and whose comment said it would be
+deleted with the `implemented` flag. It is: the check now asserts the permanent
+claim, that every module a role can see is a link.
+
+`stage09c33-inbox` asserted that notification sources linked "only to modules
+that exist" and that "unbuilt modules stay unlinked", allowing three routes
+because three were all there were. Eight source types are navigable now, so the
+check asserts every href is a real module route and the inverse is that an
+unlinked notification is one with no source record at all.
+
+And one assertion of my own was simply wrong: the final suite expected three
+Rule 04 runs in total, when the canonical seed already carries three of its own.
+Counting `reconcile_*` source events rather than rule ids is the fix, and it is
+a better assertion than the one it replaced.
