@@ -3,6 +3,7 @@ import IntelligentSystemsSection from "@/components/systems/IntelligentSystemsSe
 import ProductEngineeringSection from "@/components/products/ProductEngineeringSection";
 import AILearningSection from "@/components/learning/AILearningSection";
 import EngineeringLabSection from "@/components/lab/EngineeringLabSection";
+import CertificationsSection from "@/components/certifications/CertificationsSection";
 import FeaturedDemoSection from "@/components/work/FeaturedDemoSection";
 import SiteFooter from "@/components/layout/SiteFooter";
 
@@ -23,6 +24,14 @@ import "./page.css";
  * `FeaturedDemoSection` owns `id="work"`, and it is deliberately not
  * `SelectedWorkSection`: that component publishes real client work and refuses
  * to render until its own invariant is met. Nothing here changes that gate.
+ *
+ * `CertificationsSection` is mounted and renders nothing, which is the correct
+ * output for a section whose collection is empty. No certification has been
+ * issued, so there is none to show. It is mounted anyway, in the position it
+ * will occupy, so that adding one verified record to
+ * `src/content/certifications.ts` activates the section with no wiring: the
+ * alternative, leaving it unimported until content exists, is the arrangement
+ * that has to be remembered rather than the one that works.
  */
 
 export default function Home() {
@@ -38,6 +47,8 @@ export default function Home() {
         <AILearningSection />
 
         <EngineeringLabSection />
+
+        <CertificationsSection />
 
         <FeaturedDemoSection />
       </div>

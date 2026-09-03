@@ -1,0 +1,735 @@
+/* =====================================================================
+   05 / CERTIFICATIONS
+   A sticky scroll range containing a deck of credential cards that
+   unfolds horizontally as the range passes.
+
+   The whole choreography is expressed as one number per card. JavaScript
+   writes `--cert-cp` (that card's own 0..1 progress) and the rules below
+   interpolate position, scale and opacity from it. Nothing here animates
+   a layout property, so the scroll path stays on the compositor.
+
+   Every custom property used in this file is either defined here or
+   defined in tokens.css. There are no invented token names: an invented
+   one resolves to nothing and the browser silently uses its own default,
+   which is how a display heading once shipped at the wrong leading.
+   ===================================================================== */
+
+.certs {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(40px, 4vw, 64px);
+
+  /* Deck geometry. Read by the transforms below and by nothing else. */
+  --cert-card-w: 306px;
+  /* Tall enough for the worst case the fixtures carry: a two-line issuer, a
+     two-line clamped title, three metadata rows and the footer. Measured
+     against those rather than guessed, because a rail of fixed-height cards
+     clips whatever does not fit and clipped text reads as a bug. */
+  --cert-card-h: 314px;
+  --cert-gap: 20px;
+  /* The stacked deck's step, before a card resolves out of it. */
+  --cert-stack-x: 18px;
+  --cert-stack-y: 13px;
+}
+
+/* --- Intro ------------------------------------------------------------ */
+
+.certs__intro {
+  display: grid;
+  gap: clamp(20px, 3vw, 44px);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: end;
+}
+
+.certs__title {
+  max-width: var(--measure-display-2);
+  color: var(--text-primary);
+  font-size: var(--type-display-2);
+  font-weight: var(--weight-heading);
+  line-height: var(--leading-display-2);
+  letter-spacing: var(--tracking-display-2);
+  text-wrap: balance;
+}
+
+.certs__intro-support {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(12px, 1.4vw, 18px);
+}
+
+.certs__lead {
+  max-width: var(--measure-lead);
+  color: var(--text-secondary);
+  font-size: var(--type-lead);
+  font-weight: var(--weight-lead);
+  line-height: var(--leading-lead);
+  letter-spacing: var(--tracking-lead);
+}
+
+.certs__count {
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: var(--type-eyebrow);
+  line-height: var(--leading-technical);
+  letter-spacing: var(--tracking-eyebrow);
+}
+
+/* --- The scroll range ------------------------------------------------- */
+
+/* Without the enhancement this is an ordinary block and the cards below
+   are an ordinary grid. That is the no-JS and reduced-motion state, and
+   it is the state the server renders. */
+.certs__range {
+  position: relative;
+}
+
+/* `--cert-range-h` is written by the controller from the measured stage
+   height plus the bounded travel. It exists only in enhanced mode, so a
+   failure to run leaves the range its natural height rather than a tall
+   empty box. */
+.certs__range--enhanced {
+  height: var(--cert-range-h, auto);
+}
+
+.certs__range--enhanced .certs__stage {
+  position: sticky;
+  /* Clearance for the floating navigation, which is fixed and would
+     otherwise sit on top of the pinned heading. */
+  top: var(--nav-scroll-margin);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  /* The stage holds the viewport for the length of the range, so it occupies
+     it rather than sitting in the top corner of it. */
+  min-height: calc(100svh - var(--nav-scroll-margin) - 48px);
+  gap: clamp(20px, 2.4vw, 34px);
+}
+
+/* --- The deck --------------------------------------------------------- */
+
+.certs__deck {
+  position: relative;
+}
+
+.certs__range--enhanced .certs__deck {
+  /* The cards are taken out of flow when the choreography runs, so the
+     deck has to hold its own height. */
+  height: var(--cert-card-h);
+  /* A card sliding in from the right must not widen the document. */
+  overflow: hidden;
+  /* The clip above would cut a focus ring; the padding buys it room and
+     the negative margin gives the space back to the layout. */
+  padding: 6px;
+  margin: -6px;
+}
+
+.certs__rail {
+  position: relative;
+}
+
+.certs__range--enhanced .certs__rail {
+  height: 100%;
+  transform: translate3d(
+    calc(var(--cert-shift, 0) * -1 * (var(--cert-card-w) + var(--cert-gap))),
+    0,
+    0
+  );
+  /* No transition. The shift is scrubbed by scroll position, and a transition
+     on top of a scrubbed value lags behind the cards it is carrying. */
+  will-change: transform;
+}
+
+.certs__list {
+  display: grid;
+  gap: var(--cert-gap);
+  grid-template-columns: repeat(auto-fill, minmax(var(--cert-card-w), 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.certs__range--enhanced .certs__list {
+  display: block;
+  height: 100%;
+}
+
+/* --- A card in the deck ----------------------------------------------- */
+
+.cert-card {
+  position: relative;
+}
+
+.certs__range--enhanced .cert-card {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--cert-card-w);
+  height: var(--cert-card-h);
+
+  /* The interpolation, and the only place the choreography's arithmetic
+     touches the page.
+
+     At `--cert-cp: 0` the card sits in the stack: offset by its depth,
+     slightly small, slightly faded. At 1 it sits in its slot in the rail
+     at full size. Between the two every value is a straight blend, and
+     the easing lives in the reveal window's own shape rather than in a
+     transition, because the value is driven by scroll position and a
+     transition on top of it would fight the scrubbing. */
+  --cert-slot-x: calc(var(--cert-i, 0) * (var(--cert-card-w) + var(--cert-gap)));
+  /* The deck's origin FOLLOWS THE RAIL, which is the part that is easy to get
+     wrong and looks broken when it is. The stack of cards still waiting has to
+     sit where the visitor is looking; anchored at the rail's zero instead, it
+     stays behind at the start of the rail and slides off the left of a phone
+     the moment the rail moves, taking the next credential with it.
+
+     `--cert-shift` is set on the rail and inherits down to here. */
+  --cert-deck-x: calc(
+    var(--cert-shift, 0) * (var(--cert-card-w) + var(--cert-gap)) +
+      var(--cert-depth, 0) * var(--cert-stack-x)
+  );
+  --cert-deck-y: calc(var(--cert-depth, 0) * var(--cert-stack-y));
+
+  transform: translate3d(
+      calc(
+        var(--cert-cp, 0) * var(--cert-slot-x) +
+          (1 - var(--cert-cp, 0)) * var(--cert-deck-x)
+      ),
+      calc((1 - var(--cert-cp, 0)) * var(--cert-deck-y)),
+      0
+    )
+    scale(calc(0.965 + 0.035 * var(--cert-cp, 0)));
+  /* Opacity is driven by STACK DEPTH, not by reveal progress, and that
+     distinction is what makes the deck legible.
+
+     Element opacity fades an element's own background along with its contents,
+     so a front card at 0.82 is a window onto the four cards behind it: with
+     progress driving it, every card at section entry sat at the same value and
+     five titles were readable through each other at once. Depth zero is the
+     card in front, so the card in front is opaque and occludes the stack, and
+     only the offset edges of the ones behind it show.
+
+     Depth is already 0 for every card once it has resolved into the rail, so
+     this reaches full opacity at the end of the choreography without needing to
+     mention progress at all. */
+  opacity: calc(1 - var(--cert-depth, 0) * 0.13);
+
+  /* A resolved card sits in front of the stack behind it. Integers only,
+     and derived from the index so the order is stable. */
+  z-index: calc(100 - var(--cert-i, 0));
+  will-change: transform, opacity;
+}
+
+.cert-card__inner {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  gap: 10px;
+  padding: clamp(18px, 1.8vw, 24px);
+  border: var(--border-technical);
+  border-radius: var(--radius-card);
+  /* Nearly opaque, and that is the fix for the deck rather than a taste
+     preference. The Milk surface is 68% white, so five stacked translucent
+     cards let all five titles through at once and the deck read as a smear of
+     overlapping text. A card that occludes the card behind it shows an edge,
+     which is what makes a stack legible as a stack. */
+  background: rgba(253, 253, 255, 0.97);
+  box-shadow: var(--shadow-card), var(--shadow-inner-light);
+  cursor: pointer;
+  transition: box-shadow var(--duration-fast) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard);
+}
+
+.cert-card__inner:hover {
+  border-color: rgba(74, 80, 104, 0.18);
+  box-shadow: var(--shadow-float), var(--shadow-inner-light);
+}
+
+.cert-card__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.cert-card__index {
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: var(--type-technical-micro);
+  line-height: var(--leading-technical);
+  letter-spacing: var(--tracking-technical-micro);
+}
+
+.cert-card__category {
+  padding: 3px 9px;
+  border: var(--border-technical);
+  border-radius: var(--radius-pill);
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: var(--type-technical-micro);
+  line-height: var(--leading-technical);
+  letter-spacing: var(--tracking-technical-micro);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 46%;
+}
+
+.cert-card__issuer {
+  /* `flex: none` on both of these is load-bearing. In a flex column an item is
+     allowed to shrink below its content height, and a shrunken box whose
+     `overflow` is hidden clips its own text: the titles were being compressed
+     to one line and drawing their second line underneath the metadata. */
+  flex: none;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  color: var(--text-secondary);
+  font-size: var(--type-small);
+  font-weight: var(--weight-ui);
+  line-height: var(--leading-small);
+  letter-spacing: var(--tracking-small);
+}
+
+.cert-card__title {
+  color: var(--text-primary);
+  font-size: var(--type-h4);
+  font-weight: var(--weight-subhead);
+  line-height: var(--leading-h4);
+  letter-spacing: var(--tracking-h4);
+  /* Cards in a rail are one height. A long credential name is clamped
+     rather than allowed to push the card taller than its neighbours,
+     and the full title is one click away in the modal. */
+  flex: none;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+
+/* --- The credential link ---------------------------------------------- */
+
+/* Discoverable without being a default browser link: the portfolio has no
+   blue underlined links anywhere and this is not the place to introduce
+   one. The mark is a short rule under the text that fills on hover and
+   on focus, which reads as an affordance at rest and as a link in use. */
+.cert-link {
+  position: relative;
+  color: inherit;
+  text-decoration: none;
+}
+
+.cert-link__mark {
+  position: absolute;
+  right: 0;
+  bottom: -3px;
+  left: 0;
+  height: 1px;
+  background: linear-gradient(90deg, #6f9ee0, #b2a4eb);
+  transform: scaleX(0.16);
+  transform-origin: 0 50%;
+  transition: transform var(--duration-medium) var(--ease-entrance);
+}
+
+.cert-link:hover .cert-link__mark,
+.cert-link:focus-visible .cert-link__mark {
+  transform: scaleX(1);
+}
+
+/* --- Card metadata ---------------------------------------------------- */
+
+.cert-card__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin: 0;
+  margin-top: auto;
+}
+
+.cert-card__meta-row {
+  display: flex;
+  gap: 8px;
+  color: var(--text-annotation);
+  font-size: var(--type-technical);
+  line-height: var(--leading-technical);
+  letter-spacing: var(--tracking-technical);
+}
+
+.cert-card__meta-row dt {
+  min-width: 52px;
+  color: var(--text-muted);
+}
+
+.cert-card__meta-mono {
+  font-family: var(--font-mono);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cert-card__foot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line-subtle);
+}
+
+.cert-card__open {
+  padding: 6px 12px;
+  border: var(--border-technical);
+  border-radius: var(--radius-button);
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--text-primary);
+  font-size: var(--type-caption);
+  font-weight: var(--weight-ui);
+  line-height: var(--leading-caption);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard);
+}
+
+.cert-card__open:hover {
+  background: rgba(255, 255, 255, 0.94);
+  border-color: rgba(74, 80, 104, 0.2);
+}
+
+.cert-card__host {
+  flex: 1;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--type-technical-micro);
+  line-height: var(--leading-technical);
+  letter-spacing: var(--tracking-technical-micro);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cert-card__count {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--type-technical-micro);
+  line-height: var(--leading-technical);
+  letter-spacing: var(--tracking-technical-micro);
+  white-space: nowrap;
+}
+
+/* --- Progress metadata ------------------------------------------------ */
+
+.certs__progress {
+  display: none;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: var(--type-technical-micro);
+  letter-spacing: var(--tracking-technical-micro);
+}
+
+.certs__range--enhanced .certs__progress {
+  display: flex;
+}
+
+.certs__progress-current {
+  color: var(--text-primary);
+}
+
+.certs__progress-rule {
+  width: clamp(40px, 8vw, 96px);
+  height: 1px;
+  background: var(--line-subtle);
+}
+
+/* --- Modal ------------------------------------------------------------ */
+
+/*
+  Two platform traps, both already paid for elsewhere in this project.
+
+  The project reset (`* { margin: 0 }`) beats the user agent's
+  `margin: auto` on a modal dialog and pins it to the top-left corner, so
+  the margins are restated here rather than inherited.
+
+  A `<dialog>` is `position: fixed; inset: 0`, so `height: auto` resolves
+  against the whole viewport and stretches the panel to fill it.
+  `fit-content` is what `auto` was meant to say. That is D-093.
+*/
+.cert-modal {
+  width: min(660px, calc(100vw - 2 * var(--gutter)));
+  max-width: none;
+  height: fit-content;
+  max-height: calc(100svh - 96px);
+  margin: auto;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-panel);
+  background: transparent;
+  overflow: visible;
+}
+
+.cert-modal::backdrop {
+  background: rgba(32, 36, 54, 0.28);
+  backdrop-filter: blur(2px);
+}
+
+.cert-modal__panel {
+  display: flex;
+  max-height: calc(100svh - 96px);
+  flex-direction: column;
+  gap: 14px;
+  padding: clamp(22px, 3vw, 34px);
+  border: var(--border-glass);
+  border-radius: var(--radius-panel);
+  background: rgba(252, 252, 254, 0.96);
+  box-shadow: var(--shadow-card-lg), var(--shadow-inner-light);
+  overflow-y: auto;
+}
+
+.cert-modal__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.cert-modal__index {
+  color: var(--text-annotation);
+  font-family: var(--font-mono);
+  font-size: var(--type-technical-micro);
+  letter-spacing: var(--tracking-technical-micro);
+}
+
+.cert-modal__close {
+  display: flex;
+  width: 34px;
+  height: 34px;
+  align-items: center;
+  justify-content: center;
+  border: var(--border-technical);
+  border-radius: var(--radius-control);
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--text-secondary);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-standard);
+}
+
+.cert-modal__close:hover {
+  background: rgba(255, 255, 255, 0.96);
+}
+
+.cert-modal__issuer {
+  color: var(--text-secondary);
+  font-size: var(--type-body);
+  font-weight: var(--weight-ui);
+  line-height: var(--leading-body);
+}
+
+.cert-modal__title {
+  color: var(--text-primary);
+  font-size: var(--type-h3);
+  font-weight: var(--weight-heading);
+  line-height: var(--leading-h3);
+  letter-spacing: var(--tracking-h3);
+}
+
+.cert-modal__summary {
+  color: var(--text-annotation);
+  font-size: var(--type-small);
+  line-height: var(--leading-small);
+}
+
+.cert-modal__figure {
+  margin: 0;
+  border: var(--border-technical);
+  border-radius: var(--radius-card-sm);
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.cert-modal__image {
+  width: 100%;
+  height: auto;
+}
+
+.cert-modal__meta {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--line-subtle);
+}
+
+/* The credential with no image of itself. Its facts stand in for the
+   certificate, framed so the substitution reads as intended rather than as a
+   gap where a picture failed to load. */
+.cert-modal__meta--plate {
+  gap: 9px;
+  padding: clamp(18px, 2.4vw, 26px);
+  border: 1px dashed rgba(74, 80, 104, 0.16);
+  border-radius: var(--radius-card-sm);
+  background: linear-gradient(
+    135deg,
+    var(--aurora-lavender-0),
+    rgba(255, 255, 255, 0.5) 45%,
+    var(--aurora-sky-0)
+  );
+}
+
+.cert-modal__meta-row {
+  display: flex;
+  gap: 12px;
+  color: var(--text-secondary);
+  font-size: var(--type-small);
+  line-height: var(--leading-small);
+}
+
+.cert-modal__meta-row dt {
+  min-width: 108px;
+  color: var(--text-annotation);
+}
+
+.cert-modal__meta-mono {
+  font-family: var(--font-mono);
+  font-size: var(--type-technical);
+  overflow-wrap: anywhere;
+}
+
+.cert-modal__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 13px 22px;
+  border: var(--border-technical);
+  border-radius: var(--radius-button);
+  background: rgba(255, 255, 255, 0.86);
+  color: var(--text-primary);
+  font-size: var(--type-body);
+  font-weight: var(--weight-ui);
+  text-decoration: none;
+  transition: background var(--duration-fast) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard);
+}
+
+.cert-modal__action:hover {
+  background: #ffffff;
+  border-color: rgba(74, 80, 104, 0.2);
+}
+
+.cert-modal__action-arrow {
+  transition: transform var(--duration-fast) var(--ease-standard);
+}
+
+.cert-modal__action:hover .cert-modal__action-arrow {
+  transform: translateX(3px);
+}
+
+/* --- Tablet ------------------------------------------------------------ */
+
+@media (max-width: 1023px) {
+  .certs__intro {
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .certs {
+    --cert-card-w: 288px;
+    --cert-card-h: 320px;
+  }
+}
+
+/* --- Phone ------------------------------------------------------------- */
+
+@media (max-width: 767px) {
+  .certs {
+    --cert-card-w: min(300px, calc(100vw - 2 * var(--gutter)));
+    --cert-card-h: 330px;
+    --cert-gap: 14px;
+    --cert-stack-x: 10px;
+    --cert-stack-y: 8px;
+  }
+
+  .cert-card__foot {
+    flex-wrap: wrap;
+  }
+
+  .cert-modal {
+    width: calc(100vw - 24px);
+    max-height: calc(100svh - 40px);
+  }
+
+  .cert-modal__panel {
+    max-height: calc(100svh - 40px);
+  }
+
+  .cert-modal__meta-row {
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  .cert-modal__action {
+    width: 100%;
+  }
+}
+
+/* --- Reduced motion ---------------------------------------------------- */
+
+/*
+  The enhancement is refused in JavaScript, so these rules are the second
+  line of defence rather than the first: they matter if the preference
+  changes between render and effect, and they make the intent legible in
+  the stylesheet rather than only in the component.
+
+  Nothing is hidden here. Removing the choreography returns the cards to
+  the readable grid the server rendered, which is the point: a visitor
+  who asked for less movement asked for less movement, not less content.
+*/
+@media (prefers-reduced-motion: reduce) {
+  .certs__range--enhanced {
+    height: auto;
+  }
+
+  .certs__range--enhanced .certs__stage {
+    position: static;
+  }
+
+  .certs__range--enhanced .certs__deck {
+    height: auto;
+    overflow: visible;
+  }
+
+  .certs__range--enhanced .certs__rail {
+    transform: none;
+    transition: none;
+  }
+
+  .certs__range--enhanced .certs__list {
+    display: grid;
+    height: auto;
+  }
+
+  .certs__range--enhanced .cert-card {
+    position: relative;
+    width: auto;
+    height: auto;
+    transform: none;
+    opacity: 1;
+  }
+
+  .certs__range--enhanced .certs__progress {
+    display: none;
+  }
+
+  .cert-link__mark,
+  .cert-card__inner,
+  .cert-modal__action,
+  .cert-modal__action-arrow,
+  .cert-modal__close,
+  .cert-card__open {
+    transition: none;
+  }
+}

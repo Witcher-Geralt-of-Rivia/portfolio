@@ -6,6 +6,7 @@ import {
   findDemo,
 } from "@/demo-runtime/demo-registry";
 
+import { certificationsArePublishable } from "@/content/certifications";
 import { MODULE_GROUPS, routesInGroup } from "@/demos/operations/ui/modules";
 
 import FeaturedPreview from "./FeaturedPreview";
@@ -99,11 +100,22 @@ export default function FeaturedDemoSection() {
   const demo = findDemo("operations");
   const href = demo?.route ?? "/demos/operations";
 
+  /* The eyebrow numbers this section's place on the page, so it has to know
+     whether anything is in front of it. Certifications sits between the Lab and
+     this section and renders only when a real credential exists; today it does
+     not, so this is 05. When the first credential arrives, Certifications takes
+     05 and this becomes 06 on its own.
+
+     The alternative was a hard-coded 05 that silently becomes wrong the day the
+     section above it appears, giving the page two sections numbered 05. A
+     number that describes a position should be derived from the position. */
+  const index = certificationsArePublishable() ? "06" : "05";
+
   return (
     <section id="work" className="featured" aria-labelledby="featured-title">
       <div className="featured__intro">
         <div className="featured__intro-lead">
-          <p className="eyebrow">05 / FEATURED ENGINEERING BUILD</p>
+          <p className="eyebrow">{index} / FEATURED ENGINEERING BUILD</p>
           <h2 id="featured-title" className="featured__title">
             One operational system. Eleven connected modules.
           </h2>

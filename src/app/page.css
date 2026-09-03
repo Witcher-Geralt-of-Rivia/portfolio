@@ -36,6 +36,18 @@
   padding-block: clamp(88px, 8.5vw, 124px) clamp(80px, 8vw, 112px);
 }
 
+/* Certifications, when it has anything to show. It renders nothing today, so
+   this rule matches nothing today: the tempo is declared with the others
+   rather than added later, because a section that activates on data should
+   activate with its spacing already correct.
+
+   Lighter than its neighbours on purpose. It is a short factual interval
+   between the Lab's evidence and the featured build, and its own sticky range
+   supplies more than enough vertical room on its own. */
+.content-frame > .certs {
+  padding-block: clamp(80px, 8vw, 112px) clamp(72px, 7vw, 100px);
+}
+
 /* ---------------------------------------------------------------------
    SEAMS
 
@@ -47,13 +59,15 @@
 
 .content-frame > .products,
 .content-frame > .learning,
-.content-frame > .lab {
+.content-frame > .lab,
+.content-frame > .certs {
   position: relative;
 }
 
 .content-frame > .products::before,
 .content-frame > .learning::before,
-.content-frame > .lab::before {
+.content-frame > .lab::before,
+.content-frame > .certs::before {
   position: absolute;
   top: 0;
   left: 0;
