@@ -2624,3 +2624,81 @@ The stage is pinned at a top offset for navigation clearance, so it releases
 that many pixels before the range's own end. Scrolling to the range end
 overshoots and captures a section that has already begun to scroll away, which
 looked like a clipped heading and was not.
+
+---
+
+## Landing motion
+
+PASS. One new harness:
+
+```
+qa/stage09g-motion.mjs                  102 checks
+```
+
+Half of it never opens a browser. The scroll arithmetic lives in
+`src/lib/scroll-geometry.ts` with no React and no DOM in it, so easing,
+sticky ranges, segment splitting, panel progress, hysteresis and viewport
+progress are all checked at every count in milliseconds.
+
+### The five invariants it exists for
+
+```
+a sequence FINISHES before its section releases
+the H1 is never touched by any of it
+reduced motion leaves every section readable and complete
+nothing overflows the document horizontally at any scroll position
+no control is laid out, invisible, and still in the tab order
+```
+
+The overflow check walks the whole document at eight widths rather than
+sampling the sections, because a transform that overflows does so between
+the points anyone would think to pick.
+
+### Two assertions that were wrong rather than the code
+
+`clamp01(Infinity) === 0` was asserted. Clamping to `[0, 1]` makes it 1, and
+the function was right.
+
+The H1 was asserted to be non-transparent at `domcontentloaded`. The hero's
+own entrance fades it in over 400ms and predates this work; Stages 01-04 are
+frozen. What this stage owes is that the text is in the served HTML, that it
+occupies its space from the first layout, and that nothing added here touches
+it. Those three are what is asserted now.
+
+### The check that reported ten false failures
+
+"No control is invisible and still reachable" first tested for zero size and
+found ten `.arch-node` buttons. They sit inside the architecture section's
+narrow-width flow band, whose ancestor is `display: none` at 1440, and
+`display: none` removes an element from the tab order outright. Nothing was
+reachable; the check was wrong.
+
+It now uses `checkVisibility` twice: with opacity off to ask whether the
+element is rendered at all, and with opacity on to ask whether it can be seen.
+Rendered but unseeable is the pair that matters.
+
+### The headless trap, third occurrence
+
+Chromium paints only when asked, so a scroll-driven custom property never
+updates and a 280ms transition never advances. The first run of the featured
+sequence reported every state showing the wrong modules; the values were
+mid-transition and frozen. `settle()` forces several frames rather than one,
+because one starts a transition and does not finish it.
+
+This has now produced a false "the animation is dead" report in three separate
+suites. It is the same trap each time.
+
+### Section geometry measured at eight widths
+
+```
+1920x1080  doc 12.2vh   featured stage 0.6vh   product stage 0.9vh
+1440x900   doc 13.3vh   featured stage 0.7vh   product stage 1.1vh
+1366x768   doc 14.6vh   featured stage 0.9vh   product stage 1.3vh
+1024x768   doc 16.1vh   featured stage 0.8vh   product stage 1.8vh
+768x1024   doc 12.1vh   featured stage 0.6vh   product stage 1.4vh
+390x844    doc 19.2vh   featured stage 1.2vh   product stage 2.7vh
+```
+
+The product studio exceeds the usable viewport at every width, which is why it
+is not pinned. The featured frame fits at every width above a phone, which is
+why it is.

@@ -2137,3 +2137,132 @@ The readable grid is the default and the choreography is the upgrade, so a
 visitor with JavaScript disabled or reduced motion requested gets every
 credential in a plain readable grid. No card is ever at `opacity: 0`, and
 leaving enhanced mode removes the tall scroll range with it.
+
+---
+
+## Landing motion finalization
+
+Status: **Complete**
+
+### Summary
+A restrained motion system across the finished landing page. Four sections
+gained scroll-driven behaviour, three were deliberately left alone, and the
+runtime dependency list is unchanged at four packages.
+
+```
+Hero                micro initialisation, CSS only, no client boundary
+Intelligent Systems execution trace along the paths it already draws
+Product Engineering surface emphasis as the section passes
+AI Learning         unchanged
+Engineering Lab     unchanged
+Certifications      unchanged, dormant, still empty
+Featured Work       the strongest sequence: four operational layers
+Footer              unchanged
+```
+
+The density is uneven on purpose. A page where every section animates equally
+has no emphasis left to give the one that matters.
+
+### One controller, one arithmetic module
+
+`src/lib/scroll-geometry.ts` holds the maths with no React and no DOM in it;
+`src/lib/use-sticky-progress.ts` is the only scroll controller. Both were lifted
+from the certification deck's mechanics, which were already correct. What did
+not move is anything that knows what it is animating: the deck's reveal windows
+and rail shift stayed with the deck, and each new section's specifics stay with
+that section (D-104).
+
+### The hero stays server-rendered
+
+The hero had `SYS.01`, `FLOW / ACTIVE` and `LOCAL / READY` as annotations inside
+the constellation already, and it is 100% server-rendered by an explicit earlier
+decision. So the init sequence resolves the annotation that was already there
+rather than adding a second block saying the same words: BOOT settles into
+FLOW / ACTIVE, and the metric arrives with it, in about 900ms.
+
+Entirely CSS, inside an overlay whose box is reserved before anything paints, so
+it cannot move the H1 and cannot delay it. The headline is untouched, exact and
+laid out from the first frame.
+
+The brief's optional numeric count-up is NOT implemented. A real one needs
+either a client boundary in a section documented as having none, or `@property`,
+whose fallback when unsupported is a counter reading zero. The metric is present
+and correct from first paint instead, and it is the same `00.410` the Systems
+section's own execution trace ends on, so it is the artwork's vocabulary rather
+than an invented measurement.
+
+### The tracer animates the architecture that exists
+
+The paths it draws are the exact `<path>` elements `ArchitectureCanvas` already
+renders from `routeConnections(mode)`, and the nodes are its own node buttons. A
+second copy of the geometry would be a second source of truth for one picture.
+
+The base connections stay fully drawn and a second group is dashed in over them,
+so the architecture is complete before the trace arrives: dashing the only copy
+would mean the section starts with no connections and draws the diagram rather
+than the execution.
+
+Node thresholds are derived from the connections' own finish times, so a node
+cannot light before the line reaching it has been drawn, and no percentage was
+guessed.
+
+```
+the last connections were still 0.47 drawn when the section had passed
+  the windows were spaced at i / count, so the final ones ran past the end
+  of the section. Compressed so the last finishes at 0.92, leaving the rest
+  as a settled state. The certification deck failed the same way.
+
+two nodes never left their arriving state
+  the same cause. Resolution needed progress to exceed 1.08, and progress
+  measured 0.998 at the bottom of the range.
+```
+
+### Sticky only when it fits
+
+A stage taller than the viewport pins its top and hangs its bottom off the end,
+unreachable, because the page scrolls the range rather than the stage. The
+controller measures and refuses to pin when it does not fit.
+
+That rule took the pinning away from Product Engineering, which is the right
+outcome and was found by measuring: the studio is 988px tall at 1440 and 1428px
+at 768, against a usable 790px. Pinned, its event-flow rail and its Run button
+would have sat below the fold with no way to reach them. It takes its three
+surfaces in turn as the section passes instead, which is the behaviour the brief
+describes without a viewport and a half of reserved scrolling.
+
+The featured build is pinned, because its frame fits.
+
+### Featured Work
+
+Four layers over one composition. The preview is not rebuilt per state: the rail
+dims and brightens, the flow strip lights the steps belonging to the current
+layer, and the lower panels come forward when they are the subject. The last
+state lights everything at once (D-105).
+
+No figure changes. The disclosure stays visible at every state. The CTA is a
+plain link throughout, never deferred and never disabled.
+
+### A documented invariant corrected
+
+`docs/DESIGN_SYSTEM.md` said there was no `requestAnimationFrame` anywhere. That
+became untrue with the certification deck and is now plainly untrue; the wording
+says what it was actually protecting, which is that nothing loops and nothing is
+scheduled at rest.
+
+### Fixed along the way
+
+```
+the fit check read the offset from the stage's computed `top`
+  which is `auto` while the section is static, so the offset dropped out and
+  a 988px stage measured as fitting a 1080px viewport. It reads the token.
+
+React's ref rules
+  callback refs were being written during render, and a merged ref callback
+  owned an element twice. The frame callback now receives its elements from
+  the hook, which removes both and is a better API.
+
+a QA check reported ten controls as invisible and reachable
+  they were inside a `display: none` responsive alternate, which removes an
+  element from the tab order outright. The check tested zero size; it now
+  tests laid out but unseeable, which is the pair that actually matters.
+```

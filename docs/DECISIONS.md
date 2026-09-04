@@ -3785,3 +3785,185 @@ handler that will never run.
 
 There is no state in which a card sits at `opacity: 0`, and leaving enhanced
 mode removes the tall scroll range with it.
+
+---
+
+## D-104 - Scroll-driven motion, with one controller and no dependency
+
+Status: Accepted
+Stage: Landing motion finalization
+
+### Decision
+Four sections gained scroll-driven motion. All of it runs on one shared
+controller, `src/lib/use-sticky-progress.ts`, over one pure arithmetic module,
+`src/lib/scroll-geometry.ts`. Runtime dependencies remain exactly four: geist,
+next, react, react-dom.
+
+```
+Hero                micro initialisation, CSS only, no client boundary
+Intelligent Systems execution trace along the paths it already draws
+Product Engineering surface emphasis as the section passes
+AI Learning         unchanged
+Engineering Lab     unchanged
+Certifications      unchanged, still dormant, still empty
+Featured Work       the strongest sequence, four operational layers
+Footer              unchanged
+```
+
+The density is deliberately uneven. A page where every section animates equally
+is a page with no emphasis, and the brief asked for rhythm rather than volume.
+
+### This changes a documented invariant
+
+`docs/DESIGN_SYSTEM.md` said, under Motion Principles: "No JavaScript animation
+loop, no `requestAnimationFrame`, no pointer tracking, and nothing running on a
+timer at rest."
+
+That sentence is now wrong in one respect and has been corrected rather than
+left standing. There is a `requestAnimationFrame`, three instances of it, and
+each is scheduled by a scroll event and cancels itself. The distinction the
+sentence was protecting is intact and is what the wording now says: nothing
+loops, nothing is scheduled at rest, and every listener, observer and pending
+frame is torn down on unmount. Pointer tracking is still absent.
+
+The first RAF actually arrived with the certification deck (D-102), which
+updated `PROJECT_STATE.md` and did not update the design system. Both say the
+same thing now.
+
+### Why a shared controller rather than three
+
+The certification deck was written first and its scroll mechanics were correct.
+Copying them into three more components would have meant four copies of the
+sticky-offset arithmetic, and that arithmetic has already been wrong once in a
+way that took a measurement to find. So the generic half was lifted out: the
+range reservation, the measure-then-read ordering, the RAF coalescing, the
+resize and ResizeObserver wiring, the reduced-motion watcher.
+
+What did NOT move is anything that knows what it is animating. The deck's
+reveal windows, rail shift, capacity and stack depth stayed with the deck. The
+featured sequence's four states, the tracer's connection order and the product
+stack's surface list are each in their own section. The hook knows about a
+range, a stage and a number between 0 and 1, and that is all it may ever know.
+
+### Sticky only when it fits
+
+A stage taller than the viewport pins its top and hangs its bottom off the end,
+where nobody can see it and nobody can scroll to it, because the page is
+scrolling the range rather than the stage. So the controller measures whether
+the stage fits and refuses to pin when it does not.
+
+That rule cost the Product Engineering section its pinning, which is the right
+outcome and was found by measuring rather than by looking: the studio is 988px
+tall at 1440 and 1428px at 768, against a usable 790px once the navigation
+clearance is taken off. Pinned, it would have held the top of the studio on
+screen while its event-flow rail and its Run button sat below the fold,
+unreachable. It now takes its three surfaces in turn as the section passes,
+which is the behaviour the brief describes, minus a viewport and a half of
+reserved scrolling that would have bought a section nobody could finish reading.
+
+The featured build IS pinned, because its frame fits.
+
+### The offset that has now been wrong twice
+
+The fit check first read the offset from the stage's computed `top`. While a
+section is unenhanced the stage is `position: static`, so `top` computes to
+`auto`, parses to nothing, and the offset drops out of the sum: a 988px stage
+measured as fitting a 1080px viewport when pinning it needs 1122. It reads the
+`--nav-scroll-margin` token instead.
+
+This is the third distinct bug caused by that offset going missing from one of
+the places it belongs. The others are recorded in D-102.
+
+### Reduced motion and no JavaScript
+
+Every section renders its readable, untransformed layout on the server and
+treats the choreography as a mount-time upgrade. There is no state in which
+content sits at `opacity: 0` waiting for a handler, no reserved scroll range
+without the motion that needs it, and nothing hidden rather than dimmed. Turning
+reduced motion on mid-visit removes the choreography and hands back the plain
+layout without a reload.
+
+Every element the motion touches returns to full opacity under reduced motion,
+which is asserted rather than assumed: a visitor who asked for less movement
+asked for less movement, not less of the page.
+
+---
+
+## D-105 - The featured build is one system at four depths, not four pictures
+
+Status: Accepted
+Stage: Landing motion finalization
+
+### Decision
+The Featured Work section holds its product frame and walks through four
+operational layers: acquisition, rental, operations, intelligence. The same
+composition stays on screen throughout and parts of it come forward. Nothing is
+swapped, rebuilt or replaced.
+
+```
+01 ACQUISITION    Leads, Customers, Inbox
+02 RENTAL         Reservations, Contracts, Fleet
+03 OPERATIONS     Maintenance, Payments
+04 INTELLIGENCE   Automations, Reports
+```
+
+Overview is not in the list. It is the system's entry point rather than a layer
+of the work, and it stays lit throughout.
+
+### Why emphasis rather than replacement
+
+Four panels swapping would say there are four things. The section's claim is
+that there is one thing with four depths to it, and swapping pictures would
+contradict the sentence the section exists to make. So the rail dims and
+brightens, the flow strip lights the steps belonging to the current layer, and
+the two lower panels come forward when they are the subject. Only opacity and
+small transforms move, so nothing reflows and the frame never rearranges itself
+under the reader.
+
+The last state lights everything at once. That is the resolution the sequence
+is built toward and the state a visitor leaves the section on.
+
+### These are presentation groups, and the product's are different
+
+Demo 01 groups the same eleven modules as Customer operations, Operations and
+System, which is how its sidebar is organised. These four are the order the
+work happens in. Both are true, they are not the same grouping, and the page now
+carries both: the preview draws the product's, the sequence narrates these.
+
+That is a place drift could start, and D-099 records what it looks like when it
+does. So the module names here are checked against
+`src/demos/operations/ui/modules.ts` by `qa/stage09g-motion.mjs`, which fails if
+a module is invented, duplicated, or quietly dropped, and which asserts that the
+only one the sequence leaves out is Overview.
+
+### Nothing about the demo changed
+
+No module was added, removed, renamed or regrouped. The preview's figures are
+the canonical seed figures they were: 24 vehicles as 10 available, 4 reserved, 7
+rented, 3 in maintenance, and 26 payments as 18 paid, 5 pending, 3 overdue. None
+of them changes as the sequence runs, because what changes is which of them the
+visitor is being asked to look at.
+
+The disclosure stays visible in the frame's masthead at every state, which is
+asserted at the resolved state rather than assumed:
+
+```
+INTERACTIVE ENGINEERING DEMO
+SYNTHETIC DATA - FRONTEND ONLY
+```
+
+### The narrative label is decoration, and is marked as such
+
+`01 / ACQUISITION` and its one-line note are `aria-hidden`. The modules they
+name are already in the preview's own label and in the breadth list below, so
+the label is the only thing on the page that says nothing new, and announcing a
+caption that changes on scroll would be noise rather than information. It exists
+only while the choreography runs: a lone "01 / ACQUISITION" over a static frame
+would be a caption for something that is not happening.
+
+### The action is never held
+
+The CTA is a plain link to `/demos/operations` throughout. It is not disabled,
+not deferred, and not waiting for the sequence to finish, and it stays keyboard
+reachable at every progress. A visitor who wants the demo on the first state
+gets it.

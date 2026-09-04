@@ -32,6 +32,7 @@ Stage 09                IN PROGRESS
   09D1 Orphan recovery in deploy:safe     COMPLETE
   Landing page finalization               COMPLETE and deployed
   Certifications architecture             COMPLETE, renders nothing (empty)
+  Landing motion finalization             COMPLETE and deployed
   Demo 01 Rental Operations Platform  ALL ELEVEN MODULES, registry verified
   Demo 02 Field Operations            NOT STARTED
   Demo 03 Adaptive Learning           NOT STARTED
@@ -100,8 +101,9 @@ background while 367 checks passed.
 25. Stage 09D1 - Orphan recovery                DONE
 26. Portfolio landing page finalization         DONE
 27. Certifications architecture, built empty    DONE
-28. Field and Learning specs, then builds       NEXT
-29. Stage 09 - #work becomes a three-demo launcher  LATER
+28. Landing motion finalization                 DONE
+29. Field and Learning specs, then builds       NEXT
+30. Stage 09 - #work becomes a three-demo launcher  LATER
 ```
 
 ## What changed about Stage 09

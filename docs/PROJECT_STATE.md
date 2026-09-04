@@ -60,19 +60,18 @@ and never the default `.next`, so `npm run build` cannot disturb the live site.
 ## Rendering Architecture
 
 Server-first: the hero, the background system and both navigation presentations
-are server components. 88 `"use client"` modules exist, most in the Operations
-interface; `project-state.json` holds the list. (This said thirty-nine until the
-certifications work counted them.)
+are server components. 92 `"use client"` modules exist, most in the Operations
+interface; `project-state.json` holds the list.
 
-No `requestAnimationFrame` LOOP runs anywhere, and the distinction now matters:
-the certifications deck schedules one self-cancelling frame per scroll burst,
-schedules nothing at rest, and tears down on unmount (D-102). It is the only RAF
-in the project. No pointer tracking runs anywhere.
+No `requestAnimationFrame` LOOP runs anywhere: four sections schedule one
+self-cancelling frame per scroll burst through one shared controller,
+`src/lib/use-sticky-progress.ts`, nothing is scheduled at rest, and everything
+tears down on unmount (D-102, D-104). No pointer tracking. Scroll motion is an
+enhancement: nothing waits at opacity 0, and an oversized stage is not pinned.
 
-Timers exist only inside the three user-triggered sequences - the Stage 06 flow,
-the Stage 07 adaptation and the Stage 08 experiments - each torn down by effect
-cleanup on scenario change, restart and unmount (D-035, D-042, D-044). Nothing
-runs on a timer at rest.
+Timers exist only inside the three user-triggered sequences (the Stage 06 flow,
+the Stage 07 adaptation, the Stage 08 experiments), each torn down by effect
+cleanup on scenario change, restart and unmount (D-035, D-042, D-044).
 
 ## Routes
 
@@ -119,8 +118,8 @@ src/
                 deck-geometry.ts: the choreography's maths, pure (D-102)
     layout/SiteFooter.tsx   the page's ending; no contact route
     demos/      Stage 09A - DemoShell, DemoDisclosure, DemoResetControl, DemoSelect
-  content/{case-studies,certifications}.ts   typed models + their gates;
-                certifications is EMPTY.   lib/scroll-lock.ts   page lock
+  content/{case-studies,certifications}.ts   typed models + gates; empty
+  lib/  scroll-lock, scroll-geometry, use-sticky-progress (one controller)
   demos/operations/         Stage 09C1 domain (28 modules) + ui/ (shell,
                 sidebar, top bar, Overview panels, notifications, icons,
                 module routes, and one directory per module). All 11 built.
@@ -128,9 +127,9 @@ src/
   styles/
     tokens.css            all design tokens - the source of truth for values
     typography.css, motion.css, layers.css, surfaces.css   foundations
-    navigation.css, hero.css, systems.css, products.css, learning.css,
-    lab.css, featured.css (#work + the footer), certifications.css
-    work.css  written, never imported   demo-shell.css, operations.css  demo only
+    navigation, hero, systems, products, learning, lab, featured,
+    certifications, motion-sections.   work.css written but never imported;
+    demo-shell.css and operations.css are demo only
 
 public/
   textures/micro-grain.svg    locally generated SVG turbulence tile
@@ -139,8 +138,9 @@ qa/                            Playwright QA harness (see QA_BASELINE.md)
 docs/                          canonical project memory (this directory)
 ```
 
-Import order in `globals.css`: tokens, typography, motion, layers, surfaces,
-navigation, hero, systems, products, learning, lab, certifications, featured.
+`globals.css` import order: tokens, typography, motion, layers, surfaces, then
+navigation, hero, systems, products, learning, lab, certifications, featured
+and motion-sections.
 
 ## Stage 01 - Background (FROZEN)
 

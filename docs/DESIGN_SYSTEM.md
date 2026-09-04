@@ -138,11 +138,21 @@ than a fully rounded pill.
   Never animate blur, box-shadow, width, height, top or left.
 - Ambient motion is continuous, slow, and asynchronous. Nothing pulses.
 - Entrances are under a second, travel at most 8px, and never animate letters.
-- No JavaScript animation loop, no `requestAnimationFrame`, no pointer
-  tracking, and nothing running on a timer at rest. A user-triggered sequence
-  may use a timer when it has to move several surfaces together, provided
-  effect cleanup tears every one down on each exit. See D-035, D-042 and
-  D-044; that is the only sanctioned use of a timer.
+- No JavaScript animation LOOP, no pointer tracking, and nothing running on a
+  timer or a frame at rest. Scroll-driven sections schedule a single
+  self-cancelling `requestAnimationFrame` per scroll burst through one shared
+  controller, `src/lib/use-sticky-progress.ts`, and tear down every listener,
+  observer and pending frame on unmount (D-102, D-104). This bullet said there
+  was no `requestAnimationFrame` at all until the certification deck introduced
+  one; the distinction it was protecting is the one stated here.
+- A user-triggered sequence may use a timer when it has to move several
+  surfaces together, provided effect cleanup tears every one down on each exit.
+  See D-035, D-042 and D-044; that is the only sanctioned use of a timer.
+- Scroll motion is an enhancement, never the baseline. Every section renders its
+  readable, untransformed layout on the server and upgrades on mount, so no
+  content ever waits at `opacity: 0` for a handler that may not run.
+- A sticky stage that does not fit the viewport is not pinned. Pinning one hangs
+  its lower half off the end of the screen where nobody can reach it (D-104).
 - `prefers-reduced-motion: reduce` stops movement everywhere while keeping the
   composition visually complete.
 

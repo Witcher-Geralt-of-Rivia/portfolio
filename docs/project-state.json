@@ -156,7 +156,11 @@
       "src/demos/operations/ui/reports/StatBars.tsx",
       "src/components/certifications/CertificationDeck.tsx",
       "src/components/certifications/CertificationCard.tsx",
-      "src/components/certifications/CertificationModal.tsx"
+      "src/components/certifications/CertificationModal.tsx",
+      "src/components/work/FeaturedSequence.tsx",
+      "src/components/products/ProductStack.tsx",
+      "src/components/systems/ArchitectureTracer.tsx",
+      "src/lib/use-sticky-progress.ts"
     ]
   },
   "routes": [
@@ -328,5 +332,6 @@
   "stage09c40Complete": true,
   "stage09c41Complete": true,
   "landingPageComplete": true,
-  "certificationsArchitectureComplete": true
+  "certificationsArchitectureComplete": true,
+  "landingMotionComplete": true
 }
