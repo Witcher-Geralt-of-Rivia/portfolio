@@ -23,6 +23,8 @@
  * assistive technology, which reads the labelled text instead.
  */
 
+import { MODULE_STATE } from "./featured-sequence";
+
 /** The eleven, in canonical order, grouped as the product's own sidebar groups. */
 const RAIL = [
   { group: null, items: ["Overview"] },
@@ -70,6 +72,10 @@ export default function FeaturedPreview() {
               <p
                 className={`fpv__rail-item${item === "Fleet" ? " fpv__rail-item--active" : ""}`}
                 key={item}
+                /* Which operational layer this module belongs to. Read by the
+                   scroll sequence's CSS; absent for Overview, which is context
+                   rather than a layer and stays lit throughout. */
+                data-fpv-state={MODULE_STATE[item]}
               >
                 <span className="fpv__rail-dot" />
                 {item}
@@ -88,7 +94,11 @@ export default function FeaturedPreview() {
 
         <div className="fpv__states">
           {FLEET.map((row) => (
-            <div className={`fpv__state fpv__state--${row.tone}`} key={row.state}>
+            <div
+              className={`fpv__state fpv__state--${row.tone}`}
+              key={row.state}
+              data-fpv-part="fleet"
+            >
               <span className="fpv__state-count">{row.count}</span>
               <span className="fpv__state-label">{row.state}</span>
             </div>
@@ -102,8 +112,8 @@ export default function FeaturedPreview() {
           <svg className="fpv__flow-line" viewBox="0 0 100 2" preserveAspectRatio="none" focusable="false">
             <line x1="0" y1="1" x2="100" y2="1" />
           </svg>
-          {FLOW.map((step) => (
-            <div className="fpv__step" key={step.label}>
+          {FLOW.map((step, i) => (
+            <div className="fpv__step" key={step.label} data-fpv-step={i}>
               <span className="fpv__step-node" />
               <span className="fpv__step-label">{step.label}</span>
               <span className="fpv__step-note">{step.note}</span>
@@ -112,7 +122,7 @@ export default function FeaturedPreview() {
         </div>
 
         <div className="fpv__lower">
-          <div className="fpv__rule">
+          <div className="fpv__rule" data-fpv-part="rule">
             <p className="fpv__panel-label">Automation</p>
             <p className="fpv__rule-name">Reservation confirmation message</p>
             <p className="fpv__rule-meta">
@@ -121,7 +131,7 @@ export default function FeaturedPreview() {
             </p>
           </div>
 
-          <div className="fpv__report">
+          <div className="fpv__report" data-fpv-part="report">
             <p className="fpv__panel-label">Payment status</p>
             {PAYMENTS.map((row) => (
               <div className="fpv__bar-row" key={row.label}>

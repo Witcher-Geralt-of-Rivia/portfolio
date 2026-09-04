@@ -31,10 +31,30 @@ const pct = (v: number) => `${((v / ARTBOARD) * 100).toFixed(3)}%`;
 
 const ANNOTATIONS = [
   { id: "sys", text: "SYS.01", x: 96, y: 62 },
-  { id: "flow", text: "FLOW / ACTIVE", x: 452, y: 596 },
   { id: "nodes", text: "08 NODES", x: 566, y: 300, optional: true },
   { id: "ready", text: "LOCAL / READY", x: 68, y: 592, optional: true },
 ];
+
+/**
+ * The system-init note, which is the one annotation that resolves.
+ *
+ * It was a static "FLOW / ACTIVE" label. It now starts at BOOT and settles into
+ * FLOW / ACTIVE within the first second, which is the whole of the hero's
+ * motion: a system reporting that it came up, in the same mono the rest of the
+ * artwork already uses.
+ *
+ * Both states and the metric are in the DOM from first paint, stacked in a
+ * fixed-size box and cross-faded. Nothing is inserted, nothing is measured and
+ * nothing is counted in JavaScript: the hero is server-rendered by design, the
+ * H1 must be stable from the first frame, and an init sequence is not worth a
+ * client boundary. Under reduced motion the animations are cancelled and the
+ * resolved state is simply what shows.
+ *
+ * The metric is a presentation value, not a measurement. It is the artwork's
+ * own idea of an execution time, in the same spirit as the "08 NODES" label
+ * beside it, and it is deliberately not a claim about anything this site does.
+ */
+const INIT_NOTE = { x: 452, y: 596, boot: "BOOT", live: "FLOW / ACTIVE", metric: "00.410" };
 
 export default function IntelligenceConstellation() {
   return (
@@ -225,6 +245,23 @@ function ConstellationOverlay() {
           {a.text}
         </span>
       ))}
+
+      <span
+        className="cnote cinit"
+        style={{ left: pct(INIT_NOTE.x), top: pct(INIT_NOTE.y) }}
+      >
+        {/* Both states occupy the same box so the resolve is a cross-fade
+            rather than a reflow, and the box is sized by the longer of the
+            two so neither state moves the other annotations. */}
+        <span className="cinit__states" aria-hidden="true">
+          <span className="cinit__state cinit__state--boot">{INIT_NOTE.boot}</span>
+          <span className="cinit__state cinit__state--live">{INIT_NOTE.live}</span>
+        </span>
+        <span className="cinit__metric">{INIT_NOTE.metric}</span>
+        {/* What a screen reader gets: the settled state, once, with no
+            intermediate. The boot step is decoration and reads as noise. */}
+        <span className="visually-hidden">{INIT_NOTE.live}</span>
+      </span>
     </div>
   );
 }

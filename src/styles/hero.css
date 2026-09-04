@@ -380,6 +380,90 @@
   translate: -50% -50%;
 }
 
+/* ---------------------------------------------------------------------
+   SYSTEM INIT
+
+   The one annotation that resolves. BOOT settles into FLOW / ACTIVE
+   inside the first second, and the metric arrives with it.
+
+   Entirely CSS, entirely inside the constellation's overlay, which is
+   `position: absolute` in a box whose size is reserved before anything
+   paints. So this cannot move the H1, cannot delay it, and cannot shift
+   the page: the hero stays server-rendered and the headline is stable
+   from the first frame, which is the constraint that shaped all of it.
+   --------------------------------------------------------------------- */
+
+.cinit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* A grid with both states in the same cell: the box is as wide as the
+   longer state from the start, so the cross-fade moves nothing. */
+.cinit__states {
+  display: grid;
+}
+
+.cinit__state {
+  grid-area: 1 / 1;
+}
+
+.cinit__state--boot {
+  /* Visible first, then handed over. `both` holds the end state so it does
+     not flash back at the end of the animation. */
+  animation: cinit-boot 640ms var(--ease-nav) both;
+}
+
+.cinit__state--live {
+  color: var(--text-primary);
+  animation: cinit-live 640ms var(--ease-entrance) both;
+  animation-delay: 260ms;
+}
+
+.cinit__metric {
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  animation: cinit-metric 560ms var(--ease-entrance) both;
+  animation-delay: 160ms;
+}
+
+@keyframes cinit-boot {
+  0% {
+    opacity: 0;
+  }
+  /* Up quickly, held while it means something, then handed over. */
+  14% {
+    opacity: 1;
+  }
+  46% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes cinit-live {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes cinit-metric {
+  from {
+    opacity: 0;
+    transform: translateX(-3px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 /* =====================================================================
    MOTION
    Everything ambient runs on transform, opacity, offset-distance and
@@ -761,6 +845,22 @@
   .ccore {
     animation: none;
     transform: none;
+  }
+
+  /* The init note resolves instantly: the settled state is what shows, and
+     the boot step never appears. Listed here explicitly because the
+     entrances use `both`, so an animated selector missing from this block
+     would sit at opacity 0 for the whole visit. */
+  .cinit__state--live,
+  .cinit__metric {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .cinit__state--boot {
+    animation: none;
+    opacity: 0;
   }
 
   .hero__action:hover,

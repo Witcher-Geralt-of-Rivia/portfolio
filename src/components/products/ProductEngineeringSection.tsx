@@ -1,4 +1,5 @@
 import ProductCapabilityRail from "./ProductCapabilityRail";
+import ProductStack from "./ProductStack";
 import ProductStudio from "./ProductStudio";
 
 /**
@@ -34,10 +35,15 @@ export default function ProductEngineeringSection() {
         </div>
       </div>
 
-      <div className="products__studio">
-        <ProductStudio />
-        <p className="products__micro">LOCAL / DETERMINISTIC</p>
-      </div>
+      {/* The stack wraps rather than replaces: the studio, its tablist, its
+          run control and all three surfaces are unchanged inside it. Below
+          900px it does nothing at all. */}
+      <ProductStack>
+        <div className="products__studio">
+          <ProductStudio />
+          <p className="products__micro">LOCAL / DETERMINISTIC</p>
+        </div>
+      </ProductStack>
 
       <ProductCapabilityRail />
     </section>

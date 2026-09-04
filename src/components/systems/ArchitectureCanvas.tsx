@@ -39,6 +39,7 @@ function NodeSurface({
     <button
       type="button"
       className={`arch-node arch-node--${node.category}${isActive ? " is-active" : ""}${dimmed ? " is-dimmed" : ""}`}
+      data-arch-node={node.id}
       style={style}
       onMouseEnter={onEnter}
       onMouseLeave={onLeave}
@@ -119,10 +120,40 @@ export default function ArchitectureCanvas({
                   className={`arch-link${touchesActive ? " is-active" : ""}${
                     flowIndexes.includes(i) ? " arch-link--flow" : ""
                   }`}
+                  /* Which node this connection arrives at. Read by the scroll
+                     tracer so a node can light when the trace reaches it,
+                     rather than at a guessed percentage. */
+                  data-arch-to={c.to}
                   vectorEffect="non-scaling-stroke"
                 />
               );
             })}
+          </g>
+
+          {/*
+            The trace overlay: the same routed paths again, drawn on top.
+
+            A second group rather than restyling the first, because the
+            architecture has to be complete and legible before the trace
+            arrives. Dashing the only copy would mean the section starts with
+            no connections in it and draws the diagram rather than the
+            execution, which is the opposite of what it is showing. It also
+            means a visitor who lands mid-page, or whose JavaScript failed,
+            still sees the whole architecture.
+
+            Inert until the tracer gives it a length: `--arch-len` defaults to
+            0, and a zero dash array leaves the stroke fully hidden.
+          */}
+          <g className="arch-links arch-links--trace" aria-hidden="true">
+            {routed.map((c) => (
+              <path
+                key={`trace-${c.id}`}
+                d={c.d}
+                className="arch-link-trace"
+                data-arch-to={c.to}
+                vectorEffect="non-scaling-stroke"
+              />
+            ))}
           </g>
 
           {/* Deterministic packets, two to four per mode. */}

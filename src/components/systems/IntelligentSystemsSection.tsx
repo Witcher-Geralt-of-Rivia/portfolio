@@ -1,4 +1,5 @@
 import ArchitectureLab from "./ArchitectureLab";
+import ArchitectureTracer from "./ArchitectureTracer";
 import EngineeringPrinciples from "./EngineeringPrinciples";
 
 /**
@@ -36,7 +37,11 @@ export default function IntelligentSystemsSection() {
       </div>
 
       <div className="systems__lab">
-        <ArchitectureLab />
+        {/* The tracer wraps rather than replaces: it adds no markup of its own
+            and animates the paths and nodes the lab already draws. */}
+        <ArchitectureTracer>
+          <ArchitectureLab />
+        </ArchitectureTracer>
         <p className="systems__micro">LOCAL / DETERMINISTIC</p>
       </div>
 

@@ -10,6 +10,7 @@ import { certificationsArePublishable } from "@/content/certifications";
 import { MODULE_GROUPS, routesInGroup } from "@/demos/operations/ui/modules";
 
 import FeaturedPreview from "./FeaturedPreview";
+import FeaturedSequence from "./FeaturedSequence";
 
 /**
  * 05 / FEATURED ENGINEERING BUILD
@@ -143,9 +144,15 @@ export default function FeaturedDemoSection() {
         </div>
       </div>
 
-      {/* The product frame. The disclosure is part of its masthead because a
-          demonstration that has to be described honestly should be described
-          honestly in the first place a reader looks. */}
+      {/* The product frame, wrapped in the scroll sequence.
+
+          `FeaturedSequence` is the only client boundary this section has, and
+          it wraps rather than replaces: the frame, the masthead, the disclosure
+          and the preview below are all server-rendered and pass through it
+          untouched. With JavaScript off or reduced motion on it renders its
+          children and nothing else, so what follows is the section exactly as
+          it was before any motion existed. */}
+      <FeaturedSequence>
       <div className="featured__product">
         <header className="featured__masthead">
           <div className="featured__identity">
@@ -163,6 +170,7 @@ export default function FeaturedDemoSection() {
 
         <FeaturedPreview />
       </div>
+      </FeaturedSequence>
 
       <div className="featured__breadth">
         <div className="featured__entry">
