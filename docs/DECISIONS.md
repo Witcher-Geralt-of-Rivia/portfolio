@@ -3891,7 +3891,7 @@ asked for less movement, not less of the page.
 
 ## D-105 - The featured build is one system at four depths, not four pictures
 
-Status: Accepted
+Status: Superseded by D-106
 Stage: Landing motion finalization
 
 ### Decision
@@ -3967,3 +3967,282 @@ The CTA is a plain link to `/demos/operations` throughout. It is not disabled,
 not deferred, and not waiting for the sequence to finish, and it stays keyboard
 reachable at every progress. A visitor who wants the demo on the first state
 gets it.
+
+---
+
+## D-106 - The featured build shows photographs of the product, not a drawing of it
+
+Status: Accepted
+Stage: High-impact visual motion upgrade
+
+### Decision
+The constructed preview is deleted. `#work` now shows eleven real screenshots
+of the running application, captured from its own routes at its own canonical
+seed state, and walks through them in the product's own sidebar order:
+
+```
+Overview  Leads  Customers  Reservations  Contracts  Fleet
+Maintenance  Payments  Automations  Inbox  Reports
+```
+
+`FeaturedPreview.tsx`, `FeaturedSequence.tsx` and `featured-sequence.ts` are
+removed, along with the four synthetic states D-105 described.
+
+### Why the drawing had to go
+
+The preview was an honest abstraction and it still misrepresented the product.
+It was hand-composed from the same figures the demo seeds, it was labelled as a
+composition, and a visitor who followed the action into `/demos/operations`
+nonetheless arrived at an interface that did not look like the one on the
+landing page. Two pictures of one product that do not match is a credibility
+problem, and the visitor has no way to know which of them is real.
+
+A screenshot cannot have that problem. It is the interface.
+
+### The capture is deterministic, and it is not retouched
+
+`qa/capture-operations.mjs` opens the running application and photographs each
+module at 1440x900 and at 390x844 at 2x. Nothing is composed, cropped,
+recoloured, relabelled or repainted, no rows are added, and no application state
+is arranged for the camera.
+
+Each capture gets a FRESH browser context. The application persists to
+IndexedDB, so a single context would carry state between modules and the eighth
+screenshot would show the consequences of the seventh: entering Payments runs
+overdue reconciliation (D-095), which would then be visible in every capture
+taken after it. A new context per module means every image is the canonical seed
+state, which is the only state that is reproducible.
+
+The capture waits on the application's own top-bar title rather than on network
+idle, because network idle is a guess about a client-rendered application and a
+title is the application saying which module it has finished rendering.
+
+### The section beneath the frame is gone
+
+The breadth band, the counted facts and the descriptive notes described what the
+screenshots now show. A long explanatory band after the visual climax is an
+anticlimax with extra reading, so the section is: introduction, title,
+disclosure, one line, the frame, one action.
+
+The disclosure moved above the frame. A demonstration described honestly is
+described where a reader looks first.
+
+### The last screen resolves, and the arithmetic says so
+
+With eleven screens there are ten transitions, and `floor(p * 10)` lands on 10
+at `p = 1`, which is a transition that does not exist: the eleventh screen never
+becomes active and Reports is never reached. That defect has now appeared twice
+in this project.
+
+So the progression is a pure function in
+`src/components/work/operations-screens.ts` with no React and no DOM in it, and
+`qa/stage09h-scenes.mjs` proves at two thousand scroll positions that the last
+screen resolves fully, that every one of the eleven is reached, that presence
+always sums to one so no frame is blank, and that the sequence never runs
+backwards.
+
+### The module list is compared, never trusted
+
+`OPERATIONS_SCREENS` is a copy of the product's own `MODULE_ROUTES`, and D-099
+records what a hand-typed copy of that list does over time. Ids, labels, order
+and subtitles are all asserted against `src/demos/operations/ui/modules.ts`, and
+every one of the twenty-two image files is checked to exist and to be larger
+than an empty capture.
+
+---
+
+## D-107 - Each section is a scene, and they all share one frame
+
+Status: Accepted
+Stage: High-impact visual motion upgrade
+
+### Decision
+Every major section is wrapped in a `SceneLayer` that owns its atmosphere, its
+way in, and in three cases a colour field that answers the pointer. The
+configuration is data, in `src/lib/scenes.ts`:
+
+```
+hero       none     liquid   violet + blue
+systems    rise     liquid   blue + cyan
+products   sweep    drift    mint + lemon     spectral edge
+learning   bloom    drift    rose + violet
+lab        settle   none     peach + lemon
+work       expand   liquid   violet + cyan    spectral edge
+```
+
+### Why the configuration is one table
+
+The direction is that crossing a boundary should feel like entering a different
+environment. That only works if the sections are genuinely different from each
+other, and the failure mode is not a bug: it is six sections, each tuned in its
+own file, quietly converging on the same fade. Nobody notices until the whole
+page feels flat.
+
+Side by side the repetition is obvious, and `qa/stage09h-scenes.mjs` asserts
+what reading it is supposed to catch: no two neighbours enter the same way, no
+scene starts invisible, every entering scene actually moves rather than only
+fading, and the travel magnitudes are in the briefed range.
+
+### One frame loop for the whole page
+
+`src/lib/motion-scheduler.ts` holds a single `requestAnimationFrame`. It reads
+scroll and pointer ONCE per frame and then dispatches to its subscribers, which
+receive the already-read values and must not read layout. That rule is what
+keeps the scroll path free of forced reflow.
+
+Six independent loops would read `window.scrollY` six times a frame and keep
+working for sections nobody can see. A scene subscribes only while an
+IntersectionObserver says it is near, and the loop stops entirely when nothing
+is subscribed, so an idle page is running no animation frames at all.
+
+### The entry is measured against the viewport, not against the section
+
+Measuring an entry as a fraction of its own section's height looks correct and
+is wrong for any section taller than the screen. The work section reserves
+several viewports of scroll for its screen sequence, so a fraction of its height
+put the end of the entry thousands of pixels down: the frame would still be
+arriving, still scaled, still translating, while the visitor was already
+scrolling through the screens inside it.
+
+Against the viewport an entry always completes shortly after the section's
+leading edge is on screen, whatever the section's height, which is what "the
+scene has arrived" is supposed to mean.
+
+### `overflow-x: clip`, and specifically not `hidden`
+
+The colour fields bleed past their section so their masses arrive and leave
+rather than fading in place at the edges. Unclipped, that bleed widened the
+document by 297px.
+
+`overflow: hidden` fixes the overflow and breaks the page: it creates a scroll
+container, and `position: sticky` inside a scroll container no longer sticks to
+the viewport, so the work section's screen sequence would stop pinning. `clip`
+contains the paint without creating a scroll container. Keeping it to the x axis
+leaves the vertical bleed, which is wanted: a field that stops dead at a
+section's top edge reads as a rectangle.
+
+### The scenes sit outside the content frame
+
+`.site-main` pads its children by up to 72px a side. A field confined inside
+that stopped short of the viewport and drew a hard vertical seam down each edge
+of the page, which is the opposite of an atmosphere. So each scene reclaims the
+gutter with a negative margin and puts the frame back around its own content;
+the text measure is unchanged.
+
+### The atmosphere has an envelope, so a boundary is a change of scene
+
+`--scene-p` runs 0 to 1 across a section's whole passage and drives the field's
+opacity as `p * (1 - p)`, which peaks at the middle and returns. The floor of
+0.5 means a field is never off, only quieter, so two neighbouring scenes are
+always cross-blending at their shared edge. Without it two constant-strength
+fields meet at a line, which reads as a seam rather than as a handover.
+
+### A separate palette, because the aurora palette is frozen
+
+The Stage 01 aurora palette paints the page's permanent background and its own
+comment says not to intensify it. The scenes needed colour that registers, so
+`tokens.css` gained a `--scene-*` family: the same hues at a saturation that
+shows. The aurora palette is untouched.
+
+### Pointer response is smoothed in the scheduler, and touch is not faked
+
+The pointer is followed with `current += (target - current) * 0.085` and settles
+when the delta falls below a threshold. The smoothing lives in the scheduler
+because a lag belongs where the value is produced: a CSS transition on top of an
+already-smoothed value lags the lag, and the field starts to feel like syrup.
+
+Each liquid field carries three masses, not one. A single mass centred on the
+cursor is a torch. Three, at different sizes, one thrown the opposite way and
+one entirely autonomous, is light in a fluid, and the autonomous one means the
+field is alive when nobody is moving a pointer at all.
+
+`pointerType === "touch"` is ignored outright. On a phone the fields run on
+their own periods and the pointer variables stay centred.
+
+### Everything is refused for reduced motion, and nothing is left mid-animation
+
+The scene classes are only added once `prefers-reduced-motion` has been checked,
+so with the preference set no entry rule applies at all: nothing starts hidden,
+nothing starts moved, no stage is sticky, and the spectral edges stop turning.
+The stylesheet also carries an explicit reduced-motion block, which covers the
+moment between a preference change and the re-render.
+
+---
+
+## D-108 - Deleting a stylesheet is not the same as deleting the rules that are dead
+
+Status: Accepted
+Stage: High-impact visual motion upgrade
+
+### Decision
+`src/styles/motion-sections.css` held three blocks: the featured sequence, the
+Intelligent Systems execution trace, and the Product Engineering surface
+emphasis. Removing the featured sequence meant its block was dead, and the file
+was deleted whole.
+
+Two live behaviours went with it. `ArchitectureTracer.tsx` still wrote
+`data-arch-trace` onto its nodes and `ProductStack.tsx` still wrote
+`data-pstack` onto its wrapper, and both attributes now matched no rule at all,
+so both effects were silently invisible: no error, no warning, nothing in a
+type check, nothing in a lint, and a page that still rendered perfectly well.
+
+The two surviving blocks now live in `src/styles/section-motion.css`, which is
+scoped to what its name says: the motion that happens INSIDE a section, as
+opposed to the scene layer around it.
+
+### Why this is worth a record
+
+The mistake is a specific and repeatable one, and none of the tooling this
+project runs would have caught it. A stylesheet named for a stage rather than
+for a behaviour accumulates unrelated rules, and when the stage is superseded
+the file looks disposable while parts of it are load-bearing.
+
+The check that found it was `grep` for the class names the components still
+emit. That is the check to run before deleting any stylesheet: not "is this
+stage over" but "does anything still render these class names".
+
+---
+
+## D-109 - The work screens are revealed, not crossfaded
+
+Status: Accepted
+Stage: High-impact visual motion upgrade
+
+### Decision
+Moving between two of the eleven screenshots uncovers the arriving one over the
+one it replaces with a moving clip edge. A screen is painted or it is not.
+Nothing in the frame is ever semi-transparent.
+
+### What a crossfade actually looked like
+
+The first build faded between them, and the arithmetic was impeccable: at every
+scroll position exactly two screens had a non-zero contribution and the two
+summed to exactly 1. Every check passed.
+
+The page was unreadable. Eleven screenshots of one application share a layout, a
+chrome and a colour, so two of them at half opacity do not read as one changing
+into another. They read as a printing fault, and with a change window of 0.55
+that was the state of the section for more than half of every segment. The
+screenshots were introduced to stop the section looking artificial (D-106), and
+a smeared double exposure of two dashboards is more artificial than the drawing
+they replaced.
+
+### Why the checks did not catch it
+
+They asserted the arithmetic, and the arithmetic was right. There was no
+assertion about what a frame looks like, so nothing failed.
+
+`qa/stage09h-scenes.mjs` now asserts, at two thousand scroll positions, that a
+screen is painted or it is not and never half, that the frame is always fully
+covered by an unclipped screen, and that the arriving screen is stacked above
+the one it covers. `qa/stage09h-shots.mjs` writes the frames so they can be
+looked at, which is the check that actually found this.
+
+### The direction alternates by position
+
+Ten identical left-to-right wipes in a row become one repeated gesture that
+stops being noticed around the fourth. Odd-numbered screens are uncovered
+downward instead, chosen with `:nth-child(even)` rather than a written variable
+because the parity of a screen's position never changes. A thin light line rides
+the clip boundary so the reveal is a visible event rather than a silent
+replacement.

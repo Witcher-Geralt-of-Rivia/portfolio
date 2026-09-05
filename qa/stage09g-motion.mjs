@@ -36,10 +36,9 @@ import {
   viewportProgress,
 } from "../src/lib/scroll-geometry.ts";
 import {
-  FEATURED_STATES,
-  MODULE_STATE,
-  PREVIEW_EMPHASIS,
-} from "../src/components/work/featured-sequence.ts";
+  OPERATIONS_SCREENS,
+  SCREEN_COUNT,
+} from "../src/components/work/operations-screens.ts";
 
 const BASE = process.env.QA_BASE ?? "http://127.0.0.1:3001";
 
@@ -274,40 +273,33 @@ section("MATHS - VIEWPORT PROGRESS");
 }
 
 /* ===================================================================== */
-section("FEATURED STATES ARE TRUE OF THE PRODUCT");
+section("THE WORK SCREENS ARE THE PRODUCT'S OWN");
 {
-  /* The states are a presentation grouping and the product has its own. Both
-     describe the same eleven modules, and D-099 records what happened the last
-     time this section carried a hand-typed copy of that list. */
+  /* The section no longer groups the product into four presentation states:
+     it shows the product's own eleven modules, in the product's own order.
+     D-099 records what happened the last time this section carried a
+     hand-typed copy of that list, so it is compared rather than trusted.
+     The screenshots themselves are checked by `qa/stage09h-scenes.mjs`. */
   const modules = readFileSync(
     new URL("../src/demos/operations/ui/modules.ts", import.meta.url),
     "utf8"
   );
   const productModules = [...modules.matchAll(/id: "([A-Za-z]+)", label:/g)].map((m) => m[1]);
-  const sequenced = FEATURED_STATES.flatMap((s) => s.modules);
+  const shown = OPERATIONS_SCREENS.map((s) => s.label);
 
   check("the product publishes eleven modules", productModules.length === 11, String(productModules.length));
-  check("the sequence names ten of them", sequenced.length === 10, String(sequenced.length));
+  check("the section shows all eleven", SCREEN_COUNT === 11, String(SCREEN_COUNT));
   check(
-    "every sequenced module is a real one",
-    sequenced.every((m) => productModules.includes(m)),
-    sequenced.filter((m) => !productModules.includes(m)).join(", ")
+    "in the product's own order, with nothing left out",
+    shown.join(",") === productModules.join(","),
+    shown.join(",")
   );
-  check("none is named twice", new Set(sequenced).size === sequenced.length);
+  check("none is named twice", new Set(shown).size === shown.length);
   check(
-    "the only one left out is Overview, which is context",
-    productModules.filter((m) => !sequenced.includes(m)).join(",") === "Overview",
-    productModules.filter((m) => !sequenced.includes(m)).join(",")
+    "no screen invents a fact about the application",
+    OPERATIONS_SCREENS.every((s) => !/\d{2,}/.test(s.context)),
+    "the figures a visitor sees come from the capture, not from this file"
   );
-  check("the lookup covers every sequenced module", sequenced.every((m) => MODULE_STATE[m]));
-  check("four states, numbered in order", FEATURED_STATES.map((s) => s.index).join(",") === "01,02,03,04");
-  check("each carries emphasis", FEATURED_STATES.every((s) => PREVIEW_EMPHASIS[s.id]));
-  check(
-    "the last state lights the whole flow",
-    PREVIEW_EMPHASIS.intelligence.flow.length === 4,
-    "so the section resolves to the complete system"
-  );
-  check("no state invents an app fact", FEATURED_STATES.every((s) => !/\d{2,}/.test(s.note)));
 }
 
 /* ===================================================================== */
@@ -450,30 +442,43 @@ section("SECTIONS RESOLVE BEFORE THEY RELEASE");
   check("and none of the three is ever hidden", stacked.dim === 0,
     "they recede to 0.76, which reads as depth rather than as disabled");
 
-  /* --- Featured sequence --- */
-  const fseq = await geometryOf(page, ".fseq", ".fseq__stage");
-  check("the featured sequence reserves a range", fseq && fseq.height > fseq.stage, fseq ? `${fseq.height} vs ${fseq.stage}` : "missing");
+  /* --- The work screen sequence --- */
+  const screens = await geometryOf(page, ".screens", ".screens__stage");
+  check("the screen sequence reserves a range", screens && screens.height > screens.stage,
+    screens ? `${screens.height} vs ${screens.stage}` : "missing");
   await page.evaluate(
     (g) => window.scrollTo(0, Math.min(g.top + g.height - g.stage - g.sticky, document.body.scrollHeight - window.innerHeight)),
-    fseq
+    screens
   );
   await settle(page);
   const resolvedState = await page.evaluate(() => {
-    const root = document.querySelector(".fseq");
-    const rail = [...document.querySelectorAll(".fpv__rail-item[data-fpv-state]")];
+    const root = document.querySelector(".screens");
+    const items = [...document.querySelectorAll(".screens__item")];
     return {
-      state: root.dataset.fseqState,
-      resolved: root.dataset.fseqResolved,
-      dim: rail.filter((e) => Number(getComputedStyle(e).opacity) < 0.9).length,
-      steps: [...document.querySelectorAll(".fpv__step")].filter(
-        (e) => Number(getComputedStyle(e).opacity) < 0.9
+      active: root.dataset.screensActive,
+      module: document.querySelector(".screens__module")?.textContent ?? "",
+      /* The reveal has landed when the last screen is painted and unclipped.
+         A screen is painted or it is not, so a fractional opacity here is the
+         double-exposure defect coming back. */
+      painted: items.filter((el) => Number(el.style.getPropertyValue("--screen-show") || 0) === 1).length,
+      translucent: items.filter((el) => {
+        const o = Number(getComputedStyle(el).opacity);
+        return o > 0.001 && o < 0.999;
+      }).length,
+      uncovered: items.filter(
+        (el) =>
+          Number(el.style.getPropertyValue("--screen-show") || 0) === 1 &&
+          Number(el.style.getPropertyValue("--screen-clip") || 0) === 0
       ).length,
     };
   });
-  check("it ends on the last state", resolvedState.state === "intelligence", String(resolvedState.state));
-  check("marked resolved", resolvedState.resolved === "true");
-  check("with the whole system lit", resolvedState.dim === 0 && resolvedState.steps === 0,
-    `${resolvedState.dim} modules and ${resolvedState.steps} steps still receded`);
+  /* The defect this exists for: the last item never fully resolving. */
+  check("it ends on the last screen", resolvedState.active === String(SCREEN_COUNT - 1), String(resolvedState.active));
+  check("which is Reports", resolvedState.module === "Reports", resolvedState.module);
+  check("and that screen is fully uncovered", resolvedState.uncovered >= 1,
+    `${resolvedState.uncovered} uncovered of ${resolvedState.painted} painted`);
+  check("no screen is left half drawn on top of another", resolvedState.translucent === 0,
+    String(resolvedState.translucent));
 
   /* The disclosure is not a casualty of the choreography. */
   const disclosure = await page.evaluate(() => {
@@ -539,23 +544,23 @@ section("REDUCED MOTION LEAVES EVERYTHING READABLE");
   await settle(page, 130, 5);
 
   const state = await page.evaluate(() => ({
-    fseqEnhanced: document.querySelectorAll(".fseq--enhanced").length,
+    screensEnhanced: document.querySelectorAll(".screens--enhanced").length,
     pstackEnhanced: document.querySelectorAll(".pstack--enhanced").length,
     traced: document.querySelectorAll(".arch-trace-scope.is-traced").length,
-    label: document.querySelectorAll(".fseq__label").length,
+    scenesLive: document.querySelectorAll(".scene--live").length,
     h1: document.querySelector("h1").textContent.trim(),
     boot: getComputedStyle(document.querySelector(".cinit__state--boot")).opacity,
     live: getComputedStyle(document.querySelector(".cinit__state--live")).opacity,
     /* Nothing may be hidden. Every element the choreography touches has to be
        fully present when the choreography is refused. */
-    dimRail: [...document.querySelectorAll(".fpv__rail-item")].filter(
+    dimScreens: [...document.querySelectorAll(".screens__item")].filter(
+      (e) => e.getClientRects().length > 0 && Number(getComputedStyle(e).opacity) < 0.99
+    ).length,
+    dimScenes: [...document.querySelectorAll(".scene__content")].filter(
       (e) => Number(getComputedStyle(e).opacity) < 0.99
     ).length,
-    dimSteps: [...document.querySelectorAll(".fpv__step")].filter(
-      (e) => Number(getComputedStyle(e).opacity) < 0.99
-    ).length,
-    dimParts: [...document.querySelectorAll("[data-fpv-part]")].filter(
-      (e) => Number(getComputedStyle(e).opacity) < 0.99
+    movedScenes: [...document.querySelectorAll(".scene__content")].filter(
+      (e) => getComputedStyle(e).transform !== "none"
     ).length,
     dimSurfaces: [...document.querySelectorAll(".psurface")].filter(
       (e) => Number(getComputedStyle(e).opacity) < 0.99
@@ -563,20 +568,20 @@ section("REDUCED MOTION LEAVES EVERYTHING READABLE");
     dimNodes: [...document.querySelectorAll(".arch-node")].filter(
       (e) => Number(getComputedStyle(e).opacity) < 0.99
     ).length,
-    stickyStages: [...document.querySelectorAll(".fseq__stage, .pstack__stage")].filter(
+    stickyStages: [...document.querySelectorAll(".screens__stage, .pstack__stage")].filter(
       (e) => getComputedStyle(e).position === "sticky"
     ).length,
   }));
 
-  check("no section is enhanced", state.fseqEnhanced === 0 && state.pstackEnhanced === 0 && state.traced === 0,
-    `${state.fseqEnhanced}/${state.pstackEnhanced}/${state.traced}`);
-  check("no narrative label is rendered", state.label === 0, String(state.label));
+  check("no section is enhanced", state.screensEnhanced === 0 && state.pstackEnhanced === 0 && state.traced === 0,
+    `${state.screensEnhanced}/${state.pstackEnhanced}/${state.traced}`);
+  check("no scene is enhanced either", state.scenesLive === 0, String(state.scenesLive));
   check("nothing is sticky", state.stickyStages === 0, String(state.stickyStages));
   check("the H1 is unchanged", state.h1 === "Engineering intelligent systems.");
   check("the hero shows its settled state at once", Number(state.boot) < 0.02 && Number(state.live) > 0.98);
-  check("every module is readable", state.dimRail === 0, String(state.dimRail));
-  check("every flow step is readable", state.dimSteps === 0, String(state.dimSteps));
-  check("every preview panel is readable", state.dimParts === 0, String(state.dimParts));
+  check("the visible screen is fully readable", state.dimScreens === 0, String(state.dimScreens));
+  check("no scene is left faded", state.dimScenes === 0, String(state.dimScenes));
+  check("no scene is left transformed", state.movedScenes === 0, String(state.movedScenes));
   check("every product surface is readable", state.dimSurfaces === 0, String(state.dimSurfaces));
   check("every architecture node is readable", state.dimNodes === 0, String(state.dimNodes));
 
@@ -603,7 +608,7 @@ section("FOCUS AND RESIZE");
      left invisible-but-focusable. */
   const focusables = await page.evaluate(() => {
     const inSection = (sel) => [...document.querySelectorAll(`${sel} a, ${sel} button`)];
-    const all = [...inSection(".fseq"), ...inSection(".pstack"), ...inSection(".arch-trace-scope")];
+    const all = [...inSection(".screens"), ...inSection(".pstack"), ...inSection(".arch-trace-scope")];
     return all
       .filter((el) => {
         /* The genuine failure is LAID OUT BUT INVISIBLE: an element the browser
@@ -631,11 +636,11 @@ section("FOCUS AND RESIZE");
 
   /* Resize has to re-measure, or the reserved ranges keep coordinates from a
      viewport that no longer exists. */
-  const before = await geometryOf(page, ".fseq", ".fseq__stage");
+  const before = await geometryOf(page, ".screens", ".screens__stage");
   await page.setViewportSize({ width: 1024, height: 768 });
   await settle(page, 150, 4);
-  const after = await geometryOf(page, ".fseq", ".fseq__stage");
-  check("the featured range is re-measured on resize", before.height !== after.height,
+  const after = await geometryOf(page, ".screens", ".screens__stage");
+  check("the screen range is re-measured on resize", before.height !== after.height,
     `${before.height} -> ${after.height}`);
 
   await page.evaluate(
@@ -643,8 +648,9 @@ section("FOCUS AND RESIZE");
     after
   );
   await settle(page);
-  const stillResolves = await page.evaluate(() => document.querySelector(".fseq").dataset.fseqResolved);
-  check("and still resolves afterwards", stillResolves === "true", String(stillResolves));
+  const stillResolves = await page.evaluate(() => document.querySelector(".screens").dataset.screensActive);
+  check("and still resolves to the last screen afterwards", stillResolves === String(SCREEN_COUNT - 1),
+    String(stillResolves));
 
   /* Below its threshold the product stack stands down entirely. */
   await page.setViewportSize({ width: 390, height: 844 });

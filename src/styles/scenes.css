@@ -1,0 +1,487 @@
+/* =====================================================================
+   SCENES
+   Each major section is an environment: its own colour field, its own way
+   in, its own behaviour. Crossing a boundary should look like the page
+   changing scene rather than like a paragraph fading in.
+
+   Every rule here is inert until `.scene--live`, which only exists once
+   JavaScript has run and reduced motion has been checked. Without it the
+   sections are exactly what they were: nothing hidden, nothing moved.
+
+   Timing language: --ease-entrance (0.16, 1, 0.3, 1) as the primary and
+   --ease-nav (0.22, 1, 0.36, 1) for short changes. Both are existing
+   tokens. Nothing bounces; the one overshoot is small, fast, and
+   deliberate.
+   ===================================================================== */
+
+.scene {
+  position: relative;
+  /* The atmosphere is painted inside this box, so it must not leak into the
+     neighbouring scene's territory. */
+  isolation: isolate;
+  /*
+    `clip`, not `hidden`, and only on one axis.
+
+    The colour fields deliberately bleed past the section so their masses
+    arrive and leave rather than fading in place at the edges. Unclipped
+    that bleed widened the document by 297px, which is a hard failure.
+
+    `overflow: hidden` would fix it and break the page: it creates a scroll
+    container, and `position: sticky` inside a scroll container no longer
+    sticks to the viewport, so the work section's screen sequence would
+    stop pinning. `clip` contains the paint without creating one. Keeping
+    it to the x axis leaves the vertical bleed, which is wanted: a field
+    that stops dead at a section's top edge reads as a rectangle.
+  */
+  overflow-x: clip;
+  /*
+    Break out of the shell's gutter so the field is genuinely full width.
+
+    `.site-main` pads its children by `--gutter`, which is up to 72px a side.
+    A field confined inside that stopped short of the viewport and drew a hard
+    vertical seam down each edge of the page, which is the opposite of an
+    atmosphere. The scene reclaims the gutter and its own content puts it back.
+  */
+  margin-inline: calc(var(--gutter) * -1);
+  padding-inline: var(--gutter);
+}
+
+/* The content sits above the field, always. */
+.scene__content {
+  position: relative;
+  z-index: 1;
+}
+
+/* ---------------------------------------------------------------------
+   ATMOSPHERE
+   Oversized radial masses on a pseudo-element, moving slowly and
+   continuously. Not a repeating gradient wallpaper: three masses of
+   different sizes drifting on different periods never quite return to
+   the same arrangement, which is what makes it read as light in a
+   volume rather than as a loop.
+   --------------------------------------------------------------------- */
+
+.scene__field {
+  position: absolute;
+  /*
+    Bleeds past the section so the masses arrive and leave rather than fading
+    in place at the edges.
+
+    The vertical bleed is in `vh`, NOT in per cent. A percentage is a fraction
+    of the section's own height, and the work section reserves several
+    viewports of scroll for its screen sequence: 30 per cent of it was more
+    than a thousand pixels of field hanging below the last section, which the
+    document counted as scrollable and a visitor found as dead space after the
+    footer. A viewport-relative bleed is the same amount of atmosphere around
+    a short section and a tall one, which is also what it should have been.
+
+    The horizontal bleed stays a percentage because `overflow-x: clip` takes
+    it, so it never reaches the document at all.
+  */
+  inset: -26vh -20%;
+  /*
+    The field clips its own masses.
+
+    The masses inside drift on `transform`, and a transform percentage is a
+    fraction of the element's own box. The work scene's field is nearly six
+    thousand pixels tall, so `translate 4% scale(1.12)` on it was 350px of
+    movement and several hundred pixels of overflow below the last section,
+    which the document counted as scrollable: a visitor reached the end of the
+    footer and could keep scrolling into nothing.
+
+    Clipping here rather than on `.scene` is deliberate. `.scene` must keep its
+    vertical overflow visible so a field can bleed into its neighbour, and it
+    must not become a scroll container or the work sequence stops pinning. This
+    box is decorative, `aria-hidden`, and contains nothing that sticks, so its
+    own edges are the right place to stop the paint. They sit 26vh outside the
+    section, where nobody can see the cut.
+  */
+  overflow: clip;
+  z-index: 0;
+  pointer-events: none;
+  /* Behind text-heavy content by construction: the content layer above
+     carries its own surfaces, and this never passes over body copy at
+     full strength. */
+  opacity: 1;
+}
+
+/*
+  The envelope: the atmosphere swells as the section crosses and recedes as
+  it leaves.
+
+  This is what makes a boundary read as a change of scene rather than as two
+  constant-strength fields meeting at a line. `--scene-p` runs 0 to 1 across
+  the whole passage, so `p * (1 - p)` peaks at the middle and returns; the
+  0.5 floor means a field is never off, only quieter, and two neighbouring
+  scenes are therefore always cross-blending at their shared edge.
+
+  Opacity only. The masses inside keep their own transforms and their own
+  periods, so nothing here interferes with the entry rules below.
+*/
+.scene--live .scene__field {
+  opacity: calc(0.5 + 2 * var(--scene-p, 0.5) * (1 - var(--scene-p, 0.5)));
+}
+
+/*
+  The autonomous field. Three masses, three periods, none a multiple of
+  another, so the composition does not repeat on any short cycle.
+*/
+.scene__field--drift::before,
+.scene__field--drift::after,
+.scene__field--liquid::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.scene__field--drift::before {
+  background:
+    radial-gradient(
+      56vw 50vw at 16% 24%,
+      color-mix(in srgb, var(--scene-accent, var(--scene-violet)) 100%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      50vw 46vw at 84% 70%,
+      color-mix(in srgb, var(--scene-accent-alt, var(--scene-blue)) 92%, transparent),
+      transparent 70%
+    );
+  animation: scene-drift-a 34s var(--ease-aurora) infinite alternate;
+}
+
+.scene__field--drift::after {
+  background: radial-gradient(
+    62vw 54vw at 62% 14%,
+    color-mix(in srgb, var(--scene-accent-alt, var(--scene-blue)) 78%, transparent),
+    transparent 72%
+  );
+  animation: scene-drift-b 47s var(--ease-aurora) infinite alternate;
+}
+
+/*
+  Viewport units, not percentages.
+
+  A percentage translate is a fraction of the element's own box, so the same
+  keyframe moved the hero's field 27px and the work scene's field 235px: the
+  atmosphere drifted at a completely different speed depending on how tall the
+  section underneath it happened to be. In `vw` and `vh` every scene breathes at
+  the same rate, which is what "one atmosphere across the page" requires.
+*/
+@keyframes scene-drift-a {
+  from {
+    transform: translate3d(-3vw, -3vh, 0) scale(1);
+  }
+  to {
+    transform: translate3d(4vw, 4vh, 0) scale(1.12);
+  }
+}
+
+@keyframes scene-drift-b {
+  from {
+    transform: translate3d(2vw, 2vh, 0) scale(1.08);
+  }
+  to {
+    transform: translate3d(-4vw, -4vh, 0) scale(1);
+  }
+}
+
+/* ---------------------------------------------------------------------
+   THE LIQUID FIELD
+   Three masses rather than one: a primary near the smoothed pointer, a
+   secondary thrown the opposite way, and a third drifting on its own.
+   One mass centred on the cursor is a torch. Three, moving at different
+   rates and pulling against each other, is light in a fluid.
+   --------------------------------------------------------------------- */
+
+.scene__field--liquid {
+  /* Defaults so the field composes correctly before the first frame and
+     for anyone whose pointer never enters the page. */
+  --pointer-x: 0.5;
+  --pointer-y: 0.5;
+  background:
+    /* Primary: follows the smoothed pointer. */
+    radial-gradient(
+      54vw 48vw at calc(var(--pointer-x) * 100%) calc(var(--pointer-y) * 100%),
+      color-mix(in srgb, var(--scene-accent, var(--scene-violet)) 100%, transparent),
+      transparent 68%
+    ),
+    /* Secondary: thrown the opposite way, so the two masses move apart
+       and together rather than travelling as one blob. */
+    radial-gradient(
+      46vw 42vw at calc((1 - var(--pointer-x)) * 100%) calc((1 - var(--pointer-y)) * 90%),
+      color-mix(in srgb, var(--scene-accent-alt, var(--scene-blue)) 92%, transparent),
+      transparent 70%
+    );
+  /* No transition: the smoothing is in the scheduler, which is where a
+     lag belongs. A CSS transition on top of an already-smoothed value
+     lags the lag and the field starts to feel like syrup. */
+}
+
+/* Tertiary: entirely autonomous, so the field is alive even when nobody
+   is moving a pointer at all. */
+.scene__field--liquid::after {
+  background: radial-gradient(
+    58vw 50vw at 22% 76%,
+    color-mix(in srgb, var(--scene-accent-alt, var(--scene-blue)) 72%, transparent),
+    transparent 72%
+  );
+  animation: scene-drift-b 39s var(--ease-aurora) infinite alternate;
+}
+
+/* ---------------------------------------------------------------------
+   ENTRIES
+   Five spatial behaviours, one per scene, no two neighbours alike.
+   `--scene-enter` runs 0 to 1 and is written by the scene controller.
+   --------------------------------------------------------------------- */
+
+/* The shared shape: everything interpolates from its scene's declared
+   start toward rest. Opacity supports the movement and is never the
+   movement: no entry starts at zero. */
+/* Only while the scene is actually near the viewport. A permanent
+   compositing hint on six full-width sections is six layers the compositor
+   holds for a page that is mostly not being looked at. */
+.scene--live.scene--near .scene__content {
+  will-change: transform, opacity;
+}
+
+/* --- rise: comes up from below, with the colour plane ------------------ */
+.scene--live.scene--enter-rise .scene__content {
+  transform: translate3d(
+    0,
+    calc((1 - var(--scene-enter, 1)) * var(--scene-travel, 0px)),
+    0
+  )
+  scale(
+    calc(
+      var(--scene-scale-from, 1) + (1 - var(--scene-scale-from, 1)) * var(--scene-enter, 1)
+    )
+  );
+  opacity: calc(
+    var(--scene-opacity-from, 1) + (1 - var(--scene-opacity-from, 1)) * var(--scene-enter, 1)
+  );
+}
+
+/* The colour plane rises with it, which is the moment the background and
+   the foreground travel together. */
+.scene--live.scene--enter-rise .scene__field {
+  transform: translate3d(0, calc((1 - var(--scene-enter, 1)) * 26vh), 0);
+}
+
+/* --- sweep: arrives laterally ------------------------------------------ */
+.scene--live.scene--enter-sweep .scene__content {
+  transform: translate3d(
+    calc((1 - var(--scene-enter, 1)) * var(--scene-travel, 0px)),
+    0,
+    0
+  )
+  scale(
+    calc(
+      var(--scene-scale-from, 1) + (1 - var(--scene-scale-from, 1)) * var(--scene-enter, 1)
+    )
+  );
+  opacity: calc(
+    var(--scene-opacity-from, 1) + (1 - var(--scene-opacity-from, 1)) * var(--scene-enter, 1)
+  );
+}
+
+/* The field crosses the other way, so the scene reads as a wipe rather
+   than as one object sliding. */
+.scene--live.scene--enter-sweep .scene__field {
+  transform: translate3d(calc((1 - var(--scene-enter, 1)) * -22vw), 0, 0);
+}
+
+/* --- bloom: opens from a clipped field --------------------------------- */
+.scene--live.scene--enter-bloom .scene__content {
+  /* A circle growing from the left edge, so the section opens rather than
+     arrives. `clip-path` is compositor-friendly and, unlike a mask, does
+     not need a second paint layer. */
+  clip-path: circle(
+    calc(30% + 100% * var(--scene-enter, 1)) at 12% 50%
+  );
+  transform: scale(
+    calc(
+      var(--scene-scale-from, 1) + (1 - var(--scene-scale-from, 1)) * var(--scene-enter, 1)
+    )
+  );
+  opacity: calc(
+    var(--scene-opacity-from, 1) + (1 - var(--scene-opacity-from, 1)) * var(--scene-enter, 1)
+  );
+}
+
+.scene--live.scene--enter-bloom .scene__field {
+  transform: scale(calc(0.7 + 0.3 * var(--scene-enter, 1)));
+}
+
+/* --- settle: descends, overshoots a little, locks ---------------------- */
+/*
+  The overshoot lives in the curve rather than in a keyframe, so it stays
+  tied to scroll position. `--scene-enter` runs 0 to 1; the expression
+  below reaches slightly past rest around 0.82 and comes back. Small and
+  fast: a scene that visibly bounces reads as a toy.
+*/
+.scene--live.scene--enter-settle .scene__content {
+  transform: translate3d(
+    0,
+    calc(
+      (1 - var(--scene-enter, 1)) * (0 - var(--scene-travel, 0px)) +
+        var(--scene-enter, 1) * (1 - var(--scene-enter, 1)) * 4vh
+    ),
+    0
+  );
+  opacity: calc(
+    var(--scene-opacity-from, 1) + (1 - var(--scene-opacity-from, 1)) * var(--scene-enter, 1)
+  );
+}
+
+/* --- expand: grows into place ------------------------------------------ */
+.scene--live.scene--enter-expand .scene__content {
+  transform: translate3d(
+    0,
+    calc((1 - var(--scene-enter, 1)) * var(--scene-travel, 0px)),
+    0
+  )
+  scale(
+    calc(
+      var(--scene-scale-from, 1) + (1 - var(--scene-scale-from, 1)) * var(--scene-enter, 1)
+    )
+  );
+  opacity: calc(
+    var(--scene-opacity-from, 1) + (1 - var(--scene-opacity-from, 1)) * var(--scene-enter, 1)
+  );
+}
+
+.scene--live.scene--enter-expand .scene__field {
+  transform: scale(calc(0.82 + 0.18 * var(--scene-enter, 1)));
+}
+
+/* ---------------------------------------------------------------------
+   SPECTRAL EDGE
+   A thick, visibly moving border for focal surfaces only. Two of them on
+   the page: the product studio and the work screen frame.
+
+   Built as a padded wrapper with the gradient underneath and the real
+   surface on top, so the colour is a genuine border rather than a glow
+   bleeding over the content.
+   --------------------------------------------------------------------- */
+
+.spectral {
+  position: relative;
+  /* The visible thickness. Thick enough to be the point rather than a
+     detail nobody notices. */
+  padding: 3px;
+  border-radius: calc(var(--radius-panel) + 3px);
+  /*
+    A curated spectrum from the aurora palette, not a hue rotation. The
+    sequence returns to its first colour so the rotation has no seam.
+  */
+  background: conic-gradient(
+    from calc(var(--spectral-angle, 0) * 1turn),
+    var(--aurora-sky),
+    var(--aurora-lavender),
+    var(--aurora-rose),
+    var(--aurora-peach),
+    var(--aurora-mint),
+    var(--aurora-aqua),
+    var(--aurora-sky)
+  );
+  animation: spectral-turn 9s linear infinite;
+}
+
+/* The surface the content actually sits on, opaque so the spectrum stays
+   an edge and never washes across the thing it frames. */
+.spectral__inner {
+  position: relative;
+  border-radius: var(--radius-panel);
+  background: rgba(253, 253, 255, 0.97);
+  overflow: hidden;
+}
+
+/*
+  The larger radius, for the product studio, whose surface is a
+  `--radius-panel-lg` panel rather than a `--radius-panel` frame. An edge
+  whose corners do not match the thing inside it reads as a mistake before
+  it reads as colour.
+*/
+.spectral--lg {
+  border-radius: calc(var(--radius-panel-lg) + 3px);
+}
+
+.spectral--lg .spectral__inner {
+  border-radius: var(--radius-panel-lg);
+}
+
+/* The studio paints its own surface and its own overflow, so the wrapper
+   inside the edge contributes nothing but the corner. Giving it a second
+   opaque background would sit a flat panel behind a translucent one and
+   flatten the studio's own depth. */
+.spectral__inner--bare {
+  background: none;
+}
+
+@keyframes spectral-turn {
+  to {
+    --spectral-angle: 1;
+  }
+}
+
+/*
+  `--spectral-angle` has to be registered for the rotation to interpolate:
+  an unregistered custom property animates as a discrete swap, so the edge
+  would jump rather than turn. Registered here rather than in tokens.css
+  because it is machinery for one effect, not a design value.
+*/
+@property --spectral-angle {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+
+/* ---------------------------------------------------------------------
+   REDUCED MOTION
+   The scene classes are refused in JavaScript, so none of the entry rules
+   above apply. These cover the moment between a preference change and the
+   re-render, and make the intent legible here rather than only in the
+   components.
+
+   Everything composed, nothing moving. The atmosphere stays: a still
+   gradient is not motion, and removing the colour would take away the
+   design rather than the animation.
+   --------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .scene--live .scene__content,
+  .scene--live.scene--enter-rise .scene__content,
+  .scene--live.scene--enter-sweep .scene__content,
+  .scene--live.scene--enter-bloom .scene__content,
+  .scene--live.scene--enter-settle .scene__content,
+  .scene--live.scene--enter-expand .scene__content {
+    transform: none;
+    opacity: 1;
+    clip-path: none;
+    will-change: auto;
+  }
+
+  .scene--live .scene__field,
+  .scene--live.scene--enter-rise .scene__field,
+  .scene--live.scene--enter-sweep .scene__field,
+  .scene--live.scene--enter-bloom .scene__field,
+  .scene--live.scene--enter-expand .scene__field {
+    transform: none;
+  }
+
+  .scene__field--drift::before,
+  .scene__field--drift::after,
+  .scene__field--liquid::after {
+    animation: none;
+  }
+
+  /* The liquid field rests centred rather than following anything. */
+  .scene__field--liquid {
+    --pointer-x: 0.5;
+    --pointer-y: 0.5;
+  }
+
+  .spectral {
+    animation: none;
+  }
+}

@@ -5,225 +5,90 @@ import {
   DEMO_DISCLOSURE_SECONDARY,
   findDemo,
 } from "@/demo-runtime/demo-registry";
-
 import { certificationsArePublishable } from "@/content/certifications";
-import { MODULE_GROUPS, routesInGroup } from "@/demos/operations/ui/modules";
 
-import FeaturedPreview from "./FeaturedPreview";
-import FeaturedSequence from "./FeaturedSequence";
+import OperationsScreenSequence from "./OperationsScreenSequence";
+import { SCREEN_COUNT } from "./operations-screens";
 
 /**
  * 05 / FEATURED ENGINEERING BUILD
  *
- * The page's culmination, and deliberately not the same thing as
- * `SelectedWorkSection`.
+ * The page's climax, and now a photograph of the product rather than a drawing
+ * of it.
  *
- * That component publishes real client work and refuses to render until its own
- * invariant is satisfied: a minimum number of case studies, each verified,
- * each complete. Nothing here touches it. This section publishes something
- * different and says so in as many words: an interactive engineering demo,
- * built for this portfolio, running on synthetic data in the visitor's own
- * browser. Presenting the two through one component would have meant either
- * weakening the case-study gate or dressing a demo as an engagement, and both
- * are the same lie told in different directions.
+ * WHAT CHANGED AND WHY
  *
- * So this owns `id="work"` on the homepage, the real case-study section stays
- * dormant, and the distinction is visible rather than implied: the canonical
- * disclosure sits at the top of the product frame, not in a tooltip.
+ * This section used to carry a composed preview: a hand-built rail, four state
+ * cards, a flow strip, all drawn from the demo's canonical figures. It was
+ * accurate and it was still wrong, because it did not look like the application
+ * it was advertising. A visitor who followed the link found a different-looking
+ * interface and no way to tell which of the two was real.
  *
- * Every figure below is read from the frozen demo rather than written here.
+ * So the section shows eleven screenshots of the real verified application, at
+ * its real routes, in the product's own order, captured by a written-down
+ * procedure rather than by hand. The scroll sequence walks them.
+ *
+ * WHAT WAS REMOVED, AND WHY THAT IS THE POINT
+ *
+ * Everything that used to sit below the preview is gone: the breadth band
+ * naming eleven modules in three groups, the four counted facts, the four
+ * descriptive notes. Every one of them described what the screenshots now show.
+ * A visitor who has just watched eleven real pages of an application does not
+ * need to be told it has eleven modules, and a long explanatory band after the
+ * visual climax is an anticlimax with extra reading.
+ *
+ * What remains is what the screens cannot say themselves: whose product it is,
+ * that it is a demonstration running on synthetic data, and how to open it.
+ *
+ * It is still deliberately not `SelectedWorkSection`. That component publishes
+ * real client work and stays behind `MINIMUM_PUBLIC_CASES`; this publishes a
+ * demonstration and says so above the frame (D-098).
  */
-
-/* The four the specification freezes, each checkable in a minute by opening the
-   demo and counting. Nothing derived, nothing rounded, nothing impressive that
-   is not also true. */
-const FACTS = [
-  { value: "11", label: "connected modules" },
-  { value: "13", label: "domain entities" },
-  { value: "4", label: "simulated roles" },
-  { value: "5", label: "automation rules" },
-];
-
-/**
- * Eleven modules is a list nobody reads. Three groups and an entry point is a
- * shape somebody understands.
- *
- * Derived from `MODULE_ROUTES` rather than retyped, and that is not tidiness.
- * A hand-written copy of this list said Contracts belonged to "Rental
- * operations" and Inbox to "Customer operations", while the preview directly
- * above it drew the console's real sidebar, where Contracts is a customer
- * operation and Inbox is a system one. The page was showing a visitor two
- * different architectures for one product and inviting them to open the demo
- * and find a third. Reading the product's own configuration means the section
- * cannot disagree with the product, and cannot drift from it later.
- *
- * Only the prose is written here, keyed by the group names the product owns.
- */
-const GROUP_NOTES: Record<string, string> = {
-  "Customer operations":
-    "A lead becomes a customer, then a booking, then a signed agreement.",
-  Operations: "Where an agreement becomes a vehicle out on hire, and comes back.",
-  System: "The rules that watch the work, the messages it sends, the figures it derives.",
-};
-
-const GROUPS = MODULE_GROUPS.filter((group) => group !== "primary").map((group) => ({
-  id: group,
-  title: group,
-  modules: routesInGroup(group).map((route) => route.label),
-  note: GROUP_NOTES[group] ?? "",
-}));
-
-/* The domains the system covers, as a strip under the lead. Seven, and in the
-   order the work actually happens. */
-const CAPABILITIES = [
-  "CRM",
-  "RESERVATIONS",
-  "CONTRACTS",
-  "FLEET",
-  "MAINTENANCE",
-  "PAYMENTS",
-  "AUTOMATION",
-];
-
-/* Descriptive, and each one a property a visitor can observe: reload the page
-   and the data is still there, switch role and the surface changes, resize and
-   it holds. No badge, no score, no assertion counts. */
-const NOTES = [
-  "Deterministic local runtime",
-  "Role-aware workflows",
-  "Persistent synthetic state",
-  "Responsive application",
-];
 
 export default function FeaturedDemoSection() {
-  /* The route comes from the registry rather than a literal, so a demo that is
-     not verified cannot be linked from here by accident. */
+  /* The route comes from the registry rather than a literal, so a demo the
+     registry does not mark verified cannot be linked from here by editing a
+     href. */
   const demo = findDemo("operations");
   const href = demo?.route ?? "/demos/operations";
 
-  /* The eyebrow numbers this section's place on the page, so it has to know
-     whether anything is in front of it. Certifications sits between the Lab and
-     this section and renders only when a real credential exists; today it does
-     not, so this is 05. When the first credential arrives, Certifications takes
-     05 and this becomes 06 on its own.
-
-     The alternative was a hard-coded 05 that silently becomes wrong the day the
-     section above it appears, giving the page two sections numbered 05. A
-     number that describes a position should be derived from the position. */
+  /* Certifications sits between the Lab and this section and renders only when
+     a real credential exists. Today it does not, so this is 05; when the first
+     one arrives this becomes 06 on its own rather than leaving the page with
+     two sections numbered the same. */
   const index = certificationsArePublishable() ? "06" : "05";
 
   return (
     <section id="work" className="featured" aria-labelledby="featured-title">
       <div className="featured__intro">
-        <div className="featured__intro-lead">
-          <p className="eyebrow">{index} / FEATURED ENGINEERING BUILD</p>
-          <h2 id="featured-title" className="featured__title">
-            One operational system. Eleven connected modules.
-          </h2>
-        </div>
+        <p className="eyebrow">{index} / FEATURED ENGINEERING BUILD</p>
+        <h2 id="featured-title" className="featured__title">
+          Rental Operations Platform
+        </h2>
 
-        <div className="featured__intro-support">
-          <p className="featured__lead">
-            A complete rental operations workflow: customer acquisition,
-            reservations, contracts, fleet state, maintenance, payments,
-            automation, messaging and reporting, connected through one
-            deterministic system that runs entirely in the browser.
-          </p>
-          {/* A list rather than one string. Written as a string it wrapped
-              with the separator leading the second line, and a line that opens
-              with "/ AUTOMATION" reads as a broken path. Each item now carries
-              its own trailing separator, so a wrap can only ever happen after
-              one. */}
-          <ul className="featured__capabilities">
-            {CAPABILITIES.map((capability) => (
-              <li className="featured__capability" key={capability}>
-                {capability}
-              </li>
-            ))}
-          </ul>
-        </div>
+        <p className="featured__disclosure">
+          <span className="featured__disclosure-primary">{DEMO_DISCLOSURE_PRIMARY}</span>
+          <span className="featured__disclosure-secondary">{DEMO_DISCLOSURE_SECONDARY}</span>
+        </p>
+
+        <p className="featured__lead">
+          {SCREEN_COUNT} connected modules, running entirely in the browser.
+          Every screen below is the application itself.
+        </p>
       </div>
 
-      {/* The product frame, wrapped in the scroll sequence.
-
-          `FeaturedSequence` is the only client boundary this section has, and
-          it wraps rather than replaces: the frame, the masthead, the disclosure
-          and the preview below are all server-rendered and pass through it
-          untouched. With JavaScript off or reduced motion on it renders its
-          children and nothing else, so what follows is the section exactly as
-          it was before any motion existed. */}
-      <FeaturedSequence>
-      <div className="featured__product">
-        <header className="featured__masthead">
-          <div className="featured__identity">
-            <h3 className="featured__product-name">Rental Operations Platform</h3>
-            <p className="featured__product-sub">
-              Operations Console <span aria-hidden="true">·</span> rental fleet management
-            </p>
-          </div>
-
-          <p className="featured__disclosure">
-            <span className="featured__disclosure-primary">{DEMO_DISCLOSURE_PRIMARY}</span>
-            <span className="featured__disclosure-secondary">{DEMO_DISCLOSURE_SECONDARY}</span>
-          </p>
-        </header>
-
-        <FeaturedPreview />
-      </div>
-      </FeaturedSequence>
-
-      <div className="featured__breadth">
-        <div className="featured__entry">
-          <p className="featured__entry-label">Overview</p>
-          <p className="featured__entry-note">
-            The system entry point: live figures for every group below, each one
-            counted from the records rather than stored.
-          </p>
-        </div>
-
-        <ul className="featured__groups">
-          {GROUPS.map((group) => (
-            <li className="featured__group" key={group.id}>
-              <p className="featured__group-title">{group.title}</p>
-              <ul className="featured__module-list">
-                {group.modules.map((module) => (
-                  <li className="featured__module" key={module}>
-                    {module}
-                  </li>
-                ))}
-              </ul>
-              <p className="featured__group-note">{group.note}</p>
-            </li>
-          ))}
-        </ul>
-      </div>
+      <OperationsScreenSequence />
 
       <div className="featured__close">
-        <dl className="featured__facts">
-          {FACTS.map((fact) => (
-            <div className="featured__fact" key={fact.label}>
-              <dt className="featured__fact-label">{fact.label}</dt>
-              <dd className="featured__fact-value">{fact.value}</dd>
-            </div>
-          ))}
-        </dl>
-
-        <div className="featured__action">
-          <ul className="featured__notes">
-            {NOTES.map((note) => (
-              <li className="featured__note" key={note}>
-                {note}
-              </li>
-            ))}
-          </ul>
-
-          <Link className="featured__cta" href={href}>
-            Open the interactive demo
-            <span className="featured__cta-arrow" aria-hidden="true">
-              &rarr;
-            </span>
-          </Link>
-        </div>
+        {/* "demonstration", not "system". The disclosure above the frame
+            already says what this is, and the action a visitor clicks should
+            not be the one place on the page that sounds like a live product. */}
+        <Link className="featured__cta" href={href}>
+          Explore the demonstration
+          <span className="featured__cta-arrow" aria-hidden="true">
+            &rarr;
+          </span>
+        </Link>
       </div>
     </section>
   );

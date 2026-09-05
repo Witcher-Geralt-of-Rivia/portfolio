@@ -1,0 +1,218 @@
+/* =====================================================================
+   THE SCREEN SEQUENCE
+
+   Eleven captures of the real Operations application, one at a time,
+   advanced by scroll.
+
+   Every screen is in the DOM at once and cross-transitioned rather than
+   swapped. Mounting one at a time would begin each transition with an
+   image decode, which is a blank frame at exactly the moment the visitor
+   is looking for a change.
+   ===================================================================== */
+
+.screens {
+  position: relative;
+}
+
+.screens--enhanced {
+  height: var(--screens-range-h, auto);
+}
+
+.screens--enhanced .screens__stage {
+  position: sticky;
+  top: var(--nav-scroll-margin);
+}
+
+/* --- The frame ---------------------------------------------------------- */
+
+.screens__frame {
+  /* The spectral edge comes from the shared `.spectral` wrapper; this only
+     sets the width the frame occupies and the depth it sits at. */
+  width: 100%;
+  max-width: 1120px;
+  margin-inline: auto;
+  box-shadow: var(--shadow-card-lg);
+}
+
+.screens__inner {
+  display: flex;
+  flex-direction: column;
+}
+
+/* A thin bar naming the module rather than imitation browser controls,
+   which would be clutter around the one thing worth looking at. */
+.screens__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px clamp(14px, 1.6vw, 20px);
+  border-bottom: 1px solid var(--line-subtle);
+  background: rgba(250, 250, 253, 0.92);
+}
+
+.screens__product,
+.screens__index {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--type-technical-micro);
+  line-height: var(--leading-technical);
+  letter-spacing: var(--tracking-technical-micro);
+}
+
+.screens__module {
+  color: var(--text-primary);
+}
+
+.screens__index-sep {
+  color: var(--text-muted);
+}
+
+/* --- The screens -------------------------------------------------------- */
+
+/*
+  A fixed aspect box holding all eleven, stacked. The ratio is the capture
+  viewport's own, so nothing is letterboxed or cropped and the application
+  is seen at the proportions it was designed at.
+*/
+.screens__list {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  aspect-ratio: 1440 / 900;
+}
+
+.screens__item {
+  position: absolute;
+  inset: 0;
+}
+
+/*
+  Without the sequence running, the first screen is the one on show and the
+  rest are behind it. So a visitor whose JavaScript failed sees the real
+  Overview page rather than eleven stacked images or an empty frame.
+*/
+.screens__item + .screens__item {
+  visibility: hidden;
+}
+
+/*
+  A REVEAL, not a crossfade.
+
+  Eleven screenshots of one application share a layout, a chrome and a colour,
+  so two of them at half opacity do not read as one changing into another: they
+  read as a printing fault. The first build of this crossfaded, and every
+  transition was an unreadable double exposure of two dashboards.
+
+  A screen is therefore painted or it is not. The arriving one sits above the
+  one it replaces and is uncovered by a moving clip edge, so no frame ever
+  contains a semi-transparent screen and the application stays legible at every
+  scroll position rather than only at the settled ones.
+*/
+.screens--enhanced .screens__item {
+  visibility: visible;
+  opacity: var(--screen-show, 0);
+  /* The arriving screen is above the one it covers. */
+  z-index: calc(1 + var(--screen-layer, 0));
+  /* Uncovered from the left. `--screen-clip` runs 1 to 0 as it arrives. */
+  clip-path: inset(0 0 0 calc(var(--screen-clip, 0) * 100%));
+}
+
+/*
+  Alternating direction, by position rather than by a written variable.
+
+  Ten identical left-to-right wipes in a row become a single repeated gesture
+  that stops being noticed around the fourth one. Odd-numbered screens are
+  uncovered downward instead, so the change stays a change all the way to
+  Reports.
+*/
+.screens--enhanced .screens__item:nth-child(even) {
+  clip-path: inset(calc(var(--screen-clip, 0) * 100%) 0 0 0);
+}
+
+/*
+  The moving edge itself, so the reveal is a visible event rather than a
+  silent replacement. A thin bright line riding the clip boundary, drawn on
+  the arriving screen only and only while it is arriving.
+*/
+.screens--enhanced .screens__item::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: calc(var(--screen-clip, 0) * (1 - var(--screen-clip, 0)) * 4);
+  background: linear-gradient(
+    90deg,
+    transparent calc(var(--screen-clip, 0) * 100% - 3px),
+    rgba(178, 164, 235, 0.9) calc(var(--screen-clip, 0) * 100%),
+    transparent calc(var(--screen-clip, 0) * 100% + 3px)
+  );
+}
+
+.screens--enhanced .screens__item:nth-child(even)::after {
+  background: linear-gradient(
+    180deg,
+    transparent calc(var(--screen-clip, 0) * 100% - 3px),
+    rgba(178, 164, 235, 0.9) calc(var(--screen-clip, 0) * 100%),
+    transparent calc(var(--screen-clip, 0) * 100% + 3px)
+  );
+}
+
+.screens__shot {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+}
+
+/* The real mobile capture, used at narrow widths rather than the desktop
+   image shrunk until its tables are unreadable. */
+.screens__shot--mobile {
+  display: none;
+}
+
+@media (max-width: 759px) {
+  .screens__list {
+    aspect-ratio: 390 / 844;
+  }
+
+  .screens__shot--desktop {
+    display: none;
+  }
+
+  .screens__shot--mobile {
+    display: block;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* No sticky cycling. The frame shows the Overview screen and the section
+     scrolls normally; the other ten stay reachable in the demo itself,
+     which the action below the frame still opens. */
+  .screens--enhanced {
+    height: auto;
+  }
+
+  .screens--enhanced .screens__stage {
+    position: static;
+  }
+
+  .screens--enhanced .screens__item {
+    opacity: 0;
+    transform: none;
+    clip-path: none;
+    visibility: hidden;
+  }
+
+  .screens--enhanced .screens__item::after {
+    display: none;
+  }
+
+  .screens--enhanced .screens__item:first-child {
+    opacity: 1;
+    visibility: visible;
+  }
+}

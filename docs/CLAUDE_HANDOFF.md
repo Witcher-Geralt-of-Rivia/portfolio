@@ -137,16 +137,16 @@ src/components/
   layout/SiteShell.tsx            background + navigation + <main> content frame
   visual/{AuroraBackground,PrismLight,GrainOverlay}.tsx   background layers A-D
   navigation/SiteNavigation.tsx   CLIENT - navigation state and observers
-  navigation/{DesktopNavigation,MobileNavigation,SystemMarkImage}.tsx
-  navigation/nav-items.ts         single source for the five destinations
-  hero/{Hero,IntelligenceConstellation,CapabilityRail}.tsx
-  hero/constellation-geometry.ts  node/link maths, evaluated at build time
+  navigation/{DesktopNavigation,MobileNavigation,SystemMarkImage,nav-items}
+  hero/{Hero,IntelligenceConstellation,CapabilityRail}.tsx, and
+       constellation-geometry.ts: node/link maths, evaluated at build time
   learning/  07 - LearningLab; knowledge map, learner and tutor panels
-  systems/   05 - ArchitectureLab; canvas, trace, principles; four modes
+  systems/   05 - ArchitectureLab; canvas, trace, principles, four modes
   products/  06 - ProductStudio; web/mobile/assist surfaces, event rail
   lab/       08 - LabWorkspace; flow, experiment views, observation, controls
-  work/      FeaturedDemoSection + FeaturedPreview own #work; the 09
-             case-study renderers are here too, built and still not wired in
+  work/      FeaturedDemoSection + OperationsScreenSequence: 11 real
+             screenshots of Demo 01 (D-106); case-study renderers, unwired
+  scene/     SceneLayer: each section a scene, one shared raf (D-107)
   certifications/  built, mounted, renders nothing: no credential exists
   demos/     09A - DemoShell, DemoDisclosure, DemoResetControl
 src/demo-runtime/   09A - shared demo platform; see docs/DEMO_PLATFORM.md

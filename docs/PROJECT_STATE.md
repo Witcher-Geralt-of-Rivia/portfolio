@@ -21,13 +21,13 @@ than case studies. 09A froze the shared runtime; 09B froze Demo 01's contract;
 and `currentStage` stays 8. See `docs/DEMO_OPERATIONS_IMPLEMENTATION.md` and
 `docs/NEXT_STAGE.md`.
 
-`#work` is `FeaturedDemoSection`, publishing Demo 01 as a disclosed engineering
-demo: deliberately a different publication system from the case-study section,
-which is still not imported and still behind `MINIMUM_PUBLIC_CASES` (D-098,
-D-099). A third gate is also unmet: `CertificationsSection` is built and mounted
-between the Lab and `#work` but renders null, because no certification has been
-issued and `src/content/certifications.ts` is `[]`. Adding one verified record
-activates it with no wiring (D-101, D-102, D-103).
+`#work` is `FeaturedDemoSection`, publishing Demo 01 through eleven real
+screenshots of it (D-106), not the case-study system, which stays unimported
+behind `MINIMUM_PUBLIC_CASES` (D-098, D-099). A third gate is unmet:
+`CertificationsSection` is mounted between the Lab and `#work` and renders null
+because `src/content/certifications.ts` is `[]`; one record activates it with no
+wiring (D-101 to D-103). Every major section is a scene: its own atmosphere,
+entry and highlight colour, on one shared frame (D-107).
 
 ## Toolchain
 
@@ -63,11 +63,14 @@ Server-first: the hero, the background system and both navigation presentations
 are server components. 92 `"use client"` modules exist, most in the Operations
 interface; `project-state.json` holds the list.
 
-No `requestAnimationFrame` LOOP runs anywhere: four sections schedule one
-self-cancelling frame per scroll burst through one shared controller,
-`src/lib/use-sticky-progress.ts`, nothing is scheduled at rest, and everything
-tears down on unmount (D-102, D-104). No pointer tracking. Scroll motion is an
-enhancement: nothing waits at opacity 0, and an oversized stage is not pinned.
+ONE `requestAnimationFrame` serves the page, in `src/lib/motion-scheduler.ts`:
+it reads scroll and pointer once a frame and dispatches to subscribers, which
+must not read layout. A scene subscribes only while near the viewport and the
+loop stops when none is, so an idle page schedules nothing (D-107). Sticky
+sections keep a self-cancelling frame per scroll burst through
+`use-sticky-progress.ts` (D-102, D-104); pointer tracking is smoothed and
+ignores touch. Scroll motion is an enhancement: nothing waits at opacity 0 and
+an oversized stage is not pinned.
 
 Timers exist only inside the three user-triggered sequences (the Stage 06 flow,
 the Stage 07 adaptation, the Stage 08 experiments), each torn down by effect
@@ -111,36 +114,39 @@ src/
      shell, one "use client" lab holding the state, one "use client" ARIA
      tablist holding none, presentational renderers, and a data module)
     systems/ products/ learning/ lab/   Stages 05-08, each the shape above
-    work/       FeaturedDemoSection owns #work, publishing Demo 01 as a
-                disclosed demo; FeaturedPreview composes its picture. Also
-                the case-study renderers, built and still not wired in (D-098)
-    certifications/  shell + gate, sticky deck, card, dialog modal, and
-                deck-geometry.ts: the choreography's maths, pure (D-102)
+    work/       FeaturedDemoSection owns #work; OperationsScreenSequence walks
+                11 real screenshots, operations-screens.ts holds the list and
+                the progression maths, pure (D-106); case-study renderers,
+                unwired (D-098).   scene/SceneLayer.tsx   scenes (D-107)
+    certifications/  shell + gate, deck, card, modal, deck-geometry.ts
+                (the choreography's maths, pure) (D-102)
     layout/SiteFooter.tsx   the page's ending; no contact route
     demos/      Stage 09A - DemoShell, DemoDisclosure, DemoResetControl, DemoSelect
   content/{case-studies,certifications}.ts   typed models + gates; empty
-  lib/  scroll-lock, scroll-geometry, use-sticky-progress (one controller)
+  lib/  scroll-lock, scroll-geometry, use-sticky-progress, motion-scheduler
+        (the page's one raf), scenes.ts (the scene table)
   demos/operations/         Stage 09C1 domain (28 modules) + ui/ (shell,
-                sidebar, top bar, Overview panels, notifications, icons,
-                module routes, and one directory per module). All 11 built.
+                sidebar, top bar, Overview panels, notifications, icons, module
+                routes, one directory per module). All 11 built.
   demo-runtime/             Stage 09A platform, 18 modules; see DEMO_PLATFORM.md
   styles/
     tokens.css            all design tokens - the source of truth for values
     typography.css, motion.css, layers.css, surfaces.css   foundations
     navigation, hero, systems, products, learning, lab, featured,
-    certifications, motion-sections.   work.css written but never imported;
-    demo-shell.css and operations.css are demo only
+    certifications, work-screens, section-motion, scenes.   work.css is
+    unimported; demo-shell.css and operations.css are demo only
 
 public/
   textures/micro-grain.svg    locally generated SVG turbulence tile
   brand/logo-*.png            approved portfolio mark, derived from logo.png
+  operations/{desktop,mobile}/  22 real Demo 01 screenshots (D-106)
 qa/                            Playwright QA harness (see QA_BASELINE.md)
 docs/                          canonical project memory (this directory)
 ```
 
 `globals.css` import order: tokens, typography, motion, layers, surfaces, then
-navigation, hero, systems, products, learning, lab, certifications, featured
-and motion-sections.
+navigation, hero, systems, products, learning, lab, certifications, featured,
+work-screens, section-motion and scenes.
 
 ## Stage 01 - Background (FROZEN)
 
@@ -378,8 +384,10 @@ delay", "simulated step 6 of 6") are sequence positions, not latency.
 
 ## Assets
 
-`public/brand/*.png`, derived from the approved `logo.png` (never served), plus
-`public/textures/micro-grain.svg`. No stock imagery or icon package.
+`public/brand/*.png` (derived from the approved `logo.png`, never served),
+`public/textures/micro-grain.svg`, and `public/operations/**`: 22 deterministic
+screenshots of Demo 01 from `qa/capture-operations.mjs`, never retouched
+(D-106). No stock imagery, icon package or animation library.
 
 ## Deployment
 

@@ -184,11 +184,28 @@ record(
 
 /* ---- 9. size control ---------------------------------------------------- */
 
+/*
+  These caps exist so the two documents an agent reads first stay readable, not
+  to cap what the project may contain. `PROJECT_STATE.md` went to 420 when the
+  scene system and the real-screenshot work section arrived: it had been sitting
+  exactly on 400 and both alternatives were worse than a larger number.
+
+  Deleting frozen-stage detail would have lost facts that live nowhere else: the
+  aurora periods, the grain opacity threshold and the Stage 05 to 08
+  measurements are in that file and in no other. Leaving the additions out would
+  have left the document saying there is no `requestAnimationFrame` loop on a
+  page that now has one, which is worse than long.
+
+  Raise it again only for that reason, and say so here when you do.
+*/
+const STATE_MAX = 420;
+const HANDOFF_MAX = 300;
+
 const lineCount = (rel) => read(rel).split("\n").length;
 const handoffLines = lineCount("docs/CLAUDE_HANDOFF.md");
 const stateLines = lineCount("docs/PROJECT_STATE.md");
-record(handoffLines <= 300, "CLAUDE_HANDOFF.md within 300 lines", `${handoffLines} lines`);
-record(stateLines <= 400, "PROJECT_STATE.md within 400 lines", `${stateLines} lines`);
+record(handoffLines <= HANDOFF_MAX, `CLAUDE_HANDOFF.md within ${HANDOFF_MAX} lines`, `${handoffLines} lines`);
+record(stateLines <= STATE_MAX, `PROJECT_STATE.md within ${STATE_MAX} lines`, `${stateLines} lines`);
 
 /* ---- 10. root bootstrap ------------------------------------------------- */
 

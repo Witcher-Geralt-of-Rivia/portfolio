@@ -40,7 +40,14 @@ export default function ProductEngineeringSection() {
           900px it does nothing at all. */}
       <ProductStack>
         <div className="products__studio">
-          <ProductStudio />
+          {/* The spectral edge, on the studio because it is this section's
+              focal surface. The studio paints its own milk surface, so the
+              wrapper's inner is bare here and only carries the clip. */}
+          <div className="spectral spectral--lg">
+            <div className="spectral__inner spectral__inner--bare">
+              <ProductStudio />
+            </div>
+          </div>
           <p className="products__micro">LOCAL / DETERMINISTIC</p>
         </div>
       </ProductStack>

@@ -43,6 +43,30 @@
   --aurora-lemon-0: rgba(248, 239, 201, 0);
 
   /* -------------------------------------------------------------
+     2b. SCENE FIELD PALETTE
+
+     The aurora palette above is deliberately low saturation: it paints
+     the page's permanent background and must never compete with text,
+     and its own comment says not to intensify it. These are a separate,
+     stronger family for the scene fields introduced with the high-impact
+     motion direction, which was an explicit instruction to stop being
+     subtle.
+
+     Same hues, more present. Still bright and still pastel: every one is
+     a light-mode colour and none of them takes the page anywhere near a
+     dark treatment. They are used only in oversized radial masses behind
+     content, never under body copy at full strength, so the contrast
+     rules the aurora palette protects are unaffected.
+     ------------------------------------------------------------- */
+  --scene-violet: rgba(163, 132, 250, 0.62);
+  --scene-blue: rgba(96, 158, 250, 0.58);
+  --scene-cyan: rgba(56, 199, 220, 0.5);
+  --scene-mint: rgba(94, 222, 178, 0.5);
+  --scene-rose: rgba(244, 132, 187, 0.5);
+  --scene-peach: rgba(251, 158, 104, 0.46);
+  --scene-lemon: rgba(250, 214, 108, 0.48);
+
+  /* -------------------------------------------------------------
      3. TEXT
      Never solid black.
      ------------------------------------------------------------- */

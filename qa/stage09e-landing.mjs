@@ -130,9 +130,9 @@ section("FEATURED WORK - THE FLAGSHIP");
   check("it names the product", text.includes("Rental Operations Platform"), "");
   check("and the in-app console", text.includes("Operations Console"), "");
   check(
-    "the headline states the system",
+    "the headline names the product",
     (await page.$eval("#featured-title", (e) => e.textContent.trim())) ===
-      "One operational system. Eleven connected modules.",
+      "Rental Operations Platform",
     await page.$eval("#featured-title", (e) => e.textContent.trim())
   );
 
@@ -162,22 +162,32 @@ section("FEATURED WORK - THE FLAGSHIP");
   check("in the same tab", cta.target === null, String(cta.target));
   check("and says so plainly", /demo/i.test(cta.label), cta.label);
 
-  /* Facts, and each one true of the frozen demo. */
-  const facts = await page.$$eval(".featured__fact", (n) =>
-    n.map((e) => e.textContent.replace(/\s+/g, " ").trim())
-  );
-  check("four facts, no metrics grid", facts.length === 4, facts.join(" | "));
-  check("eleven modules", facts.some((f) => f.includes("11") && /module/.test(f)), facts.join(" | "));
-  check("thirteen entities", facts.some((f) => f.includes("13") && /entit/.test(f)), "");
-  check("four roles", facts.some((f) => f.includes("4") && /role/.test(f)), "");
-  check("five automation rules", facts.some((f) => f.includes("5") && /automation/.test(f)), "");
+  /*
+    The bands beneath the frame are GONE, and staying gone is the assertion.
 
-  /* All eleven module names appear, so breadth is shown rather than claimed. */
-  const modules = await page.$$eval(".featured__module", (n) => n.map((e) => e.textContent.trim()));
-  const expected = ["Leads", "Customers", "Reservations", "Inbox", "Contracts", "Fleet", "Maintenance", "Payments", "Automations", "Reports"];
-  check("ten modules are named in the groups", modules.length === 10, modules.join(","));
-  check("and they are the right ten", expected.every((m) => modules.includes(m)), modules.join(","));
-  check("with Overview as the entry point", text.includes("Overview"), "");
+    The breadth list, the four counted facts and the descriptive notes all
+    described what eleven real screenshots now show. A visitor who has just
+    watched eleven pages of an application does not need to be told it has
+    eleven modules, and a long explanatory band after the visual climax is an
+    anticlimax with extra reading.
+  */
+  const removed = await page.evaluate(() => ({
+    facts: document.querySelectorAll(".featured__fact").length,
+    modules: document.querySelectorAll(".featured__module").length,
+    notes: document.querySelectorAll(".featured__note").length,
+    breadth: document.querySelectorAll(".featured__breadth").length,
+  }));
+  check("no counted-facts band", removed.facts === 0, String(removed.facts));
+  check("no breadth list", removed.modules + removed.breadth === 0,
+    `${removed.modules}/${removed.breadth}`);
+  check("no descriptive notes", removed.notes === 0, String(removed.notes));
+
+  /* What replaced them is the product's own eleven, checked in detail by
+     `qa/stage09h-scenes.mjs`. Here only that the count is right. */
+  const shots = await page.$$eval(".screens__item", (n) => n.length);
+  check("eleven real screens instead", shots === 11, String(shots));
+
+  check("and the sequence opens on Overview", text.includes("Overview"), "");
 
   /* Every list in the section is semantic markup used for grouping, never for
      bullets. `display: flex` blockifies children but `list-item` survives
@@ -211,9 +221,15 @@ section("FEATURED WORK - THE FLAGSHIP");
     markers.map((m) => `${m.cls}:${m.type}`).join(" | ")
   );
 
-  /* The preview is a composition, not an embedded application. */
-  check("the preview is present", (await page.$(".fpv")) !== null);
-  check("it is labelled for assistive technology", (await page.$eval(".fpv", (e) => e.getAttribute("aria-label") ?? "")).length > 30);
+  /* The section shows photographs of the application, not a drawing of it
+     and not the application itself embedded. The screens are checked in
+     detail by `qa/stage09h-scenes.mjs`; what matters here is that the frame
+     is present and that nothing live has been smuggled onto the page. */
+  check("the screen frame is present", (await page.$(".screens__frame")) !== null);
+  check(
+    "every screen is described",
+    (await page.$$eval(".screens__shot", (n) => n.every((i) => (i.getAttribute("alt") ?? "").length > 30)))
+  );
   check("there is no iframe anywhere on the page", (await page.$$eval("iframe", (n) => n.length)) === 0);
   check("and no canvas", (await page.$$eval("canvas", (n) => n.length)) === 0);
 

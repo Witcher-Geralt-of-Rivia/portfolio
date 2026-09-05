@@ -2702,3 +2702,135 @@ suites. It is the same trap each time.
 The product studio exceeds the usable viewport at every width, which is why it
 is not pinned. The featured frame fits at every width above a phone, which is
 why it is.
+
+---
+
+## Scene motion and real screenshots
+
+PASS. Two new harnesses, one of which produces assets rather than checks:
+
+```
+qa/capture-operations.mjs               22 images, 2.0MB
+qa/stage09h-scenes.mjs                  71 checks
+```
+
+### The capture is a QA script because it has to be reproducible
+
+`capture-operations.mjs` photographs all eleven Operations modules at 1440x900
+and at 390x844 at 2x. It lives in `qa/` rather than in a build step because its
+correctness is a QA property: run it twice and it must produce the same images.
+
+Two things make that true.
+
+```
+a fresh browser context per capture
+  the application persists to IndexedDB, so one context carries state forward.
+  Entering Payments runs overdue reconciliation (D-095), which would then be
+  visible in every image taken after it. Eleven contexts, eleven canonical
+  seed states.
+
+waiting on the top bar's title, not on network idle
+  network idle is a guess about a client-rendered application. The title is
+  the application saying which module it has finished rendering.
+```
+
+Nothing is composed, cropped, recoloured, relabelled or repainted, and no rows
+are added. `stage09h` checks every one of the twenty-two files exists and is
+larger than 8KB, because a near-empty PNG is a capture that failed silently and
+renders a broken frame rather than nothing.
+
+### Half of stage09h never opens a browser
+
+The screen progression is a pure function in
+`src/components/work/operations-screens.ts`, so it is proved at two thousand
+scroll positions in milliseconds:
+
+```
+progress 1 resolves the LAST screen              current = 10 of 10
+the last screen is fully present at the end      1.0000
+every one of the eleven is reached               11/11
+presence always sums to one                      worst error 0.00e+0
+the sequence never runs backwards                0 regressions
+```
+
+The first two are the defect this exists for. With eleven screens there are ten
+transitions, and `floor(p * 10)` lands on 10 at `p = 1`, which is a transition
+that does not exist, so the eleventh screen never becomes active. That has
+happened twice in this project.
+
+The scene table is checked the same way, because its failure mode is not a bug:
+
+```
+no two neighbours enter the same way
+no scene starts invisible, which would make it a fade
+every entering scene actually moves rather than only fading
+travel is 8-30vh vertically, 8-25vw laterally
+the settle overshoot is deliberate (0.08), not elastic
+the spectral edge is on two focal surfaces, not everywhere
+```
+
+### What the browser half proves
+
+```
+one raf for the page, and at most 3 of 6 scenes live at any scroll position
+the H1 is never moved or scaled by any scene
+no horizontal overflow at any scroll position          worst -15px
+the sequence pins, and reaches Reports                 11/11 labels seen
+exactly one screen is exposed to assistive technology
+the removed preview, sequence and bands are all gone   0/0/0
+no email, no telephone number, no solicitation
+mobile 390x844: no overflow, sequence stands down, real mobile capture shown
+mobile: the pointer field is not driven by touch       --pointer-x = 0.5000
+reduced motion: nothing enhanced, transformed, faded, pinned or turning
+```
+
+### The H1 assertion that was wrong rather than the code
+
+`transform === "none"` was asserted and reported a failure. The H1 carries the
+frozen Stage 01 hero entrance, which fills forwards and therefore computes to
+`matrix(1, 0, 0, 1, 0, 0)` rather than to the keyword. The assertion is on the
+matrix values now: at rest, not untouched.
+
+### Frame starvation, for the fourth time
+
+The scroll walks force frames through `settle()`. The first version of the
+scroll path stepped 700px at a time with three forced frames each, which on a
+document several viewports tall is nearly two hundred screenshots and turns a
+check into a coffee break. It samples the document at twenty-four points
+instead, which finds nothing less and finishes.
+
+### The visual pass, and why it is a separate script
+
+`qa/stage09h-shots.mjs` writes the section handoffs, all eleven work screens,
+the pointer field at three positions, mobile and reduced motion. Its PNGs are
+not committed: they are a judgement aid rather than a baseline, and the script
+reproduces them in a couple of minutes.
+
+It exists because the suites alone were not enough, and the failure is worth
+recording exactly. The first build of the work sequence CROSSFADED between
+screens. The arithmetic was correct, the two screens in a transition summed to
+exactly 1, every check passed, and the page showed an unreadable double exposure
+of two near-identical dashboards for more than half of every segment. Eleven
+screenshots of one application share a layout, a chrome and a colour, so half of
+one over half of another is mush rather than a transition.
+
+The transition is now a reveal: a screen is painted or it is not, and the
+arriving one is uncovered over the one it replaces by a moving clip edge. The
+assertion that would have caught it is in `stage09h`: `a screen is painted or it
+is not, never half`, at two thousand scroll positions.
+
+The same pass found the Lab to Work boundary was white meeting white. The Lab
+scene had no colour field, which made the page's climax its weakest crossing. It
+carries a warm one now, so the handover into Work's violet and cyan is a
+full-viewport change of temperature.
+
+### A regression no tool would have caught
+
+Deleting `src/styles/motion-sections.css` removed the featured sequence's dead
+rules and, with them, the live rules for the Systems execution trace and the
+Product surface emphasis. Both components still emitted their class names, so
+both effects went silently invisible: no error, no warning, no type failure, no
+lint failure, and a page that still rendered.
+
+`grep` for the class names the components emit is the check. Not "is this stage
+over" but "does anything still render these class names" (D-108).

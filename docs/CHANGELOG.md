@@ -2266,3 +2266,99 @@ a QA check reported ten controls as invisible and reachable
   element from the tab order outright. The check tested zero size; it now
   tests laid out but unseeable, which is the pair that actually matters.
 ```
+
+---
+
+## Stage 09H - High-impact visual motion, and real screenshots
+
+Status: **Current**
+
+### Summary
+Two replacements in one stage. The constructed featured preview was deleted and
+replaced with eleven real screenshots of the running application, captured
+deterministically from its own routes. The restrained per-section motion was
+replaced with a scene model: each major section owns an atmosphere, a way in, a
+highlight colour and, in three cases, a colour field that answers the pointer,
+all driven from one shared animation frame.
+
+### Files
+`src/lib/scenes.ts`, `src/lib/motion-scheduler.ts`,
+`src/components/scene/SceneLayer.tsx`, `src/styles/scenes.css`,
+`src/styles/section-motion.css`, `src/styles/work-screens.css`,
+`src/components/work/{OperationsScreenSequence.tsx,operations-screens.ts}`,
+`qa/capture-operations.mjs`, `qa/stage09h-scenes.mjs`,
+`public/operations/**` (22 PNG, 2.0MB)
+
+Removed: `src/components/work/{FeaturedPreview.tsx,FeaturedSequence.tsx,
+featured-sequence.ts}`, `src/styles/motion-sections.css`
+
+### The screenshots
+
+`qa/capture-operations.mjs` photographs all eleven modules at 1440x900 and at
+390x844 at 2x. Each capture gets a fresh browser context, because the
+application persists to IndexedDB and a shared context would carry state
+forward: entering Payments runs overdue reconciliation, which would then appear
+in every image taken afterwards. Nothing is composed, cropped, recoloured,
+relabelled or repainted (D-106).
+
+The section beneath the frame was cut back to introduction, title, disclosure,
+one line, the frame and one action. The breadth band, counted facts and
+descriptive notes described what the screenshots now show.
+
+### The scenes
+
+Six scenes, no two neighbours entering the same way: the hero has atmosphere
+only, Systems rises, Product Engineering sweeps in laterally, AI Learning blooms
+from a clipped field, the Engineering Lab settles with a small deliberate
+overshoot, and Featured Work expands. Two focal surfaces carry a spectral edge
+(D-107).
+
+All of it runs on one `requestAnimationFrame` in `src/lib/motion-scheduler.ts`,
+which reads scroll and pointer once per frame and dispatches. A scene subscribes
+only while an IntersectionObserver says it is near, and the loop stops when
+nothing is subscribed.
+
+### Notable during implementation
+
+```
+the entry was measured against the section, not the viewport
+  which is correct for a section shorter than the screen and wrong for the work
+  section, which reserves several viewports of scroll. The entry's end landed
+  thousands of pixels down, so the frame was still arriving while the visitor
+  was already scrolling the screens inside it. It is measured against the
+  viewport now.
+
+the fields widened the document by 297px
+  they deliberately bleed past their section. `overflow: hidden` would contain
+  it and break the page, because it creates a scroll container and sticky stops
+  pinning inside one. `overflow-x: clip` contains the paint without one.
+
+the fields were trapped in the 1200px content frame
+  and drew a hard vertical seam down both edges of the page. The scenes moved
+  outside the frame and reclaim the gutter; each puts the frame back around its
+  own content.
+
+deleting motion-sections.css took two live behaviours with it
+  the file was named for a stage rather than for a behaviour, so it had
+  accumulated the Systems execution trace and the Product surface emphasis
+  alongside the dead featured-sequence rules. Both components still emitted
+  their class names, so both effects went silently invisible: no error, no
+  warning, no type or lint failure. Restored as `section-motion.css` (D-108).
+
+Playwright wanted a filesystem path
+  a `URL` object passed as `path` fails with `lastIndexOf is not a function`.
+
+the colour was far too subtle at first
+  the aurora palette is deliberately low saturation and its own comment says not
+  to intensify it. A separate `--scene-*` family was added instead, and the
+  aurora palette was left untouched.
+```
+
+### QA
+`qa/stage09h-scenes.mjs`: the eleven screens against the product's own
+`MODULE_ROUTES`, all 22 files present and non-empty, the progression proved at
+two thousand scroll positions (last screen resolves, every screen reached,
+presence always sums to one, never runs backwards), the scene table (no two
+neighbours alike, nothing starts invisible, travel in range), one frame loop,
+the H1 unmoved, no horizontal overflow at any scroll position, mobile at 390x844
+with no faked pointer, and reduced motion leaving the page composed and still.

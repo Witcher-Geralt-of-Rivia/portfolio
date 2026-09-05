@@ -1,10 +1,18 @@
 /* =====================================================================
-   MILKY INTELLIGENCE - 05 / FEATURED ENGINEERING BUILD
+   05 / FEATURED ENGINEERING BUILD
 
-   The page's culmination. It follows four sections that each demonstrate a
-   capability, and its job is to show one finished system rather than a
-   fifth demonstration, so it is built heavier than they are: a framed
-   product surface, a breadth band, and a closing action.
+   The page's climax, and now a photograph of the product rather than a
+   drawing of it. The section is a short introduction, a framed sequence of
+   eleven real application screens, and one action.
+
+   Everything that used to sit below the frame is gone: the breadth band,
+   the counted facts, the descriptive notes. They described what the
+   screenshots now show, and a long explanatory band after the visual
+   climax is an anticlimax with extra reading.
+
+   The screen sequence itself is in `work-screens.css`. The footer at the
+   bottom of this file is the page's ending and has nothing to do with
+   this section; it lives here because it arrived with it.
 
    Distinct from `work.css`, which belongs to the real case-study system
    and stays unimported until that system has verified content.
@@ -13,38 +21,31 @@
 .featured {
   display: flex;
   flex-direction: column;
-  gap: clamp(44px, 4.6vw, 72px);
-  /* The heaviest top padding on the page, and the reason is rhythm: this is
-     where the reader should feel the page change register from capability
-     demonstrations to one finished thing. */
+  gap: clamp(30px, 3.4vw, 52px);
+  /* The heaviest top padding on the page: this is where the reader should
+     feel the register change from capability demonstrations to one
+     finished thing. */
   padding-block: clamp(132px, 13vw, 192px) clamp(72px, 7vw, 100px);
 }
 
 /* --- Introduction ------------------------------------------------------ */
 
+/*
+  Centred and narrow, unlike the two-column intros above it. The frame
+  below is the widest thing on the page, so the text introducing it gets
+  out of the way rather than competing across the same width.
+*/
 .featured__intro {
-  display: grid;
-  gap: clamp(22px, 3vw, 44px);
-  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
-  align-items: end;
-}
-
-.featured__intro-lead {
   display: flex;
+  max-width: 720px;
   flex-direction: column;
-  gap: 18px;
+  align-items: center;
+  gap: clamp(14px, 1.6vw, 20px);
+  margin-inline: auto;
+  text-align: center;
 }
 
-/* The same treatment the other section headings use, token for token. An
-   earlier draft invented `--leading-display` and `--tracking-display`, which do
-   not exist, so the browser fell back to normal leading and the heading opened
-   to four loose lines while every other section stayed tight. */
 .featured__title {
-  /* Wider than the other section headings on purpose. Theirs are short enough
-     to sit inside the 16ch display measure; this one is 46 characters and that
-     measure breaks it into four short lines. A little more room lets it fall as
-     two, which is what a culminating headline should look like. */
-  max-width: 13.6em;
   color: var(--text-primary);
   font-size: var(--type-display-2);
   font-weight: var(--weight-heading);
@@ -53,109 +54,46 @@
   text-wrap: balance;
 }
 
-.featured__intro-support {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
 .featured__lead {
-  max-width: var(--measure-lead);
+  /*
+    Tighter than `--measure-lead`, and in em rather than ch.
+
+    Centred text reads worse at a long measure than ragged-right text does,
+    because every line starts in a different place, so the lead under a centred
+    title gets less width than one in a column. Em rather than ch because a
+    ch-based measure is calibrated against the fallback font and jumps when
+    Geist swaps in, which is a layout shift on a paragraph nobody was looking
+    at yet.
+  */
+  max-width: 32em;
   color: var(--text-secondary);
   font-size: var(--type-lead);
-  line-height: var(--leading-body);
+  font-weight: var(--weight-lead);
+  line-height: var(--leading-lead);
+  letter-spacing: var(--tracking-lead);
+  text-wrap: balance;
 }
 
-/* The list reset is load-bearing, not habit. `display: flex` blockifies the
-   children but `list-item` survives blockification, so the markers stay and a
-   technical strip acquires bullets. This shipped once. */
-.featured__capabilities {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2px 8px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  color: var(--text-annotation);
-  font-family: var(--font-mono);
-  font-size: var(--type-eyebrow);
-  line-height: var(--leading-technical);
-  letter-spacing: var(--tracking-eyebrow);
-}
-
-.featured__capability {
-  white-space: nowrap;
-}
-
-/* The separator trails its own item, so it wraps with the word it follows. */
-.featured__capability:not(:last-child)::after {
-  content: " /";
-  color: var(--text-muted);
-}
-
-/* --- The product frame -------------------------------------------------- */
-
-.featured__product {
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  border: var(--border-glass);
-  border-radius: 20px;
-  background: var(--surface-milk-bg);
-  backdrop-filter: blur(var(--surface-milk-blur));
-  box-shadow: 0 28px 70px rgba(31, 36, 58, 0.09);
-}
-
-.featured__masthead {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px 28px;
-  padding: clamp(18px, 2vw, 26px) clamp(20px, 2.4vw, 32px);
-  border-bottom: 1px solid var(--line-subtle);
-}
-
-.featured__identity {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.featured__product-name {
-  color: var(--text-primary);
-  font-size: clamp(19px, 1.7vw, 23px);
-  font-weight: var(--weight-heading);
-  line-height: 1.25;
-  letter-spacing: -0.01em;
-}
-
-.featured__product-sub {
-  color: var(--text-annotation);
-  font-size: 13px;
-  line-height: var(--leading-technical);
-}
-
-/* The canonical disclosure. Given the masthead's other half rather than a
-   footnote, because a demonstration described honestly should be described
-   honestly where a reader looks first. */
+/* The canonical disclosure, above the frame rather than in a footnote,
+   because a demonstration described honestly is described where a reader
+   looks first. */
 .featured__disclosure {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  padding: 7px 12px;
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px 14px;
+  padding: 7px 16px;
   border: 1px solid rgba(74, 80, 104, 0.12);
-  border-radius: 9px;
-  background: rgba(255, 255, 255, 0.5);
-  text-align: right;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.55);
 }
 
 .featured__disclosure-primary,
 .featured__disclosure-secondary {
   font-family: var(--font-mono);
-  font-size: 10.5px;
-  line-height: 1.5;
-  letter-spacing: 0.07em;
+  font-size: var(--type-technical-micro);
+  line-height: var(--leading-technical);
+  letter-spacing: var(--tracking-eyebrow);
 }
 
 .featured__disclosure-primary {
@@ -166,185 +104,33 @@
   color: var(--text-muted);
 }
 
-/* --- Breadth ------------------------------------------------------------ */
-
-.featured__breadth {
-  display: grid;
-  gap: clamp(20px, 2.4vw, 34px);
-  grid-template-columns: minmax(0, 0.82fr) minmax(0, 2.4fr);
-  align-items: start;
-}
-
-.featured__entry {
-  display: flex;
-  flex-direction: column;
-  gap: 9px;
-  padding-right: clamp(12px, 2vw, 28px);
-  border-right: 1px solid var(--line-subtle);
-}
-
-.featured__entry-label {
-  color: var(--text-primary);
-  font-size: 15px;
-  font-weight: var(--weight-ui);
-}
-
-.featured__entry-note {
-  color: var(--text-secondary);
-  font-size: 13px;
-  line-height: var(--leading-body);
-}
-
-.featured__groups {
-  display: grid;
-  gap: clamp(18px, 2.2vw, 32px);
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-/* Three rows rather than a stack, because the groups do not hold the same
-   number of modules: the four in Customer operations wrap to a second line of
-   chips and used to push that column's note below the other two. The middle
-   row absorbs the difference so every note starts on the same line. */
-.featured__group {
-  display: grid;
-  grid-template-rows: auto 1fr auto;
-  gap: 10px;
-}
-
-.featured__group-title {
-  color: var(--text-annotation);
-  font-family: var(--font-mono);
-  font-size: var(--type-eyebrow);
-  line-height: var(--leading-technical);
-  letter-spacing: var(--tracking-eyebrow);
-  text-transform: uppercase;
-}
-
-.featured__module-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.featured__module {
-  padding: 4px 10px;
-  border: 1px solid rgba(74, 80, 104, 0.11);
-  border-radius: 7px;
-  background: rgba(255, 255, 255, 0.52);
-  color: var(--text-primary);
-  font-size: 12.5px;
-  line-height: 1.5;
-}
-
-.featured__group-note {
-  color: var(--text-secondary);
-  font-size: 12.5px;
-  line-height: var(--leading-body);
-}
-
 /* --- Close -------------------------------------------------------------- */
 
 .featured__close {
-  display: grid;
-  gap: clamp(24px, 3vw, 44px);
-  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
-  align-items: end;
-  padding-top: clamp(18px, 2.4vw, 32px);
-  border-top: 1px solid var(--line-subtle);
-}
-
-.featured__facts {
-  display: grid;
-  gap: 14px clamp(18px, 2.4vw, 36px);
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  margin: 0;
-}
-
-.featured__fact {
   display: flex;
-  flex-direction: column-reverse;
-  gap: 3px;
-}
-
-.featured__fact-value {
-  margin: 0;
-  color: var(--text-primary);
-  font-family: var(--font-mono);
-  font-size: clamp(26px, 2.6vw, 34px);
-  font-weight: var(--weight-heading);
-  line-height: 1.05;
-  letter-spacing: -0.02em;
-}
-
-.featured__fact-label {
-  color: var(--text-annotation);
-  font-size: 12.5px;
-  line-height: var(--leading-technical);
-}
-
-.featured__action {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  align-items: flex-start;
-}
-
-.featured__notes {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, auto));
-  justify-content: start;
-  gap: 7px clamp(18px, 2vw, 30px);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.featured__note {
-  position: relative;
-  padding-left: 13px;
-  color: var(--text-annotation);
-  font-size: 12.5px;
-  line-height: var(--leading-technical);
-}
-
-.featured__note::before {
-  position: absolute;
-  top: 0.62em;
-  left: 0;
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: rgba(111, 158, 224, 0.72);
-  content: "";
+  justify-content: center;
 }
 
 .featured__cta {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  padding: 13px 22px;
+  padding: 15px 28px;
   border: 1px solid rgba(74, 80, 104, 0.14);
-  border-radius: 11px;
-  background: rgba(255, 255, 255, 0.72);
+  border-radius: var(--radius-button);
+  background: rgba(255, 255, 255, 0.82);
   color: var(--text-primary);
-  font-size: 15px;
+  font-size: var(--type-body-lg);
   font-weight: var(--weight-ui);
   text-decoration: none;
-  transition:
-    transform var(--duration-fast) ease,
-    background var(--duration-fast) ease,
-    box-shadow var(--duration-fast) ease;
+  transition: transform var(--duration-fast) var(--ease-standard),
+    background var(--duration-fast) var(--ease-standard),
+    box-shadow var(--duration-fast) var(--ease-standard);
 }
 
 .featured__cta:hover {
-  background: rgba(255, 255, 255, 0.92);
-  box-shadow: 0 12px 28px rgba(31, 36, 58, 0.1);
+  background: #ffffff;
+  box-shadow: var(--shadow-float);
   transform: translateY(-1px);
 }
 
@@ -354,425 +140,14 @@
 }
 
 .featured__cta-arrow {
-  transition: transform var(--duration-fast) ease;
+  transition: transform var(--duration-fast) var(--ease-standard);
 }
 
 .featured__cta:hover .featured__cta-arrow {
   transform: translateX(3px);
 }
 
-/* =====================================================================
-   THE PREVIEW
-   ===================================================================== */
-
-.fpv {
-  display: grid;
-  gap: 0;
-  grid-template-columns: minmax(148px, 0.85fr) minmax(0, 3.5fr);
-  min-height: 316px;
-  background: linear-gradient(
-    135deg,
-    rgba(247, 248, 252, 0.72),
-    rgba(244, 246, 252, 0.5)
-  );
-}
-
-/* --- Rail --------------------------------------------------------------- */
-
-.fpv__rail {
-  display: flex;
-  flex-direction: column;
-  gap: 11px;
-  padding: clamp(16px, 1.8vw, 24px) clamp(14px, 1.6vw, 20px);
-  border-right: 1px solid var(--line-subtle);
-  background: rgba(255, 255, 255, 0.4);
-}
-
-.fpv__rail-brand {
-  color: var(--text-primary);
-  font-size: 12px;
-  font-weight: var(--weight-ui);
-  letter-spacing: -0.005em;
-}
-
-.fpv__rail-block {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.fpv__rail-group {
-  margin-bottom: 2px;
-  color: var(--text-muted);
-  font-family: var(--font-mono);
-  font-size: 8.5px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-.fpv__rail-item {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  color: var(--text-secondary);
-  font-size: 11.5px;
-  line-height: 1.5;
-}
-
-.fpv__rail-dot {
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: rgba(74, 80, 104, 0.24);
-  flex: none;
-}
-
-/* One item is current, which is what tells a reader this is a screen inside a
-   system rather than a menu of eleven equal things. */
-.fpv__rail-item--active {
-  color: var(--text-primary);
-  font-weight: var(--weight-ui);
-}
-
-.fpv__rail-item--active .fpv__rail-dot {
-  background: #6f9ee0;
-  box-shadow: 0 0 0 3px rgba(111, 158, 224, 0.16);
-}
-
-/* --- Main --------------------------------------------------------------- */
-
-.fpv__main {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: clamp(14px, 1.7vw, 22px);
-  padding: clamp(16px, 1.9vw, 26px) clamp(18px, 2.1vw, 30px);
-}
-
-.fpv__head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 16px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--line-subtle);
-}
-
-.fpv__head-title {
-  color: var(--text-primary);
-  font-size: clamp(15px, 1.4vw, 18px);
-  font-weight: var(--weight-heading);
-  letter-spacing: -0.01em;
-}
-
-.fpv__head-role {
-  padding: 3px 9px;
-  border: 1px solid rgba(74, 80, 104, 0.12);
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.6);
-  color: var(--text-annotation);
-  font-family: var(--font-mono);
-  font-size: 9.5px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-/* --- Fleet state -------------------------------------------------------- */
-
-.fpv__states {
-  display: grid;
-  gap: 9px;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-
-.fpv__state {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 9px 11px;
-  border: 1px solid rgba(74, 80, 104, 0.09);
-  border-radius: 9px;
-  background: rgba(255, 255, 255, 0.62);
-}
-
-/* A left edge rather than a filled tile: the tone reads at a glance and the
-   figure stays the loudest thing in the box. Every state also carries its own
-   word, so nothing here depends on colour alone. */
-.fpv__state {
-  border-left-width: 2px;
-}
-
-.fpv__state--mint { border-left-color: #7fc8a4; }
-.fpv__state--sky { border-left-color: #6f9ee0; }
-.fpv__state--peach { border-left-color: #e8a578; }
-.fpv__state--slate { border-left-color: #b4b9c6; }
-
-.fpv__state-count {
-  color: var(--text-primary);
-  font-family: var(--font-mono);
-  font-size: clamp(15px, 1.5vw, 19px);
-  font-weight: var(--weight-heading);
-  line-height: 1.1;
-}
-
-.fpv__state-label {
-  color: var(--text-annotation);
-  font-size: 10.5px;
-  line-height: 1.4;
-}
-
-/* --- Flow --------------------------------------------------------------- */
-
-.fpv__flow {
-  position: relative;
-  display: grid;
-  gap: 8px;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  align-content: center;
-  /* The connector is absolutely positioned and has to land on the centres of
-     the nodes, which sit at this padding plus half a node. Both read the one
-     value so the line cannot drift off the nodes when the spacing is tuned:
-     it did drift, by exactly the amount this padding last changed. */
-  --fpv-flow-pad: 26px;
-  padding: var(--fpv-flow-pad) 0 14px;
-}
-
-.fpv__flow-line {
-  position: absolute;
-  top: calc(var(--fpv-flow-pad) + 4.5px);
-  left: 8%;
-  width: 84%;
-  height: 2px;
-  overflow: visible;
-}
-
-.fpv__flow-line line {
-  stroke: rgba(74, 80, 104, 0.16);
-  stroke-width: 1;
-  stroke-dasharray: 3 3;
-  vector-effect: non-scaling-stroke;
-}
-
-.fpv__step {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  align-items: center;
-  text-align: center;
-}
-
-.fpv__step-node {
-  width: 9px;
-  height: 9px;
-  margin-bottom: 5px;
-  border: 1.5px solid #6f9ee0;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.95);
-}
-
-.fpv__step-label {
-  color: var(--text-primary);
-  font-size: 11.5px;
-  font-weight: var(--weight-ui);
-  line-height: 1.3;
-}
-
-.fpv__step-note {
-  color: var(--text-muted);
-  font-family: var(--font-mono);
-  font-size: 9.5px;
-  line-height: 1.4;
-}
-
-/* --- Lower band --------------------------------------------------------- */
-
-.fpv__lower {
-  display: grid;
-  gap: 12px;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
-}
-
-.fpv__rule,
-.fpv__report {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 11px 13px;
-  border: 1px solid rgba(74, 80, 104, 0.09);
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.58);
-}
-
-.fpv__panel-label {
-  color: var(--text-muted);
-  font-family: var(--font-mono);
-  font-size: 8.5px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-.fpv__rule-name {
-  color: var(--text-primary);
-  font-size: 12px;
-  line-height: 1.4;
-}
-
-.fpv__rule-meta {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  color: var(--text-muted);
-  font-family: var(--font-mono);
-  font-size: 9.5px;
-}
-
-.fpv__rule-pulse {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: #7fc8a4;
-  box-shadow: 0 0 0 3px rgba(127, 200, 164, 0.18);
-  flex: none;
-}
-
-/* --- Report bars -------------------------------------------------------- */
-
-.fpv__bar-row {
-  display: grid;
-  gap: 8px;
-  grid-template-columns: 46px minmax(0, 1fr) 18px;
-  align-items: center;
-}
-
-.fpv__bar-label {
-  color: var(--text-annotation);
-  font-size: 10px;
-}
-
-.fpv__bar-rail {
-  height: 5px;
-  border-radius: 3px;
-  background: rgba(74, 80, 104, 0.07);
-}
-
-.fpv__bar-fill {
-  display: block;
-  height: 100%;
-  border-radius: 3px;
-  transform-origin: left center;
-}
-
-.fpv__bar-fill--mint { background: #7fc8a4; }
-.fpv__bar-fill--slate { background: #b4b9c6; }
-.fpv__bar-fill--peach { background: #e8a578; }
-
-.fpv__bar-count {
-  color: var(--text-annotation);
-  font-family: var(--font-mono);
-  font-size: 10px;
-  text-align: right;
-}
-
-/* =====================================================================
-   RESPONSIVE
-
-   The section is designed at each width rather than allowed to stack. The
-   preview in particular has to stay a composition on a phone: the rail
-   becomes a horizontal strip instead of a column of eleven, because a
-   column of eleven on a 390px screen is just a list.
-   ===================================================================== */
-
-@media (max-width: 1023px) {
-  .featured__intro,
-  .featured__breadth,
-  .featured__close {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .featured__entry {
-    padding-right: 0;
-    padding-bottom: 18px;
-    border-right: 0;
-    border-bottom: 1px solid var(--line-subtle);
-  }
-
-  .featured__groups {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .featured__close {
-    align-items: start;
-  }
-
-  .fpv {
-    grid-template-columns: minmax(0, 1fr);
-    min-height: 0;
-  }
-
-  .fpv__rail {
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 8px 16px;
-    align-items: center;
-    border-right: 0;
-    border-bottom: 1px solid var(--line-subtle);
-  }
-
-  .fpv__rail-brand {
-    width: 100%;
-  }
-
-  .fpv__rail-block {
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 6px 10px;
-    align-items: center;
-  }
-
-  .fpv__rail-group {
-    display: none;
-  }
-}
-
 @media (max-width: 767px) {
-  .featured__groups {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 20px;
-  }
-
-  .featured__facts {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .featured__masthead {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .featured__disclosure {
-    align-self: flex-start;
-    text-align: left;
-  }
-
-  .fpv__states {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .fpv__flow {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px 8px;
-  }
-
-  /* The connector spans a single row, so it is dropped rather than left
-     drawing a line through two rows that are not sequential. */
-  .fpv__flow-line {
-    display: none;
-  }
-
-  .fpv__lower {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
   .featured__cta {
     width: 100%;
     justify-content: center;
@@ -785,10 +160,7 @@
     transition: none;
   }
 
-  .featured__cta:hover {
-    transform: none;
-  }
-
+  .featured__cta:hover,
   .featured__cta:hover .featured__cta-arrow {
     transform: none;
   }

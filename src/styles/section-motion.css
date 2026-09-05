@@ -1,0 +1,164 @@
+/* =====================================================================
+   SECTION MOTION
+   The two scroll-driven behaviours that live inside a section rather
+   than around it: the execution trace in Intelligent Systems, and the
+   surface emphasis in Product Engineering.
+
+   The scene layer around each section handles its entry and atmosphere;
+   this is what happens once the visitor is inside one.
+
+   Both are inert until their `--enhanced` / `is-traced` class, which
+   only exists once JavaScript has run and reduced motion has been
+   checked.
+   ===================================================================== */
+
+/* ---------------------------------------------------------------------
+   INTELLIGENT SYSTEMS
+   The trace, drawn along the architecture the section already draws.
+   --------------------------------------------------------------------- */
+
+/*
+  The base connections keep their own styling and stay fully drawn. The
+  overlay group above them is dashed back to nothing and drawn in as the
+  trace passes, so what moves is the execution and not the diagram.
+
+  Dashing the only copy would mean the section starts with no connections
+  in it, drawing the picture rather than the run through it, and a visitor
+  who lands mid-page would find an architecture with no wiring.
+*/
+.arch-link-trace {
+  fill: none;
+  stroke: rgba(111, 158, 224, 0.9);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  /* Inert until the tracer measures it: a zero-length dash array with a
+     zero offset hides the stroke completely, which is the correct resting
+     state for an overlay nobody has driven yet. */
+  stroke-dasharray: var(--arch-len, 0);
+  stroke-dashoffset: calc(var(--arch-len, 0) * (1 - var(--arch-drawn, 0)));
+  /* No transition on the dash: the value is scrubbed by scroll position,
+     and a transition on top of a scrubbed value lags behind the thing it
+     is drawing. */
+}
+
+/* Without the tracer the overlay never gets a length, so it never paints.
+   Stated rather than left to a fallback. */
+.arch-trace-scope:not(.is-traced) .arch-link-trace {
+  display: none;
+}
+
+/* --- Node states ------------------------------------------------------ */
+
+/*
+  IDLE, ACTIVE, RESOLVED, written as data attributes by the tracer.
+
+  The section had no node-state vocabulary of its own to reuse: `is-active`
+  and `is-dimmed` belong to hover and focus, which is a different axis and
+  is left alone. These are visual states only, and no new label text is
+  rendered: the section's content is frozen and adding words to it to suit
+  an animation would be changing content.
+*/
+.arch-trace-scope.is-traced .arch-node {
+  transition: opacity var(--duration-medium) var(--ease-nav),
+    border-color var(--duration-medium) var(--ease-nav);
+}
+
+.arch-trace-scope.is-traced .arch-node[data-arch-trace="idle"] {
+  opacity: 0.5;
+}
+
+.arch-trace-scope.is-traced .arch-node[data-arch-trace="active"],
+.arch-trace-scope.is-traced .arch-node[data-arch-trace="resolved"] {
+  opacity: 1;
+}
+
+/* The arriving moment: the marker swells briefly, then settles. One
+   controlled signal, not a spark. */
+.arch-trace-scope.is-traced .arch-node__marker {
+  transition: transform var(--duration-medium) var(--ease-entrance),
+    box-shadow var(--duration-medium) var(--ease-nav);
+}
+
+.arch-trace-scope.is-traced .arch-node[data-arch-trace="active"] .arch-node__marker {
+  transform: scale(1.9);
+  /* The light the trace carries with it, on the marker rather than on the
+     line: the environment around the trace does the work, so the line
+     itself never has to become thick to be noticed. */
+  box-shadow: 0 0 0 5px rgba(111, 158, 224, 0.18);
+}
+
+/* ---------------------------------------------------------------------
+   PRODUCT ENGINEERING
+   Surface emphasis. Not pinned: the studio is taller than the usable
+   viewport at every width, so holding it would hide its own controls
+   below the fold. The emphasis runs as the section passes instead.
+   --------------------------------------------------------------------- */
+
+.pstack {
+  position: relative;
+}
+
+/*
+  The recede: scale to 0.978 and opacity to 0.76, which is enough to read
+  as depth and not enough to read as disabled. Transform and opacity only,
+  so nothing reflows and all three surfaces keep their positions exactly.
+
+  None of the three ever leaves. The section's claim is that this is one
+  product across every surface, and that claim is made by having all three
+  on screen together.
+*/
+.pstack--enhanced .psurface {
+  transform-origin: 50% 50%;
+  transition: transform var(--duration-slow) var(--ease-entrance),
+    opacity var(--duration-slow) var(--ease-nav);
+}
+
+.pstack--enhanced[data-pstack] .pweb,
+.pstack--enhanced[data-pstack] .pmob,
+.pstack--enhanced[data-pstack] .passist {
+  transform: scale(0.978);
+  opacity: 0.76;
+}
+
+.pstack--enhanced[data-pstack="0"] .pweb,
+.pstack--enhanced[data-pstack="1"] .pmob,
+.pstack--enhanced[data-pstack="2"] .passist {
+  transform: none;
+  opacity: 1;
+}
+
+/* ---------------------------------------------------------------------
+   REDUCED MOTION
+   Both behaviours are refused in JavaScript, so neither class appears.
+   These cover the moment between a preference change and the re-render,
+   and keep the intent legible here rather than only in the components.
+   --------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  /* The overlay is not needed when nothing moves: the base connections
+     are already fully drawn, so the trace simply does not paint. */
+  .arch-link-trace {
+    display: none;
+  }
+
+  .arch-trace-scope.is-traced .arch-node,
+  .arch-trace-scope.is-traced .arch-node[data-arch-trace="idle"] {
+    opacity: 1;
+    transition: none;
+  }
+
+  .arch-trace-scope.is-traced .arch-node__marker {
+    transform: none;
+    box-shadow: none;
+    transition: none;
+  }
+
+  .pstack--enhanced .psurface,
+  .pstack--enhanced[data-pstack] .pweb,
+  .pstack--enhanced[data-pstack] .pmob,
+  .pstack--enhanced[data-pstack] .passist {
+    transform: none;
+    opacity: 1;
+    transition: none;
+  }
+}
