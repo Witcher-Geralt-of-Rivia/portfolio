@@ -2834,3 +2834,64 @@ lint failure, and a page that still rendered.
 
 `grep` for the class names the components emit is the check. Not "is this stage
 over" but "does anything still render these class names" (D-108).
+
+---
+
+## Stage 09H public verification
+
+PASS, against the deployed site over HTTPS rather than loopback.
+
+```
+qa/stage09h-public.mjs                  20 checks   ALL PASS
+```
+
+A build that is correct on 127.0.0.1 and wrong in production is the only kind of
+wrong that reaches anybody, and the Work section now depends on twenty-two image
+assets that a release could ship without. So the claims are re-asserted against
+the live origin:
+
+```
+work renders the real Operations captures     /_next/image?url=/operations/...
+no screenshot failed to load                  0
+eleven screens in the DOM                     11
+no half-painted crossfade state exists        0 over 61 scroll positions
+all eleven labels reached                     Overview through Reports
+two spectral edges, animating                 spectral-turn 9s, 3px
+pointer field moves with the pointer          0.0925 -> 0.9054
+no horizontal overflow anywhere               -15px
+no certification renders                      0
+the bands beneath the frame stay removed      0
+the action still points at the demo           /demos/operations
+390px: no overflow, sequence stands down, real mobile capture shown
+reduced motion: nothing enhanced, transformed or turning; H1 exact
+```
+
+### The check that was wrong rather than the page
+
+It reported ten of eleven labels, and the missing one was Overview: the FIRST
+screen, not a middle one, which is what ruled out the sampling density the
+failure first looked like.
+
+The walk started at the top edge of the sequence's range. The stage does not
+begin pinning until that edge reaches the sticky offset, so by the time the page
+is scrolled to it the sequence is already a few per cent in and has begun
+advancing to Leads. The first screen was reported missing on a sequence that
+renders it correctly.
+
+It starts two hundred pixels earlier now, which is where `stage09h-shots.mjs`
+already started and why the capture saw all eleven when this did not. The lesson
+is the same one as the crossfade: a check that measures slightly the wrong thing
+fails in a way that looks like a product defect.
+
+### Deployment
+
+`npm run deploy:safe` aborted on its first run because the working tree was
+dirty, and the dirty file was the deploy log itself, redirected into the repo by
+the invocation. Production was not switched and the active release was untouched,
+which is the gate behaving exactly as D-097 intends. The log belongs outside the
+repository.
+
+The second run switched to `.next-release-a` in 229s. Verified independently
+afterwards: portfolio online, one listener on 3100 owned by the managed PID
+16672, `suspicious` empty with two environment variables, zero unstable restarts,
+and both neighbours still at zero restarts.

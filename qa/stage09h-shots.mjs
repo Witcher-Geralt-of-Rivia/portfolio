@@ -25,6 +25,10 @@ import { chromium } from "playwright";
 import { mkdirSync } from "node:fs";
 
 const OUT = process.env.OUT ?? "qa/shots/stage09h";
+/* Defaults to the local preview, but points anywhere: the same frames have to
+   be checkable against the deployed site, because a build that is correct on
+   loopback and wrong in production is the only kind of wrong that matters. */
+const BASE = process.env.QA_BASE ?? "http://127.0.0.1:3001";
 mkdirSync(OUT, { recursive: true });
 
 const settle = async (p, ms = 90, n = 8) => {
@@ -41,7 +45,7 @@ const b = await chromium.launch();
 {
   const c = await b.newContext({ viewport: { width: 1440, height: 900 } });
   const p = await c.newPage();
-  await p.goto("http://127.0.0.1:3001/", { waitUntil: "load" });
+  await p.goto(BASE + "/", { waitUntil: "load" });
   await settle(p, 150, 6);
   await p.mouse.move(1050, 340);
   await settle(p, 80, 8);
@@ -72,7 +76,7 @@ const b = await chromium.launch();
 {
   const c = await b.newContext({ viewport: { width: 1440, height: 900 } });
   const p = await c.newPage();
-  await p.goto("http://127.0.0.1:3001/", { waitUntil: "load" });
+  await p.goto(BASE + "/", { waitUntil: "load" });
   await settle(p, 150, 6);
   const g = await p.evaluate(() => {
     const r = document.querySelector(".screens");
@@ -101,7 +105,7 @@ const b = await chromium.launch();
 {
   const c = await b.newContext({ viewport: { width: 1440, height: 900 } });
   const p = await c.newPage();
-  await p.goto("http://127.0.0.1:3001/", { waitUntil: "load" });
+  await p.goto(BASE + "/", { waitUntil: "load" });
   await settle(p, 150, 6);
   for (const [tag, x, y] of [["left", 120, 700], ["centre", 720, 420], ["right", 1330, 180]]) {
     await p.mouse.move(x, y);
@@ -125,7 +129,7 @@ const b = await chromium.launch();
     deviceScaleFactor: 2,
   });
   const p = await c.newPage();
-  await p.goto("http://127.0.0.1:3001/", { waitUntil: "load" });
+  await p.goto(BASE + "/", { waitUntil: "load" });
   await settle(p, 150, 6);
   const doc = await p.evaluate(() => document.body.scrollHeight);
   for (let i = 0; i < 7; i++) {
@@ -140,7 +144,7 @@ const b = await chromium.launch();
 {
   const c = await b.newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: "reduce" });
   const p = await c.newPage();
-  await p.goto("http://127.0.0.1:3001/", { waitUntil: "load" });
+  await p.goto(BASE + "/", { waitUntil: "load" });
   await settle(p, 150, 6);
   const doc = await p.evaluate(() => document.body.scrollHeight);
   for (let i = 0; i < 6; i++) {
