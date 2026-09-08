@@ -46,6 +46,67 @@
   overflow: hidden;
 }
 
+/*
+  THE PRODUCT SCENE.
+
+  Four colour stops driven by one scrubbed custom property, so the environment
+  changes as each state takes control rather than three panels rearranging in
+  front of an unchanged background. `--pscene` runs 0 to 3 and each layer fades
+  in over its own part of that range.
+
+  Registered so it interpolates: an unregistered custom property animates as a
+  discrete swap, which would step between palettes rather than cross them.
+*/
+@property --pscene {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+
+.pstory__scene {
+  position: absolute;
+  inset: -12% -8%;
+  z-index: 0;
+  pointer-events: none;
+  --pscene: 0;
+}
+
+.pstory__scene::before,
+.pstory__scene::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+/* 01 cool cyan and lavender, giving way to 02 violet and rose. */
+/*
+  Held well below full. The scene has to be unmistakably different between
+  states, and it also sits directly behind three product surfaces whose panels
+  are translucent: at full strength it tinted them and the application inside
+  stopped reading as a screenshot of software.
+*/
+.pstory__scene::before {
+  opacity: calc((1 - clamp(0, var(--pscene), 1)) * 0.5);
+  background:
+    radial-gradient(64vw 58vh at 22% 24%, var(--scene-cyan), transparent 66%),
+    radial-gradient(58vw 54vh at 78% 70%, var(--scene-violet), transparent 68%);
+}
+
+/* 03 mint and blue expanding, resolving at 04 into the balanced field. */
+.pstory__scene::after {
+  opacity: calc(clamp(0, var(--pscene) - 1, 2) * 0.26);
+  background:
+    radial-gradient(70vw 62vh at 76% 22%, var(--scene-mint), transparent 66%),
+    radial-gradient(62vw 56vh at 18% 76%, var(--scene-rose), transparent 68%),
+    radial-gradient(50vw 48vh at 52% 50%, var(--scene-blue), transparent 72%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pstory__scene {
+    display: none;
+  }
+}
+
 /* --- Captions ----------------------------------------------------------- */
 
 /*
@@ -55,6 +116,7 @@
 */
 .pstory__captions {
   position: relative;
+  z-index: 1;
   height: clamp(64px, 8vh, 92px);
   flex: none;
 }
@@ -109,6 +171,7 @@
 */
 .pstory__field {
   position: relative;
+  z-index: 1;
   flex: 1;
   min-height: 0;
   display: flex;

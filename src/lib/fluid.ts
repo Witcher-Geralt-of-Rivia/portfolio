@@ -62,16 +62,39 @@ export type FluidConfig = {
   maxDpr: number;
 };
 
+/*
+  TUNED FOR BROAD RIBBONS, NOT FILAMENTS.
+
+  The first calibration produced fine turbulent detail: technically a fluid, and
+  the wrong picture. The direction asks for a small number of large translucent
+  pastel masses, one of which may cover most of the viewport, so every number
+  here moved toward LOWER spatial frequency:
+
+    curl        26 -> 3.5   vorticity confinement is what makes small eddies
+                            survive. It is the single biggest source of
+                            filaments, and almost all of it is gone.
+    splatRadius 0.2 -> 3.4  the gaussian falls to a tenth at about
+                            sqrt(2.3 * r / 100) of the width, so this is a
+                            primary influence of roughly 28vw rather than 7vw.
+    simResolution 128 -> 96 a coarser velocity grid cannot represent fine
+                            structure, which is the point rather than a
+                            compromise.
+    dissipation up          dye and momentum persist, so masses accumulate into
+                            large forms instead of decaying into wisps.
+
+  It is also cheaper than what it replaces: a smaller grid and fewer pressure
+  iterations, with the visual weight moved into radius and persistence.
+*/
 export const DESKTOP_CONFIG: FluidConfig = {
-  simResolution: 128,
-  dyeResolution: 512,
-  velocityDissipation: 0.985,
-  densityDissipation: 0.972,
-  pressureIterations: 20,
+  simResolution: 96,
+  dyeResolution: 384,
+  velocityDissipation: 0.994,
+  densityDissipation: 0.991,
+  pressureIterations: 16,
   pressure: 0.8,
-  curl: 26,
-  splatRadius: 0.2,
-  splatForce: 5200,
+  curl: 3.5,
+  splatRadius: 3.4,
+  splatForce: 6600,
   maxDpr: 1.5,
 };
 
@@ -80,10 +103,10 @@ export const DESKTOP_CONFIG: FluidConfig = {
    pointer on a touch screen to justify it. */
 export const MOBILE_CONFIG: FluidConfig = {
   ...DESKTOP_CONFIG,
-  simResolution: 72,
+  simResolution: 64,
   dyeResolution: 256,
   pressureIterations: 12,
-  curl: 18,
+  curl: 2.5,
   maxDpr: 1,
 };
 
@@ -352,11 +375,11 @@ void main () {
     field turned into an oil slick. Here a mixed region has small deficits and
     stays near white, which is what mixing colour in water actually looks like.
   */
-  vec3 tint = clamp(vec3(1.0) - (vec3(m) - c) * 1.15, 0.0, 1.0);
+  vec3 tint = clamp(vec3(1.0) - (vec3(m) - c) * 1.45, 0.0, 1.0);
 
   /* Held well below 1: the field passes behind body copy, and a mass that
      reaches full strength there would win against the text. */
-  float amount = clamp(m * 1.25, 0.0, 0.78);
+  float amount = clamp(m * 1.5, 0.0, 0.86);
 
   tint += (dither(vUv * 1024.0) - 0.5) * 0.012;
   fragColor = vec4(tint * amount, amount);
@@ -612,13 +635,20 @@ export function createFluid(
     deltaY = 0;
   }
 
-  function splat(x: number, y: number, dx: number, dy: number, color: [number, number, number]) {
+  function splatWith(
+    x: number,
+    y: number,
+    dx: number,
+    dy: number,
+    color: [number, number, number],
+    radius: number
+  ) {
     gl!.useProgram(programs.splat.program);
     gl!.uniform1i(programs.splat.uniforms.uTarget, velocity.read.attach(0));
     gl!.uniform1f(programs.splat.uniforms.uAspectRatio, canvas.width / Math.max(1, canvas.height));
     gl!.uniform2f(programs.splat.uniforms.uPoint, x, y);
     gl!.uniform3f(programs.splat.uniforms.uColor, dx, dy, 0);
-    gl!.uniform1f(programs.splat.uniforms.uRadius, config.splatRadius / 100);
+    gl!.uniform1f(programs.splat.uniforms.uRadius, radius / 100);
     blit(velocity.write);
     velocity.swap();
 
@@ -628,62 +658,138 @@ export function createFluid(
     dye.swap();
   }
 
-  /*
-    One pointer movement injects SEVERAL overlapping impulses, not one.
+  function splat(x: number, y: number, dx: number, dy: number, color: [number, number, number]) {
+    splatWith(x, y, dx, dy, color, config.splatRadius);
+  }
 
-    A single splat per frame is a bead on a string and reads as a cursor
-    decoration. Three, at slightly different offsets along the direction of
-    travel and in different hues from the palette, is a disturbance with a
-    leading edge and a wake, which is what a fast flick should leave behind.
+  /*
+    THE POINTER MOVES A LARGE REGION, NOT A DISC AROUND THE CURSOR.
+
+    Three impulses at three scales, so the whole composition answers rather than
+    a patch under the pointer:
+
+      primary    ~28vw, on the pointer, carrying most of the force
+      secondary  ~55vw, offset behind the direction of travel and at a fraction
+                 of the force, which is what makes a distant part of the field
+                 lean into the movement a moment later
+      trail      ~18vw, further back again, so a fast flick leaves a wake with
+                 a beginning and an end rather than a single bead
+
+    The secondary is the reason a gesture on the left visibly bends a ribbon on
+    the right. Without it the reaction stays local and reads as a cursor effect
+    however large the primary radius is.
   */
   function injectPointer() {
     if (!moved) return;
     moved = false;
     const dx = deltaX * config.splatForce;
     const dy = deltaY * config.splatForce;
-    const speed = Math.hypot(deltaX, deltaY);
-    const impulses = speed > 0.01 ? 3 : 2;
-    for (let i = 0; i < impulses; i++) {
-      const t = i / impulses;
-      const color = PALETTE[colorIndex % PALETTE.length];
-      colorIndex += 1;
-      const spread = (i - (impulses - 1) / 2) * 0.012;
-      splat(
-        pointerX - deltaX * t + spread,
-        pointerY - deltaY * t + spread * 0.6,
-        dx * (1 - t * 0.35),
-        dy * (1 - t * 0.35),
-        [color[0] * 0.35, color[1] * 0.35, color[2] * 0.35]
-      );
-    }
+    const color = PALETTE[colorIndex % PALETTE.length];
+    const alt = PALETTE[(colorIndex + 3) % PALETTE.length];
+    colorIndex += 1;
+
+    splatWith(pointerX, pointerY, dx, dy, [color[0] * 0.24, color[1] * 0.24, color[2] * 0.24],
+      config.splatRadius);
+
+    /* Behind the direction of travel, wide and gentle. */
+    splatWith(
+      pointerX - deltaX * 2.4,
+      pointerY - deltaY * 2.4,
+      dx * 0.42,
+      dy * 0.42,
+      [alt[0] * 0.13, alt[1] * 0.13, alt[2] * 0.13],
+      config.splatRadius * 2.4
+    );
+
+    /* The wake. */
+    splatWith(
+      pointerX - deltaX * 4.2,
+      pointerY - deltaY * 4.2,
+      dx * 0.2,
+      dy * 0.2,
+      [color[0] * 0.11, color[1] * 0.11, color[2] * 0.11],
+      config.splatRadius * 0.7
+    );
   }
 
   /*
-    AUTONOMOUS DRIFT.
+    THREE DEPTHS, AND ONE DOMINANT RIBBON.
 
-    The field must be alive with no pointer at all: that is the whole of the
-    mobile behaviour and it is what stops a desktop page looking dead while
-    somebody reads. Slow, wide, low-force splats on a long period, placed on a
-    wandering path rather than at random, so the result is a current rather
-    than a twitch.
+    The autonomous motion is not one blob any more. It is three layers moving at
+    different rates, which is what gives the background depth without anything
+    three dimensional in it:
+
+      far    very large, very slow fog. Sets the overall colour of the viewport.
+      mid    THE RIBBON: a wide curved structure laid down continuously along a
+             slow travelling path, so it reads as one elongated mass rather than
+             a row of circles.
+      near   smaller, quicker accents that keep the surface from looking static.
+
+    The ribbon path is two incommensurable frequencies, so it never repeats and
+    never resolves into an obvious sine wave. It is deliberately diagonal: a
+    horizontal band reads as a stripe rather than as light moving through a
+    volume.
   */
-  let ambientAt = 0;
-  let ambientPhase = Math.PI * 0.25;
-  function ambient(now: number) {
-    if (now - ambientAt < 900) return;
-    ambientAt = now;
-    ambientPhase += 0.37;
-    const x = 0.5 + Math.cos(ambientPhase) * 0.34;
-    const y = 0.5 + Math.sin(ambientPhase * 0.73) * 0.3;
-    const color = PALETTE[colorIndex % PALETTE.length];
-    colorIndex += 1;
-    splat(
-      x,
-      y,
-      Math.cos(ambientPhase * 1.3) * 260,
-      Math.sin(ambientPhase * 0.9) * 260,
-      [color[0] * 0.11, color[1] * 0.11, color[2] * 0.11]
-    );
+  let ribbonPhase = Math.PI * 0.3;
+  let fogAt = 0;
+  let nearAt = 0;
+  let fogPhase = 0;
+  let nearPhase = 1.7;
+
+  /** Where the ribbon is at a given phase. Diagonal, curved, non-repeating. */
+  const ribbonAt = (t: number) => ({
+    x: 0.5 + Math.cos(t * 0.31) * 0.42 + Math.sin(t * 0.73) * 0.1,
+    y: 0.5 + Math.sin(t * 0.23) * 0.34 + Math.cos(t * 0.61) * 0.08,
+  });
+
+  function ambient(now: number, dt: number) {
+    /* --- mid: the ribbon, every frame, so it is continuous ------------- */
+    ribbonPhase += dt * 0.22;
+    const head = ribbonAt(ribbonPhase);
+    const tail = ribbonAt(ribbonPhase - 0.16);
+    /* Momentum along the path's own direction: the ribbon is dragged into
+       being rather than stamped, which is what makes it elongate. */
+    const dx = (head.x - tail.x) * 900;
+    const dy = (head.y - tail.y) * 900;
+    const ribbonColor = PALETTE[Math.floor(ribbonPhase * 0.4) % PALETTE.length];
+    splat(head.x, head.y, dx, dy, [
+      ribbonColor[0] * 0.17,
+      ribbonColor[1] * 0.17,
+      ribbonColor[2] * 0.17,
+    ]);
+
+    /* --- far: broad slow fog ------------------------------------------- */
+    if (now - fogAt > 2600) {
+      fogAt = now;
+      fogPhase += 0.53;
+      const color = PALETTE[colorIndex % PALETTE.length];
+      colorIndex += 1;
+      splatWith(
+        0.5 + Math.cos(fogPhase) * 0.46,
+        0.5 + Math.sin(fogPhase * 0.67) * 0.4,
+        Math.cos(fogPhase * 1.1) * 130,
+        Math.sin(fogPhase * 0.8) * 130,
+        [color[0] * 0.13, color[1] * 0.13, color[2] * 0.13],
+        /* Far larger than a pointer splat: this is the layer that sets the
+           colour of a whole corner of the viewport. */
+        config.splatRadius * 2.6
+      );
+    }
+
+    /* --- near: quicker, smaller accents -------------------------------- */
+    if (now - nearAt > 1500) {
+      nearAt = now;
+      nearPhase += 0.87;
+      const color = PALETTE[(colorIndex + 3) % PALETTE.length];
+      splatWith(
+        0.5 + Math.cos(nearPhase * 1.3) * 0.36,
+        0.5 + Math.sin(nearPhase * 1.07) * 0.32,
+        Math.cos(nearPhase) * 420,
+        Math.sin(nearPhase * 1.4) * 420,
+        [color[0] * 0.11, color[1] * 0.11, color[2] * 0.11],
+        config.splatRadius * 0.55
+      );
+    }
   }
 
   /* ------------------------------------------------------------------
@@ -770,12 +876,25 @@ export function createFluid(
 
   function frame(now: number) {
     if (destroyed) return;
-    /* Clamped: a backgrounded tab returns with a huge delta, and advecting by
-       it throws the whole field off screen in one step. */
-    const dt = Math.min(0.0166, (now - last) / 1000) || 0.0166;
+    /*
+      Clamped at BOTH ends.
+
+      The upper bound is the obvious one: a backgrounded tab returns with a huge
+      delta, and advecting by it throws the whole field off screen in one step.
+
+      The lower bound is the one that was missing, and it was a real fault. A
+      rAF timestamp can predate a `performance.now()` captured moments earlier,
+      so the first frame after the loop starts can produce a NEGATIVE delta. The
+      old `|| 0.0166` guard caught zero and NaN and let a negative straight
+      through: the ribbon phase then ran backwards, `Math.floor` of it went
+      negative, and the palette lookup returned undefined. It also meant the
+      solver could advect the field backwards in time.
+    */
+    const raw = (now - last) / 1000;
+    const dt = raw > 0 ? Math.min(0.0166, raw) : 0.0166;
     last = now;
     injectPointer();
-    ambient(now);
+    ambient(now, dt);
     /* After a movement stops, the solver keeps carrying what is already there.
        That decay IS the settling the direction asks for. */
     if (now - lastMoveAt > 8000 && frames % 2 === 1) {
@@ -819,15 +938,19 @@ export function createFluid(
   /* A page that opens on an empty field looks broken for the first second, so
      the surface starts with colour already in it. */
   function seed() {
-    for (let i = 0; i < 9; i++) {
-      const color = PALETTE[i % PALETTE.length];
-      const a = (i / 9) * Math.PI * 2;
-      splat(
-        0.5 + Math.cos(a) * 0.34,
-        0.5 + Math.sin(a) * 0.3,
-        Math.cos(a) * 520,
-        Math.sin(a) * 520,
-        [color[0] * 0.22, color[1] * 0.22, color[2] * 0.22]
+    /* Five broad masses along a diagonal, not nine around a circle: the page
+       should open on the same picture the ribbon maintains, rather than on a
+       rosette that has to dissolve into one. */
+    for (let i = 0; i < 5; i++) {
+      const color = PALETTE[(i * 2) % PALETTE.length];
+      const t = i / 4;
+      splatWith(
+        0.12 + t * 0.76,
+        0.74 - t * 0.5 + Math.sin(t * 3.1) * 0.08,
+        420,
+        -260,
+        [color[0] * 0.30, color[1] * 0.30, color[2] * 0.30],
+        config.splatRadius * (1.5 + t * 0.5)
       );
     }
   }

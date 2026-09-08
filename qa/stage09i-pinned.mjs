@@ -65,7 +65,10 @@ const open = async (opts = {}) => {
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, ...opts });
   const page = await ctx.newPage();
   const errors = [];
-  page.on("pageerror", (e) => errors.push(String(e).slice(0, 200)));
+  /* The stack, not just the message: an intermittent "undefined[0]" says
+     nothing about where it came from, and this suite is the only place that
+     has reproduced one. */
+  page.on("pageerror", (e) => errors.push((e.stack ?? String(e)).slice(0, 600)));
   await page.goto(BASE + "/", { waitUntil: "load" });
   await page.waitForTimeout(3200);
   return { ctx, page, errors };
@@ -150,14 +153,24 @@ section("PRODUCT ENGINEERING PINS AND FITS");
     await settle(page);
     const r = await stageRect(page, ".pstory__stage");
     tops.push(r.top);
-    /* NOTHING IS CUT OFF, at any point in the story. Measured as a rendered
-       box escaping the stage's own box, which is what a visitor would see,
-       rather than as a scrollHeight, which counts overflow the stage hides. */
+    /*
+      NOTHING VISIBLE IS CUT OFF, at any point in the story.
+
+      Measured as a rendered box escaping the stage's own box, which is what a
+      visitor would see, rather than as a scrollHeight, which counts overflow
+      the stage hides.
+
+      A surface that has not faded in yet is skipped. It is staged outside the
+      stage on purpose so it can travel in, and counting an invisible element
+      as clipped content reported a failure on an entrance working exactly as
+      designed.
+    */
     clipped += await page.evaluate(() => {
       const st = document.querySelector(".pstory__stage").getBoundingClientRect();
       return [...document.querySelectorAll(".pstory__surface")].filter((e) => {
         const b = e.getBoundingClientRect();
         if (b.height < 4) return false;
+        if (Number(getComputedStyle(e).opacity) < 0.12) return false;
         return b.top < st.top - 2 || b.bottom > st.bottom + 2;
       }).length;
     });
@@ -182,6 +195,16 @@ section("FEATURED WORK PINS AND CYCLES");
     `${track}px = ${(track / 900).toFixed(1)} viewports`
   );
 
+  /*
+    Measured INSIDE the pin, not at page load.
+
+    The handoff stages the frame at scale 0.9 before the section is reached, so
+    reading it at the top of the document reports a frame smaller than the one
+    a visitor ever sees, and "the screen got smaller" is exactly the wrong
+    conclusion to draw from that.
+  */
+  await page.evaluate((v) => scrollTo(0, v), geo.screens.top + 400);
+  await settle(page);
   const frame = await page.evaluate(() => {
     const f = document.querySelector(".screens__frame");
     const b = f.getBoundingClientRect();

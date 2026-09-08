@@ -187,6 +187,8 @@ export default function OperationsScreenSequence() {
         tl.set(el, { "--screen-show": i === 0 ? 1 : 0, "--screen-clip": i === 0 ? 0 : 1 }, 0);
       });
 
+      const frameEl = root.querySelector<HTMLElement>(".screens__frame");
+
       for (let i = 1; i < SCREEN_COUNT; i++) {
         const at = i - 1;
         tl.set(items[i], { "--screen-show": 1 }, at)
@@ -199,6 +201,33 @@ export default function OperationsScreenSequence() {
           /* The covered screen stops painting only once the cover is complete,
              so nothing shows through a partly drawn reveal. */
           .set(items[i - 1], { "--screen-show": 0 }, at + REVEAL);
+
+        /*
+          A small dip in the frame itself as each module changes, so the
+          replacement has a physical beat rather than only a moving edge. Scale
+          only: the dashboard is never rotated and never blurred, because a
+          screenshot of a product has to stay a legible screenshot.
+        */
+        if (frameEl) {
+          tl.to(frameEl, { scale: 0.965, duration: REVEAL * 0.45, ease: "none" }, at)
+            .to(frameEl, { scale: 1, duration: REVEAL * 0.55, ease: "none" }, at + REVEAL * 0.45);
+        }
+      }
+
+      /*
+        THE ENVIRONMENT EVOLVES ACROSS THE ELEVEN.
+
+        Not eleven unrelated palettes: one designed progression, scrubbed, so a
+        long pinned sequence visibly travels somewhere instead of holding a
+        single backdrop for ten transitions. `--wscene` runs 0 to 3 across the
+        four groups the direction names.
+      */
+      const scene = root.querySelector<HTMLElement>(".screens__scene");
+      if (scene) {
+        gsap.set(scene, { "--wscene": 0 });
+        tl.to(scene, { "--wscene": 1, duration: 3, ease: "none" }, 0)
+          .to(scene, { "--wscene": 2, duration: 2, ease: "none" }, 3)
+          .to(scene, { "--wscene": 3, duration: 3, ease: "none" }, 5);
       }
 
       /* The settle. Reports is fully resolved here and the stage is still
@@ -258,6 +287,8 @@ export default function OperationsScreenSequence() {
       {/* The colour plane the Lab's warm field hands over to. Decorative, and
           outside the pinned stage so it cannot affect what the pin measures. */}
       <div className="screens__handoff" aria-hidden="true" />
+      {/* The environment around the screen, evolving across the eleven. */}
+      <div className="screens__scene" aria-hidden="true" />
 
       <div ref={stageRef} className="screens__stage">
         <div className="screens__bar">

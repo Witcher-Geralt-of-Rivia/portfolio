@@ -71,6 +71,63 @@
   padding-bottom: clamp(14px, 2vh, 28px);
 }
 
+/*
+  THE WORK SCENE.
+
+  A designed progression across the eleven modules rather than eleven unrelated
+  palettes, so a sequence that holds the viewport for ten viewports of scroll
+  visibly travels somewhere:
+
+    Overview / Leads / Customers        cyan and lavender
+    Reservations / Contracts / Fleet    blue and violet
+    Maintenance / Payments              mint and peach
+    Automations / Inbox / Reports       rose, violet and cyan
+
+  Fixed, because the stage it sits behind is pinned to the viewport; retired
+  entirely under reduced motion.
+*/
+@property --wscene {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+
+.screens__scene {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  --wscene: 0;
+}
+
+.screens__scene::before,
+.screens__scene::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.screens__scene::before {
+  opacity: calc((1 - clamp(0, var(--wscene), 1)) * 0.5);
+  background:
+    radial-gradient(68vw 62vh at 20% 26%, var(--scene-cyan), transparent 66%),
+    radial-gradient(60vw 56vh at 80% 72%, var(--scene-violet), transparent 68%);
+}
+
+.screens__scene::after {
+  opacity: calc(clamp(0, var(--wscene) - 1, 2) * 0.24);
+  background:
+    radial-gradient(66vw 60vh at 74% 20%, var(--scene-mint), transparent 66%),
+    radial-gradient(58vw 54vh at 22% 74%, var(--scene-peach), transparent 68%),
+    radial-gradient(54vw 50vh at 52% 54%, var(--scene-rose), transparent 70%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .screens__scene {
+    display: none;
+  }
+}
+
 /* --- The bar ------------------------------------------------------------ */
 
 /*
@@ -221,12 +278,16 @@
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  opacity: calc(var(--screen-clip, 0) * (1 - var(--screen-clip, 0)) * 4);
+  /* Held near full for most of the wipe rather than peaking and fading, so the
+     boundary is easy to follow the whole way across. */
+  opacity: calc(min(1, var(--screen-clip, 0) * (1 - var(--screen-clip, 0)) * 9));
   background: linear-gradient(
     var(--screen-edge-angle, 180deg),
-    transparent calc(var(--screen-clip, 0) * 100% - 3px),
-    rgba(178, 164, 235, 0.9) calc(var(--screen-clip, 0) * 100%),
-    transparent calc(var(--screen-clip, 0) * 100% + 3px)
+    transparent calc(var(--screen-clip, 0) * 100% - 10px),
+    rgba(150, 214, 232, 0.55) calc(var(--screen-clip, 0) * 100% - 5px),
+    rgba(236, 244, 255, 0.95) calc(var(--screen-clip, 0) * 100%),
+    rgba(190, 172, 240, 0.6) calc(var(--screen-clip, 0) * 100% + 5px),
+    transparent calc(var(--screen-clip, 0) * 100% + 10px)
   );
 }
 

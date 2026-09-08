@@ -117,9 +117,14 @@ export default function ProductStory() {
       const centreOf = (el: HTMLElement) =>
         field ? field.clientWidth / 2 - (el.offsetLeft + el.offsetWidth / 2) : 0;
 
-      gsap.set(web, { x: centreOf(web), scale: 1, transformOrigin: "50% 50%" });
-      gsap.set(mob, { x: "26vw", y: "10vh", scale: 0.78, autoAlpha: 0 });
-      gsap.set(ai, { x: "18vw", y: "26vh", scale: 0.78, autoAlpha: 0 });
+      gsap.set(web, { x: centreOf(web), y: 0, scale: 1, transformOrigin: "50% 50%" });
+      /* Far enough outside that they arrive from off the stage rather than
+         fading up in place: the direction asks for entrances, not reveals. */
+      gsap.set(mob, { x: "38vw", y: "14vh", scale: 0.7, autoAlpha: 0 });
+      /* 28vh rather than 42: far enough to be an entrance from below, close
+         enough that the panel is already inside the stage by the time it is
+         visible enough to read as clipped. */
+      gsap.set(ai, { x: "12vw", y: "28vh", scale: 0.68, autoAlpha: 0 });
       gsap.set(link, { autoAlpha: 0, scaleX: 0, transformOrigin: "50% 50%" });
       captions.forEach((c, i) => gsap.set(c, { autoAlpha: i === 0 ? 1 : 0 }));
 
@@ -145,25 +150,56 @@ export default function ProductStory() {
         },
       });
 
+      /*
+        AMPLITUDE. Each state has to be recognisably a different composition in
+        a still frame, not a nudge from the one before it: roughly 20vw of
+        horizontal travel for the web surface, 10 to 14vh of vertical, and a
+        scale that ends well down at 0.74 rather than hovering near 1.
+
+        Containment is still absolute. The web surface at 0.74 is 493px in a
+        683px field, so even at its lowest offset it stays inside the stage.
+      */
+
       /* --- 01 -> 02 : the web app gives up the middle, the phone arrives -- */
-      tl.to(web, { x: centreOf(web) * 0.45, scale: 0.94, duration: 1 }, 0)
-        .to(mob, { x: "7vw", y: "0vh", scale: 0.94, autoAlpha: 1, duration: 1 }, 0.1);
+      tl.to(web, { x: centreOf(web) * 0.4, y: "-9vh", scale: 0.84, duration: 1 }, 0)
+        .to(mob, { x: "9vw", y: "3vh", scale: 0.95, autoAlpha: 1, duration: 1 }, 0.08);
       showCaption(tl, 1, 0.55);
 
-      /* --- 02 -> 03 : the assist panel rises into the row ---------------- */
-      tl.to(web, { x: 0, scale: 0.86, duration: 1 }, 1.1)
-        .to(mob, { x: 0, scale: 1, duration: 1 }, 1.1)
-        .to(ai, { x: 0, y: 0, scale: 1, autoAlpha: 1, duration: 1 }, 1.15);
+      /* --- 02 -> 03 : the assist panel rises from below ------------------ */
+      tl.to(web, { x: 0, y: "-3vh", scale: 0.76, duration: 1 }, 1.1)
+        .to(mob, { x: 0, y: "-8vh", scale: 0.88, duration: 1 }, 1.1)
+        /* Alpha arrives a little after the travel starts, so it is never
+           visible while still hanging below the stage. */
+        .to(ai, { x: 0, y: 0, scale: 1, duration: 1 }, 1.12)
+        .to(ai, { autoAlpha: 1, duration: 0.55 }, 1.35);
       showCaption(tl, 2, 1.6);
 
       /* --- 03 -> 04 : the row settles and the connection is drawn -------- */
-      tl.to([web, mob, ai], { y: "-1vh", duration: 0.7 }, 2.2)
-        .to(link, { autoAlpha: 1, scaleX: 1, duration: 0.8 }, 2.35);
+      tl.to(web, { y: 0, scale: 0.74, duration: 0.8 }, 2.2)
+        .to(mob, { y: 0, scale: 1, duration: 0.8 }, 2.2)
+        .to(ai, { y: 0, scale: 1, duration: 0.8 }, 2.2)
+        .to(link, { autoAlpha: 1, scaleX: 1, duration: 0.8 }, 2.45);
       showCaption(tl, 3, 2.7);
 
       /* Hold at the resolved composition so the section settles before the pin
          releases rather than releasing mid-move. */
       tl.to({}, { duration: 0.5 });
+
+      /*
+        THE ENVIRONMENT MOVES WITH THE STORY.
+
+        A plane behind the surfaces whose colour is interpolated by the same
+        scroll progress, so a new state visibly takes control of the scene
+        rather than only rearranging three panels in front of an unchanged
+        background. Four stops, continuous between them.
+      */
+      const scene = root.querySelector<HTMLElement>(".pstory__scene");
+      if (scene) {
+        gsap.set(scene, { "--pscene": 0 });
+        tl.to(scene, { "--pscene": 1, duration: 1, ease: "none" }, 0)
+          .to(scene, { "--pscene": 2, duration: 1, ease: "none" }, 1.1)
+          .to(scene, { "--pscene": 3, duration: 0.8, ease: "none" }, 2.2);
+      }
 
       root.dataset.story = "pinned";
     }, root);
@@ -184,6 +220,8 @@ export default function ProductStory() {
   return (
     <div ref={rootRef} className="pstory">
       <div ref={stageRef} className="pstory__stage">
+        {/* The scene behind the surfaces. Four colour stops, scrubbed. */}
+        <div className="pstory__scene" aria-hidden="true" />
         <div className="pstory__captions" aria-hidden="true">
           {STATES.map((s, i) => (
             <p key={s.index} className="pstory__caption" data-story-caption={i}>
