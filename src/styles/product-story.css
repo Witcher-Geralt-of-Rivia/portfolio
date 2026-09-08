@@ -1,0 +1,249 @@
+/* =====================================================================
+   PRODUCT ENGINEERING, PINNED
+
+   The cinematic stage. Deliberately a DIFFERENT presentation from the
+   interactive studio below it, and the reason is the one the previous
+   attempt got wrong: the studio is 988px tall, pinning something taller
+   than the viewport hangs its controls off the bottom of the screen, and
+   overriding the fit check would have reproduced that problem inside a
+   pin rather than solving it.
+
+   So the stage is built to the viewport instead. Its height is the
+   viewport minus the navigation clearance and its own padding, the three
+   surfaces are scaled to fit inside that, and nothing here scrolls
+   internally at any point in the sequence.
+
+   Everything below is inert until JavaScript adds `data-story="pinned"`,
+   so with no JS, or with reduced motion, the section is a plain readable
+   composition and no transform applies.
+   ===================================================================== */
+
+.pstory {
+  position: relative;
+  /* The stage only occupies a viewport; the pin distance is reserved by
+     ScrollTrigger's own spacer, not by a height declared here. */
+  margin-block: clamp(40px, 5vw, 72px);
+}
+
+.pstory__stage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(10px, 1.4vh, 20px);
+  /*
+    `svh`, not `vh`. On a phone `vh` is the tallest the viewport ever gets, so a
+    stage sized in it is taller than the screen whenever the browser chrome is
+    showing, which is precisely the clipped-content failure this redesign exists
+    to avoid.
+
+    The pin holds the stage at the very top of the viewport, so the navigation
+    clearance has to be padding INSIDE it: without that the first caption sits
+    underneath the floating navigation bar.
+  */
+  height: 100svh;
+  padding-top: var(--nav-scroll-margin, 96px);
+  padding-bottom: clamp(16px, 2.5vh, 36px);
+  overflow: hidden;
+}
+
+/* --- Captions ----------------------------------------------------------- */
+
+/*
+  All four are in the DOM, stacked, and cross-faded by the timeline. Only one
+  is visible at a time. They are `aria-hidden` because they narrate a visual
+  state rather than adding information: the section's real prose is above.
+*/
+.pstory__captions {
+  position: relative;
+  height: clamp(64px, 8vh, 92px);
+  flex: none;
+}
+
+.pstory__caption {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px clamp(10px, 1.2vw, 16px);
+  align-content: start;
+}
+
+.pstory__caption-index {
+  grid-row: span 2;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--type-technical-micro);
+  line-height: 2.4;
+  letter-spacing: var(--tracking-technical-micro);
+}
+
+.pstory__caption-title {
+  color: var(--text-primary);
+  font-size: clamp(20px, 2.2vw, 30px);
+  font-weight: var(--weight-heading);
+  line-height: 1.2;
+  letter-spacing: var(--tracking-display-2);
+}
+
+.pstory__caption-note {
+  color: var(--text-secondary);
+  font-size: clamp(13px, 1.1vw, 15px);
+  line-height: var(--leading-body);
+}
+
+/* --- The field the surfaces move in ------------------------------------- */
+
+/*
+  A ROW, NOT THREE ABSOLUTELY CENTRED BOXES.
+
+  The first version placed all three at 50%/50% and moved them with `xPercent`,
+  which is a percentage of each element's OWN width: three different widths meant
+  three different step sizes, and the resolved state was an unreadable overlapping
+  cluster rather than a composition.
+
+  So the resting layout lives here, in flow, where the three surfaces already sit
+  side by side in the proportions the product actually has. GSAP then animates
+  DEVIATIONS from that: the opening state pushes the web surface up to fill the
+  stage and holds the other two offstage, and the story is the journey back to
+  what CSS already describes.
+*/
+.pstory__field {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(16px, 2.2vw, 40px);
+}
+
+.pstory__surface {
+  position: relative;
+  flex: none;
+  transform-origin: 50% 50%;
+  /* Each surface keeps the proportions it was drawn at; only the box it sits
+     in changes size. */
+  max-height: 100%;
+}
+
+/*
+  Sized so the OPENING state fits, not just the resting one.
+
+  State 01 scales the web surface up to dominate the stage, and the first
+  version was drawn at a resting width whose scaled height was taller than the
+  field: the opening frame, the one that is supposed to show the application at
+  its most legible, had its top and bottom cut off. The resting width is chosen
+  backwards from `1 / OPEN_SCALE` of the room available.
+*/
+.pstory__surface--web {
+  width: min(38%, 460px);
+  z-index: 2;
+}
+
+.pstory__surface--mobile {
+  width: min(17%, 200px);
+  z-index: 3;
+}
+
+.pstory__surface--assist {
+  width: min(26%, 310px);
+  z-index: 3;
+}
+
+/*
+  The connector drawn in the final state, so "one system" is shown rather than
+  asserted. A hairline rather than a diagram: the section already has an event
+  flow, and a second one here would be two explanations of the same thing.
+*/
+.pstory__link {
+  position: absolute;
+  top: 50%;
+  left: 6%;
+  width: 88%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(111, 158, 224, 0.55) 18%,
+    rgba(178, 164, 235, 0.55) 82%,
+    transparent
+  );
+  z-index: 1;
+}
+
+/*
+  The surfaces inside the story are pictures. Their own hover and focus
+  treatments belong to the interactive studio below, and leaving them live here
+  would give the page two places that respond to the same gesture.
+*/
+.pstory__field * {
+  pointer-events: none !important;
+}
+
+/* --- Not running -------------------------------------------------------- */
+
+/*
+  Without the story the stage is a plain block: no fixed height, no absolute
+  placement, nothing hidden. This is what reduced motion, a narrow viewport
+  and a JavaScript failure all get, and it has to be readable on its own.
+*/
+.pstory:not([data-story="pinned"]) .pstory__stage {
+  height: auto;
+  padding-top: 0;
+  overflow: visible;
+}
+
+.pstory:not([data-story="pinned"]) .pstory__captions {
+  height: auto;
+}
+
+.pstory:not([data-story="pinned"]) .pstory__caption {
+  position: static;
+  inset: auto;
+}
+
+/* Only the first caption, or the plain layout reads as four competing
+   headings for one section. */
+.pstory:not([data-story="pinned"]) .pstory__caption:not(:first-child) {
+  display: none;
+}
+
+.pstory:not([data-story="pinned"]) .pstory__field {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(16px, 2vw, 28px);
+  align-items: flex-start;
+  justify-content: center;
+  margin-top: clamp(16px, 2vw, 28px);
+}
+
+.pstory:not([data-story="pinned"]) .pstory__field {
+  flex-wrap: wrap;
+}
+
+.pstory:not([data-story="pinned"]) .pstory__surface {
+  width: min(100%, 520px);
+  max-height: none;
+}
+
+/* Below the story's width the section shows its plain composition, which is
+   the same one the reduced-motion path gets. */
+@media (max-width: 1059px) {
+  .pstory__stage {
+    height: auto;
+    padding-top: 0;
+    overflow: visible;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pstory__stage {
+    height: auto;
+    padding-top: 0;
+    overflow: visible;
+  }
+
+  .pstory__surface {
+    will-change: auto;
+  }
+}

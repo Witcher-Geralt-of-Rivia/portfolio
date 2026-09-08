@@ -28,7 +28,7 @@
 
 import { useCallback, useEffect, useRef } from "react";
 
-import { useStickyProgress } from "@/lib/use-sticky-progress";
+import { useSectionProgress } from "@/lib/use-section-progress";
 import { clamp01 } from "@/lib/scroll-geometry";
 
 /**
@@ -159,11 +159,8 @@ export default function ArchitectureTracer({ children }: { children: React.React
     [readWiring]
   );
 
-  const { rangeRef, stageRef, enhanced } = useStickyProgress<HTMLDivElement, HTMLDivElement>({
-    sticky: false,
-    travel: () => 0,
+  const { rangeRef, enhanced } = useSectionProgress<HTMLDivElement>({
     onFrame,
-    rangeHeightProperty: "--arch-unused",
   });
 
   /* Leaving enhanced mode has to clear what the frames wrote, or a visitor who
@@ -183,7 +180,7 @@ export default function ArchitectureTracer({ children }: { children: React.React
 
   return (
     <div ref={rangeRef} className={`arch-trace-scope${enhanced ? " is-traced" : ""}`}>
-      <div ref={stageRef}>{children}</div>
+      <div>{children}</div>
     </div>
   );
 }

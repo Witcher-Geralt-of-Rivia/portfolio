@@ -1,5 +1,5 @@
 import ProductCapabilityRail from "./ProductCapabilityRail";
-import ProductStack from "./ProductStack";
+import ProductStory from "./ProductStory";
 import ProductStudio from "./ProductStudio";
 
 /**
@@ -35,22 +35,29 @@ export default function ProductEngineeringSection() {
         </div>
       </div>
 
-      {/* The stack wraps rather than replaces: the studio, its tablist, its
-          run control and all three surfaces are unchanged inside it. Below
-          900px it does nothing at all. */}
-      <ProductStack>
-        <div className="products__studio">
-          {/* The spectral edge, on the studio because it is this section's
-              focal surface. The studio paints its own milk surface, so the
-              wrapper's inner is bare here and only carries the clip. */}
-          <div className="spectral spectral--lg">
-            <div className="spectral__inner spectral__inner--bare">
-              <ProductStudio />
-            </div>
+      {/*
+        The story first, then the instrument.
+
+        `ProductStory` is a pinned, viewport-safe retelling of the same three
+        surfaces: it is what the section shows. The studio below is the same
+        product with its controls attached, and it is where a visitor can
+        actually run the flow. The story never pins the studio, because the
+        studio is 988px tall and pinning it would hang its own controls off the
+        bottom of the screen.
+      */}
+      <ProductStory />
+
+      <div className="products__studio">
+        {/* The spectral edge, on the studio because it is this section's focal
+            interactive surface. The studio paints its own milk surface, so the
+            wrapper's inner is bare here and only carries the clip. */}
+        <div className="spectral spectral--lg">
+          <div className="spectral__inner spectral__inner--bare">
+            <ProductStudio />
           </div>
-          <p className="products__micro">LOCAL / DETERMINISTIC</p>
         </div>
-      </ProductStack>
+        <p className="products__micro">LOCAL / DETERMINISTIC</p>
+      </div>
 
       <ProductCapabilityRail />
     </section>

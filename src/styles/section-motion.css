@@ -1,15 +1,14 @@
 /* =====================================================================
    SECTION MOTION
-   The two scroll-driven behaviours that live inside a section rather
-   than around it: the execution trace in Intelligent Systems, and the
-   surface emphasis in Product Engineering.
+   The execution trace in Intelligent Systems: the one scroll-driven
+   behaviour that still lives inside a section rather than around it.
 
-   The scene layer around each section handles its entry and atmosphere;
-   this is what happens once the visitor is inside one.
+   Product Engineering and Featured Work are pinned GSAP stories now and
+   own their own transforms; the note further down records what used to
+   be here and why it went.
 
-   Both are inert until their `--enhanced` / `is-traced` class, which
-   only exists once JavaScript has run and reduced motion has been
-   checked.
+   Inert until `is-traced`, which only exists once JavaScript has run and
+   reduced motion has been checked.
    ===================================================================== */
 
 /* ---------------------------------------------------------------------
@@ -88,50 +87,18 @@
 }
 
 /* ---------------------------------------------------------------------
-   PRODUCT ENGINEERING
-   Surface emphasis. Not pinned: the studio is taller than the usable
-   viewport at every width, so holding it would hide its own controls
-   below the fold. The emphasis runs as the section passes instead.
-   --------------------------------------------------------------------- */
+   THE PRODUCT SURFACE EMPHASIS IS GONE
 
-.pstack {
-  position: relative;
-}
+   `.pstack` drove a per-surface opacity and scale as the section passed
+   through the viewport. It was never pinned, and the direction was
+   explicit that ordinary section-reactive scrolling is not the effect it
+   wants. The section now opens with `ProductStory`, a pinned stage that
+   moves the same three surfaces through four states under scroll, and
+   that stage's transforms are written by GSAP rather than by CSS rules
+   keyed off a data attribute.
 
-/*
-  The recede: scale to 0.978 and opacity to 0.76, which is enough to read
-  as depth and not enough to read as disabled. Transform and opacity only,
-  so nothing reflows and all three surfaces keep their positions exactly.
-
-  None of the three ever leaves. The section's claim is that this is one
-  product across every surface, and that claim is made by having all three
-  on screen together.
-*/
-.pstack--enhanced .psurface {
-  transform-origin: 50% 50%;
-  transition: transform var(--duration-slow) var(--ease-entrance),
-    opacity var(--duration-slow) var(--ease-nav);
-}
-
-.pstack--enhanced[data-pstack] .pweb,
-.pstack--enhanced[data-pstack] .pmob,
-.pstack--enhanced[data-pstack] .passist {
-  transform: scale(0.978);
-  opacity: 0.76;
-}
-
-.pstack--enhanced[data-pstack="0"] .pweb,
-.pstack--enhanced[data-pstack="1"] .pmob,
-.pstack--enhanced[data-pstack="2"] .passist {
-  transform: none;
-  opacity: 1;
-}
-
-/* ---------------------------------------------------------------------
-   REDUCED MOTION
-   Both behaviours are refused in JavaScript, so neither class appears.
-   These cover the moment between a preference change and the re-render,
-   and keep the intent legible here rather than only in the components.
+   Leaving these here would be a second system with an opinion about the
+   same transform.
    --------------------------------------------------------------------- */
 
 @media (prefers-reduced-motion: reduce) {
@@ -150,15 +117,6 @@
   .arch-trace-scope.is-traced .arch-node__marker {
     transform: none;
     box-shadow: none;
-    transition: none;
-  }
-
-  .pstack--enhanced .psurface,
-  .pstack--enhanced[data-pstack] .pweb,
-  .pstack--enhanced[data-pstack] .pmob,
-  .pstack--enhanced[data-pstack] .passist {
-    transform: none;
-    opacity: 1;
     transition: none;
   }
 }

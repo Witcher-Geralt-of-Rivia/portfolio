@@ -31,8 +31,6 @@ import {
   panelProgress,
   segmentAt,
   stepTravel,
-  stickyProgress,
-  stickyRangeHeight,
   viewportProgress,
 } from "../src/lib/scroll-geometry.ts";
 import {
@@ -129,31 +127,14 @@ section("MATHS - EASING");
 }
 
 /* ===================================================================== */
-section("MATHS - STICKY RANGES");
-{
-  check("a range is the stage, the offset and the travel", stickyRangeHeight(600, 900, 110) === 1610);
-  check("progress starts at 0", stickyProgress(0, 1000, 1610, 600, 110) === 0);
-  /* The defect this exists to prevent: a sticky box pinned at an offset
-     releases that many pixels early, and leaving the offset out of any of the
-     three places it appears ends the choreography short by its height. */
-  check(
-    "and reaches exactly 1 where the stage releases",
-    stickyProgress(1000 + 1610 - 600 - 110, 1000, 1610, 600, 110) === 1,
-    "the sticky offset is carried through both ends"
-  );
-  check(
-    "an offset left out would finish short",
-    stickyProgress(1000 + 1610 - 600 - 110, 1000, 1610, 600, 0) < 1,
-    "which is the bug the parameter prevents"
-  );
-  check("a range with no travel cannot divide by zero", stickyProgress(500, 0, 600, 600, 0) === 0);
+/*
+  The sticky-range maths that used to be tested here is gone with the functions
+  it covered. Pinning is ScrollTrigger's now, and a pin's geometry is its own
+  business rather than something this project computes: `qa/stage09i-pinned.mjs`
+  asserts the behaviour that replaced it, by measuring whether a pinned stage
+  actually holds its position in the viewport.
+*/
 
-  check("travel is bounded above", stepTravel(50, 900, 0.7, 1, 2.5) === Math.round(2.5 * 900));
-  check("and below", stepTravel(1, 900, 0.1, 1, 2.5) === 900);
-  check("no steps means no travel", stepTravel(0, 900, 0.7, 1, 2.5) === 0);
-}
-
-/* ===================================================================== */
 section("MATHS - SEGMENTS AND PANELS");
 {
   /* The property every stacked section depends on: the last panel reaches its
@@ -307,8 +288,16 @@ section("THE PAGE - HEADLINE AND DEPENDENCIES");
 {
   const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
   const deps = Object.keys(pkg.dependencies ?? {});
-  check("runtime dependencies are unchanged", deps.join(",") === "geist,next,react,react-dom", deps.join(","));
-  for (const banned of ["gsap", "lenis", "framer-motion", "motion", "animejs", "anime.js", "three"]) {
+  /*
+    GSAP is now a sanctioned dependency: the pinned storytelling direction
+    superseded the earlier no-animation-library rule, and ScrollTrigger is what
+    implements it. The rest of the list stands. Lenis in particular is still out,
+    because the direction asked for native scrolling unless it demonstrably broke
+    the integration, and it did not.
+  */
+  check("runtime dependencies are the four plus gsap",
+    deps.join(",") === "geist,gsap,next,react,react-dom", deps.join(","));
+  for (const banned of ["lenis", "framer-motion", "motion", "animejs", "anime.js", "three"]) {
     check(`no ${banned}`.slice(0, 58), !deps.includes(banned) && !(pkg.devDependencies ?? {})[banned]);
   }
 
@@ -395,90 +384,12 @@ section("SECTIONS RESOLVE BEFORE THEY RELEASE");
   check("every node reaches its final state", traced.idle === 0 && traced.resolved === traced.total,
     `${traced.resolved} of ${traced.total} resolved`);
 
-  /* --- Product stack --- */
   /*
-     Unpinned, deliberately, and the assertion says so rather than checking for
-     a reserved range that should not exist. The studio is 988px tall at 1440
-     against a usable 790px, so pinning it would hang its event-flow rail and
-     its Run button off the bottom of the screen. Progress runs as the section
-     passes instead, which is the same behaviour without the dead scrolling.
+    The product stack and the old screen progression used to be walked here.
+    Both are pinned GSAP stories now and are covered by
+    `qa/stage09i-pinned.mjs`, which can assert the thing that actually matters
+    about them: that the viewport stays anchored while the composition changes.
   */
-  const pstack = await page.evaluate(() => {
-    const el = document.querySelector(".pstack");
-    const stage = document.querySelector(".pstack__stage");
-    const box = el.getBoundingClientRect();
-    return {
-      enhanced: el.className.includes("--enhanced"),
-      top: box.top + window.scrollY,
-      height: el.offsetHeight,
-      stageHeight: stage.offsetHeight,
-      position: getComputedStyle(stage).position,
-    };
-  });
-  check("the product stack is enhanced at this width", pstack.enhanced);
-  check("it reserves no scroll range", pstack.height === pstack.stageHeight,
-    `${pstack.height} vs ${pstack.stageHeight}`);
-  check("and nothing is pinned", pstack.position !== "sticky", pstack.position);
-
-  const surfacesSeen = new Set();
-  for (let f = 0; f <= 1.001; f += 0.1) {
-    await page.evaluate(
-      (y) => window.scrollTo(0, Math.max(0, Math.min(y, document.body.scrollHeight - window.innerHeight))),
-      pstack.top - 900 + (pstack.height + 900) * f
-    );
-    await settle(page, 80, 3);
-    const s = await page.evaluate(() => document.querySelector(".pstack").dataset.pstack);
-    if (s !== undefined) surfacesSeen.add(s);
-  }
-  check("every surface takes a turn leading", surfacesSeen.size === 3, [...surfacesSeen].join(","));
-
-  const stacked = await page.evaluate(() => ({
-    index: document.querySelector(".pstack").dataset.pstack,
-    dim: [...document.querySelectorAll(".psurface")].filter(
-      (e) => Number(getComputedStyle(e).opacity) < 0.7
-    ).length,
-  }));
-  check("it ends on the last surface", stacked.index === "2", String(stacked.index));
-  check("and none of the three is ever hidden", stacked.dim === 0,
-    "they recede to 0.76, which reads as depth rather than as disabled");
-
-  /* --- The work screen sequence --- */
-  const screens = await geometryOf(page, ".screens", ".screens__stage");
-  check("the screen sequence reserves a range", screens && screens.height > screens.stage,
-    screens ? `${screens.height} vs ${screens.stage}` : "missing");
-  await page.evaluate(
-    (g) => window.scrollTo(0, Math.min(g.top + g.height - g.stage - g.sticky, document.body.scrollHeight - window.innerHeight)),
-    screens
-  );
-  await settle(page);
-  const resolvedState = await page.evaluate(() => {
-    const root = document.querySelector(".screens");
-    const items = [...document.querySelectorAll(".screens__item")];
-    return {
-      active: root.dataset.screensActive,
-      module: document.querySelector(".screens__module")?.textContent ?? "",
-      /* The reveal has landed when the last screen is painted and unclipped.
-         A screen is painted or it is not, so a fractional opacity here is the
-         double-exposure defect coming back. */
-      painted: items.filter((el) => Number(el.style.getPropertyValue("--screen-show") || 0) === 1).length,
-      translucent: items.filter((el) => {
-        const o = Number(getComputedStyle(el).opacity);
-        return o > 0.001 && o < 0.999;
-      }).length,
-      uncovered: items.filter(
-        (el) =>
-          Number(el.style.getPropertyValue("--screen-show") || 0) === 1 &&
-          Number(el.style.getPropertyValue("--screen-clip") || 0) === 0
-      ).length,
-    };
-  });
-  /* The defect this exists for: the last item never fully resolving. */
-  check("it ends on the last screen", resolvedState.active === String(SCREEN_COUNT - 1), String(resolvedState.active));
-  check("which is Reports", resolvedState.module === "Reports", resolvedState.module);
-  check("and that screen is fully uncovered", resolvedState.uncovered >= 1,
-    `${resolvedState.uncovered} uncovered of ${resolvedState.painted} painted`);
-  check("no screen is left half drawn on top of another", resolvedState.translucent === 0,
-    String(resolvedState.translucent));
 
   /* The disclosure is not a casualty of the choreography. */
   const disclosure = await page.evaluate(() => {
@@ -545,17 +456,24 @@ section("REDUCED MOTION LEAVES EVERYTHING READABLE");
 
   const state = await page.evaluate(() => ({
     screensEnhanced: document.querySelectorAll(".screens--enhanced").length,
-    pstackEnhanced: document.querySelectorAll(".pstack--enhanced").length,
+    storiesPinned: document.querySelectorAll('[data-story="pinned"]').length,
     traced: document.querySelectorAll(".arch-trace-scope.is-traced").length,
     scenesLive: document.querySelectorAll(".scene--live").length,
     h1: document.querySelector("h1").textContent.trim(),
     boot: getComputedStyle(document.querySelector(".cinit__state--boot")).opacity,
     live: getComputedStyle(document.querySelector(".cinit__state--live")).opacity,
-    /* Nothing may be hidden. Every element the choreography touches has to be
-       fully present when the choreography is refused. */
-    dimScreens: [...document.querySelectorAll(".screens__item")].filter(
-      (e) => e.getClientRects().length > 0 && Number(getComputedStyle(e).opacity) < 0.99
-    ).length,
+    /*
+      The screen a visitor can actually SEE has to be fully readable. The other
+      ten are `visibility: hidden` under reduced motion, which is the correct
+      resting state for a sequence that does not run, and counting them as
+      "dim" reported ten failures on a section that was behaving exactly as
+      intended.
+    */
+    dimScreens: [...document.querySelectorAll(".screens__item")].filter((e) => {
+      const cs = getComputedStyle(e);
+      if (cs.visibility === "hidden" || cs.display === "none") return false;
+      return e.getClientRects().length > 0 && Number(cs.opacity) < 0.99;
+    }).length,
     dimScenes: [...document.querySelectorAll(".scene__content")].filter(
       (e) => Number(getComputedStyle(e).opacity) < 0.99
     ).length,
@@ -568,13 +486,13 @@ section("REDUCED MOTION LEAVES EVERYTHING READABLE");
     dimNodes: [...document.querySelectorAll(".arch-node")].filter(
       (e) => Number(getComputedStyle(e).opacity) < 0.99
     ).length,
-    stickyStages: [...document.querySelectorAll(".screens__stage, .pstack__stage")].filter(
+    stickyStages: [...document.querySelectorAll(".screens__stage, .pstory__stage")].filter(
       (e) => getComputedStyle(e).position === "sticky"
     ).length,
   }));
 
-  check("no section is enhanced", state.screensEnhanced === 0 && state.pstackEnhanced === 0 && state.traced === 0,
-    `${state.screensEnhanced}/${state.pstackEnhanced}/${state.traced}`);
+  check("no section is enhanced", state.screensEnhanced === 0 && state.storiesPinned === 0 && state.traced === 0,
+    `${state.screensEnhanced}/${state.storiesPinned}/${state.traced}`);
   check("no scene is enhanced either", state.scenesLive === 0, String(state.scenesLive));
   check("nothing is sticky", state.stickyStages === 0, String(state.stickyStages));
   check("the H1 is unchanged", state.h1 === "Engineering intelligent systems.");
@@ -608,7 +526,7 @@ section("FOCUS AND RESIZE");
      left invisible-but-focusable. */
   const focusables = await page.evaluate(() => {
     const inSection = (sel) => [...document.querySelectorAll(`${sel} a, ${sel} button`)];
-    const all = [...inSection(".screens"), ...inSection(".pstack"), ...inSection(".arch-trace-scope")];
+    const all = [...inSection(".screens"), ...inSection(".pstory"), ...inSection(".arch-trace-scope")];
     return all
       .filter((el) => {
         /* The genuine failure is LAID OUT BUT INVISIBLE: an element the browser
@@ -652,15 +570,15 @@ section("FOCUS AND RESIZE");
   check("and still resolves to the last screen afterwards", stillResolves === String(SCREEN_COUNT - 1),
     String(stillResolves));
 
-  /* Below its threshold the product stack stands down entirely. */
+  /* Below its threshold the product story stands down entirely. */
   await page.setViewportSize({ width: 390, height: 844 });
   await settle(page, 150, 4);
   const narrow = await page.evaluate(() => ({
-    enhanced: document.querySelectorAll(".pstack--enhanced").length,
-    sticky: getComputedStyle(document.querySelector(".pstack__stage")).position,
+    story: document.querySelector(".pstory")?.dataset.story ?? "none",
+    spacers: document.querySelectorAll(".pin-spacer").length,
   }));
-  check("the product stack is off on a phone", narrow.enhanced === 0 && narrow.sticky !== "sticky",
-    `${narrow.enhanced} / ${narrow.sticky}`);
+  check("the product story is off on a phone", narrow.story !== "pinned" && narrow.spacers === 0,
+    `${narrow.story} / ${narrow.spacers}`);
 
   await ctx.close();
   await browser.close();

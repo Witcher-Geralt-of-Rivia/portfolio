@@ -150,9 +150,11 @@ export default function SceneLayer({
   return (
     <div
       ref={rootRef}
-      className={`scene scene--${sceneId} scene--enter-${scene.enter}${
-        enhanced ? " scene--live" : ""
-      }`}
+      /* A pinned scene gets no entry class at all, so no rule in `scenes.css`
+         can put a transform on its content and break the pin inside it. */
+      className={`scene scene--${sceneId}${
+        scene.pinned ? " scene--pinned" : ` scene--enter-${scene.enter}`
+      }${enhanced ? " scene--live" : ""}`}
       data-scene={sceneId}
       style={
         {

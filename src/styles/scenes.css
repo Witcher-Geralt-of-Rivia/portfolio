@@ -77,8 +77,23 @@
 /* Only while the scene is actually near the viewport. A permanent
    compositing hint on six full-width sections is six layers the compositor
    holds for a page that is mostly not being looked at. */
-.scene--live.scene--near .scene__content {
+.scene--live.scene--near:not(.scene--pinned) .scene__content {
   will-change: transform, opacity;
+}
+
+/*
+  A pinned scene's content must have NO containing block on it.
+
+  `position: fixed` resolves against the nearest transformed, filtered or
+  will-change-transform ancestor rather than against the viewport, so either
+  property here silently cancels the ScrollTrigger pin inside: the spacer is
+  still created and the timeline still scrubs, but the stage scrolls away as
+  though nothing were pinned. Stated as a rule rather than left to the absence
+  of one, because the failure is invisible in the markup.
+*/
+.scene--pinned .scene__content {
+  transform: none;
+  will-change: auto;
 }
 
 /* --- rise: comes up from below, with the colour plane ------------------ */

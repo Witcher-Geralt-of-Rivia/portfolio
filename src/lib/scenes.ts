@@ -52,6 +52,20 @@ export type Scene = {
   field: "none" | "drift" | "liquid";
   /** A spectral edge on this scene's focal surface. */
   border: boolean;
+  /**
+   * This scene contains a ScrollTrigger-pinned story, so it must NOT transform.
+   *
+   * A pinned stage is `position: fixed`, and `fixed` inside a transformed
+   * ancestor resolves against that ancestor rather than against the viewport.
+   * A scene entry transform on the wrapper therefore silently cancels the pin:
+   * the spacer is created, the trigger scrubs, the labels advance, and the
+   * stage scrolls away exactly as if nothing were pinned at all. `will-change:
+   * transform` does the same thing on its own, so both are withheld here.
+   *
+   * These sections lose nothing by it. They have four and eleven states of
+   * their own choreography, which is a far stronger entrance than a sweep.
+   */
+  pinned?: boolean;
 };
 
 /**
@@ -90,9 +104,9 @@ export const SCENES: readonly Scene[] = [
     border: false,
   },
   {
-    /* Sweeps in laterally, which is the clearest possible break from the
-       section above it. The studio is the page's widest surface and arriving
-       sideways is what makes the width register. */
+    /* Declared, and deliberately not applied: this scene is `pinned`, so its
+       wrapper must stay untransformed or the pinned stage inside it cannot be
+       fixed to the viewport. Its entrance is the pinned story itself. */
     id: "products",
     enter: "sweep",
     travel: "14vw",
@@ -102,6 +116,7 @@ export const SCENES: readonly Scene[] = [
     accentAlt: "var(--scene-lemon)",
     field: "drift",
     border: true,
+    pinned: true,
   },
   {
     /* Blooms open from a clipped field. Radial rather than linear, so the
@@ -140,9 +155,9 @@ export const SCENES: readonly Scene[] = [
     border: false,
   },
   {
-    /* Expands into place. The climax, and the only scene that both expands and
-       carries a spectral edge, because it is the one the whole page is built
-       toward. */
+    /* Declared, and deliberately not applied: this scene is `pinned`. Its
+       entrance is eleven real application screens arriving one at a time,
+       which does not need a wrapper transform in front of it. */
     id: "work",
     enter: "expand",
     travel: "8vh",
@@ -152,6 +167,7 @@ export const SCENES: readonly Scene[] = [
     accentAlt: "var(--scene-cyan)",
     field: "liquid",
     border: true,
+    pinned: true,
   },
 ] as const;
 

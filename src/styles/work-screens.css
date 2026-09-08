@@ -1,54 +1,89 @@
 /* =====================================================================
-   THE SCREEN SEQUENCE
+   THE PINNED SCREEN SEQUENCE
 
    Eleven captures of the real Operations application, one at a time,
-   advanced by scroll.
+   inside a stage ScrollTrigger holds in the viewport while the page
+   keeps taking scroll.
 
-   Every screen is in the DOM at once and cross-transitioned rather than
-   swapped. Mounting one at a time would begin each transition with an
-   image decode, which is a blank frame at exactly the moment the visitor
-   is looking for a change.
+   Every screen is in the DOM at once. Mounting one at a time would begin
+   each transition with an image decode, which is a blank frame at exactly
+   the moment the visitor is looking for a change.
+
+   D-109: a screenshot is painted or it is not. Two dashboards at half
+   opacity read as a printing fault rather than as a transition, so the
+   arriving screen is uncovered over the one it replaces by a moving clip
+   edge and nothing is ever semi-transparent.
    ===================================================================== */
 
 .screens {
   position: relative;
 }
 
-.screens--enhanced {
-  height: var(--screens-range-h, auto);
+/*
+  THE LAB TO WORK HANDOFF.
+
+  The page's largest scene change, and the one the direction wants to be
+  unmistakable: the Lab's warm peach and lemon are overtaken by this scene's
+  cyan and violet as the application frame rises into place.
+
+  It is a fixed plane rather than a field inside the section, because a handover
+  has to cover the viewport to read as one scene replacing another. It is
+  scrubbed by the approach and gone by the time the pin engages, so it never
+  competes with the fluid behind it: the fluid is the page's permanent
+  atmosphere and this is one transition drawn over it.
+*/
+.screens__handoff {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    radial-gradient(72vw 66vh at 88% 8%, var(--scene-lemon), transparent 62%),
+    radial-gradient(66vw 60vh at 74% 26%, var(--scene-peach), transparent 66%),
+    radial-gradient(84vw 76vh at 14% 74%, var(--scene-cyan), transparent 64%),
+    radial-gradient(70vw 64vh at 32% 92%, var(--scene-violet), transparent 68%);
 }
 
-.screens--enhanced .screens__stage {
-  position: sticky;
-  top: var(--nav-scroll-margin);
+@media (prefers-reduced-motion: reduce) {
+  /* The timeline never runs, so this never becomes visible; stated rather than
+     left to the absence of a trigger. */
+  .screens__handoff {
+    display: none;
+  }
 }
 
-/* --- The frame ---------------------------------------------------------- */
-
-.screens__frame {
-  /* The spectral edge comes from the shared `.spectral` wrapper; this only
-     sets the width the frame occupies and the depth it sits at. */
-  width: 100%;
-  max-width: 1120px;
-  margin-inline: auto;
-  box-shadow: var(--shadow-card-lg);
-}
-
-.screens__inner {
+/*
+  The stage fills the viewport it is pinned in, and the frame inside is sized
+  to what is left after the bar. `svh` because on a phone `vh` is the tallest
+  the viewport ever gets, so a stage sized in it is taller than the screen
+  whenever the browser chrome is showing.
+*/
+.screens[data-story="pinned"] .screens__stage {
   display: flex;
   flex-direction: column;
+  gap: clamp(8px, 1.1vh, 16px);
+  /* The pin holds the stage at the top of the viewport, so the navigation
+     clearance is padding INSIDE it: without that the module bar renders behind
+     the floating navigation. */
+  height: 100svh;
+  padding-top: var(--nav-scroll-margin, 96px);
+  padding-bottom: clamp(14px, 2vh, 28px);
 }
 
-/* A thin bar naming the module rather than imitation browser controls,
-   which would be clutter around the one thing worth looking at. */
+/* --- The bar ------------------------------------------------------------ */
+
+/*
+  A thin line naming the module rather than imitation browser controls, which
+  would be clutter around the one thing worth looking at.
+*/
 .screens__bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 10px clamp(14px, 1.6vw, 20px);
-  border-bottom: 1px solid var(--line-subtle);
-  background: rgba(250, 250, 253, 0.92);
+  flex: none;
+  padding-inline: 2px;
 }
 
 .screens__product,
@@ -68,19 +103,64 @@
   color: var(--text-muted);
 }
 
-/* --- The screens -------------------------------------------------------- */
+/* --- The frame ---------------------------------------------------------- */
 
 /*
-  A fixed aspect box holding all eleven, stacked. The ratio is the capture
-  viewport's own, so nothing is letterboxed or cropped and the application
-  is seen at the proportions it was designed at.
+  The screenshot dominates the stage. It is held at the capture's own aspect
+  ratio and given as much of the stage as fits, so at 1440x900 it reads as the
+  actual application rather than as a thumbnail of one.
 */
+.screens__frame {
+  width: 100%;
+  max-width: 1240px;
+  margin-inline: auto;
+  box-shadow: var(--shadow-card-lg);
+}
+
+/*
+  THE FRAME KEEPS THE CAPTURE'S RATIO, EXACTLY.
+
+  Sized by the height the stage has left, with the width following from
+  1440:900. Letting the width lead instead was the first attempt: the box ended
+  up a different shape from the screenshots, `object-fit: cover` cropped the
+  sides, and the application lost its own sidebar and right-hand column. A
+  screenshot that is cropped is no longer a photograph of the product.
+*/
+.screens[data-story="pinned"] .screens__frame {
+  min-height: 0;
+  flex: 1;
+  display: flex;
+  height: 100%;
+  width: auto;
+  aspect-ratio: 1440 / 900;
+  max-width: 100%;
+  margin-inline: auto;
+}
+
+.screens__inner {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 0;
+}
+
+/* --- The screens -------------------------------------------------------- */
+
 .screens__list {
   position: relative;
+  flex: 1;
+  min-height: 0;
   margin: 0;
   padding: 0;
   list-style: none;
   aspect-ratio: 1440 / 900;
+}
+
+.screens[data-story="pinned"] .screens__list {
+  /* The frame already carries the ratio, so the list simply fills it. */
+  aspect-ratio: auto;
+  width: 100%;
+  height: 100%;
 }
 
 .screens__item {
@@ -90,53 +170,52 @@
 
 /*
   Without the sequence running, the first screen is the one on show and the
-  rest are behind it. So a visitor whose JavaScript failed sees the real
-  Overview page rather than eleven stacked images or an empty frame.
+  rest are behind it. So a visitor whose JavaScript failed, or who asked for
+  reduced motion, sees the real Overview page rather than eleven stacked images
+  or an empty frame.
 */
 .screens__item + .screens__item {
   visibility: hidden;
 }
 
 /*
-  A REVEAL, not a crossfade.
+  THE REVEAL.
 
-  Eleven screenshots of one application share a layout, a chrome and a colour,
-  so two of them at half opacity do not read as one changing into another: they
-  read as a printing fault. The first build of this crossfaded, and every
-  transition was an unreadable double exposure of two dashboards.
-
-  A screen is therefore painted or it is not. The arriving one sits above the
-  one it replaces and is uncovered by a moving clip edge, so no frame ever
-  contains a semi-transparent screen and the application stays legible at every
-  scroll position rather than only at the settled ones.
+  `--screen-show` is binary: painted or not. `--screen-clip` runs 1 to 0 as a
+  screen is uncovered. Neither is ever a partial opacity, which is the whole of
+  D-109 expressed in two custom properties.
 */
-.screens--enhanced .screens__item {
+.screens[data-story="pinned"] .screens__item {
   visibility: visible;
   opacity: var(--screen-show, 0);
   /* The arriving screen is above the one it covers. */
-  z-index: calc(1 + var(--screen-layer, 0));
-  /* Uncovered from the left. `--screen-clip` runs 1 to 0 as it arrives. */
-  clip-path: inset(0 0 0 calc(var(--screen-clip, 0) * 100%));
+  z-index: calc(1 + var(--screen-show, 0) * (1 - var(--screen-clip, 0)));
 }
 
-/*
-  Alternating direction, by position rather than by a written variable.
-
-  Ten identical left-to-right wipes in a row become a single repeated gesture
-  that stops being noticed around the fourth one. Odd-numbered screens are
-  uncovered downward instead, so the change stays a change all the way to
-  Reports.
-*/
-.screens--enhanced .screens__item:nth-child(even) {
+/* The compass. Four directions in a designed rotation, written onto each item
+   as `data-dir`, so no two consecutive changes arrive the same way. */
+.screens[data-story="pinned"] .screens__item[data-dir="up"] {
   clip-path: inset(calc(var(--screen-clip, 0) * 100%) 0 0 0);
 }
 
+.screens[data-story="pinned"] .screens__item[data-dir="left"] {
+  clip-path: inset(0 0 0 calc(var(--screen-clip, 0) * 100%));
+}
+
+.screens[data-story="pinned"] .screens__item[data-dir="down"] {
+  clip-path: inset(0 0 calc(var(--screen-clip, 0) * 100%) 0);
+}
+
+.screens[data-story="pinned"] .screens__item[data-dir="right"] {
+  clip-path: inset(0 calc(var(--screen-clip, 0) * 100%) 0 0);
+}
+
 /*
-  The moving edge itself, so the reveal is a visible event rather than a
-  silent replacement. A thin bright line riding the clip boundary, drawn on
-  the arriving screen only and only while it is arriving.
+  A light line riding the clip boundary, so the reveal is a visible event
+  rather than a silent replacement. Drawn only while a screen is arriving:
+  `clip * (1 - clip)` is zero at both ends and peaks mid-wipe.
 */
-.screens--enhanced .screens__item::after {
+.screens[data-story="pinned"] .screens__item::after {
   content: "";
   position: absolute;
   inset: 0;
@@ -144,32 +223,34 @@
   pointer-events: none;
   opacity: calc(var(--screen-clip, 0) * (1 - var(--screen-clip, 0)) * 4);
   background: linear-gradient(
-    90deg,
+    var(--screen-edge-angle, 180deg),
     transparent calc(var(--screen-clip, 0) * 100% - 3px),
     rgba(178, 164, 235, 0.9) calc(var(--screen-clip, 0) * 100%),
     transparent calc(var(--screen-clip, 0) * 100% + 3px)
   );
 }
 
-.screens--enhanced .screens__item:nth-child(even)::after {
-  background: linear-gradient(
-    180deg,
-    transparent calc(var(--screen-clip, 0) * 100% - 3px),
-    rgba(178, 164, 235, 0.9) calc(var(--screen-clip, 0) * 100%),
-    transparent calc(var(--screen-clip, 0) * 100% + 3px)
-  );
-}
+.screens[data-story="pinned"] .screens__item[data-dir="up"]::after { --screen-edge-angle: 180deg; }
+.screens[data-story="pinned"] .screens__item[data-dir="left"]::after { --screen-edge-angle: 90deg; }
+.screens[data-story="pinned"] .screens__item[data-dir="down"]::after { --screen-edge-angle: 0deg; }
+.screens[data-story="pinned"] .screens__item[data-dir="right"]::after { --screen-edge-angle: 270deg; }
 
+/*
+  `contain`, not `cover`. The frame is held at the capture's own ratio so the
+  two are equivalent in the normal case, and `contain` is the one that fails
+  safely: if a viewport ever makes the box a different shape, the screenshot
+  letterboxes rather than losing its edges.
+*/
 .screens__shot {
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  object-position: top center;
+  object-fit: contain;
+  object-position: center;
 }
 
-/* The real mobile capture, used at narrow widths rather than the desktop
-   image shrunk until its tables are unreadable. */
+/* The real mobile capture, used at narrow widths rather than the desktop image
+   shrunk until its tables are unreadable. */
 .screens__shot--mobile {
   display: none;
 }
@@ -189,29 +270,24 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  /* No sticky cycling. The frame shows the Overview screen and the section
-     scrolls normally; the other ten stay reachable in the demo itself,
-     which the action below the frame still opens. */
-  .screens--enhanced {
+  /* No pin and no cycling. The frame shows the Overview screen and the section
+     scrolls normally; the other ten stay reachable in the demo itself, which
+     the action below the frame still opens. */
+  .screens .screens__stage {
     height: auto;
   }
 
-  .screens--enhanced .screens__stage {
-    position: static;
-  }
-
-  .screens--enhanced .screens__item {
+  .screens .screens__item {
     opacity: 0;
-    transform: none;
     clip-path: none;
     visibility: hidden;
   }
 
-  .screens--enhanced .screens__item::after {
+  .screens .screens__item::after {
     display: none;
   }
 
-  .screens--enhanced .screens__item:first-child {
+  .screens .screens__item:first-child {
     opacity: 1;
     visibility: visible;
   }

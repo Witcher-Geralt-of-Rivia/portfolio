@@ -64,45 +64,6 @@ export const easeEntrance = cubicBezier(0.16, 1, 0.3, 1);
 export const easeNav = cubicBezier(0.22, 1, 0.36, 1);
 
 /**
- * The outer range's height: the pinned stage, its sticky offset, and the travel.
- *
- * `stickyTop` is here for the reason the certification deck learned it: a
- * sticky box pinned at an offset releases that many pixels EARLIER than one
- * pinned at zero, and leaving it out of the range and the progress denominator
- * meant the deck never finished, short by exactly the height of the offset.
- * It has to appear in all three places or the bug comes back.
- */
-export function stickyRangeHeight(
-  stageHeight: number,
-  travel: number,
-  stickyTop = 0
-): number {
-  const stage = Math.max(0, Math.floor(stageHeight));
-  const offset = Math.max(0, Math.floor(stickyTop));
-  return stage + offset + Math.max(0, Math.floor(travel));
-}
-
-/**
- * Normalised 0..1 progress through a sticky range, from cached numbers.
- *
- * Takes numbers rather than elements deliberately: the caller measures once, on
- * resize, and this runs per frame against the cached values. Reading layout
- * here would put a forced reflow inside the scroll path.
- */
-export function stickyProgress(
-  scrollY: number,
-  rangeTop: number,
-  rangeHeight: number,
-  stageHeight: number,
-  stickyTop = 0
-): number {
-  const offset = Math.max(0, stickyTop);
-  const travel = rangeHeight - stageHeight - offset;
-  if (travel <= 0) return 0;
-  return clamp01((scrollY + offset - rangeTop) / travel);
-}
-
-/**
  * Travel in pixels for a section with `steps` transitions, bounded at both ends.
  *
  * Bounded because travel that grows without limit turns a section into a
