@@ -4246,3 +4246,149 @@ downward instead, chosen with `:nth-child(even)` rather than a written variable
 because the parity of a screen's position never changes. A thin light line rides
 the clip boundary so the reveal is a visible event rather than a silent
 replacement.
+
+---
+
+## D-110 - The background is a fluid simulation, not a gradient that follows the pointer
+
+Status: Accepted
+Stage: Motion rebuild
+
+### Decision
+`src/lib/fluid.ts` runs a Stable Fluids solver on WebGL2 behind the whole
+document. Velocity and dye live in half-float textures; every frame advects both
+along the velocity, restores small rotations with vorticity confinement, and
+projects the velocity to be divergence free through twenty Jacobi pressure
+iterations.
+
+### Why the previous version could not be tuned into this
+
+It moved two radial gradients toward a smoothed pointer. It was described,
+correctly, as a cursor spotlight: a fast flick produced the same picture as a
+slow drag, and nothing was left behind when the pointer stopped.
+
+That is not a tuning problem. A gradient whose centre is a variable has no state
+to carry, so there is nowhere for momentum, a trail or a settling to live. Every
+property the direction asked for is a property of a simulation.
+
+### The pointer carries velocity, and a still cursor injects nothing
+
+A sample records position AND the delta from the previous sample. Below a
+movement threshold nothing is injected at all, because `pointermove` fires for
+sub-pixel jitter and for a scroll under a stationary cursor, and without the
+threshold the field takes a steady drip of identical splats and saturates under
+a cursor nobody is moving.
+
+One movement injects three overlapping impulses along the direction of travel in
+different palette hues. A single splat per frame is a bead on a string; three
+with a leading edge and a wake is what a flick should leave behind.
+
+### Three things it got wrong before it was right
+
+Each was found by looking at a frame, not by a check:
+
+```
+an opaque ground
+  occluded the frozen Stage 01 aurora and flattened the document to white.
+  The display pass composites now, premultiplied, transparent where there is
+  no dye.
+
+grey smoke
+  the display added a constant to every channel. Lifting r, g and b equally
+  destroys the ratio between them, which is the only place colour lives.
+
+an oil slick
+  normalizing to the brightest channel made every texel fully saturated in its
+  own hue, so mixed regions had tiny differences amplified back to vivid
+  colour. It subtracts absorption from white instead, and the palette starts at
+  full chroma because dye mixes and must start far apart to still read as
+  colour after it does.
+```
+
+### It never reaches React
+
+The listener writes into the simulation directly. Moving the mouse across the
+page causes zero renders. Reduced motion, no WebGL2 and no float rendering all
+leave the canvas transparent with the CSS field showing, and that field is
+retired the moment the simulation starts so the two are never on screen at once.
+
+---
+
+## D-111 - Two sections are pinned stories, and the stage was redesigned to fit
+
+Status: Accepted
+Stage: Motion rebuild
+
+### Decision
+Product Engineering and Featured Work are pinned with GSAP ScrollTrigger. The
+stage stays anchored in the viewport while the page keeps taking vertical scroll
+and the composition inside transforms with scroll position. `scrub: true` with
+`ease: "none"`, so stopping the scroll stops the story and scrolling back runs
+it backwards.
+
+GSAP 3.15.0 is a runtime dependency. The earlier no-animation-library rule is
+superseded; Lenis is still out, because native scrolling never demonstrably
+broke the integration.
+
+### The stage was redesigned, not forced
+
+The interactive studio is 988px tall. Pinning it would hold its top on screen
+and hang its own controls off the bottom, which is exactly what the old fit
+check existed to prevent, and overriding that check would have reproduced the
+problem inside a pin rather than solving it.
+
+So `ProductStory` is a separate viewport-safe presentation of the same three
+surfaces: 900px inside a 900px viewport, nothing needing internal scroll, four
+states over 4140px of track. The studio is unchanged and still on the page
+below, where its controls are reachable.
+
+### A pin can report as configured and do nothing
+
+`.scene__content` carried `transform: matrix(1,0,0,1,0,0)` and `will-change:
+transform` from the old scene entries. `position: fixed` resolves against a
+transformed ancestor rather than against the viewport, so the spacers were
+created, the timeline scrubbed, all eleven labels advanced, and the stage
+scrolled away exactly as if nothing were pinned.
+
+Scenes that contain a pinned story are marked `pinned` and never receive a
+wrapper transform. The only honest test is measuring the stage's viewport rect
+across the track; the configuration saying `pin: true` proves nothing, and
+`qa/stage09i-pinned.mjs` measures the rect.
+
+### Four more that assertions could not see
+
+```
+three surfaces resolved into an overlapping cluster
+  `xPercent` is a fraction of each element's own width, and three widths meant
+  three step sizes. CSS owns the resting row; GSAP animates deviations from it.
+
+the opening surface was clipped
+  it scaled UP to 1.34, putting an 893px element in a 900px stage. Scale only
+  goes down now, and state 01 is dominant by being alone and centred at its
+  natural size.
+
+the screenshots were cropped
+  the pinned frame stopped matching 1440:900 and `object-fit: cover` ate the
+  sidebar. Sized by height with the ratio following, and `contain` so it fails
+  safe.
+
+the frame opened completely empty
+  a zero-duration `set` at t = 0.82 had no earlier recorded state to reverse
+  into, so it applied at t = 0 as well and the first screen was never painted.
+  The suite passed 35 of 35 with this present, because every check sampled from
+  inside the sequence. There is a pin-entry check now.
+```
+
+### D-109 survives intact
+
+Screens are never crossfaded. The arriving screen is uncovered by a moving clip
+edge following a designed four-step compass, up then left then down then right,
+so ten consecutive changes do not become one repeated gesture. Nothing is ever
+semi-transparent.
+
+### Cleanup
+
+`ProductStack`, `use-sticky-progress` and its fit gate, the dead sticky maths
+and the `.pstack` rules are gone. Pins tear down when the viewport crosses the
+width or motion threshold, so a desktop page dragged narrow does not keep a
+story it cannot fit.

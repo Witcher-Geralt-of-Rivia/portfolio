@@ -41,14 +41,15 @@ zero errors; one pre-existing unused-variable warning in qa/texture.mjs.
 ## Dependencies
 
 ```
-runtime  geist ^1.7.2, next 16.3.3, react 19.2.8, react-dom 19.2.8
+runtime  geist ^1.7.2, gsap ^3.15.0, next 16.3.3, react 19.2.8, react-dom 19.2.8
 dev      typescript ^5, eslint ^9, eslint-config-next 16.3.3,
          @types/{node ^20,react ^19,react-dom ^19}
          playwright ^1.62.1 + pngjs ^7.0.0   QA harness - do not remove
 ```
 
-No animation library, UI kit, icon package, CSS framework or AI SDK, by
-intent.
+GSAP (with ScrollTrigger) is the one animation library, added for the pinned
+storytelling direction. No UI kit, icon package, CSS framework, AI SDK or
+scroll-hijacking library: scrolling is native.
 
 ## Scripts
 
@@ -63,14 +64,16 @@ Server-first: the hero, the background system and both navigation presentations
 are server components. 92 `"use client"` modules exist, most in the Operations
 interface; `project-state.json` holds the list.
 
-ONE `requestAnimationFrame` serves the page, in `src/lib/motion-scheduler.ts`:
-it reads scroll and pointer once a frame and dispatches to subscribers, which
-must not read layout. A scene subscribes only while near the viewport and the
-loop stops when none is, so an idle page schedules nothing (D-107). Sticky
-sections keep a self-cancelling frame per scroll burst through
-`use-sticky-progress.ts` (D-102, D-104); pointer tracking is smoothed and
-ignores touch. Scroll motion is an enhancement: nothing waits at opacity 0 and
-an oversized stage is not pinned.
+Motion has three owners and they do not overlap. `src/lib/fluid.ts` runs the
+background: a WebGL2 Stable Fluids solver on its own loop, fed by the pointer
+directly so a mouse move causes no React render (D-110). GSAP ScrollTrigger owns
+the two pinned stories, Product Engineering and Featured Work, scrubbed by
+scroll position (D-111). `src/lib/motion-scheduler.ts` keeps one shared
+`requestAnimationFrame` for the remaining scroll readers, and stops when none is
+subscribed. Scroll motion is an enhancement: nothing waits at opacity 0, and a
+scene that contains a pinned story never carries a transform, because
+`position: fixed` resolves against a transformed ancestor and that silently
+cancels the pin.
 
 Timers exist only inside the three user-triggered sequences (the Stage 06 flow,
 the Stage 07 adaptation, the Stage 08 experiments), each torn down by effect
@@ -123,8 +126,8 @@ src/
     layout/SiteFooter.tsx   the page's ending; no contact route
     demos/      Stage 09A - DemoShell, DemoDisclosure, DemoResetControl, DemoSelect
   content/{case-studies,certifications}.ts   typed models + gates; empty
-  lib/  scroll-lock, scroll-geometry, use-sticky-progress, motion-scheduler
-        (the page's one raf), scenes.ts (the scene table)
+  lib/  scroll-lock, scroll-geometry, use-section-progress, motion-scheduler,
+        fluid.ts (the WebGL background), scroll-story.ts (GSAP), scenes.ts
   demos/operations/         Stage 09C1 domain (28 modules) + ui/ (shell,
                 sidebar, top bar, Overview panels, notifications, icons, module
                 routes, one directory per module). All 11 built.

@@ -2362,3 +2362,79 @@ presence always sums to one, never runs backwards), the scene table (no two
 neighbours alike, nothing starts invisible, travel in range), one frame loop,
 the H1 unmoved, no horizontal overflow at any scroll position, mobile at 390x844
 with no faked pointer, and reduced motion leaving the page composed and still.
+
+---
+
+## Stage 09I - Motion rebuild: real fluid, real pinning
+
+Status: **Current**
+
+### Summary
+Two replacements. The pointer-following gradient background became a WebGL2
+Stable Fluids simulation, and the section-reactive scrolling in Product
+Engineering and Featured Work became genuine GSAP ScrollTrigger pinned stories.
+
+### Files
+`src/lib/fluid.ts`, `src/components/visual/FluidField.tsx`,
+`src/styles/fluid.css`, `src/lib/scroll-story.ts`,
+`src/components/products/ProductStory.tsx`, `src/styles/product-story.css`,
+`src/components/work/OperationsScreenSequence.tsx`,
+`src/styles/work-screens.css`, `src/lib/use-section-progress.ts`,
+`qa/stage09i-pinned.mjs`, `qa/stage09i-shots.mjs`
+
+Removed: `src/components/products/ProductStack.tsx`,
+`src/lib/use-sticky-progress.ts`, the sticky maths in `scroll-geometry.ts`,
+the `.pstack` rules and every `.scene__field`.
+
+Added: `gsap ^3.15.0`.
+
+### The fluid
+
+A velocity field and a dye field in half-float textures, advected every frame,
+with vorticity confinement and a twenty-iteration Jacobi pressure solve. Trails,
+momentum, bending and settling are consequences of the simulation rather than
+effects layered on one. The pointer carries velocity as well as position, and a
+stationary cursor injects nothing (D-110).
+
+### The pins
+
+Product Engineering: 4140px of track, four states, a stage of 900px inside a
+900px viewport with nothing needing internal scroll. It is a redesigned
+presentation of the same three surfaces, not the 988px studio forced into a pin,
+and the studio is unchanged below it.
+
+Featured Work: 8955px of track, roughly 85vh per transition, all eleven real
+Operations screens from Overview to Reports, revealed by a moving clip edge on a
+four-step compass. D-109 holds: nothing is ever semi-transparent (D-111).
+
+### Notable during implementation
+
+```
+a pin reported as configured and did nothing
+  `.scene__content` carried a transform from the old scene entries, and
+  `position: fixed` resolves against a transformed ancestor. Spacers existed,
+  the timeline scrubbed, the labels advanced, and the stage scrolled away.
+
+the fluid painted an opaque ground
+  and occluded the frozen Stage 01 aurora, flattening the page to white.
+
+it then produced grey smoke, then an oil slick
+  adding a constant to every channel destroys the r:g:b ratio; normalizing to
+  the brightest channel over-saturates every mixed region.
+
+the opening product surface was clipped
+  it scaled up to 1.34 in a stage that could not hold it. Scale only goes
+  down now.
+
+the work screenshots were cropped
+  the pinned frame stopped matching 1440:900 and `cover` ate the sidebar.
+
+the work frame opened completely empty
+  a zero-duration `set` with no earlier recorded state applied at t = 0 too.
+  The suite was passing 35 of 35 with this present.
+```
+
+### QA
+`qa/stage09i-pinned.mjs` 37 checks, `qa/stage09g-motion.mjs` 78, style and
+memory pass. Public verification against HTTPS after deployment: 37 of 37, all
+eleven modules in order, handoff scrubbing the same values, fluid still running.

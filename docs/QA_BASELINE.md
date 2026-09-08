@@ -2895,3 +2895,71 @@ The second run switched to `.next-release-a` in 229s. Verified independently
 afterwards: portfolio online, one listener on 3100 owned by the managed PID
 16672, `suspicious` empty with two environment variables, zero unstable restarts,
 and both neighbours still at zero restarts.
+
+---
+
+## Motion rebuild: fluid and pinned storytelling
+
+PASS.
+
+```
+qa/stage09i-pinned.mjs                  37 checks   ALL PASS
+qa/stage09i-shots.mjs                   35 frames   visual proof, not committed
+qa/stage09g-motion.mjs                  78 checks   ALL PASS
+```
+
+Measured at 1440x900:
+
+```
+product story    pinned, 4140px track (4.6 viewports), stage 900px in 900px
+                 four states, no surface clipped at any sample
+work story       pinned, 8955px track (9.9 viewports, ~85vh per transition)
+                 frame 1173x733 at exactly 1440:900, eleven modules in order
+handoff          plane 0.00 / 0.36 / 0.73 / 0.89 / 0.44 / 0.00
+                 frame rises 1202px to 148px
+```
+
+### Five ways a check can pass on a broken page
+
+Every defect in this stage was invisible to the suite that was meant to catch
+it, and each one is now an assertion:
+
+```
+a pin reported as configured and did not hold
+  `position: fixed` resolves against a transformed ancestor, so the spacers
+  existed and the stage scrolled away anyway. The check measures the stage's
+  viewport rect across the track; `pin: true` in the config proves nothing.
+
+the frame opened completely empty
+  the suite was at 35 of 35 with this present, because every check sampled
+  from inside the sequence and never looked at the first frame at pin entry.
+
+a screenshot was cropped
+  the frame stopped matching the capture ratio. The check asserts the ratio.
+
+a module label ran ahead of its screen
+  and separately skipped one entirely, because the span was recomputed from
+  the vh constants instead of read from the timeline that owns it.
+
+the surfaces resolved into an overlapping cluster
+  the check measures a rendered box escaping the stage, not a scrollHeight.
+```
+
+### Frame starvation, for the fourth and fifth time
+
+Headless Chromium does not advance a rAF-driven pin without a frame. A 180ms
+wait with no forced frame reported "the pin never holds, 1 of 51 samples" on a
+pin that holds at every sample.
+
+A screenshot forces a frame and was the first fix, but under software GL with
+the fluid running each one costs seconds and the suite timed out mid-walk. A
+double `requestAnimationFrame` does the same job for a millisecond, and that is
+what both suites use now.
+
+### Public verification
+
+Repeated against `https://intelligent-systems-lab.duckdns.org` after
+deployment: 37 of 37, all eleven modules in order, the handoff scrubbing the
+same values as locally, the fluid still running. Supervision after the switch:
+online on `.next-release-b`, one listener on 3100 owned by the managed PID,
+`suspicious` empty, both neighbours at zero restarts.
