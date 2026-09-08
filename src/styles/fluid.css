@@ -1,0 +1,79 @@
+/* =====================================================================
+   THE FLUID FIELD
+
+   One fixed surface for the whole document, behind every section.
+
+   It replaces the per-section `.scene__field` elements entirely. Those were
+   radial gradients whose centres followed the pointer, which is the effect
+   the direction rejected, and they could not have carried momentum across a
+   section boundary even in principle: each one was a separate element with
+   no state.
+
+   The CSS gradient here is not decoration behind the canvas, it is the
+   fallback. Reduced motion, a missing WebGL2 context and a machine with no
+   float rendering all leave the canvas transparent, and in every one of
+   those cases the page still has a composed multi-hue field, because this
+   is what is underneath it.
+   ===================================================================== */
+
+.fluid {
+  position: fixed;
+  inset: 0;
+  /* Behind the whole document. The Stage 01 layers sit at -4 to -1, and this
+     goes above them and below content: the aurora is the permanent ground,
+     the fluid is the weather on top of it. */
+  z-index: -1;
+  /* Nothing here may ever eat a click, a hover or a selection. */
+  pointer-events: none;
+  /*
+    THE STATIC FIELD, which is also the reduced-motion presentation.
+
+    A premium multi-pastel composition rather than a flat colour: several
+    oversized masses at different sizes and positions, none of them centred,
+    so a still page still reads as an atmosphere rather than as a blank.
+  */
+  background:
+    radial-gradient(58vw 52vw at 18% 22%, var(--scene-violet), transparent 68%),
+    radial-gradient(50vw 46vw at 82% 30%, var(--scene-cyan), transparent 70%),
+    radial-gradient(54vw 48vw at 68% 78%, var(--scene-rose), transparent 70%),
+    radial-gradient(46vw 44vw at 26% 82%, var(--scene-mint), transparent 72%),
+    radial-gradient(40vw 38vw at 92% 62%, var(--scene-peach), transparent 74%);
+  background-color: #fafafd;
+}
+
+/*
+  Once the simulation is running the fallback field is retired.
+
+  The two are alternatives, not layers. Leaving the CSS gradients under a live
+  fluid would put a second, static field on the same surface, which is exactly
+  the doubling this rebuild exists to remove: the canvas composites over the
+  Stage 01 aurora, and that aurora is the ground it needs, not another set of
+  radial masses.
+*/
+.fluid[data-fluid="running"] {
+  background: none;
+  background-color: transparent;
+}
+.fluid__canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  /* Fading in on the first frame rather than snapping: the simulation seeds
+     itself with colour, and the change from the CSS field to the seeded field
+     is otherwise a visible jump on load. */
+  opacity: 0;
+  transition: opacity 900ms var(--ease-entrance);
+}
+
+.fluid__canvas[data-fluid="running"] {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* The simulation is refused in JavaScript, so this only covers the moment
+     between a preference change and the effect re-running. */
+  .fluid__canvas {
+    opacity: 0;
+    transition: none;
+  }
+}

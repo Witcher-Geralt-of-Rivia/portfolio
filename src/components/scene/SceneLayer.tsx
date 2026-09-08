@@ -12,7 +12,6 @@
  *
  *   --scene-p        0..1 as the section crosses the viewport
  *   --scene-enter    0..1 for the entry choreography, finishing early
- *   --pointer-x/y    the smoothed pointer, only for scenes that use it
  *   --scene-live     1 while the section is near enough to be worth animating
  *
  * IT DOES NOT OWN A FRAME LOOP. Every scene reads from one shared scheduler,
@@ -78,12 +77,7 @@ export default function SceneLayer({
 
     let release: (() => void) | null = null;
 
-    const read = (frame: {
-      scrollY: number;
-      viewportHeight: number;
-      pointerX: number;
-      pointerY: number;
-    }) => {
+    const read = (frame: { scrollY: number; viewportHeight: number }) => {
       /* How far the section has crossed the viewport: 0 as its top edge reaches
          the bottom of the screen, 1 as its bottom edge leaves the top. This
          drives the atmosphere, which should track the whole passage. */
@@ -110,10 +104,6 @@ export default function SceneLayer({
         "--scene-enter",
         clamp01(lead / Math.max(1, frame.viewportHeight * ENTER_COMPLETE_AT)).toFixed(4)
       );
-      if (scene.field === "liquid") {
-        root.style.setProperty("--pointer-x", frame.pointerX.toFixed(4));
-        root.style.setProperty("--pointer-y", frame.pointerY.toFixed(4));
-      }
     };
 
     /* Only near sections subscribe. This is what keeps a page with six scenes
@@ -155,7 +145,7 @@ export default function SceneLayer({
       nearRef.current = false;
       root.classList.remove("scene--near");
     };
-  }, [enhanced, scene.field]);
+  }, [enhanced]);
 
   return (
     <div
@@ -174,12 +164,9 @@ export default function SceneLayer({
         } as React.CSSProperties
       }
     >
-      {/* The atmosphere. Behind the content, never over it, and inert to the
-          pointer so it cannot eat a click or a hover anywhere on the page. */}
-      {scene.field !== "none" ? (
-        <div className={`scene__field scene__field--${scene.field}`} aria-hidden="true" />
-      ) : null}
-
+      {/* No field element any more. The atmosphere is one fluid surface for
+          the whole document, in `FluidField`; a scene owns its entry and its
+          accent, not a background of its own. */}
       <div className="scene__content">{children}</div>
     </div>
   );

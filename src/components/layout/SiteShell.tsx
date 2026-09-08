@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 
 import AuroraBackground from "@/components/visual/AuroraBackground";
 import PrismLight from "@/components/visual/PrismLight";
+import FluidField from "@/components/visual/FluidField";
 import GrainOverlay from "@/components/visual/GrainOverlay";
 import SiteNavigation from "@/components/navigation/SiteNavigation";
 
@@ -18,6 +19,9 @@ export default function SiteShell({ children }: { children: ReactNode }) {
       {/* Stage 01 background. Fixed, inert, painted behind everything. */}
       <AuroraBackground />
       <PrismLight />
+      {/* The fluid sits above the Stage 01 ground and below all content: the
+          aurora is the permanent background, this is the weather on it. */}
+      <FluidField />
       <GrainOverlay />
 
       <SiteNavigation />
