@@ -4392,3 +4392,67 @@ semi-transparent.
 and the `.pstack` rules are gone. Pins tear down when the viewport crosses the
 width or motion threshold, so a desktop page dragged narrow does not keep a
 story it cannot fit.
+
+---
+
+## D-112 - Broad ribbons are a calibration, not a different simulation
+
+Status: Accepted
+Stage: Cinematic visual calibration
+
+### Decision
+The fluid keeps its architecture and changes its art direction. Every number
+moved toward LOWER spatial frequency, because the first calibration produced
+fine turbulent filaments: technically a fluid and the wrong picture.
+
+```
+curl           26   -> 3.5    vorticity confinement is what makes small eddies
+                              survive, and is the single biggest source of
+                              filaments
+splatRadius    0.2  -> 3.4    a primary influence of about 28vw rather than 7vw
+simResolution  128  -> 96     a coarser velocity grid cannot represent fine
+                              structure, which is the point
+dissipation    up             dye and momentum persist, so masses accumulate
+                              into large forms instead of decaying into wisps
+```
+
+It is cheaper than what it replaced. A smaller grid and fewer pressure
+iterations, with the visual weight moved into radius and persistence rather
+than into detail.
+
+### Three depths and one ribbon
+
+The single ambient blob became three layers at different rates: slow broad fog
+that sets the colour of a whole corner, a ribbon drawn continuously along a
+travelling diagonal path, and quicker near accents. The ribbon path uses two
+incommensurable frequencies so it never repeats and never resolves into an
+obvious sine wave, and it is diagonal because a horizontal band reads as a
+stripe rather than as light moving through a volume.
+
+### The pointer moves a region, not a disc
+
+Three impulses at three scales. The one that matters is the secondary: about
+55vw, offset behind the direction of travel, at a fraction of the force. It is
+the reason a gesture on the left visibly bends a ribbon on the right. Without
+it the reaction stays local and reads as a cursor effect however large the
+primary radius is.
+
+### A negative timestep, which was a real fault
+
+`dt` was clamped at the top and not at the bottom. A `requestAnimationFrame`
+timestamp can predate a `performance.now()` captured moments earlier, so the
+first frame after the loop starts could produce a negative delta. The old
+`|| 0.0166` guard caught zero and NaN and let a negative straight through: the
+ribbon phase ran backwards until its palette index went negative and the lookup
+returned undefined.
+
+It would also have advected the solver backwards in time. It is clamped at both
+ends now. This was a fault in the background as locked, exposed by the ribbon
+work rather than caused by it.
+
+### Scene planes are held well below full
+
+Both the Product and Work scene planes were halved after the first pass. At
+full strength they tinted the translucent product panels and the application
+inside stopped reading as software, which is a background winning against the
+thing it exists to frame. The state change is still unmistakable at half.

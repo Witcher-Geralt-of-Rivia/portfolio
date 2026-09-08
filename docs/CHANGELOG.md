@@ -2438,3 +2438,65 @@ the work frame opened completely empty
 `qa/stage09i-pinned.mjs` 37 checks, `qa/stage09g-motion.mjs` 78, style and
 memory pass. Public verification against HTTPS after deployment: 37 of 37, all
 eleven modules in order, handoff scrubbing the same values, fluid still running.
+
+---
+
+## Stage 09J - Cinematic visual calibration
+
+Status: **Current**
+
+### Summary
+Appearance and amplitude, not architecture. GSAP, ScrollTrigger, the two pins,
+the real Operations assets, the wipe and the reduced-motion policy are all
+unchanged. The fluid was recalibrated from fine filaments to broad pastel
+ribbons, and the two pinned stories had their choreography amplitude and their
+scene backgrounds raised.
+
+### Files
+`src/lib/fluid.ts`, `src/components/products/ProductStory.tsx`,
+`src/styles/product-story.css`,
+`src/components/work/OperationsScreenSequence.tsx`,
+`src/styles/work-screens.css`, `qa/stage09i-pinned.mjs`
+
+### The calibration
+
+```
+curl           26   -> 3.5    the main source of filaments
+splatRadius    0.2  -> 3.4    primary pointer influence ~7vw -> ~28vw
+simResolution  128  -> 96     a coarser grid cannot hold fine structure
+dissipation    up             masses accumulate rather than decay to wisps
+```
+
+Three depths replace one ambient blob: broad slow fog, a ribbon drawn along a
+travelling diagonal path on two incommensurable frequencies, and near accents.
+The pointer injects at three scales, and the wide secondary offset behind the
+direction of travel is what makes a gesture on one side bend a ribbon on the
+other (D-112).
+
+Product Engineering: about 20vw and 9 to 14vh of travel, scale 1.00 to 0.74,
+entrances from 38vw outside and from below, and four scrubbed colour stops
+behind the surfaces. Featured Work: a designed palette progression across the
+eleven modules, a 0.965 dip in the frame at each change, and a 20px luminous
+clip boundary. D-109 untouched.
+
+### Notable during implementation
+
+```
+the scene planes drowned the foreground
+  at full strength they tinted the translucent product panels and the
+  application stopped reading as software. Both halved.
+
+the assist panel was clipped entering
+  42vh below and already fading up. Shortened to 28vh, alpha after travel.
+
+the fluid crashed about one load in six
+  `dt` was clamped at the top only, and a rAF timestamp can predate a
+  `performance.now()` taken moments before it. The negative delta ran the
+  ribbon phase backwards until its palette index went negative, and would also
+  have advected the solver backwards in time.
+```
+
+### QA
+stage09i 37 and stage09g 78 locally and against public HTTPS, contrast 04, 06
+and 08 with the stronger background, style and memory. Visual proof captured
+locally and again from the deployed origin.

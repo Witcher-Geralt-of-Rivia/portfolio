@@ -2963,3 +2963,50 @@ deployment: 37 of 37, all eleven modules in order, the handoff scrubbing the
 same values as locally, the fluid still running. Supervision after the switch:
 online on `.next-release-b`, one listener on 3100 owned by the managed PID,
 `suspicious` empty, both neighbours at zero restarts.
+
+---
+
+## Cinematic visual calibration
+
+PASS. No new harness: the calibration is checked by the suites the pinned stage
+already had, plus the frames, which are the actual gate.
+
+```
+qa/stage09i-pinned.mjs                  37 checks   ALL PASS, locally and public
+qa/stage09g-motion.mjs                  78 checks   ALL PASS
+qa/stage0{4,6,8}-contrast.mjs           PASS with the stronger background
+```
+
+### Two checks that were wrong rather than the page
+
+Both would have been reported as regressions if the numbers had been taken at
+face value:
+
+```
+"a surface is clipped by the stage"
+  it was the assist panel staged 42vh below on purpose so it could travel in.
+  An element that has not faded in yet is not clipped content, and the check
+  skips anything under 12 per cent opacity now. The entrance was also
+  shortened to 28vh, with the alpha arriving after the travel starts, so it is
+  inside the stage before it is visible at all.
+
+"the work frame shrank to 1056px"
+  it was measured at page load, where the Lab to Work handoff stages the frame
+  at scale 0.9. Inside the pin, where a visitor sees it, it is the same 1173px
+  it has always been. The check measures inside the pin now.
+```
+
+### An intermittent crash that took a stack to find
+
+`TypeError: Cannot read properties of undefined (reading '0')`, appearing in
+roughly one page load in six and never in a dedicated reproduction. Guessing at
+it would have meant guarding a palette lookup that could not be shown to be out
+of range.
+
+Capturing `e.stack` rather than the message pointed at the minified frame, and
+reading the built chunk at that offset identified `ambient()`. The cause was a
+`dt` clamped only at the top: a rAF timestamp can predate a `performance.now()`
+taken moments earlier, and the resulting negative delta ran the ribbon phase
+backwards until its palette index went negative (D-112).
+
+The lesson is the cheap one: capture stacks in QA, not messages.
